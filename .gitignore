@@ -1,2 +1,9 @@
-/CAME/sample_data/
+__pycache__/
 /_temp/
+/_case_res/
+
+/CAME/sample_data/
+
+
+/DATASET_NAMES.py
+/_tmp*.py

@@ -65,24 +65,23 @@ _params_lossfunc = dict(
 )
 
 
+def _get_parameter_dict(default={}, **kwds) -> dict:
+    params = copy.deepcopy(default)
+    if len(kwds) > 0:
+        params.update(**kwds)
+    return params
+
+
 def get_preprocess_params(**kwds) -> dict:
-    params = copy.deepcopy(_params_pre)
-    if len(kwds) > 0:
-        params.update(**kwds)
-    return params
-
-
-def get_model_params(kwdict_outgat={}, **kwds) -> dict:
-    params = copy.deepcopy(_params_model)
-    if len(kwds) > 0:
-        params.update(**kwds)
-    if len(kwdict_outgat) > 0:
-        params['kwdict_outgat'].update(kwdict_outgat)
-    return params
+    return _get_parameter_dict(_params_pre, **kwds)
 
 
 def get_loss_params(**kwds) -> dict:
-    params = copy.deepcopy(_params_lossfunc)
-    if len(kwds) > 0:
-        params.update(**kwds)
+    return _get_parameter_dict(_params_lossfunc, **kwds)
+
+
+def get_model_params(kwdict_outgat={}, **kwds) -> dict:
+    params = _get_parameter_dict(_params_model, **kwds)
+    if len(kwdict_outgat) > 0:
+        params['kwdict_outgat'].update(kwdict_outgat)
     return params

@@ -33,7 +33,7 @@ from .datapair.unaligned import datapair_from_adatas, DataPair
 from .datapair.aligned import aligned_datapair_from_adatas, AlignedDataPair
 from .model.cggc import CGGCNet
 from .model.cgc import CGCNet
-from .PARAMETERS import get_model_params
+from .PARAMETERS import get_model_params, get_loss_params
 from .pipeline import __test1__, __test2__
 
 

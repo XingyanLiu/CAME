@@ -417,7 +417,7 @@ class Trainer(BaseTrainer):
             g = g.to(self.device)
         with torch.no_grad():
             self.model.train()  # semi-supervised learning
-            #            self.model.eval()
+            # self.model.eval()
             output = self.model.forward(
                 feat_dict, g,  # .to(self.device),
                 **other_inputs)

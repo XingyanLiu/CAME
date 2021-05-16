@@ -20,7 +20,8 @@ from scipy.special import softmax
 import networkx as nx
 import torch
 
-os.chdir('E:/lxy_pro/004/main')
+#ROOT = os.path.dirname(os.path.abspath(__file__))
+#os.chdir(ROOT)
 
 import CAME
 from CAME import pipeline, pp, pl
@@ -39,7 +40,7 @@ DATASET_PAIRS = [
         ('testis_human', 'testis_mouse'),
         ('testis_human', 'testis_monkey'),
         ]
-dsnames = DATASET_PAIRS[4]#[::-1]
+dsnames = DATASET_PAIRS[0]#[::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -67,19 +68,11 @@ df_varmap_1v1 = pd.read_csv(dir_gmap / f'gene_matches_1v1_{sp1}2{sp2}.csv',)
 df_varmap = pd.read_csv(dir_gmap / f'gene_matches_{sp1}2{sp2}.csv',)
 
 
-_time_tag = CAME.make_nowtime_tag()
-subdir_res0 = f"{tiss}-{dsnames}{_time_tag}"
-
-resdir = Path('./case') / subdir_res0
-figdir = resdir / 'figs'
-sc.settings.figdir = figdir
-CAME.check_dirs(figdir)
-
 
 _time_tag = CAME.make_nowtime_tag()
 subdir_res0 = f"{tiss}-{dsnames}{_time_tag}"
 
-resdir = Path('./test_res') / subdir_res0
+resdir = Path('./_case_res') / subdir_res0
 figdir = resdir / 'figs'
 sc.settings.figdir = figdir
 CAME.check_dirs(figdir)
@@ -87,7 +80,7 @@ CAME.check_dirs(figdir)
 # In[]
 ''' loading data
 '''
-key_class1 = ['major_class', 'cell_ontology_class'][0]
+key_class1 = ['major_class', 'cell_ontology_class'][1]
 key_class2 = key_class1
 
 adata_raw1 = sc.read_h5ad(dir_formal / f'raw-{dsn1}.h5ad')
