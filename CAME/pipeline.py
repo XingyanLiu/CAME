@@ -8,7 +8,6 @@ Created on Tue Apr 20 20:11:08 2021
 import os
 from pathlib import Path
 from typing import Sequence, Union, Mapping, List, Optional  # , Callable
-
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -98,7 +97,7 @@ def main_for_aligned(
     if do_normalize:
         adatas = list(map(lambda a: utp.normalize_default(a, force_return=True), adatas))
 
-    print('Step 1: preparing DataPair object...')
+    logging.info('Step 1: preparing DataPair object...')
     adpair = aligned_datapair_from_adatas(
         adatas,
         vars_feat=vars_feat,
@@ -109,7 +108,7 @@ def main_for_aligned(
 
     ENV_VARs = prepare4train(adpair, key_class=keys, )
 
-    print(ENV_VARs.keys())
+    logging.debug(ENV_VARs.keys())
     G = ENV_VARs['G']
     classes0 = ENV_VARs['classes']
     classes = classes0[:-1] if 'unknown' in classes0 else classes0
@@ -177,7 +176,7 @@ def main_for_aligned(
 
     ### group counts statistics (optinal)
     gcnt = utp.group_value_counts(adpair.obs, 'celltype', group_by='dataset')
-    print(gcnt)
+    logging.debug(str(gcnt))
     gcnt.to_csv(resdir / 'group_counts.csv')
 
     # ============= confusion matrix & alluvial plot ==============
@@ -260,7 +259,7 @@ def main_for_unaligned(
             lambda a: utp.normalize_default(a, force_return=True),
             adatas
         ))
-    print('preparing DataPair object...')
+    logging.info('preparing DataPair object...')
     dpair = datapair_from_adatas(
         adatas,
         vars_use=vars_use,
@@ -274,7 +273,7 @@ def main_for_unaligned(
 
     ENV_VARs = prepare4train(dpair, key_class=keys, )
 
-    print(ENV_VARs.keys())
+    logging.info(ENV_VARs.keys())
     G = ENV_VARs['G']
     classes0 = ENV_VARs['classes']
     classes = classes0[:-1] if 'unknown' in classes0 else classes0
@@ -344,7 +343,7 @@ def main_for_unaligned(
 
     ### group counts statistics (optinal)
     gcnt = utp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
-    print(gcnt)
+    logging.info(str(gcnt))
     gcnt.to_csv(resdir / 'group_counts.csv')
 
     # ============= confusion matrix OR alluvial plot ==============
@@ -393,7 +392,7 @@ def preprocess_aligned(
         adatas[0], adatas[1], df_varmap_1v1, unify_names=True,
     )
 
-    print('================ preprocessing ===============')
+    logging.info('================ preprocessing ===============')
     params_preproc = dict(
         target_sum=None,
         n_top_genes=2000,
@@ -453,7 +452,7 @@ def preprocess_unaligned(
         nneigh_clust: int = 20,
         ntop_deg: int = 50,
 ):
-    print('================ preprocessing ===============')
+    logging.info('================ preprocessing ===============')
     params_preproc = dict(
         target_sum=None,
         n_top_genes=2000,
@@ -507,7 +506,6 @@ def preprocess_unaligned(
 def __test1__(n_epochs: int = 5):
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
-    #    logging.debug(os.path.abspath(datadir))
     sp1, sp2 = ('human', 'mouse')
     dsnames = ('Baron_human', 'Baron_mouse')
 
@@ -542,14 +540,13 @@ def __test1__(n_epochs: int = 5):
 
     del adpair, trainer, _
     torch.cuda.empty_cache()
-    print('memory cleared\n')
+    logging.debug('memory cleared\n')
     print('Test passed for ALIGNED!')
 
 
 def __test2__(n_epochs: int = 5):
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
-    #    logging.debug(os.path.abspath(datadir))
     sp1, sp2 = ('human', 'mouse')
     dsnames = ('Baron_human', 'Baron_mouse')
 
@@ -586,5 +583,5 @@ def __test2__(n_epochs: int = 5):
 
     del dpair, trainer, _
     torch.cuda.empty_cache()
-    print('memory cleared\n')
+    logging.debug('memory cleared\n')
     print('Test passed for UN-ALIGNED!')
