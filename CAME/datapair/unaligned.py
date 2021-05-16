@@ -27,7 +27,7 @@ class DataPair(object):
     ======
     
     features: a list or tuple of 2 feature matrices.
-        common / aligned feratures, as node-features (for observations).
+        common / aligned features, as node-features (for observations).
         shape: (n_obs1, n_features) and (n_obs2, n_features)
         
     ov_adjs: a list or tuple of 2 (sparse) feature matrices.
@@ -101,7 +101,7 @@ class DataPair(object):
             varnames_node: Optional[Sequence[str]] = None,
             obs_dfs: Optional[Sequence[pd.DataFrame]] = None,
             var_dfs: Optional[Sequence[pd.DataFrame]] = None,# TODO!!!
-            dataset_names: Sequence[str]=('reference', 'query'),
+            dataset_names: Sequence[str] = ('reference', 'query'),
             ntypes: Mapping[str, str] = DEFAULT_NTYPES,
             etypes: Mapping[str, str] = DEFAULT_ETYPES,
             make_graph: bool = True,
