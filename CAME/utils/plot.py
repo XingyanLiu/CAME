@@ -2,7 +2,7 @@
 """
 Created on Fri Oct 23 12:31:28 2020
 
-@author: Administrator
+@author: Xingyan Liu
 """
 from typing import Union, Mapping, Sequence, Optional
 from pathlib import Path

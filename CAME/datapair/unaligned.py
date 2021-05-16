@@ -2,7 +2,7 @@
 """
 Created on Fri Aug 28 23:57:02 2020
 
-@author: Administrator
+@author: Xingyan Liu
 """
 from typing import Union, Sequence, Mapping, Optional
 

@@ -1,4 +1,6 @@
-"""Heterograph NN modules"""
+"""Heterograph NN modules
+
+"""
 import torch as th
 import torch.nn as nn
 

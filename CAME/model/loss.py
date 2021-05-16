@@ -2,7 +2,7 @@
 """
 Created on Sun Apr 11 18:46:19 2021
 
-@author: Administrator
+@author: Xingyan Liu
 """
 import torch.nn as nn
 import torch.nn.functional as F

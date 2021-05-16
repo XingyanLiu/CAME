@@ -2,7 +2,7 @@
 """
 Created on Mon Aug 24 00:30:14 2020
 
-@author: Administrator
+@author: Xingyan Liu
 """
 import torch as th
 from torch import nn

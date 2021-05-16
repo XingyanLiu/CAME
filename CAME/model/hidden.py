@@ -2,7 +2,7 @@
 """
 Created on Sun Apr 11 18:42:39 2021
 
-@author: Administrator
+@author: Xingyan Liu
 """
 from typing import Union, Sequence, Optional
 #from torch.autograd import Variable, Function
