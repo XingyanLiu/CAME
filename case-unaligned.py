@@ -22,8 +22,8 @@ import torch
 
 os.chdir('E:/lxy_pro/004/main')
 
-import CAME_v1 as CAME
-from CAME_v1 import pipeline, pp, pl
+import CAME
+from CAME import pipeline, pp, pl
 
 
 # In[]
