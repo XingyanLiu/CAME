@@ -7,7 +7,6 @@ Created on Fri Oct 23 12:31:28 2020
 from typing import Union, Mapping, Sequence, Optional
 from pathlib import Path
 
-
 import numpy as np
 import pandas as pd
 from scipy import sparse
@@ -26,22 +25,26 @@ Example:
     import utils_plot as uplt
     uplt.heatmap(df)
 '''
+
+
 # In[]
 
 def _save_with_adjust(fig, fpath=None, figsize=None, **kwds):
-    
     if figsize is not None:
         fig.set_size_inches(*figsize)
     if fpath is not None:
-        fig.savefig(fpath, bbox_inches = 'tight', **kwds)
+        fig.savefig(fpath, bbox_inches='tight', **kwds)
         print(f'figure has been saved into:\n\t{fpath}')
     else:
         fig.show()
     plt.close()
 
+
 # In[]
 ''' colors 
-'''    
+'''
+
+
 def view_color_map(cmap='viridis', n=None, figsize=(6, 2), s=150, k=20,
                    ax=None,
                    grid=False, **kwds):
@@ -60,7 +63,7 @@ def view_color_map(cmap='viridis', n=None, figsize=(6, 2), s=150, k=20,
     fx.view_color_map(cmap, k=16)    
     '''
     if not isinstance(cmap, (np.ndarray, list)):
-#        from matplotlib import cm
+        #        from matplotlib import cm
         cmp = mpl.cm.get_cmap(cmap, n)
         n = 20 if n is None else n
         cmp = [cmp(i) for i in range(n)]
@@ -71,7 +74,7 @@ def view_color_map(cmap='viridis', n=None, figsize=(6, 2), s=150, k=20,
         fig, ax = plt.subplots(figsize=figsize)
     for i in range(n):
         ax.scatter(i % k, i // k, color=cmp[i], s=s)
-    plt.grid(b=grid,)#axis='y')
+    plt.grid(b=grid, )  # axis='y')
     plt.show()
     return ax
 
@@ -81,7 +84,7 @@ def get_colors(cmap='Spectral', n=5, to_hex=True):
     fx.get_colors('Reds', 4)
     fx.view_color_map('Reds', 4)
     '''
-#    import matplotlib.colors as mcolors
+    #    import matplotlib.colors as mcolors
     cmp = plt.cm.get_cmap(cmap, n)
     colors = [cmp(i) for i in range(n)]
     if to_hex:
@@ -89,16 +92,14 @@ def get_colors(cmap='Spectral', n=5, to_hex=True):
     else:
         return colors
 
-def diy_cmap_grey_bg(name_fg = 'RdPu', low = 0.15, rm_high=0.01, n=100):
-    
+
+def diy_cmap_grey_bg(name_fg='RdPu', low=0.15, rm_high=0.01, n=100):
     s = int(n * low)
     t = max((1, int(n * rm_high)))
     print((s, t))
-    candi_colors = ['#d9d9d9']*s + get_colors(name_fg, n)[s: -t]
+    candi_colors = ['#d9d9d9'] * s + get_colors(name_fg, n)[s: -t]
     cmap = mcolors.ListedColormap(candi_colors)
     return cmap
-
-
 
 
 # In[]
@@ -108,72 +109,70 @@ def diy_cmap_grey_bg(name_fg = 'RdPu', low = 0.15, rm_high=0.01, n=100):
 '''
 
 
-
-def _alluvial_dict_from_confusdf(df: pd.DataFrame, vals_ignore = [0, np.nan]):
+def _alluvial_dict_from_confusdf(df: pd.DataFrame, vals_ignore=[0, np.nan]):
     dct = {}
     rowsum = df.sum(1)
-    
+
     for i, idx in enumerate(df.index):
-#        print(i, idx, type(rowsum[idx]), rowsum[idx])
+        #        print(i, idx, type(rowsum[idx]), rowsum[idx])
         if rowsum[idx] in vals_ignore:
             continue
         dct[idx] = {}
         for col in df.columns:
             val = df.loc[idx, col]
             if val > 0:
-                dct[idx][col + ' '] = val # make sure no collisions for names in each side
+                dct[idx][col + ' '] = val  # make sure no collisions for names in each side
     return dct
 
 
-def alluvial_plot(confsdf: pd.DataFrame, 
-                  labels = ['', ''],# ['true', 'predicted'],
-                  label_shift = 0,# -18
-                  title = 'alluvial plot',
-                  alpha = 0.75,
-                  cmap_name = 'tab20_r', 
+def alluvial_plot(confsdf: pd.DataFrame,
+                  labels=['', ''],  # ['true', 'predicted'],
+                  label_shift=0,  # -18
+                  title='alluvial plot',
+                  alpha=0.75,
+                  cmap_name='tab20_r',
                   shuffle_colors=True,
-                  fonsize_title = 11,
-                  figsize = (5, 5),
-                  fname = None,
+                  fonsize_title=11,
+                  figsize=(5, 5),
+                  fname=None,
                   **kwds):
     ''' visualizing confusion matrix using alluvial plot
     '''
     input_dct = _alluvial_dict_from_confusdf(confsdf)
     cmap = mpl.cm.get_cmap(cmap_name)
-    ax = _alluvial.plot(input_dct, labels = labels, 
-                   label_shift = label_shift,
-                   cmap=cmap, alpha = alpha, 
-                   shuffle_colors=shuffle_colors,
-                   figsize = figsize,
-                   **kwds)
+    ax = _alluvial.plot(input_dct, labels=labels,
+                        label_shift=label_shift,
+                        cmap=cmap, alpha=alpha,
+                        shuffle_colors=shuffle_colors,
+                        figsize=figsize,
+                        **kwds)
     ax.set_title(title, fontsize=fonsize_title)
     fig = ax.get_figure()
-#    fig.set_size_inches(*figsize)
+    #    fig.set_size_inches(*figsize)
     plt.show()
-    _save_with_adjust(fig, fname, )        
+    _save_with_adjust(fig, fname, )
     return ax
-        
-
 
 
 # In[]
 '''       functions for plotting confusion matrix
 ==================================================================
 '''
-        
-def plot_confus_mat(y_true, y_pred, classes_on=None, 
-                   normalize='true',
-                   linewidths=0.02, linecolor='grey', **kw):
+
+
+def plot_confus_mat(y_true, y_pred, classes_on=None,
+                    normalize='true',
+                    linewidths=0.02, linecolor='grey', **kw):
     ''' by default, normalized by row (true classes)
-    '''  
+    '''
     if classes_on is None:
         classes_on = list(set(y_true).union(y_pred))
-        
-    mat = metrics.confusion_matrix(y_true, y_pred, labels = classes_on, 
-                               normalize=normalize)
 
-    return sns.heatmap(mat, linewidths=linewidths, linecolor=linecolor, 
-                xticklabels=classes_on, yticklabels=classes_on, **kw)
+    mat = metrics.confusion_matrix(y_true, y_pred, labels=classes_on,
+                                   normalize=normalize)
+
+    return sns.heatmap(mat, linewidths=linewidths, linecolor=linecolor,
+                       xticklabels=classes_on, yticklabels=classes_on, **kw)
 
 
 def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
@@ -183,7 +182,7 @@ def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
     '''
     combime multiple confusion matrix-plots into a single plot
     '''
-    
+
     fig, axs = plt.subplots(nrows, ncols, sharey=True, figsize=figsize)
     for k in range(len(ytrue_lists)):
         if nrows == 1 or ncols == 1:
@@ -192,10 +191,10 @@ def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
             irow = k // ncols
             icol = k % nrows
             ax = axs[irow, icol]
-        plot_confus_mat(ytrue_lists[k], ypred_lists[k], 
-                        classes_on=classes_on, 
-                        square=True, #cbar=False, 
-                        vmax=vmax, 
+        plot_confus_mat(ytrue_lists[k], ypred_lists[k],
+                        classes_on=classes_on,
+                        square=True,  # cbar=False,
+                        vmax=vmax,
                         ax=ax,
                         )
     _save_with_adjust(fig, fname)
@@ -210,8 +209,8 @@ def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
 
 def plot_line_list(ys, lbs=None,
                    ax=None, figsize=(4.5, 3.5),
-                   tt=None, fp=None, 
-                   legend_loc = (1.05, 0), 
+                   tt=None, fp=None,
+                   legend_loc=(1.05, 0),
                    **kwds):
     '''
     ys: a list of lists, each sub-list is a set of curve-points to be plotted.
@@ -229,22 +228,23 @@ def plot_line_list(ys, lbs=None,
 
     return ax
 
+
 def plot_records_for_trainer(
         trainer, record_names, start=0, end=None,
         lbs=None, tt='training logs', fp=None,
         **kwds):
-        if lbs is None: lbs = record_names
-        if end is not None: end = int(min([trainer._cur_epoch + 1, end]))
-        line_list = [getattr(trainer, nm)[start: end] for nm in record_names]
-        
-        return plot_line_list(line_list, lbs = lbs, tt = tt, fp = fp, **kwds)
-        
-        
+    if lbs is None: lbs = record_names
+    if end is not None: end = int(min([trainer._cur_epoch + 1, end]))
+    line_list = [getattr(trainer, nm)[start: end] for nm in record_names]
+
+    return plot_line_list(line_list, lbs=lbs, tt=tt, fp=fp, **kwds)
+
+
 # In[]
-    
+
 
 def venn_plot(sets, set_labels=None, regular=False,
-             tt='Venn plot', ax=None, fp=None, **kwds):
+              tt='Venn plot', ax=None, fp=None, **kwds):
     '''
     sets: iterable
     set_labels: list[str]
@@ -258,40 +258,37 @@ def venn_plot(sets, set_labels=None, regular=False,
         sets = list(map(set, map(lowerStr, sets)))
     if not isinstance(sets[0], set):
         # assure that each item in `sets` is a set object
-        sets = list(map(set, sets)) 
+        sets = list(map(set, sets))
     n = len(sets)
     if set_labels is None:
         set_labels = np.arange(n)
     venn = {2: venn2, 3: venn3}[n]
     if ax is None:
         fig, ax = plt.subplots()
-    venn(sets, set_labels = set_labels, ax=ax, **kwds)
+    venn(sets, set_labels=set_labels, ax=ax, **kwds)
     ax.set_title(tt)
 
     _save_with_adjust(ax.figure, fp, )
-#    plt.show()
-    
+    #    plt.show()
+
     return ax
 
 
-
-    
-
 # In[]
-    
 
-def heatmap(df_hmap: pd.DataFrame, 
-            norm_method: Union[None, str]=None, 
-            norm_axis=1, 
-            order_row = False,
-            order_col = False,
-            figsize=(6, 6), # ignored if ax is not None
-            ax = None,
+
+def heatmap(df_hmap: pd.DataFrame,
+            norm_method: Union[None, str] = None,
+            norm_axis=1,
+            order_row=False,
+            order_col=False,
+            figsize=(6, 6),  # ignored if ax is not None
+            ax=None,
             xlabel=None,
             ylabel=None,
-            cmap = 'magma_r', # 'RdBu_r' 
-            cbar=True, 
-            cbar_kws = {'shrink': 0.5},
+            cmap='magma_r',  # 'RdBu_r'
+            cbar=True,
+            cbar_kws={'shrink': 0.5},
             fp=None,
             xrotation=45,
             yrotation=None,
@@ -305,117 +302,117 @@ def heatmap(df_hmap: pd.DataFrame,
     
     '''
     # normalize values
-    if norm_method == 'max': # ALL non-negative values are required!
+    if norm_method == 'max':  # ALL non-negative values are required!
         if (df_hmap < 0).any():
             raise ValueError('Data with ALL non-negative values are required '
                              'for "max-normalization"')
-        df_hmap = df_hmap.apply(lambda x: x / x.max() if x.max() > 0 else x, 
+        df_hmap = df_hmap.apply(lambda x: x / x.max() if x.max() > 0 else x,
                                 axis=norm_axis)
     elif norm_method == 'maxmin':
         eps = 1e-8
         df_hmap = df_hmap.apply(
-                lambda x: (x - x.min()) / (x.max() - x.min() + eps), 
-                axis=norm_axis)
+            lambda x: (x - x.min()) / (x.max() - x.min() + eps),
+            axis=norm_axis)
     elif norm_method == 'zs':
         from utils_preprocess import zscore
-        if norm_axis == 0: 
-            df_hmap = zscore(df_hmap) # column normalization
+        if norm_axis == 0:
+            df_hmap = zscore(df_hmap)  # column normalization
         elif norm_axis == 1:
             df_hmap = zscore(df_hmap.T).T
 
     # re-order rows or columns
     from utils_preprocess import order_contingency_mat
     if order_col:
-        df_hmap = order_contingency_mat(df_hmap, axis = 0)
+        df_hmap = order_contingency_mat(df_hmap, axis=0)
     if order_row:
-        df_hmap = order_contingency_mat(df_hmap, axis = 1)
-    
+        df_hmap = order_contingency_mat(df_hmap, axis=1)
+
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
-    sns.heatmap(df_hmap, 
-#                yticklabels=False, 
-                cbar=cbar, 
-                cbar_kws = cbar_kws,
+    sns.heatmap(df_hmap,
+                #                yticklabels=False,
+                cbar=cbar,
+                cbar_kws=cbar_kws,
                 ax=ax,
-                cmap = cmap,
-    #            col_colors = cl_color_match,
+                cmap=cmap,
+                #            col_colors = cl_color_match,
                 **kwds)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     if xrotation is not None:
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=xrotation, 
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=xrotation,
                            ha='right' if xrotation < 90 else 'center'
                            )
     if yrotation is not None:
         ax.set_yticklabels(ax.get_yticklabels(), rotation=yrotation)
-    
+
     if fp is not None:
         _save_with_adjust(fig, fp)
     return ax
-    
+
 
 ''' heatmap showing probabilities
 '''
 
+
 def heatmap_probas(
-        df_data, lbs, #sort_lbs=False, 
+        df_data, lbs,  # sort_lbs=False,
         name_label=None,
-        cmap_heat='magma_r', cmap_lb='tab20', 
+        cmap_heat='magma_r', cmap_lb='tab20',
         figsize=(8, 4),
         vmax=1, vmin=0,
         xrotation=30,
         fp=None):
-    
     lbs = pd.Categorical(lbs, )
     pix_lbs = np.vstack([lbs.codes] * 2)
-    
+
     fig = plt.figure(constrained_layout=False, figsize=figsize)
     gs = fig.add_gridspec(
-            nrows=12, ncols=80, left=0.05, right=0.98, 
-            hspace=0.25, wspace=2)
+        nrows=12, ncols=80, left=0.05, right=0.98,
+        hspace=0.25, wspace=2)
     w_cbar = 2
     ax1 = fig.add_subplot(gs[:-1, : -w_cbar])
-    ax11 = fig.add_subplot(gs[:-1, -w_cbar : ])
-    ax2 = fig.add_subplot(gs[-1: , : -w_cbar ])
-    im = ax1.imshow(df_data, #.iloc[::-1, :], 
-                    interpolation='nearest', 
+    ax11 = fig.add_subplot(gs[:-1, -w_cbar:])
+    ax2 = fig.add_subplot(gs[-1:, : -w_cbar])
+    im = ax1.imshow(df_data,  # .iloc[::-1, :],
+                    interpolation='nearest',
                     cmap=cmap_heat,
-    #               origin='lower', #extent=[-3, 3, -3, 3], 
-                   aspect='auto',
-                   vmax=1, vmin=0)
+                    #               origin='lower', #extent=[-3, 3, -3, 3],
+                    aspect='auto',
+                    vmax=1, vmin=0)
     fig.colorbar(mpl.cm.ScalarMappable(
-                    norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax),
-                    cmap='magma_r',
-                    ), 
-                cax=ax11, )
-    #im = ax1.pcolor(df_data, cmap='magma_r', vmax=1, vmin=0)
+        norm=mpl.colors.Normalize(vmin=vmin, vmax=vmax),
+        cmap='magma_r',
+    ),
+        cax=ax11, )
+    # im = ax1.pcolor(df_data, cmap='magma_r', vmax=1, vmin=0)
     ax2.pcolor(pix_lbs, cmap=plt.get_cmap(cmap_lb))
-    
-    for _ax in [ax1, ax2,]:
+
+    for _ax in [ax1, ax2, ]:
         _ax.grid(False)
     ax1.set_yticks(np.arange(df_data.shape[0]))
     ax1.set_yticklabels(df_data.index)
     ax1.set_xticks([])
     ax2.set_yticks([1])
     ax2.set_yticklabels([name_label])
-    
+
     # setting class-labels (x-ticks)
     classes = pd.unique(lbs)
-    cut_loc = np.hstack([[0], np.flatnonzero(np.diff(lbs.codes)), [len(lbs)]]) #// 2
+    cut_loc = np.hstack([[0], np.flatnonzero(np.diff(lbs.codes)), [len(lbs)]])  # // 2
     x_loc = cut_loc[:-1] + np.diff(cut_loc) // 2
     ax2.set_xticks(x_loc)
     if xrotation:
         ax2.set_xticklabels(classes, rotation=xrotation, ha='right')
     else:
         ax2.set_xticklabels(classes, )
-    
+
     for loc in ['right', 'top', 'bottom', 'left'][:-1]:
         ax1.spines[loc].set_visible(False)
         ax11.spines[loc].set_visible(False)
         ax2.spines[loc].set_visible(False)
     #    _ax.set_axis_off()
     if fp: _save_with_adjust(fig, fp)
-    
+
     return gs
 
 
@@ -425,14 +422,15 @@ def _get_affine_mat(angle_x=30, angle_y=150):
     if angle_x=0, angle_y=90, an identity matrix will be returned.
     '''
     angle_x, angle_y = tuple(map(lambda x: (x / 180) * np.pi, (angle_x, angle_y)))
-    _transmat = np.array([[np.cos(angle_x), np.sin(angle_x)], 
+    _transmat = np.array([[np.cos(angle_x), np.sin(angle_x)],
                           [np.cos(angle_y), np.sin(angle_y)]
                           ])
     return _transmat
-    
-def _plot_edges(sids, tids, 
-                xy1, xy2=None, 
-                ax=None, 
+
+
+def _plot_edges(sids, tids,
+                xy1, xy2=None,
+                ax=None,
                 figsize=(4, 4), **kwds_edge):
     '''
     sids: sequence of source ids, of shape (n_edges, )
@@ -442,109 +440,107 @@ def _plot_edges(sids, tids,
     '''
     xy2 = xy1 if xy2 is None else xy2
     if ax is None:
-        fig, ax = plt.subplots(figsize=figsize) # w*h
+        fig, ax = plt.subplots(figsize=figsize)  # w*h
     _kwds_edge = dict(c='gray', alpha=0.5, linewidth=0.08)
     _kwds_edge.update(kwds_edge)
     for pt1, pt2 in zip(xy1[sids], xy2[tids]):
         ax.plot(*zip(pt1, pt2), **_kwds_edge)
     return ax
-    
+
 
 def plot_edges_by_adj(adj, pos, ax=None, **kwds_edge):
     ''' adj: a sparse matrix, None is allowed'''
     adj = sparse.triu(adj).tocoo()
     sids, tids = adj.row, adj.col
     return _plot_edges(sids, tids, xy1=pos, xy2=None, ax=ax, **kwds_edge)
-    
+
 
 def plot_mapped_graph(
-        xy1, xy2, mapping, adj1=None, adj2=None, 
+        xy1, xy2, mapping, adj1=None, adj2=None,
         pt_color1=None, pt_color2=None,
         cmap_pt='tab20',
         angle_x=30, angle_y=150,
-        offset_scale = 1.2,
+        offset_scale=1.2,
         yscale=1.,
-        pt_size = 10,
-        style_name = 'default',
+        pt_size=10,
+        style_name='default',
         figsize=(5, 7),
         fp=None,
         **kwds_edge):
     '''
     pt_color1, pt_color2: RGB colors or numerical label sequence
     '''
-#    style_name = ['dark_background', 'default'][1]
+    #    style_name = ['dark_background', 'default'][1]
     plt.style.use(style_name)
-    _kwds_edge = dict(c='white' if style_name == 'dark_background' else 'grey', 
-                     alpha=0.35, linewidth=0.08)
+    _kwds_edge = dict(c='white' if style_name == 'dark_background' else 'grey',
+                      alpha=0.35, linewidth=0.08)
     _kwds_edge.update(kwds_edge)
 
     _transmat = _get_affine_mat(angle_x, angle_y)
     xy1 = xy1.dot(_transmat)
     xy2 = xy2.dot(_transmat)
-    
+
     x1, y1 = xy1[:, 0], xy1[:, 1]
     x2, y2 = xy2[:, 0], xy2[:, 1]
     y1 *= yscale
     y2 *= yscale
     y1 += max(y2) * offset_scale
-    
-    
-    fig, ax = plt.subplots(figsize=figsize) # w*h
+
+    fig, ax = plt.subplots(figsize=figsize)  # w*h
     if adj1 is not None:
         plot_edges_by_adj(adj1, xy1, ax=ax, zorder=0.9, **_kwds_edge)
     if adj2 is not None:
         plot_edges_by_adj(adj2, xy2, ax=ax, zorder=0.9, **_kwds_edge)
     plot_edges_by_adj(mapping, np.vstack([xy1, xy2]), ax=ax, zorder=1, **_kwds_edge)
 
-    cmap_pt = cmap_pt if isinstance(cmap_pt, (list, tuple)) else [cmap_pt] * 2 
+    cmap_pt = cmap_pt if isinstance(cmap_pt, (list, tuple)) else [cmap_pt] * 2
     ax.scatter(x1, y1, marker='.', c=pt_color1, s=pt_size, cmap=cmap_pt[0], zorder=2.5)
     ax.scatter(x2, y2, marker='.', c=pt_color2, s=pt_size, cmap=cmap_pt[1])
     ax.set_axis_off()
-    
+
     _save_with_adjust(fig, fp, dpi=400)
     plt.style.use('default')
     return ax
 
 
-
-
 # In[]
 ''' multiple-plots of embeddings
-'''    
+'''
 
-def umap_grid(adatas, colors=None, 
-              ncols=1, figsize=None, 
-              sharex=True, sharey=True, 
+
+def umap_grid(adatas, colors=None,
+              ncols=1, figsize=None,
+              sharex=True, sharey=True,
               fp=None, **kwds):
     n = len(adatas)
     if isinstance(colors, str) or colors is None:
         colors = [colors] * n
-    
+
     nrows = n // ncols + min([n % ncols, 1])
     fig, axs = plt.subplots(nrows, ncols, figsize=figsize,
                             sharex=sharex, sharey=sharey)
     for ax, adt, color in zip(axs.flatten(), adatas, colors):
-        sc.pl.umap(adt, color=color, ax=ax, show=False, 
-#                   title=f'', 
+        sc.pl.umap(adt, color=color, ax=ax, show=False,
+                   #                   title=f'',
                    **kwds)
-        
+
     _save_with_adjust(fig, fp)
     return fig
 
-def plot_splitted_umaps(adata, splitby, 
-                      left_groups=None,
-                      colors=None, ncols=1,
-                      figsize=(4, 8), **kwds):
+
+def plot_splitted_umaps(adata, splitby,
+                        left_groups=None,
+                        colors=None, ncols=1,
+                        figsize=(4, 8), **kwds):
     from utils_preprocess import bisplit_adata
     adt1, adt2 = bisplit_adata(adata, splitby, left_groups)
-    
-    return umap_grid(
-            [adt1, adt2], colors=colors,
-            ncols=ncols, figsize=figsize, **kwds)
 
-    
-    
-def triple_umaps(adata1, adata2, 
+    return umap_grid(
+        [adt1, adt2], colors=colors,
+        ncols=ncols, figsize=figsize, **kwds)
+
+
+def triple_umaps(adata1, adata2,
                  titles=None,
                  colors=['dataset', 'is_private', 'is_private'],
                  figsize=(6, 4.5),
@@ -554,43 +550,43 @@ def triple_umaps(adata1, adata2,
     '''
     if titles is None:
         titles = [titles] * 3
-    
+
     # point sizes
     n1, n2 = adata1.shape[0], adata2.shape[1]
     size0 = int(100000 / (n1 + n2))
     size = size0 / 2
-    
+
     # color maps
-    color_bg = 'lightgray' # background
+    color_bg = 'lightgray'  # background
     color_fg1 = 'tab:blue'
-    color_fg2 = 'lightcoral'#'tab:pink'
+    color_fg2 = 'lightcoral'  # 'tab:pink'
 
     fig = plt.figure(constrained_layout=False, figsize=figsize)
     gs = fig.add_gridspec(
-            nrows=2, ncols=3, 
-            left=0.05, right=0.95, 
-            hspace=0.15, wspace=0.1)
+        nrows=2, ncols=3,
+        left=0.05, right=0.95,
+        hspace=0.15, wspace=0.1)
     ax1 = fig.add_subplot(gs[:, : -1])
     ax2 = fig.add_subplot(gs[: 1, - 1:])
-    ax3 = fig.add_subplot(gs[1: , - 1:])
-    
-    sc.pl.umap(adata1, color = colors[0], 
+    ax3 = fig.add_subplot(gs[1:, - 1:])
+
+    sc.pl.umap(adata1, color=colors[0],
                size=size0,
-    #           title=f'merged {sp1} and {sp2} genes',
+               #           title=f'merged {sp1} and {sp2} genes',
                palette=[color_fg1],
                ax=ax1, show=False, **kwds)
-    sc.pl.umap(adata2, color = colors[0], size=size0,
-               palette=[color_fg2], 
+    sc.pl.umap(adata2, color=colors[0], size=size0,
+               palette=[color_fg2],
                title=titles[0],
                ax=ax1, show=False, **kwds)
-    sc.pl.umap(adata1, color=colors[1], palette=[color_bg, color_fg1], 
+    sc.pl.umap(adata1, color=colors[1], palette=[color_bg, color_fg1],
                title=titles[1],
-               size=size, ax=ax2, show=False, **kwds,)
-    sc.pl.umap(adata2, color=colors[2], palette=[color_bg, color_fg2], 
+               size=size, ax=ax2, show=False, **kwds, )
+    sc.pl.umap(adata2, color=colors[2], palette=[color_bg, color_fg2],
                title=titles[2],
                size=size, ax=ax3, show=False, **kwds)
-    #ax1.legend_.remove()#ax1.legend([])
-    #fig
+    # ax1.legend_.remove()#ax1.legend([])
+    # fig
     for _ax in [ax1, ax2, ax3]:
         _ax.grid(False)
         _ax.set_xticks([])
@@ -602,14 +598,15 @@ def triple_umaps(adata1, adata2,
     return fig
 
 
-
-    
 # In[]
 ''' annotate texts for genes of interest
 '''
+
+
 def _get_value_index(srs: pd.Series, vals: Sequence, ):
     isin = srs.isin(vals)
     return isin[isin].index
+
 
 def _get_value_index_list(lst, vals, return_vals=False):
     '''
@@ -629,30 +626,31 @@ def _get_value_index_list(lst, vals, return_vals=False):
         return ids, _vals
     return ids
 
+
 def umap_with_annotates(
-        adt: sc.AnnData, 
-        text_ids: Sequence, 
-        color: Optional[str] = None, 
+        adt: sc.AnnData,
+        text_ids: Sequence,
+        color: Optional[str] = None,
         anno_df: Optional[pd.DataFrame] = None,
-        text_col: Optional[str] = None, 
-        index_col: Optional[str] = None, 
+        text_col: Optional[str] = None,
+        index_col: Optional[str] = None,
         anno_fontsize: int = 12,
-        ax=None, 
-        fp=None, 
+        ax=None,
+        fp=None,
         **plkwds):
     from adjustText import adjust_text
     anno_df = adt.obs if anno_df is None else anno_df
 
     index_all = anno_df.index if index_col is None else anno_df[index_col]
     idnums, _text_ids = _get_value_index_list(
-            index_all, text_ids, return_vals=True)# only the first one
+        index_all, text_ids, return_vals=True)  # only the first one
     # subsetting xumap and df
     xumap = adt.obsm['X_umap'][idnums, :]
-#    anno_df = anno_df.iloc[idnums, :]
+    #    anno_df = anno_df.iloc[idnums, :]
     xs = xumap[:, 0]
     ys = xumap[:, 1]
     texts = _text_ids if text_col is None else anno_df[text_col][idnums]
-#    print(texts)
+    #    print(texts)
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -666,19 +664,19 @@ def umap_with_annotates(
 
 # In[]
 def plot_distance_lines(
-        dists, names, xlabel='distance', 
+        dists, names, xlabel='distance',
         markersize=10, fp=None,
-        ):
+):
     '''
     names: a list of str, yticklabels
     '''
-    
+
     n = len(names)
     ys1 = [x + 0.9 for x in range(n)]
     ys2 = ys1
     xs1 = [0] * n
     xs2 = dists
-    
+
     fig, ax = plt.subplots(figsize=(4.5, 0.4 * n + 0.4))
     for i in range(n):
         _x = [xs1[i], xs2[i]]
@@ -689,19 +687,19 @@ def plot_distance_lines(
     ax.set_yticks(ys1)
     ax.set_yticklabels(list(names), fontsize=14)
     ax.set_ylim(0.0, n + 0.9)
-    #ax.get_yticklabels()
+    # ax.get_yticklabels()
     for loc in ['right', 'top']:
         ax.spines[loc].set_visible(False)
-    
+
     _save_with_adjust(fig, fp)
     return ax
 
 
-
-    
 # In[]
 ''' Visualization of the abstracted graph
 '''
+
+
 def _adjust_xlims(ax, scale=1):
     if isinstance(scale, Sequence):
         xlims = ax.get_xlim()
@@ -709,6 +707,7 @@ def _adjust_xlims(ax, scale=1):
     else:
         xlims = ax.get_xlim()
         ax.set_xlim((xlims[0] * scale, xlims[1] * scale))
+
 
 def _adjust_ylims(ax, scale=1):
     if isinstance(scale, Sequence):
@@ -720,82 +719,83 @@ def _adjust_ylims(ax, scale=1):
 
 
 def plot_multipartite_graph(
-        g, 
-        node_list = None,
-        subset_key='subset', 
-        weight_key='weight', 
-        nodelb_key = 'original name',
-        nodesz_key = 'size',
+        g,
+        node_list=None,
+        subset_key='subset',
+        weight_key='weight',
+        nodelb_key='original name',
+        nodesz_key='size',
         node_color='lightblue',
         alpha=0.85,
-        figsize=(10, 8), fp=None, 
-        xscale = 1.5, yscale=1.1,
-        edge_scale = 5,
-        node_scale = 1,
-        node_size_min = 100,
-        node_size_max = 1800,
+        figsize=(10, 8), fp=None,
+        xscale=1.5, yscale=1.1,
+        edge_scale=5,
+        node_scale=1,
+        node_size_min=100,
+        node_size_max=1800,
         with_labels=True,
         **kwds):
     import networkx as nx
     if node_list is None: node_list = list(g)
 
     pos = multipartite_layout(g, subset_key=subset_key, )
-    
+
     edge_vals = [v * edge_scale for v in nx.get_edge_attributes(g, weight_key).values()]
     fig, ax = plt.subplots(figsize=figsize)
 
     ax.set_axis_off()
     ax.set_frame_on(False)
-    
-    nx.draw_networkx_edges(
-            g, pos, 
-            width=edge_vals, 
-#            edge_color='grey',
-            edge_color=edge_vals, edge_cmap=_cut_cmap('Greys', ),
-            alpha=alpha,)
-    nodedf =_prepare_for_nxplot(g, **kwds)
 
-#    node_sizes = np.array([nx.get_node_attributes(g, nodesz_key)[nd] for nd in node_list])
+    nx.draw_networkx_edges(
+        g, pos,
+        width=edge_vals,
+        #            edge_color='grey',
+        edge_color=edge_vals, edge_cmap=_cut_cmap('Greys', ),
+        alpha=alpha, )
+    nodedf = _prepare_for_nxplot(g, **kwds)
+
+    #    node_sizes = np.array([nx.get_node_attributes(g, nodesz_key)[nd] for nd in node_list])
     node_sizes = np.maximum(nodedf['plt_size'] * node_scale, node_size_min)
-#    node_sizes = np.minimum(node_sizes, node_size_max)
+    #    node_sizes = np.minimum(node_sizes, node_size_max)
     node_color = nodedf['plt_color'].tolist()
-    
-    nx.draw_networkx_nodes(g, pos, node_color=node_color, node_size = node_sizes)
+
+    nx.draw_networkx_nodes(g, pos, node_color=node_color, node_size=node_sizes)
     if with_labels:
         node_labels = nx.get_node_attributes(g, nodelb_key)
         tmp = nx.draw_networkx_labels(g, pos, node_labels)
-#    ax = plot_graph(g, pos)
+    #    ax = plot_graph(g, pos)
     if xscale is not None:
         _adjust_xlims(ax, xscale)
-#        xlims = ax.get_xlim()
-#        ax.set_xlim((xlims[0] * xscale, xlims[1] * xscale))
+    #        xlims = ax.get_xlim()
+    #        ax.set_xlim((xlims[0] * xscale, xlims[1] * xscale))
     if yscale is not None:
         _adjust_ylims(ax, yscale)
-
 
     _save_with_adjust(fig, fp)
     return ax
 
+
 def _prepare_for_nxplot(
         g, names=['cell group', 'gene module'],
-        sizes=[1800, 900, 900, 1800], 
+        sizes=[1800, 900, 900, 1800],
         colors=['pink', 'lightblue', 'lightblue', 'pink']):
     '''
     g: a multipartite graph with 4 layers
     '''
     nodedf = pd.DataFrame(g.nodes.values(), index=g.nodes.keys())
     nodedf['ntype'] = nodedf['subset'].apply(
-            lambda x: names[0] if x in [0, 3] else names[1]
-            )
+        lambda x: names[0] if x in [0, 3] else names[1]
+    )
     nodedf['plt_color'] = nodedf['subset'].apply(
-            lambda x: colors[x]
-            )
+        lambda x: colors[x]
+    )
     nodedf['plt_size'] = nodedf.groupby('ntype')['size'].apply(lambda x: x / x.max())
-    
+
     for isubset, size_scale in enumerate(sizes):
         inds_sub = nodedf['subset'] == isubset
         nodedf['plt_size'][inds_sub] *= size_scale
     return nodedf
+
 
 def _cut_cmap(cmap='Greys', low=0.2, high=0.9):
     cmap0 = plt.cm.get_cmap(cmap)
@@ -803,13 +803,13 @@ def _cut_cmap(cmap='Greys', low=0.2, high=0.9):
     colors = colors[int(256 * low): int(256 * high)]
     cmap_new = mcolors.ListedColormap(colors)
     return cmap_new
-    
 
 
 # In[]
 '''     graph layout 
 (copied from `networkx.drawing.layout.py`, with some modifications)
 '''
+
 
 def _process_params(G, center, dim):
     # Some boilerplate code.
@@ -832,9 +832,9 @@ def _process_params(G, center, dim):
 
 
 def multipartite_layout(
-        G, subset_key="subset", 
-        align="vertical", 
-        spread_nodes=True, # xingyan
+        G, subset_key="subset",
+        align="vertical",
+        spread_nodes=True,  # xingyan
         scale=1, center=None):
     """Position nodes in layers of straight lines.
 
@@ -974,13 +974,3 @@ def rescale_layout(pos, scale=1):
         for i in range(pos.shape[1]):
             pos[:, i] *= scale / lim
     return pos
-
-
-
-
-
-
-
-
-
-

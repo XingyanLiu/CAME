@@ -6,6 +6,7 @@ import torch.nn as nn
 
 __all__ = ['HeteroGraphConv']
 
+
 class HeteroGraphConv(nn.Module):
     r"""A generic module for computing convolution on heterogeneous graphs.
 
@@ -103,6 +104,7 @@ class HeteroGraphConv(nn.Module):
     mods : dict[str, nn.Module]
         Modules associated with every edge types.
     """
+
     def __init__(self, mods, aggregate='sum'):
         super(HeteroGraphConv, self).__init__()
         self.mods = nn.ModuleDict(mods)
@@ -136,9 +138,9 @@ class HeteroGraphConv(nn.Module):
             mod_args = {}
         if mod_kwargs is None:
             mod_kwargs = {}
-        outputs = {nty : [] for nty in g.dsttypes}
+        outputs = {nty: [] for nty in g.dsttypes}
         if etypes is None:
-            _etypes = g.canonical_etypes  
+            _etypes = g.canonical_etypes
         elif all(map(lambda x: len(x) == 3, etypes)):
             _etypes = etypes
         else:
@@ -147,7 +149,7 @@ class HeteroGraphConv(nn.Module):
             src_inputs, dst_inputs = inputs
             for stype, etype, dtype in _etypes:
                 rel_graph = g[stype, etype, dtype]
-                if etype not in self.mods.keys(): # xingyan
+                if etype not in self.mods.keys():  # xingyan
                     continue
                 if rel_graph.number_of_edges() == 0:
                     continue
@@ -162,7 +164,7 @@ class HeteroGraphConv(nn.Module):
         else:
             for stype, etype, dtype in _etypes:
                 rel_graph = g[stype, etype, dtype]
-                if etype not in self.mods.keys(): # xingyan
+                if etype not in self.mods.keys():  # xingyan
                     continue
                 if rel_graph.number_of_edges() == 0:
                     continue
@@ -179,6 +181,7 @@ class HeteroGraphConv(nn.Module):
             if len(alist) != 0:
                 rsts[nty] = self.agg_fn(alist, nty)
         return rsts
+
 
 def get_aggregate_fn(agg):
     """Internal function to get the aggregation function for node data
@@ -208,7 +211,7 @@ def get_aggregate_fn(agg):
         fn = None  # will not be called
     else:
         raise TypeError('DGLError: Invalid cross type aggregator. Must be one of '
-                       '"sum", "max", "min", "mean" or "stack". But got "%s"' % agg)
+                        '"sum", "max", "min", "mean" or "stack". But got "%s"' % agg)
     if agg == 'stack':
         def aggfn(inputs, dsttype):  # pylint: disable=unused-argument
             if len(inputs) == 0:
@@ -220,7 +223,5 @@ def get_aggregate_fn(agg):
                 return None
             stacked = th.stack(inputs, dim=0)
             return fn(stacked, dim=0)
-    
+
     return aggfn
-
-

@@ -11,10 +11,12 @@ from sklearn import metrics
 import torch
 from typing import Sequence
 
+
 def detach2numpy(x):
     if isinstance(x, torch.Tensor):
         x = x.cpu().clone().detach().numpy()
     return x
+
 
 def accuracy(logits, labels):
     if len(logits.shape) >= 2:
@@ -27,10 +29,11 @@ def accuracy(logits, labels):
 
 def get_AMI(y_true, y_pred, **kwds):
     y_true, y_pred = list(map(
-            detach2numpy, 
-            (y_true, y_pred)))
+        detach2numpy,
+        (y_true, y_pred)))
     ami = metrics.adjusted_mutual_info_score(y_true, y_pred, **kwds)
     return ami
+
 
 def get_F1_score(y_true, y_pred, average='micro', **kwds):
     y_true, y_pred = list(map(detach2numpy, (y_true, y_pred)))
@@ -40,6 +43,7 @@ def get_F1_score(y_true, y_pred, average='micro', **kwds):
 
 def as_probabilities(logits):
     return softmax(detach2numpy(logits), axis=1)
+
 
 def predict_from_logits(logits, classes=None):
     '''
@@ -52,14 +56,12 @@ def predict_from_logits(logits, classes=None):
         preds = np.take(classes, preds)
     return preds
 
-def predict(model: torch.nn.Module, 
-            feat_dict: dict, 
+
+def predict(model: torch.nn.Module,
+            feat_dict: dict,
             g=None,
             classes: Sequence = None,
             key: str = 'cell',
             **other_inputs):
     logits = model.forward(feat_dict, g, **other_inputs)[key]
     return predict_from_logits(logits, classes=classes)
-    
-    
-

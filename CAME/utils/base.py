@@ -23,14 +23,18 @@ from scipy import sparse
 def strline(seq):
     return '\n'.join(map(str, seq))
 
+
 def _upper_strs(strs):
     return [s.upper() for s in strs]
+
 
 def _lower_strs(strs):
     return [s.lower() for s in strs]
 
+
 def _capital_strs(strs):
     return [s.capitalize() for s in strs]
+
 
 # In[]
 ''' I/O functions
@@ -38,12 +42,11 @@ def _capital_strs(strs):
 '''
 
 
-
 def save_pickle(obj, fpath):
-            
     with open(fpath, 'wb') as f:
         pickle.dump(obj, f)
     print('object saved into:\n\t', fpath)
+
 
 def load_pickle(fp):
     '''
@@ -53,13 +56,15 @@ def load_pickle(fp):
         res = pickle.load(f)
     return res
 
+
 def check_dirs(path):
     if os.path.exists(path):
-        print('already exsists:\n\t%s'%path)
+        print('already exsists:\n\t%s' % path)
     else:
         os.makedirs(path)
-        print('a new directory made:\n\t%s'%path)
-        
+        print('a new directory made:\n\t%s' % path)
+
+
 def write_info(fn, **dicts):
     '''
     key words parameter-dicts
@@ -73,21 +78,23 @@ def write_info(fn, **dicts):
         else:
             print(f'\n>{kw}:\n', val, file=f)
     f.close()
-    
+
+
 def save_json_dict(dct, fname='test_json.json', encoding='utf-8'):
-    
     with open(fname, 'w', encoding=encoding) as jsfile:
         json.dump(dct, jsfile, ensure_ascii=False)
     print(fname)
 
-def get_json_dict(fname, encoding = 'utf-8'):
-    with open(fname, encoding = encoding) as f:
+
+def get_json_dict(fname, encoding='utf-8'):
+    with open(fname, encoding=encoding) as f:
         dct = json.load(f)
     return dct
-    
+
+
 # In[]
 
-        
+
 def make_nowtime_tag(nowtime=None, brackets=True):
     if nowtime is None:
         nowtime = datetime.datetime.today()
@@ -99,6 +106,7 @@ def make_nowtime_tag(nowtime=None, brackets=True):
         fmt = '{} {}'
     return fmt.format(d, t)
 
+
 def dec_timewrapper(tag='function'):
     def my_decorator(foo):
         def wrapper(*args, **kargs):
@@ -107,7 +115,9 @@ def dec_timewrapper(tag='function'):
             t1 = time.time()
             print(f'[{tag}] Time used: {t1 - t0: .4f} s')
             return res
+
         return wrapper
+
     return my_decorator
 
 
@@ -125,13 +135,11 @@ def make_pairs_from_lists(lst1, lst2=None, inverse=False, skip_equal=True):
     return pairs
 
 
-
-
 # In[]
-def subsample_single(N, 
-                     frac = 0.25, n_min = 50,
-                     n_out = None, 
-                     seed = 0):
+def subsample_single(N,
+                     frac=0.25, n_min=50,
+                     n_out=None,
+                     seed=0):
     '''
     N:
         The total number of the original indices to be subsampled
@@ -147,7 +155,7 @@ def subsample_single(N,
     seed:
         random state
     '''
-#    N = len(ids)
+    #    N = len(ids)
     if n_out is None:
         n_ids_sub = max([np.ceil(N * frac), n_min])
         except_error = False
@@ -162,17 +170,17 @@ def subsample_single(N,
         return np.arange(N)
     else:
         np.random.seed(seed)
-        _ids_sub = np.random.choice(N, size = n_ids_sub, replace=False)
-        
+        _ids_sub = np.random.choice(N, size=n_ids_sub, replace=False)
+
         return _ids_sub
-        
+
 
 def subsample_each_group(
-        group_labels, 
-#        frac=0.5, n_min=50, 
-        n_out = 50, 
-        seed = 0, 
-        ):
+        group_labels,
+        #        frac=0.5, n_min=50,
+        n_out=50,
+        seed=0,
+):
     '''
     randomly sample indices from each group, labeled by `group_labels`.
     and return the sampled indices.
@@ -186,20 +194,18 @@ def subsample_each_group(
     else:
         ids_all = np.arange(len(group_labels))
     res_ids = []
-    
+
     for lb in pd.unique(group_labels):
         ids = np.flatnonzero(group_labels == lb)
         if len(ids) <= n_out:
             ids_sub = ids
         else:
             ids_sub = np.take(
-                    ids, 
-                    np.random.choice(len(ids), size=n_out, replace=False)
-                    )
+                ids,
+                np.random.choice(len(ids), size=n_out, replace=False)
+            )
         res_ids.append(ids_sub)
-#    print(list(map(len, res_ids)))
+    #    print(list(map(len, res_ids)))
     res_ids = np.hstack(res_ids)
-    
+
     return np.take(ids_all, sorted(res_ids))
-
-
