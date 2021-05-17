@@ -64,13 +64,12 @@ class CGGCNet(nn.Module):
                  out_bias=False,
                  rel_names_out=None,
                  share_hidden_weights=False,
-                 attn_out=False,
+                 attn_out=True,
                  kwdict_outgat={},
                  share_layernorm=True,
                  residual=False,
                  **kwds):  # ignored
         super(CGGCNet, self).__init__()
-        #        self.g = g
         self.in_dim_dict = in_dim_dict
         if h_dim_add is not None:
             if isinstance(h_dim_add, int):
@@ -187,7 +186,7 @@ class CGGCNet(nn.Module):
         return attn_mat
 
     def get_classification_loss(
-            self, out_cell, labels, weight=None, record=False,
+            self, out_cell, labels, weight=None, 
             smooth=True, smooth_eps=0.1, smooth_reduction='mean'):
         # take out representations of nodes that have labels
         # F.cross_entropy() combines `log_softmax` and `nll_loss` in a single function.
@@ -197,10 +196,6 @@ class CGGCNet(nn.Module):
         else:
             criterion = F.cross_entropy
         class_loss = criterion(out_cell, labels, weight=weight)
-        if record:
-            if not hasattr(self, '_loss_cls'):
-                self._loss_cls = []
-            self._loss_cls.append(class_loss.item())
         return class_loss
 
     def build_embed_layer(self, activation=None, **kwds):

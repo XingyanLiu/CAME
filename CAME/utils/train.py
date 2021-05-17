@@ -356,7 +356,6 @@ class Trainer(BaseTrainer):
                 out_cell[train_idx],
                 _train_labels,  # labels[train_idx],
                 weight=class_weights,
-                record=True,  # (DO NOT change it)
                 **params_lossfunc
             )
 
