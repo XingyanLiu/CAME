@@ -6,7 +6,7 @@ Created on Sat Mar 20 18:59:29 2021
 """
 
 from typing import Union, Sequence, Optional
-
+import logging
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
@@ -137,12 +137,12 @@ class CGGCNet(nn.Module):
         
         '''
         if (feat_dict is not None) and (g is not None):
-            print('Forward passing...')
+            logging.info('Forward passing...')
             # activate the random dropouts, which gives a better integrated embedding
             self.train()
             _ = self.forward(feat_dict, g=g, **kwds)
         else:
-            print('No inputs were given for the forward passing, so the '
+            logging.warning('No inputs were given for the forward passing, so the '
                   'returned are the current hidden states of the model.')
 
         h_dict = self.rgcn.hidden_states[i_layer]
@@ -158,7 +158,6 @@ class CGGCNet(nn.Module):
         output:
             cell-by-gene attention matrix
         '''
-        #        g = self.g if g is None else g
         # getting subgraph and the hidden states
         g_sub = g.to('cuda')['gene', 'expressed_by', 'cell']
         h_dict = self.get_hidden_states(feat_dict=feat_dict, g=g, detach2np=False)
@@ -173,20 +172,19 @@ class CGGCNet(nn.Module):
             attn, _ = th.max(attn0, dim=1)
         else:  # fuse == 'mean':
             attn = th.mean(attn0, dim=1)
-        #        else:
 
         attn = detach2numpy(attn).flatten()
         ig, ic = list(map(detach2numpy, g_sub.edges()))
         n_vnodes, n_obs = g.num_nodes('gene'), g.num_nodes('cell')
-
         from scipy import sparse
         attn_mat = sparse.coo_matrix(
             (attn, (ig, ic)), shape=(n_vnodes, n_obs)).tocsc().T
 
         return attn_mat
 
+    @staticmethod
     def get_classification_loss(
-            self, out_cell, labels, weight=None, 
+            out_cell, labels, weight=None, 
             smooth=True, smooth_eps=0.1, smooth_reduction='mean'):
         # take out representations of nodes that have labels
         # F.cross_entropy() combines `log_softmax` and `nll_loss` in a single function.

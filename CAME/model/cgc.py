@@ -6,7 +6,7 @@ Created on Tue Mar 16 14:11:14 2021
 """
 
 from typing import Union, Sequence, Optional
-
+import logging
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
@@ -138,12 +138,12 @@ class CGCNet(nn.Module):
         
         '''
         if (feat_dict is not None) and (g is not None):
-            print('Forward passing...')
+            logging.info('Forward passing...')
             # activate the random dropouts, which gives a better integrated embedding
             self.train()
             _ = self.forward(feat_dict, g=g, **kwds)
         else:
-            print('No inputs were given for the forward passing, so the '
+            logging.warning('No inputs were given for the forward passing, so the '
                   'returned are the current hidden states of the model.')
 
         h_dict = self.rgcn.hidden_states[i_layer]
@@ -185,8 +185,9 @@ class CGCNet(nn.Module):
 
         return attn_mat
 
+    @staticmethod
     def get_classification_loss(
-            self, out_cell, labels, weight=None, 
+            out_cell, labels, weight=None, 
             smooth=True, smooth_eps=0.1, smooth_reduction='mean'):
         # take out representations of nodes that have labels
         # F.cross_entropy() combines `log_softmax` and `nll_loss` in a single function.
