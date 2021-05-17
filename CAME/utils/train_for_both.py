@@ -140,12 +140,21 @@ class Trainer(BaseTrainer):
                                 self.g,  # .to(self.device),
                                 **other_inputs)
             out_cell = logits[cat_class].cuda()
-            loss = self.model.get_classification_loss(
-                out_cell[train_idx],
-                _train_labels,  # labels[train_idx],
-                weight=class_weights,
+            
+            out_cell1 = out_cell[train_idx1, : self.n_classes1]
+            out_cell2 = out_cell[train_idx2, self.n_classes1: ]
+            
+            loss1 = self.model.get_classification_loss(
+                out_cell1, labels[train_idx1], # TODO: `labels1[train_idx1]`
+                weight=class_weights1,
                 **params_lossfunc
             )
+            loss2 = self.model.get_classification_loss(
+                out_cell2, labels[train_idx2], # TODO: `labels2[train_idx2]`
+                weight=class_weights2,
+                **params_lossfunc
+            )
+            loss = loss1 + loss2
 
             # prediction of ALL
             _, y_pred = torch.max(out_cell, dim=1)
