@@ -6,13 +6,14 @@ Created on Sun Apr 11 19:15:45 2021
 """
 from pathlib import Path
 import os
-from typing import Sequence, Union, Mapping, Optional
+from typing import Sequence, Union, Mapping, Optional, List
 
 import time
 import random
 import numpy as np
 from pandas import DataFrame, value_counts
 import torch
+from torch import Tensor
 import dgl
 
 from ..datapair.aligned import AlignedDataPair
@@ -35,7 +36,7 @@ def seed_everything(seed=123):
 
 
 def make_class_weights(labels, astensor=True, foo=np.sqrt, n_add=0):
-    if isinstance(labels, torch.Tensor):
+    if isinstance(labels, Tensor):
         labels = labels.cpu().clone().detach().numpy()
 
     counts = value_counts(labels).sort_index()  # sort for alignment
@@ -46,7 +47,7 @@ def make_class_weights(labels, astensor=True, foo=np.sqrt, n_add=0):
     w = np.array(list(w) + [1 / n_cls] * int(n_add))
 
     if astensor:
-        return torch.Tensor(w)
+        return Tensor(w)
     return w
 
 
@@ -54,12 +55,10 @@ def prepare4train(
         dpair: Union[DataPair, AlignedDataPair],
         key_class,
         key_clust='clust_lbs',
-        ###
         scale_within=True,
         unit_var=True,
         clip=False,
         clip_range=(-3, 3.5),
-        embed2ord=False,
         categories: Optional[Sequence] = None,
         cluster_labels: Optional[Sequence] = None,
         test_idx: Optional[Sequence] = None,
@@ -72,8 +71,8 @@ def prepare4train(
     '''
     if key_clust and cluster_labels is None:
         cluster_labels = dpair.obs_dfs[1][key_clust].values
-    #    else:
-    #        cluster_labels = None
+    # else:
+    #     cluster_labels = None
 
     feat_dict = dpair.get_feature_dict(scale=scale_within,
                                        unit_var=unit_var,
@@ -81,6 +80,8 @@ def prepare4train(
                                        clip_range=clip_range)
     labels0, classes = dpair.get_obs_labels(
         key_class, categories=categories, add_unknown_force=False)
+    classes = classes[:-1] if 'unknown' in classes else classes
+
     if test_idx is None:
         train_idx = dpair.get_obs_ids(0, astensor=True)
         test_idx = dpair.get_obs_ids(1, astensor=True)
@@ -88,7 +89,7 @@ def prepare4train(
         train_idx = torch.LongTensor([i for i in range(dpair.n_obs) if i not in test_idx])
         test_idx = torch.LongTensor(test_idx)
 
-    G = dpair.get_whole_net(rebuild=False, link2ord=True, )
+    G = dpair.get_whole_net(rebuild=False, )
 
     ENV_VARs = dict(
         classes=classes,
@@ -113,30 +114,29 @@ class BaseTrainer(object):
     def __init__(self,
                  model,
                  feat_dict: Mapping,
-                 labels: torch.Tensor,
-                 train_idx: torch.Tensor,
-                 test_idx: torch.Tensor,
-                 cluster_labels: Union[None, Sequence, torch.Tensor] = None,
-                 lr=1e-3,
-                 l2norm=1e-2,  # 1e-2 is tested for all datasets
-                 al_trigger_acc=1.,  # NOT using active learning
-                 al_clear_update=False,
-                 use_cuda=True,
-                 dir_main=Path('.'),
+                 labels: Union[Tensor, List[Tensor]],
+                 train_idx: Union[Tensor, List[Tensor]],
+                 test_idx: Union[Tensor, List[Tensor]],
+                 cluster_labels: Optional[Sequence] = None,
+                 lr: float = 1e-3,
+                 l2norm: float = 1e-2,  # 1e-2 is tested for all datasets
+                 use_cuda: bool = True,
+                 dir_main: Union[str, Path] = Path('.'),
                  **kwds  # for code compatibility (not raising error)
                  ):
 
         self.use_cuda = use_cuda and torch.cuda.is_available()
         self.set_inputs(model, feat_dict,
                         labels, train_idx, test_idx,
-                        use_cuda)
+                        )
 
         self.cluster_labels = cluster_labels
         self.set_train_params(
             lr=lr,
             l2norm=l2norm,  # 1e-2 is tested for all datasets
         )
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=l2norm)
+        self.optimizer = torch.optim.Adam(
+            model.parameters(), lr=lr, weight_decay=l2norm)
 
         self.set_dir(dir_main)
         self._cur_epoch = -1
@@ -144,7 +144,6 @@ class BaseTrainer(object):
         self._cur_epoch_adopted = 0
 
     def set_dir(self, dir_main=Path('.')):
-
         self.dir_main = Path(dir_main)
         self.dir_model = self.dir_main / '_models'
         check_dirs(self.dir_model)
@@ -154,19 +153,23 @@ class BaseTrainer(object):
 
     def set_inputs(self, model,
                    feat_dict: Mapping,
-                   labels: torch.Tensor,
-                   train_idx: torch.Tensor,
-                   test_idx: torch.Tensor,
-                   use_cuda=True
+                   labels: Union[Tensor, List[Tensor]],
+                   train_idx: Union[Tensor, List[Tensor]],
+                   test_idx: Union[Tensor, List[Tensor]],
                    ):
 
         if self.use_cuda:
+            def _to_cuda(x):
+                if isinstance(x, Tensor):
+                    return x.cuda()
+                elif isinstance(x[0], Tensor):
+                    return [xx.cuda() for xx in x]
             print('Using CUDA...')
             model.cuda()
             feat_dict = {k: feat_dict[k].cuda() for k in feat_dict.keys()}
-            labels = labels.cuda()
-            train_idx = train_idx.cuda()
-            test_idx = test_idx.cuda()
+            labels = _to_cuda(labels)
+            train_idx = _to_cuda(train_idx)
+            test_idx = _to_cuda(test_idx)
 
         self.model = model
         self.feat_dict = feat_dict
@@ -174,7 +177,10 @@ class BaseTrainer(object):
         self.train_idx = train_idx
         self.test_idx = test_idx
         # inference device
-        self.device = self.train_idx.device
+        try:
+            self.device = self.train_idx.device
+        except AttributeError:
+            self.device = self.train_idx[0].device
 
     def set_train_params(self,
                          lr=1e-3,
@@ -263,10 +269,10 @@ class Trainer(BaseTrainer):
                  model,
                  feat_dict: Mapping,
                  g: dgl.DGLGraph,
-                 labels: torch.Tensor,
-                 train_idx: torch.Tensor,
-                 test_idx: torch.Tensor,
-                 cluster_labels: Union[None, Sequence, torch.Tensor] = None,
+                 labels: Tensor,
+                 train_idx: Tensor,
+                 test_idx: Tensor,
+                 cluster_labels: Optional[Sequence] = None,
                  lr=1e-3,
                  l2norm=1e-2,  # 1e-2 is tested for all datasets
                  use_cuda=True,
@@ -288,7 +294,7 @@ class Trainer(BaseTrainer):
         )
 
         self.g = g.to(self.device)
-        self.set_class_weights()  # class weights
+        self.set_class_weights()
         ### infer n_classes
         self.n_classes = len(self.class_weights)
 
@@ -305,7 +311,7 @@ class Trainer(BaseTrainer):
             self.class_weights = make_class_weights(
                 self.labels[self.train_idx], foo=foo, n_add=n_add)
         else:
-            self.class_weights = torch.Tensor(class_weights)
+            self.class_weights = Tensor(class_weights)
         if self.use_cuda:
             self.class_weights = self.class_weights.cuda()
 
@@ -351,7 +357,7 @@ class Trainer(BaseTrainer):
             logits = self.model(self.feat_dict,
                                 self.g,  # .to(self.device),
                                 **other_inputs)
-            out_cell = logits[cat_class].cuda()
+            out_cell = logits[cat_class]
             loss = self.model.get_classification_loss(
                 out_cell[train_idx],
                 _train_labels,  # labels[train_idx],
@@ -408,7 +414,7 @@ class Trainer(BaseTrainer):
         '''
         if feat_dict is None:
             feat_dict = self.feat_dict
-        else:
+        elif self.use_cuda:
             feat_dict = {k: v.cuda() for k, v in feat_dict.items()}
         if g is None:
             g = self.g

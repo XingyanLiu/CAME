@@ -126,7 +126,7 @@ dpair, trainer, h_dict = pipeline.main_for_unaligned(
 #df_probs = pd.DataFrame(probas_all, columns = trainer.classes)
 
 # In[]
-''' ======================= furture analysis =======================
+''' ======================= further analysis =======================
 '''
 obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
 obs = dpair.obs

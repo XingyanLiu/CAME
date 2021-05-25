@@ -9,6 +9,7 @@ from typing import Sequence, Union, Mapping
 import time
 import numpy as np
 import torch
+from torch import Tensor
 import dgl
 
 from .train import BaseTrainer, make_class_weights, prepare4train, seed_everything
@@ -26,10 +27,10 @@ class Trainer(BaseTrainer):
                  model,
                  feat_dict: Mapping,
                  g: dgl.DGLGraph,
-                 labels: torch.Tensor,
-                 train_idx: torch.Tensor,
-                 test_idx: torch.Tensor,
-                 cluster_labels: Union[None, Sequence, torch.Tensor] = None,
+                 labels: Tensor,
+                 train_idx: Tensor,
+                 test_idx: Tensor,
+                 cluster_labels: Union[None, Sequence, Tensor] = None,
                  lr=1e-3,
                  l2norm=1e-2,  # 1e-2 is tested for all datasets
                  use_cuda=True,
@@ -72,7 +73,7 @@ class Trainer(BaseTrainer):
             self.class_weights = make_class_weights(
                 self.labels[self.train_idx], foo=foo, n_add=n_add)
         else:
-            self.class_weights = torch.Tensor(class_weights)
+            self.class_weights = Tensor(class_weights)
 
         if self.use_cuda:
             self.class_weights = self.class_weights.cuda()

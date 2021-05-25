@@ -36,9 +36,7 @@ from .PARAMETERS import (
 )
 from . import pp as utp
 from . import pl as uplt
-# from CAME_v0.utils import plot as uplt
 from .utils import base, evaluation
-# from CAME_v0.utils.train import prepare4train, Trainer
 from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
