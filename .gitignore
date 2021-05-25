@@ -4,6 +4,7 @@ __pycache__/
 /_case_res/
 
 /CAME/sample_data/
+!/CAME/sample_data/sample_data.rar
 
 
 /DATASET_NAMES.py
