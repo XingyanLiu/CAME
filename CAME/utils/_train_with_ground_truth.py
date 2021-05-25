@@ -138,7 +138,7 @@ class Trainer(BaseTrainer):
             logits = self.model(self.feat_dict,
                                 self.g,  # .to(self.device),
                                 **other_inputs)
-            out_cell = logits[cat_class].cuda()
+            out_cell = logits[cat_class] # .cuda()
             loss = self.model.get_classification_loss(
                 out_cell[train_idx],
                 _train_labels,  # labels[train_idx],
@@ -203,7 +203,7 @@ class Trainer(BaseTrainer):
         '''
         if feat_dict is None:
             feat_dict = self.feat_dict
-        else:
+        elif self.use_cuda:
             feat_dict = {k: v.cuda() for k, v in feat_dict.items()}
         if g is None:
             g = self.g
