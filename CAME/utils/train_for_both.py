@@ -244,7 +244,7 @@ class Trainer(BaseTrainer):
             if self._cur_epoch >= n_pass - 1:
                 self.acc_max1 = max(self.acc_max1, test_acc1)
                 self.acc_max2 = max(self.acc_max2, test_acc2)
-                if test_acc1 > self.acc_max1 - eps or test_acc2 > self.acc_max2 - eps :
+                if test_acc1 >= self.acc_max1 - eps or test_acc2 >= self.acc_max2 - eps :
                     self._cur_epoch_best = self._cur_epoch
                     self.save_model_weights()
                     print('model weights backup')

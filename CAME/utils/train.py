@@ -378,7 +378,7 @@ class Trainer(BaseTrainer):
 
             if self._cur_epoch >= n_pass - 1:
                 ami_max = max(self.AMI[n_pass - 1:])
-                if ami > ami_max - eps:
+                if ami >= ami_max - eps:
                     self._cur_epoch_best = self._cur_epoch
                     self.save_model_weights()
                     print('model weights backup')

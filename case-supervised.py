@@ -24,24 +24,76 @@ import torch
 
 import CAME
 from CAME.pipeline_supervised import preprocess_unaligned, main_for_unaligned
-from CAME import pipeline_supervised, pp, pl
+from CAME import pp, pl
+
 
 # In[]
-datadir = Path(os.path.abspath(__file__)).parent / 'CAME/sample_data'
-sp1, sp2 = ('human', 'mouse')
-dsnames = ('Baron_human', 'Baron_mouse')
-
-df_varmap_1v1 = pd.read_csv(datadir / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
-df_varmap = pd.read_csv(datadir / f'gene_matches_{sp1}2{sp2}.csv', )
-
+DATASET_PAIRS = [
+    ('zebrafish_LD_10hr', 'mouse_NMDA_24hr'),
+    ('panc8', 'Baron_mouse'),
+    ('Baron_human', 'Baron_mouse'),
+    ('Baron_human', 'FACS'),
+    ('Lake_2018', 'Tasic18'),
+    ('Lake_2018', 'Tosches_turtle'),
+    ('Lake_2018', 'Tosches_lizard'),
+    ('Tosches_turtle', 'Tosches_lizard'),
+    ('testis_human', 'testis_mouse'),
+    ('testis_human', 'testis_monkey'),
+]
+dsnames = DATASET_PAIRS[0]  # [::-1]
 dsn1, dsn2 = dsnames
+
+from DATASET_NAMES import Tissues, NAMES_ALL
+
+for _tiss in Tissues:
+    NameDict = NAMES_ALL[_tiss]
+    species = list(NameDict.keys())
+    pair_species = CAME.base.make_pairs_from_lists(species, species)
+    for _sp1, _sp2 in pair_species:
+        if dsn1 in NameDict[_sp1] and dsn2 in NameDict[_sp2]:
+            tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
+            break
+
+print(f'Tissue:\t{tiss}', f'ref: {sp1}\t{dsn1}', f'que: {sp2}\t{dsn2}',
+      sep='\n')
+
+# In[]
+datadir0 = Path('E:/lxy_pro/004/datasets')
+dir_gmap = Path('E:/lxy_pro/004/resources/mart_exports/exported_gene_matches')
+
+datadir = datadir0 / 'formal' / tiss
+df_varmap_1v1 = pd.read_csv(dir_gmap / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
+df_varmap = pd.read_csv(dir_gmap / f'gene_matches_{sp1}2{sp2}.csv', )
+
+_time_tag = CAME.make_nowtime_tag()
+subdir_res0 = f"{tiss}-{dsnames}{_time_tag}"
+
+resdir = Path('./_case_res') / subdir_res0
+figdir = resdir / 'figs'
+sc.settings.figdir = figdir
+CAME.check_dirs(figdir)
+
+key_class = 'cell_ontology_class'
+
+# In[]
+#datadir = Path(os.path.abspath(__file__)).parent / 'CAME/sample_data'
+#sp1, sp2 = ('human', 'mouse')
+#dsnames = ('Baron_human', 'Baron_mouse')
+
+#df_varmap_1v1 = pd.read_csv(datadir / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
+#df_varmap = pd.read_csv(datadir / f'gene_matches_{sp1}2{sp2}.csv', )
+
+#dsn1, dsn2 = dsnames
+#
+#key_class = 'cell_ontology_class'
+#time_tag = CAME.make_nowtime_tag()
+#resdir = Path('_temp') / f'{dsnames}-{time_tag}'
+
+# In[]
 adata_raw1 = sc.read_h5ad(datadir / f'raw-{dsn1}.h5ad')
 adata_raw2 = sc.read_h5ad(datadir / f'raw-{dsn2}.h5ad')
 adatas = [adata_raw1, adata_raw2]
 
-key_class = 'cell_ontology_class'
-time_tag = CAME.make_nowtime_tag()
-resdir = Path('_temp') / f'{dsnames}-{time_tag}'
 
 # In[]
 ''' default pipeline of CAME
@@ -64,7 +116,7 @@ dpair, trainer, h_dict = main_for_unaligned(
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
-        model_params=dict(residual=True)
+        model_params=dict(residual=False)
     )
 
 # In[]
@@ -81,6 +133,9 @@ gadt = pp.make_adata(h_dict['gene'], obs=dpair.var, assparse=False)
 
 # adt.write(resdir / 'adt_hidden_cell.h5ad')
 # gadt.write(resdir / 'adt_hidden_gene.h5ad')
+dsnames
+cross_acc2 = (obs['predicted1'][obs_ids2] == obs['celltype'][obs_ids2]).sum() / len(obs_ids2)
+cross_acc1 = (obs['predicted2'][obs_ids1] == obs['celltype'][obs_ids1]).sum() / len(obs_ids1)
 
 # In[]
 '''======================= cell embeddings ======================='''
