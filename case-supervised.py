@@ -49,8 +49,9 @@ resdir = Path('_temp') / f'{dsnames}-{time_tag}'
 came_inputs, (adata1, adata2) = preprocess_unaligned(
     adatas,
     key_class=key_class,
+    use_scnets=False
 )
-n_epochs = 100
+n_epochs = 400
 dpair, trainer, h_dict = main_for_unaligned(
         **came_inputs,
         df_varmap=df_varmap,
@@ -110,7 +111,7 @@ sc.pl.umap(gadt, color='dataset', )
 
 ''' joint gene module extraction '''
 sc.tl.leiden(gadt, resolution=.8, key_added='module')
-sc.pl.umap(gadt, color=['dataset', 'module'], ncols=1)
+sc.pl.umap(gadt, color=['dataset', 'module'], ncols=1, save=f'combined.pdf')
 
 ''' link-weights between homologous gene pairs '''
 df_var_links = CAME.weight_linked_vars(
