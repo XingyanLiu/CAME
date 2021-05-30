@@ -137,8 +137,10 @@ gadt = pp.make_adata(h_dict['gene'], obs=dpair.var, assparse=False)
 dsnames
 cross_acc2 = (obs['predicted1'][obs_ids2] == obs['celltype'][obs_ids2]).sum() / len(obs_ids2)
 cross_acc1 = (obs['predicted2'][obs_ids1] == obs['celltype'][obs_ids1]).sum() / len(obs_ids1)
+print('\n')
 print(f'{dsn1} to {dsn2} acc: {cross_acc2:.4f}')
 print(f'{dsn2} to {dsn1} acc: {cross_acc1:.4f}')
+print('\n')
 
 # In[]
 '''======================= cell embeddings ======================='''
