@@ -51,7 +51,7 @@ came_inputs, (adata1, adata2) = preprocess_unaligned(
     key_class=key_class,
     use_scnets=False
 )
-n_epochs = 400
+n_epochs = 500
 dpair, trainer, h_dict = main_for_unaligned(
         **came_inputs,
         df_varmap=df_varmap,
@@ -96,10 +96,29 @@ adata1.obsm['X_umap'] = obs_umap[obs_ids1]
 adata2.obsm['X_umap'] = obs_umap[obs_ids2]
 
 ftype = ['.svg', ''][1]
+sc.pl.umap(adt, color=['dataset', 'celltype'], save=f'-cell{ftype}')
 sc.pl.umap(adt, color='dataset', save=f'-dataset{ftype}')
 sc.pl.umap(adt, color='celltype', save=f'-ctype{ftype}')
 
 adt.write(resdir / 'adt_hidden_cell.h5ad')
+
+# In[]
+''' similaraties of cell-type embeddings
+'''
+adt1, adt2 = pp.bisplit_adata(adt, 'dataset', dsn1, reset_index_by='original_name')
+avg_embed1 = pp.group_mean_adata(adt1, 'celltype')
+avg_embed2 = pp.group_mean_adata(adt2, 'celltype')
+
+from scipy.spatial.distance import cdist
+dist = cdist(avg_embed1.values.T, avg_embed2.values.T, metric='cosine')
+sim = pd.DataFrame(
+        data=1 - dist,
+        index=avg_embed1.columns, columns=avg_embed2.columns
+        )           
+ax = pl.heatmap(sim, order_col=True, order_row=True, figsize=(5, 4), 
+                fp=resdir / 'celltype_embed_sim.png')
+ax.figure
+#%matplotlib inline
 
 # In[]
 '''===================== gene embeddings ====================='''
@@ -126,3 +145,39 @@ sc.pl.umap(gadt1, color=color_by, s=10, edges=True, edges_width=0.05,
            save=f'_{color_by}-{dsn1}')
 sc.pl.umap(gadt2, color=color_by, s=10, edges=True, edges_width=0.05,
            save=f'_{color_by}-{dsn2}')
+
+
+# In[]
+''' ============ cell type gene-profiles on gene embeddings ============
+'''
+# averaged expressions
+avg_expr1 = pp.group_mean_adata(adata_raw1, groupby=key_class,
+                                features=dpair.vnode_names1, use_raw=True)
+avg_expr2 = pp.group_mean_adata(adata_raw2, groupby=key_class,
+                                features=dpair.vnode_names2, use_raw=True)
+# adata_raw1.X.data
+
+avg_expr_add1, avg_expr_add2 = list(map(
+    lambda x: pp.zscore(x.T).T, (avg_expr1, avg_expr2)
+))
+
+# add annos
+pp.add_obs_annos(gadt1, avg_expr_add1, ignore_index=True)
+pp.add_obs_annos(gadt2, avg_expr_add2, ignore_index=True)
+
+''' plot cell type gene-profiles (plot all the cell types) on UMAP '''
+ctypes1 = avg_expr1.columns.tolist()
+ctypes2 = avg_expr2.columns.tolist()
+sc.set_figure_params(fontsize=14)
+cmap_expr = 'RdYlBu_r'
+vmax = None
+vmin = - 1.5
+plkwds = dict(color_map=cmap_expr, vmax=vmax, vmin=vmin, ncols=5, )
+sc.pl.umap(gadt1, color=ctypes1,
+           #           edges=True, size=50,
+           save=f'_exprAvgs-{dsn1}-all.png', **plkwds)
+sc.pl.umap(gadt2, color=ctypes2,
+           #           edges=True, size=50,
+           save=f'_exprAvgs-{dsn2}-all.png', **plkwds)
+
+
