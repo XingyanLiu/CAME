@@ -11,6 +11,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 
 if __name__ == '__main__':
+
     # CAME.__test1__()
     # CAME.__test2__()
-    pipeline_supervised.__test2_sup__()
+    pipeline_supervised.__test2_sup__(10)

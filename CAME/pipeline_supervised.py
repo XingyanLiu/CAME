@@ -167,9 +167,10 @@ def main_for_unaligned(
          'max_probs1': np.max(probas_all1, axis=1),
          'max_probs2': np.max(probas_all2, axis=1),
          })
-    # obs['is_right'] = obs['predicted'] == obs[key_class1]
     df_probs1 = pd.DataFrame(probas_all1, columns=classes1)
     df_probs2 = pd.DataFrame(probas_all2, columns=classes2)
+    df_probs1.to_csv(resdir / f'probabilities_1.csv')
+    df_probs2.to_csv(resdir / f'probabilities_2.csv')
     dpair.set_common_obs_annos(obs)
     # TODO: `df_probs1` and `df_probs1` may have conflicts
     dpair.set_common_obs_annos(df_probs1, ignore_index=True)

@@ -314,14 +314,14 @@ def heatmap(df_hmap: pd.DataFrame,
             lambda x: (x - x.min()) / (x.max() - x.min() + eps),
             axis=norm_axis)
     elif norm_method == 'zs':
-        from utils_preprocess import zscore
+        from .preprocess import zscore
         if norm_axis == 0:
             df_hmap = zscore(df_hmap)  # column normalization
         elif norm_axis == 1:
             df_hmap = zscore(df_hmap.T).T
 
     # re-order rows or columns
-    from utils_preprocess import order_contingency_mat
+    from .preprocess import order_contingency_mat
     if order_col:
         df_hmap = order_contingency_mat(df_hmap, axis=0)
     if order_row:
@@ -532,7 +532,7 @@ def plot_splitted_umaps(adata, splitby,
                         left_groups=None,
                         colors=None, ncols=1,
                         figsize=(4, 8), **kwds):
-    from utils_preprocess import bisplit_adata
+    from .preprocess import bisplit_adata
     adt1, adt2 = bisplit_adata(adata, splitby, left_groups)
 
     return umap_grid(

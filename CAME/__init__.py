@@ -5,7 +5,6 @@ Created on Sun Dec 27 21:59:44 2020
 @author: Xingyan Liu
 """
 
-#import utils, model
 from .utils import base
 from .utils.base import (
         save_pickle,
