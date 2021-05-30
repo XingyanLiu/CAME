@@ -66,6 +66,7 @@ def main_for_unaligned(
         params_lossfunc: dict = PARAMS_LOSS,
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
+        model_params={},
 ):
     if resdir is None:
         tag_time = base.make_nowtime_tag()
@@ -119,6 +120,7 @@ def main_for_unaligned(
         out_dim=n_classes1 + n_classes2,
         layernorm_ntypes=G.ntypes,
     )
+    params_model.update(model_params)
 
     # model = None
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -304,6 +306,7 @@ def __test2_sup__(n_epochs: int = 5):
     came_inputs, (adata1, adata2) = preprocess_unaligned(
         adatas,
         key_class=key_class,
+        use_scnets=False, 
     )
 
     dpair, trainer, _ = main_for_unaligned(
@@ -318,6 +321,7 @@ def __test2_sup__(n_epochs: int = 5):
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
+        model_params=dict(residual=True)
     )
 
     del dpair, trainer, _
