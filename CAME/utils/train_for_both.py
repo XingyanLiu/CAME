@@ -216,7 +216,12 @@ class Trainer(BaseTrainer):
                 weight=class_weights2,
                 **params_lossfunc
             )
-            loss = loss1 + loss2
+            if self._cur_epoch < 150:
+                loss = loss1
+            elif self._cur_epoch < 300:
+                loss = loss2
+            else:
+                loss = loss1 + loss2
 
             # prediction of ALL
             _, y_pred1 = torch.max(out_cell1, dim=1)
