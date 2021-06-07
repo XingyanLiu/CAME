@@ -256,6 +256,11 @@ class BaseTrainer(object):
         '''
         raise NotImplementedError
 
+    def train_minibatch(self, **kwargs):
+        ''' abstract method to be re-defined
+        '''
+        raise NotImplementedError
+
 
 # In[]
 
@@ -324,6 +329,10 @@ class Trainer(BaseTrainer):
             tt='train accuracy and cluster index',
             fp=fp)
 
+    def train_minibatch(self, **kwargs):
+        # TODO: @qunlun
+        raise NotImplementedError
+
     # In[]
     def train(self, n_epochs=350,
               use_class_weights=True,
@@ -334,7 +343,7 @@ class Trainer(BaseTrainer):
               cat_class='cell',
               **other_inputs):
         '''
-                Main function for model taining 
+                Main function for model training
         ================================================
         
         other_inputs: other inputs for `model.forward()`

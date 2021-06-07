@@ -163,15 +163,6 @@ class Trainer(BaseTrainer):
             tt='classification accuracy',
             fp=fp)
 
-    # def plot_cluster_index(self, start=0, end=None, fp=None):
-    #     plot_records_for_trainer(
-    #         self,
-    #         record_names=['test_acc', 'AMI'],
-    #         start=start, end=end,
-    #         lbs=['test accuracy', 'AMI'],
-    #         tt='test accuracy and cluster index',
-    #         fp=fp)
-
     # In[]
     def train(self, n_epochs=350,
               use_class_weights=True,
@@ -181,7 +172,7 @@ class Trainer(BaseTrainer):
               cat_class='cell',
               **other_inputs):
         '''
-                Main function for model taining 
+                Main function for model training
         ================================================
         
         other_inputs: other inputs for `model.forward()`
@@ -237,10 +228,6 @@ class Trainer(BaseTrainer):
             test_acc1 = accuracy(y_pred1[test_idx1], labels1[test_idx1])
             test_acc2 = accuracy(y_pred2[test_idx2], labels2[test_idx2])
 
-            # unsupervised cluster index
-            # if self.cluster_labels is not None:
-            #     ami = get_AMI(self.cluster_labels, y_pred_test)
-
             if self._cur_epoch >= n_pass - 1:
                 self.acc_max1 = max(self.acc_max1, test_acc1)
                 self.acc_max2 = max(self.acc_max2, test_acc2)
@@ -253,7 +240,6 @@ class Trainer(BaseTrainer):
             self.optimizer.step()
             t1 = time.time()
 
-            ##########[ recording ]###########
             self._record(dur=t1 - t0,
                          train_loss1=loss1.item(),
                          train_loss2=loss2.item(),

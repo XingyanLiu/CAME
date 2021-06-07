@@ -105,6 +105,10 @@ class Trainer(BaseTrainer):
             tt='test accuracy and cluster index',
             fp=fp)
 
+    def train_minibatch(self, **kwargs):
+        # TODO: @qunlun
+        raise NotImplementedError
+
     # In[]
     def train(self, n_epochs=350,
               use_class_weights=True,
@@ -114,7 +118,7 @@ class Trainer(BaseTrainer):
               cat_class='cell',
               **other_inputs):
         '''
-                Main function for model taining 
+                Main function for model training
         ================================================
         
         other_inputs: other inputs for `model.forward()`
@@ -200,8 +204,8 @@ class Trainer(BaseTrainer):
                      feat_dict=None,
                      g=None,
                      **other_inputs):
-        ''' get the current states of the model output
-        '''
+        """get the current states of the model output"""
+
         if feat_dict is None:
             feat_dict = self.feat_dict
         elif self.use_cuda:
