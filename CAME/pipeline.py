@@ -63,9 +63,8 @@ def main_for_aligned(
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
         tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
-        params_pre: dict = PARAMS_PRE,
-        params_model: dict = PARAMS_MODEL,
-        params_lossfunc: dict = PARAMS_LOSS,
+        params_model: dict = {},
+        params_lossfunc: dict = {},
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
 ):
@@ -111,7 +110,7 @@ def main_for_aligned(
     classes0 = ENV_VARs['classes']
     classes = classes0[:-1] if 'unknown' in classes0 else classes0
     n_classes = len(classes)
-
+    params_model = get_model_params(params_model)
     params_model.update(
         in_dim_dict={'cell': adpair.n_feats, 'gene': 0},
         out_dim=n_classes,
@@ -123,6 +122,7 @@ def main_for_aligned(
     model = CGCNet(G, **params_model)
 
     ''' Training '''
+    params_lossfunc = get_loss_params(**params_lossfunc)
     trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
     trainer.train(n_epochs=n_epochs,
                   params_lossfunc=params_lossfunc,
@@ -223,9 +223,8 @@ def main_for_unaligned(
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
         tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
-        params_pre: dict = PARAMS_PRE,
-        params_model: dict = PARAMS_MODEL,
-        params_lossfunc: dict = PARAMS_LOSS,
+        params_model: dict = {},
+        params_lossfunc: dict = {},
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
 ):
@@ -276,7 +275,7 @@ def main_for_unaligned(
     classes0 = ENV_VARs['classes']
     classes = classes0[:-1] if 'unknown' in classes0 else classes0
     n_classes = len(classes)
-
+    params_model = get_model_params(params_model)
     params_model.update(
         in_dim_dict={'cell': dpair.n_feats, 'gene': 0},
         out_dim=n_classes,
@@ -288,6 +287,7 @@ def main_for_unaligned(
     model = CGGCNet(G, **params_model)
 
     ''' Training '''
+    params_lossfunc = get_loss_params(**params_lossfunc)
     trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
     trainer.train(n_epochs=n_epochs,
                   params_lossfunc=params_lossfunc,

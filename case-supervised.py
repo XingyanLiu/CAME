@@ -127,7 +127,7 @@ dpair, trainer, h_dict = main_for_unaligned(
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
-        model_params=dict(residual=False)
+        params_model=dict(residual=False)
     )
 
 # In[]

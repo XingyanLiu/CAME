@@ -61,12 +61,10 @@ def main_for_unaligned(
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
         tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
-        params_pre: dict = PARAMS_PRE,
-        params_model: dict = PARAMS_MODEL,
-        params_lossfunc: dict = PARAMS_LOSS,
+        params_model: dict = {},
+        params_lossfunc: dict = {},
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
-        model_params={},
 ):
     if resdir is None:
         tag_time = base.make_nowtime_tag()
@@ -114,19 +112,19 @@ def main_for_unaligned(
     G = ENV_VARs['G']
     classes1, classes2 = ENV_VARs['classes']
     n_classes1, n_classes2 = len(classes1), len(classes2)
-
+    params_model = get_model_params(params_model)
     params_model.update(
         in_dim_dict={'cell': dpair.n_feats, 'gene': 0},
         out_dim=n_classes1 + n_classes2,
         layernorm_ntypes=G.ntypes,
     )
-    params_model.update(model_params)
 
     # model = None
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = CGGCNet(G, **params_model)
 
     ''' Training '''
+    params_lossfunc = get_loss_params(**params_lossfunc)
     trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
     trainer.train(n_epochs=n_epochs,
                   params_lossfunc=params_lossfunc,
