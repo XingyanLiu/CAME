@@ -39,7 +39,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse'),
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[0]  # [::-1]
+dsnames = DATASET_PAIRS[2]  # [::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -157,6 +157,23 @@ sc.pl.umap(adt, color='dataset', save=f'-dataset{ftype}')
 sc.pl.umap(adt, color='celltype', save=f'-ctype{ftype}')
 
 adt.write(resdir / 'adt_hidden_cell.h5ad')
+
+# In[]
+''' similaraties of cell-type embeddings
+'''
+adt1, adt2 = pp.bisplit_adata(adt, 'dataset', dsn1, reset_index_by='original_name')
+avg_embed1 = pp.group_mean_adata(adt1, 'celltype')
+avg_embed2 = pp.group_mean_adata(adt2, 'celltype')
+
+from scipy.spatial.distance import cdist
+dist = cdist(avg_embed1.values.T, avg_embed2.values.T, metric='cosine')
+sim = pd.DataFrame(
+        data=1 - dist,
+        index=avg_embed1.columns, columns=avg_embed2.columns
+        )           
+ax = pl.heatmap(sim, order_col=True, order_row=True, figsize=(5, 4), 
+                fp=resdir / 'celltype_embed_sim.png')
+ax.figure.show()
 
 # In[]
 '''===================== gene embeddings ====================='''

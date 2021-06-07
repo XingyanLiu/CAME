@@ -40,7 +40,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse'),
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[0]  # [::-1]
+dsnames = DATASET_PAIRS[2]  # [::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -94,6 +94,17 @@ adata_raw1 = sc.read_h5ad(datadir / f'raw-{dsn1}.h5ad')
 adata_raw2 = sc.read_h5ad(datadir / f'raw-{dsn2}.h5ad')
 adatas = [adata_raw1, adata_raw2]
 
+
+# In[]
+''' subsampling and filtering genes
+'''
+for _adt, _name in zip([adata_raw1, adata_raw2], dsnames):
+    if _adt.shape[0] >= 2e4:
+        print(f'Doing subsampling for {_name}')
+        sc.pp.subsample(_adt, fraction=0.5)
+
+sc.pp.filter_genes(adata_raw1, min_cells=3)
+sc.pp.filter_genes(adata_raw2, min_cells=3)
 
 # In[]
 ''' default pipeline of CAME
