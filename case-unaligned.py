@@ -117,7 +117,7 @@ dpair, trainer, h_dict = pipeline.main_for_unaligned(
     resdir=resdir,
     check_umap=not True,  # True for visualizing embeddings each 40 epochs
     n_pass=100,
-    params_model=dict(residual=False)
+    params_model=dict(residual=True)
 )
 
 # out_cell = trainer.eval_current()['cell']
