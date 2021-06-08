@@ -534,6 +534,7 @@ def __test1__(n_epochs: int = 5):
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
+        params_model=dict(residual=True)
     )
 
     del adpair, trainer, _
@@ -577,6 +578,7 @@ def __test2__(n_epochs: int = 5):
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
+        params_model=dict(residual=True)
     )
 
     del dpair, trainer, _

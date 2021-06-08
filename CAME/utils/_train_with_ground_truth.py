@@ -172,6 +172,9 @@ class Trainer(BaseTrainer):
                 if ami > self.ami_max - eps:
                     self._cur_epoch_best = self._cur_epoch
                     self.save_model_weights()
+                    print('[current best] model weights backup')
+                elif self._cur_epoch % 43:
+                    self.save_model_weights()
                     print('model weights backup')
 
             loss.backward()

@@ -319,7 +319,7 @@ def __test2_sup__(n_epochs: int = 5):
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
-        model_params=dict(residual=True)
+        params_model=dict(residual=True)
     )
 
     del dpair, trainer, _
