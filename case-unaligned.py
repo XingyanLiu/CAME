@@ -121,7 +121,7 @@ dpair, trainer, h_dict, ENV_VARs = pipeline.main_for_unaligned(
 )
 load_other_ckpt = False
 if load_other_ckpt:
-    pipeline.gather_came_results(
+    obs, df_probs, h_dict = pipeline.gather_came_results(
             dpair,
             trainer,
             classes=ENV_VARs['classes'],
