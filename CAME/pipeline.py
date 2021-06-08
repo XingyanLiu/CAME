@@ -144,40 +144,23 @@ def main_for_aligned(
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
 
     # ======================== Gather results ======================
-    obs_ids1, obs_ids2 = adpair.get_obs_ids(0, False), adpair.get_obs_ids(1, False)
     out_cell = trainer.eval_current()['cell']
-
-    labels_cat = adpair.get_obs_labels(keys, asint=False)
-    probas_all = as_probabilities(out_cell)
-    cl_preds = predict_from_logits(probas_all, classes=classes)
-    obs = pd.DataFrame(
-        {key_class1: labels_cat,  # true labels with `unknown` for unseen classes in query data
-         'celltype': adpair.get_obs_anno(keys_compare),  # labels for comparison
-         'predicted': cl_preds,
-         'max_probs': np.max(probas_all, axis=1),
-         })
-    obs['is_right'] = obs['predicted'] == obs[key_class1]
-    df_probs = pd.DataFrame(probas_all, columns=classes)
-    adpair.set_common_obs_annos(obs)
-    adpair.set_common_obs_annos(df_probs, ignore_index=True)
-    adpair.obs.to_csv(resdir / 'obs.csv')
-    save_pickle(adpair, resdir / 'adpair.pickle')
-    # adding labels, predicted probabilities
-    #    adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1], categories=classes)
-    #    adata2.obs['predicted'] = pd.Categorical(obs['predicted'][obs_ids2], categories=classes)
-    #    utp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
-
-    # hidden states are stored in sc.AnnData to facilitated downstream analysis
-    h_dict = model.get_hidden_states()  # trainer.feat_dict, trainer.g)
-    adt = utp.make_adata(h_dict['cell'], obs=adpair.obs, assparse=False)
-    #    gadt = utp.make_adata(h_dict['gene'], obs = adpair.var, assparse=False)
-
-    ### group counts statistics (optinal)
-    gcnt = utp.group_value_counts(adpair.obs, 'celltype', group_by='dataset')
-    logging.debug(str(gcnt))
-    gcnt.to_csv(resdir / 'group_counts.csv')
+    obs_ids1 = adpair.get_obs_ids(0, False)
+    obs_ids2 = adpair.get_obs_ids(1, False)
+    obs, df_probs, h_dict = gather_came_results(
+        adpair,
+        trainer,
+        classes=classes,
+        keys=keys,
+        keys_compare=keys_compare,
+        resdir=resdir,
+        checkpoint='best'
+    )
+    test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
     # ============= confusion matrix & alluvial plot ==============
+    labels_cat = obs[keys[0]]
+    cl_preds = obs['predicted']
     sc.set_figure_params(fontsize=10)
 
     lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
@@ -293,14 +276,8 @@ def main_for_unaligned(
                   params_lossfunc=params_lossfunc,
                   n_pass=n_pass, )
     trainer.save_model_weights()
-    trainer.load_model_weights()  # 127)
-    # trainer.load_model_weights(trainer._cur_epoch)
-    test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
-
-    '''========================== record results ========================
-    '''
+    # ========================== record results ========================
     trainer.write_train_logs()
-
     write_info(resdir / 'info.txt',
                current_performance=trainer._cur_log,
                params_model=params_model,
@@ -309,47 +286,32 @@ def main_for_unaligned(
                )
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
 
-    ''' ======================== Gather results ======================
-    '''
-    obs_ids1, obs_ids2 = dpair.get_obs_ids(0, False), dpair.get_obs_ids(1, False)
-    out_cell = trainer.eval_current()['cell']
+    # ======================== Gather results ======================
+    obs_ids1 = dpair.get_obs_ids(0, False)
+    obs_ids2 = dpair.get_obs_ids(1, False)
+    obs, df_probs, h_dict = gather_came_results(
+        dpair,
+        trainer,
+        classes=classes,
+        keys=keys,
+        keys_compare=keys_compare,
+        resdir=resdir,
+        checkpoint='best'
+    )
+    test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
-    labels_cat = dpair.get_obs_labels(keys, asint=False)
-    probas_all = as_probabilities(out_cell)
-    cl_preds = predict_from_logits(probas_all, classes=classes)
-    obs = pd.DataFrame(
-        {key_class1: labels_cat,  # true labels with `unknown` for unseen classes in query data
-         'celltype': dpair.get_obs_anno(keys_compare),  # labels for comparison
-         'predicted': cl_preds,
-         'max_probs': np.max(probas_all, axis=1),
-         })
-    obs['is_right'] = obs['predicted'] == obs[key_class1]
-    df_probs = pd.DataFrame(probas_all, columns=classes)
-    dpair.set_common_obs_annos(obs)
-    dpair.set_common_obs_annos(df_probs, ignore_index=True)
-    dpair.obs.to_csv(resdir / 'obs.csv')
-    save_pickle(dpair, resdir / 'dpair.pickle')
-    # adding labels, predicted probabilities
-    #    adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1], categories=classes)
-    #    adata2.obs['predicted'] = pd.Categorical(obs['predicted'][obs_ids2], categories=classes)
-    #    utp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
+    # # adding labels, predicted probabilities
+    # #    adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1], categories=classes)
+    # #    adata2.obs['predicted'] = pd.Categorical(obs['predicted'][obs_ids2], categories=classes)
+    # #    utp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
 
-    # hidden states are stored in sc.AnnData to facilitated downstream analysis
-    h_dict = model.get_hidden_states()  # trainer.feat_dict, trainer.g)
-    adt = utp.make_adata(h_dict['cell'], obs=dpair.obs, assparse=False)
-    #    gadt = utp.make_adata(h_dict['gene'], obs = adpair.var, assparse=False)
-
-    ### group counts statistics (optinal)
-    gcnt = utp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
-    logging.info(str(gcnt))
-    gcnt.to_csv(resdir / 'group_counts.csv')
-
+    labels_cat = obs[keys[0]]
+    cl_preds = obs['predicted']
     # ============= confusion matrix OR alluvial plot ==============
     sc.set_figure_params(fontsize=10)
 
     lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
     lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
-
     uplt.plot_confus_multi_mats(
         lblist_y,
         lblist_x,
@@ -369,11 +331,63 @@ def main_for_unaligned(
     df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
     lbs = df_lbs[name_label][indices]
 
-    _ = uplt.heatmap_probas(df_data.T, lbs, name_label='true label',
-                            figsize=(5, 3.),
-                            fp=figdir / f'heatmap_probas.pdf'
-                            )
+    _ = uplt.heatmap_probas(
+        df_data.T, lbs, name_label='true label',
+        figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
+    )
     return dpair, trainer, h_dict
+
+
+def gather_came_results(
+        dpair,
+        trainer,
+        classes: Sequence,
+        keys,
+        keys_compare,
+        resdir: Union[str, Path],
+        checkpoint: Union[int, str] = 'best',
+):
+    resdir = Path(resdir)
+    if isinstance(checkpoint, int):
+        trainer.load_model_weights(checkpoint)
+    elif 'best' in checkpoint.lower():
+        trainer.load_model_weights()
+    elif 'last' in checkpoint.lower():
+        trainer.load_model_weights(trainer._cur_epoch)
+    else:
+        raise ValueError(
+            f'`checkpoint` should be either str ("best" or "last") or int, '
+            f'got {checkpoint}'
+        )
+    out_cell = trainer.eval_current()['cell']
+
+    labels_cat = dpair.get_obs_labels(keys, asint=False)
+    probas_all = as_probabilities(out_cell)
+    cl_preds = predict_from_logits(probas_all, classes=classes)
+    obs = pd.DataFrame(
+        {keys[0]: labels_cat,
+         # true labels with `unknown` for unseen classes in query data
+         'celltype': dpair.get_obs_anno(keys_compare),  # labels for comparison
+         'predicted': cl_preds,
+         'max_probs': np.max(probas_all, axis=1),
+         })
+    obs['is_right'] = obs['predicted'] == obs[keys[0]]
+    df_probs = pd.DataFrame(probas_all, columns=classes)
+    dpair.set_common_obs_annos(obs)
+    dpair.set_common_obs_annos(df_probs, ignore_index=True)
+    dpair.obs.to_csv(resdir / 'obs.csv')
+    save_pickle(dpair, resdir / 'dpair.pickle')
+
+    # hidden states are stored in sc.AnnData to facilitated downstream analysis
+    h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
+    adt = utp.make_adata(h_dict['cell'], obs=dpair.obs, assparse=False)
+    # gadt = utp.make_adata(h_dict['gene'], obs = adpair.var, assparse=False)
+
+    # group counts statistics (optinal)
+    gcnt = utp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
+    logging.info(str(gcnt))
+    gcnt.to_csv(resdir / 'group_counts.csv')
+    return obs, df_probs, h_dict
 
 
 def preprocess_aligned(
