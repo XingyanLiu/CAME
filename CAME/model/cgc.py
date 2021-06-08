@@ -121,7 +121,7 @@ class CGCNet(nn.Module):
             # h_dict = {'cell': relu(h_dict0['cell'] + h_dict['cell']),
             #           'gene': relu(h_dict['gene'])}
             h_dict['cell'] = relu(h_dict0['cell'] + h_dict['cell'])
-            h_dict['gene'] = relu(h_dict['gene'])
+            h_dict['gene'] = relu(h_dict0['gene'] + h_dict['gene'])
         else:
             h_dict = self.embed_layer(g, feat_dict, )
             h_dict = self.rgcn.forward(g, h_dict, **kwds).copy()
