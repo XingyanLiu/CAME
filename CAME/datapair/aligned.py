@@ -20,7 +20,7 @@ from ..utils import preprocess as utp
 # In[]
 
 class AlignedDataPair(object):
-    ''' (pair of dataset2 of the same species)
+    """ (pair of dataset2 of the same species)
     
     Inputs
     ======
@@ -76,7 +76,7 @@ class AlignedDataPair(object):
              obs_dfs = [obs1, obs2],
              dataset_names=dataset_names,
              )
-    '''
+    """
     KEY_DATASET = 'dataset'
     KEY_VARNAME = 'name'
     KEY_OBSNAME = 'original_name'
@@ -157,13 +157,13 @@ class AlignedDataPair(object):
                        split=False,
                        name_unknown='unknown',
                        categories=None):
-        '''
+        """
         make labels for model training
         
         If `categories` is provided, the labels will be coded according to it,
         and the names not in `categories` will be NA or `name_unknown`('unknown')
 
-        '''
+        """
         labels_12 = self.get_obs_anno(keys, concat=False)
         classes = list(labels_12[train_use].unique()) if categories is None else list(categories)
 
@@ -199,9 +199,9 @@ class AlignedDataPair(object):
                      keys: Union[str, Sequence[Union[str, None]]],
                      which=None,
                      concat=True):
-        '''
+        """
         get the annotations of samples (observations)
-        '''
+        """
         # annotations for only one dataset
         if which is not None:
             return self.obs_dfs[which][keys]
@@ -228,12 +228,12 @@ class AlignedDataPair(object):
         return self.obs[self.KEY_DATASET]
 
     def get_obs_ids(self, which=0, astensor=True, ):
-        '''
+        """
         get node indices for obs-nodes (samples), choices are:
             1. all the node ids
             2. only the ids of the "reference" data (by `which=0`)
             3. only the ids of the "query" data (by `which=1`)
-        '''
+        """
         if which is None:
             obs_ids = np.arange(self.n_obs)
         elif which in [0, self.dataset_names[0]]:
@@ -267,9 +267,9 @@ class AlignedDataPair(object):
         return self.get_obs_ids(None, False)
 
     #    def get_vnode_ids_by_name(self, varlist, which = 0, unseen=np.nan):
-    #        '''
+    #        """
     #        looking-up var-node indices for the given names
-    #        '''
+    #        """
     #        if isinstance(varlist, str):
     #            varlist = [varlist]
     #        gids = [self._n2i_dict[which].get(g, unseen) for g in varlist]
@@ -280,9 +280,9 @@ class AlignedDataPair(object):
         return self._ov_adj
 
     def make_whole_net(self, selfloop_o=True, selfloop_v=True, ):
-        '''
+        """
         make the whole hetero-graph (e.g. cell-gene graph)
-        '''
+        """
         ntypes = self.ntypes
         etypes = self.etypes
         ov_adj = self.make_ov_adj()
@@ -323,9 +323,9 @@ class AlignedDataPair(object):
             raise ValueError('`dataset_names` should be of length 2!')
 
     def set_features(self, features, varnames_feat=None):
-        '''
+        """
         setting feature matrices, where features are aligned across datasets.
-        '''
+        """
         if len(features) == 2:
             print('[*] Setting aligned features for observation nodes '
                   '(self._features)')
@@ -349,9 +349,9 @@ class AlignedDataPair(object):
             raise ValueError('`features` should be a list or tuple of length 2!')
 
     def set_ov_adj(self, ov_adjs):
-        '''
+        """
         set observation-by-variable adjacent matrices
-        '''
+        """
         if len(ov_adjs) == 2:
             print('[*] Setting observation-by-variable adjacent matrices '
                   '(`self._ov_adjs`) for making merged graph adjacent matrix of '
@@ -384,8 +384,8 @@ class AlignedDataPair(object):
 
     @property
     def _ov_adj(self, ):
-        ''' merged adjacent matrix between observation and variable nodes 
-        '''
+        """ merged adjacent matrix between observation and variable nodes 
+        """
         return sparse.vstack(self._ov_adjs)
 
     def set_varnames_node(self, varnames_node=None, index=None):
@@ -439,10 +439,10 @@ class AlignedDataPair(object):
                              df: Union[None, pd.DataFrame] = None,
                              ignore_index=True,
                              **kwannos):
-        '''
+        """
         Shared and merged annotation labels for ALL of the observations in both
         datasets. (self.obs, pd.DataFrame)
-        '''
+        """
         if not hasattr(self, 'obs'):
             self.obs = self._obs_id2name.to_frame(self.KEY_OBSNAME)
             dsn_lbs = self.n_obs1 * [self.dataset_names[0]] + \
@@ -496,8 +496,8 @@ class AlignedDataPair(object):
 
 
 # In[]
-'''
-'''
+"""
+"""
 
 
 def _check_sparse_toarray(mat):
@@ -523,7 +523,7 @@ def aligned_datapair_from_adatas(
         dataset_names: Sequence[str] = ('reference', 'query'),
         **kwds
 ) -> AlignedDataPair:
-    '''
+    """
     inputs
     -------
     
@@ -549,7 +549,7 @@ def aligned_datapair_from_adatas(
                          vars_feat,
                          from_raw = False,
                          dataset_names = ['reference', 'query'])
-    '''
+    """
     adata1, adata2 = adatas
     adata_raw1 = adata1.raw.to_adata() if adata1.raw is not None else adata1
     adata_raw2 = adata2.raw.to_adata() if adata2.raw is not None else adata2

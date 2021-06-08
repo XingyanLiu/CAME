@@ -47,6 +47,7 @@ PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
 PARAMS_LOSS = get_loss_params()
 
+
 def main_for_unaligned(
         adatas: sc.AnnData,
         vars_use: Sequence[Sequence],

@@ -26,10 +26,10 @@ from .base_layers import GeneralRGCLayer, HeteroLayerNorm
 # In[]
 
 class HiddenRGCN(nn.Module):
-    '''
+    """
     NOT sharing parameters across hidden layers
     
-    '''
+    """
 
     def __init__(self,
                  canonical_etypes,
@@ -83,10 +83,10 @@ class HiddenRGCN(nn.Module):
     def forward(self, g, h_dict,
                 norm=True, bias=True, activate=True,
                 **kwds, ):
-        '''
+        """
         No copies made for h_dict, so make sure the forward functions do not
         make any changes directly on the h_dict !
-        '''
+        """
         self.hidden_states = []
         for layer in self.layers[: -1]:
             h_dict = layer(g, h_dict, **kwds)
@@ -99,10 +99,10 @@ class HiddenRGCN(nn.Module):
 
 
 class HiddenRRGCN(nn.Module):
-    '''
+    """
     sharing parameters across hidden layers, so that the dimensions for 
     each layer should be the same.
-    '''
+    """
 
     def __init__(self,
                  canonical_etypes: Sequence[str],
@@ -188,10 +188,10 @@ class HiddenRRGCN(nn.Module):
     def forward(self, g, h_dict,  # residual=False,
                 norm=True, bias=True, activate=True,
                 **kwds, ):
-        '''
+        """
         No copies made for h_dict, so make sure the forward functions do not
         make any changes directly on the h_dict !
-        '''
+        """
         #        h_dict0 = h_dict
         self.hidden_states = []
         for i, layer in enumerate(self.layers[: -1]):
@@ -217,8 +217,8 @@ class HiddenRRGCN(nn.Module):
 
 #    @staticmethod
 #    def _sum(*dicts, keys=None):
-#        ''' sum-up the features from dicts grouped-by keys
-#        '''
+#        """ sum-up the features from dicts grouped-by keys
+#        """
 #        results = dict()
 #        for d in dicts:
 #            for k, feat in d.items():

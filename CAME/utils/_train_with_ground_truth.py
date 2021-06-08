@@ -18,10 +18,10 @@ from .plot import plot_records_for_trainer
 
 
 class Trainer(BaseTrainer):
-    '''
+    """
     
     
-    '''
+    """
 
     def __init__(self,
                  model,
@@ -117,12 +117,12 @@ class Trainer(BaseTrainer):
               eps=1e-4,
               cat_class='cell',
               **other_inputs):
-        '''
+        """
                 Main function for model training
         ================================================
         
         other_inputs: other inputs for `model.forward()`
-        '''
+        """
         #        g = self.g
         train_idx, test_idx, labels = self.train_idx, self.test_idx, self.labels
         _train_labels, _test_labels = labels[train_idx], labels[test_idx]

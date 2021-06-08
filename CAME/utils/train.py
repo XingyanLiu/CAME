@@ -106,10 +106,10 @@ def prepare4train(
 # In[]
 
 class BaseTrainer(object):
-    '''
+    """
     DO NOT use it directly!
     
-    '''
+    """
 
     def __init__(self,
                  model,
@@ -186,11 +186,11 @@ class BaseTrainer(object):
                          lr=1e-3,
                          l2norm=1e-2,  # 1e-2 is tested for all datasets
                          ):
-        '''
+        """
         setting parameters for:
             lr: learning rate
             l2norm: `weight_decay`
-        '''
+        """
         self.lr = lr
         self.l2norm = l2norm
 
@@ -226,8 +226,8 @@ class BaseTrainer(object):
         print('model saved into:', fp)
 
     def save_model_weights(self, fp=None, **kwds):
-        ''' better NOT set the path `fp` manually~
-        '''
+        """ better NOT set the path `fp` manually~
+        """
         n_epoch = self._cur_epoch
         if fp is None:
             fp = self.dir_model / f'weights_epoch{n_epoch}.pt'
@@ -247,28 +247,28 @@ class BaseTrainer(object):
         print('states loaded from:', fp)
 
     def eval_current(self, **other_inputs):
-        ''' get the current states of the model output
-        '''
+        """ get the current states of the model output
+        """
         raise NotImplementedError
 
     def train(self, ):
-        ''' abstract method to be re-defined
-        '''
+        """ abstract method to be re-defined
+        """
         raise NotImplementedError
 
     def train_minibatch(self, **kwargs):
-        ''' abstract method to be re-defined
-        '''
+        """ abstract method to be re-defined
+        """
         raise NotImplementedError
 
 
 # In[]
 
 class Trainer(BaseTrainer):
-    '''
+    """
     
     
-    '''
+    """
 
     def __init__(self,
                  model,
@@ -342,12 +342,12 @@ class Trainer(BaseTrainer):
               eps=1e-4,
               cat_class='cell',
               **other_inputs):
-        '''
+        """
                 Main function for model training
         ================================================
         
         other_inputs: other inputs for `model.forward()`
-        '''
+        """
         train_idx, test_idx, labels = self.train_idx, self.test_idx, self.labels
         _train_labels, _test_labels = labels[train_idx], labels[test_idx]
 
@@ -422,8 +422,8 @@ class Trainer(BaseTrainer):
                      feat_dict=None,
                      g=None,
                      **other_inputs):
-        ''' get the current states of the model output
-        '''
+        """ get the current states of the model output
+        """
         if feat_dict is None:
             feat_dict = self.feat_dict
         elif self.use_cuda:

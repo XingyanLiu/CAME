@@ -26,24 +26,24 @@ def detach2numpy(x):
 
 # In[]
 class CGGCNet(nn.Module):
-    '''
-    cell-gene-gene-cell network 
+    """
+    cell-gene-gene-cell network
     =======================
-    Graph Convolutional Network for cell-gene Heterogenous graph, 
+    Graph Convolutional Network for cell-gene Heterogenous graph,
     with edges named as:
-        ('cell', 'express', 'gene'):        cg_net, 
+        ('cell', 'express', 'gene'):        cg_net,
         ('gene', 'expressed_by', 'cell'):   cg_net.T,
         ('gene', 'homolog_with', 'gene'):   gg_net + sparse.eye(n_gnodes),
         ('cell', 'self_loop_cell', 'cell'):      sparse.eye(n_cells),
-        
+
     * gene embeddings are computed from cells;
-    * weight sharing across hidden layers is allowed by setting 
+    * weight sharing across hidden layers is allowed by setting
         `share_hidden_weights=True`
     * attention can be applied on the last layer (`self.cell_classifier`);
     * the graph for the embedding layer and the hidden layers can be different;
     * allow expression values as static edge weights. (but seems not work...)
 
-    '''
+    """
 
     def __init__(self,
                  g,
@@ -134,10 +134,10 @@ class CGGCNet(nn.Module):
                           i_layer=-1,
                           detach2np: bool = True,
                           **kwds):
-        '''
+        """
         detach2np: whether tensors be detached and transformed into numpy.ndarray
-        
-        '''
+
+        """
         if (feat_dict is not None) and (g is not None):
             logging.info('Forward passing...')
             # activate the random dropouts, which gives a better integrated embedding
@@ -156,10 +156,10 @@ class CGGCNet(nn.Module):
         return h_dict
 
     def get_attentions(self, feat_dict, g, fuse='mean'):
-        '''
+        """
         output:
             cell-by-gene attention matrix
-        '''
+        """
         # getting subgraph and the hidden states
         g_sub = g.to('cuda')['gene', 'expressed_by', 'cell']
         h_dict = self.get_hidden_states(feat_dict=feat_dict, g=g, detach2np=False)

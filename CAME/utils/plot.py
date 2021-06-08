@@ -20,11 +20,11 @@ import seaborn as sns
 
 from . import _alluvial
 
-'''
+"""
 Example:
     import utils_plot as uplt
     uplt.heatmap(df)
-'''
+"""
 
 
 # In[]
@@ -41,14 +41,14 @@ def _save_with_adjust(fig, fpath=None, figsize=None, **kwds):
 
 
 # In[]
-''' colors 
-'''
+""" colors 
+"""
 
 
 def view_color_map(cmap='viridis', n=None, figsize=(6, 2), s=150, k=20,
                    ax=None,
                    grid=False, **kwds):
-    '''
+    """
     n: total number of colors
     k: number of colors to be plotted on each line.
     
@@ -61,7 +61,7 @@ def view_color_map(cmap='viridis', n=None, figsize=(6, 2), s=150, k=20,
     cmap = sc.pl.palettes.zeileis_26
     cmap = sc.pl.palettes.default_64
     fx.view_color_map(cmap, k=16)    
-    '''
+    """
     if not isinstance(cmap, (np.ndarray, list)):
         #        from matplotlib import cm
         cmp = mpl.cm.get_cmap(cmap, n)
@@ -80,10 +80,10 @@ def view_color_map(cmap='viridis', n=None, figsize=(6, 2), s=150, k=20,
 
 
 def get_colors(cmap='Spectral', n=5, to_hex=True):
-    '''
+    """
     fx.get_colors('Reds', 4)
     fx.view_color_map('Reds', 4)
-    '''
+    """
     #    import matplotlib.colors as mcolors
     cmp = plt.cm.get_cmap(cmap, n)
     colors = [cmp(i) for i in range(n)]
@@ -104,9 +104,9 @@ def diy_cmap_grey_bg(name_fg='RdPu', low=0.15, rm_high=0.01, n=100):
 
 # In[]
 
-'''     Visualization of group correspondances on an alluvial plot
+"""     Visualization of group correspondances on an alluvial plot
 =======================================================================
-'''
+"""
 
 
 def _alluvial_dict_from_confusdf(df: pd.DataFrame, vals_ignore=[0, np.nan]):
@@ -136,8 +136,8 @@ def alluvial_plot(confsdf: pd.DataFrame,
                   figsize=(5, 5),
                   fname=None,
                   **kwds):
-    ''' visualizing confusion matrix using alluvial plot
-    '''
+    """ visualizing confusion matrix using alluvial plot
+    """
     input_dct = _alluvial_dict_from_confusdf(confsdf)
     cmap = mpl.cm.get_cmap(cmap_name)
     ax = _alluvial.plot(input_dct, labels=labels,
@@ -155,16 +155,16 @@ def alluvial_plot(confsdf: pd.DataFrame,
 
 
 # In[]
-'''       functions for plotting confusion matrix
+"""       functions for plotting confusion matrix
 ==================================================================
-'''
+"""
 
 
 def plot_confus_mat(y_true, y_pred, classes_on=None,
                     normalize='true',
                     linewidths=0.02, linecolor='grey', **kw):
-    ''' by default, normalized by row (true classes)
-    '''
+    """ by default, normalized by row (true classes)
+    """
     if classes_on is None:
         classes_on = list(set(y_true).union(y_pred))
 
@@ -179,9 +179,9 @@ def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
                            nrows=1, ncols=2, figsize=(8, 3),
                            vmax=1,
                            fname=None):
-    '''
+    """
     combime multiple confusion matrix-plots into a single plot
-    '''
+    """
 
     fig, axs = plt.subplots(nrows, ncols, sharey=True, figsize=figsize)
     for k in range(len(ytrue_lists)):
@@ -203,8 +203,8 @@ def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
 
 
 # In[]
-''' plot functions (for inspecting training process)
-'''
+""" plot functions (for inspecting training process)
+"""
 
 
 def plot_line_list(ys, lbs=None,
@@ -212,9 +212,9 @@ def plot_line_list(ys, lbs=None,
                    tt=None, fp=None,
                    legend_loc=(1.05, 0),
                    **kwds):
-    '''
+    """
     ys: a list of lists, each sub-list is a set of curve-points to be plotted.
-    '''
+    """
     if lbs is None:
         lbs = list(map(str, range(len(ys))))
     if ax is None:
@@ -245,12 +245,12 @@ def plot_records_for_trainer(
 
 def venn_plot(sets, set_labels=None, regular=False,
               tt='Venn plot', ax=None, fp=None, **kwds):
-    '''
+    """
     sets: iterable
     set_labels: list[str]
     regular: bool, only for sets of strings!
         wether to regularize the strings in sets 
-    '''
+    """
     from matplotlib_venn import venn2, venn3
     if regular:
         print('Regularizing strings in sets (UPPER case ignored)')
@@ -293,14 +293,14 @@ def heatmap(df_hmap: pd.DataFrame,
             xrotation=45,
             yrotation=None,
             **kwds):
-    ''' wrapper of sns.heatmap()
+    """ wrapper of sns.heatmap()
     ===================================
     norm_method: None, 'zs', 'max', 'maxmin'
     norm_axis: 0 or 1. 0 for column-normalization and 1 for rows.
     figsize: tuple, (6, 6) by default, ignored if ax is not None.
     
     
-    '''
+    """
     # normalize values
     if norm_method == 'max':  # ALL non-negative values are required!
         if (df_hmap < 0).any():
@@ -351,8 +351,8 @@ def heatmap(df_hmap: pd.DataFrame,
     return ax
 
 
-''' heatmap showing probabilities
-'''
+""" heatmap showing probabilities
+"""
 
 
 def heatmap_probas(
@@ -418,9 +418,9 @@ def heatmap_probas(
 
 # In[]
 def _get_affine_mat(angle_x=30, angle_y=150):
-    ''' rortate x and y axis to mock 3D projection 
+    """ rortate x and y axis to mock 3D projection 
     if angle_x=0, angle_y=90, an identity matrix will be returned.
-    '''
+    """
     angle_x, angle_y = tuple(map(lambda x: (x / 180) * np.pi, (angle_x, angle_y)))
     _transmat = np.array([[np.cos(angle_x), np.sin(angle_x)],
                           [np.cos(angle_y), np.sin(angle_y)]
@@ -432,12 +432,12 @@ def _plot_edges(sids, tids,
                 xy1, xy2=None,
                 ax=None,
                 figsize=(4, 4), **kwds_edge):
-    '''
+    """
     sids: sequence of source ids, of shape (n_edges, )
     tids: sequence of target ids, of shape (n_edges, )
     xy1: x, y coordinates of source node (ids), of shape (n1, 2) or (n1+n2, 2)
     xy2: x, y coordinates of target node (ids)
-    '''
+    """
     xy2 = xy1 if xy2 is None else xy2
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)  # w*h
@@ -449,7 +449,7 @@ def _plot_edges(sids, tids,
 
 
 def plot_edges_by_adj(adj, pos, ax=None, **kwds_edge):
-    ''' adj: a sparse matrix, None is allowed'''
+    """ adj: a sparse matrix, None is allowed"""
     adj = sparse.triu(adj).tocoo()
     sids, tids = adj.row, adj.col
     return _plot_edges(sids, tids, xy1=pos, xy2=None, ax=ax, **kwds_edge)
@@ -467,9 +467,9 @@ def plot_mapped_graph(
         figsize=(5, 7),
         fp=None,
         **kwds_edge):
-    '''
+    """
     pt_color1, pt_color2: RGB colors or numerical label sequence
-    '''
+    """
     #    style_name = ['dark_background', 'default'][1]
     plt.style.use(style_name)
     _kwds_edge = dict(c='white' if style_name == 'dark_background' else 'grey',
@@ -504,8 +504,8 @@ def plot_mapped_graph(
 
 
 # In[]
-''' multiple-plots of embeddings
-'''
+""" multiple-plots of embeddings
+"""
 
 
 def umap_grid(adatas, colors=None,
@@ -545,9 +545,9 @@ def triple_umaps(adata1, adata2,
                  colors=['dataset', 'is_private', 'is_private'],
                  figsize=(6, 4.5),
                  fp=None, **kwds):
-    '''
+    """
     Specific function for gene embeddings only, to be generized
-    '''
+    """
     if titles is None:
         titles = [titles] * 3
 
@@ -599,8 +599,8 @@ def triple_umaps(adata1, adata2,
 
 
 # In[]
-''' annotate texts for genes of interest
-'''
+""" annotate texts for genes of interest
+"""
 
 
 def _get_value_index(srs: pd.Series, vals: Sequence, ):
@@ -609,9 +609,9 @@ def _get_value_index(srs: pd.Series, vals: Sequence, ):
 
 
 def _get_value_index_list(lst, vals, return_vals=False):
-    '''
+    """
     # getting the indexes only the first-occurred one in the list
-    '''
+    """
     lst = list(lst)
     ids = []
     _vals = []
@@ -667,9 +667,9 @@ def plot_distance_lines(
         dists, names, xlabel='distance',
         markersize=10, fp=None,
 ):
-    '''
+    """
     names: a list of str, yticklabels
-    '''
+    """
 
     n = len(names)
     ys1 = [x + 0.9 for x in range(n)]
@@ -696,8 +696,8 @@ def plot_distance_lines(
 
 
 # In[]
-''' Visualization of the abstracted graph
-'''
+""" Visualization of the abstracted graph
+"""
 
 
 def _adjust_xlims(ax, scale=1):
@@ -779,9 +779,9 @@ def _prepare_for_nxplot(
         g, names=['cell group', 'gene module'],
         sizes=[1800, 900, 900, 1800],
         colors=['pink', 'lightblue', 'lightblue', 'pink']):
-    '''
+    """
     g: a multipartite graph with 4 layers
-    '''
+    """
     nodedf = pd.DataFrame(g.nodes.values(), index=g.nodes.keys())
     nodedf['ntype'] = nodedf['subset'].apply(
         lambda x: names[0] if x in [0, 3] else names[1]
@@ -806,9 +806,9 @@ def _cut_cmap(cmap='Greys', low=0.2, high=0.9):
 
 
 # In[]
-'''     graph layout 
+"""     graph layout 
 (copied from `networkx.drawing.layout.py`, with some modifications)
-'''
+"""
 
 
 def _process_params(G, center, dim):

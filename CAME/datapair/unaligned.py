@@ -20,7 +20,7 @@ from ..utils import preprocess as utp
 # In[]
 
 class DataPair(object):
-    '''
+    """
     
     Inputs
     ======
@@ -79,7 +79,7 @@ class DataPair(object):
              dataset_names = ['reference', 'query'],
              )
     
-    '''
+    """
     KEY_DATASET = 'dataset'  # '_datapair_name'
     KEY_VARNAME = 'name'
     KEY_OBSNAME = 'original_name'
@@ -168,12 +168,12 @@ class DataPair(object):
                        categories=None,
                        set_attr=True,
                        ):
-        '''
+        """
         make labels for model training
         
         If `categories` is provided, the labels will be coded according to it,
         and the names not in `categories` will be NA or `name_unknown`('unknown')
-        '''
+        """
         labels_12 = self.get_obs_anno(keys, concat=False)
         classes = list(labels_12[train_use].unique()) if categories is None else list(categories)
 
@@ -221,9 +221,9 @@ class DataPair(object):
                      keys: Union[str, Sequence[Union[str, None]]],
                      which=None,
                      concat=True):
-        '''
+        """
         get the annotations of samples (observations)
-        '''
+        """
         # annotations for only one dataset
         if which is not None:
             return self.obs_dfs[which][keys]
@@ -252,12 +252,12 @@ class DataPair(object):
     #        return self.get_obs_anno(self.KEY_DATASET)
 
     def get_obs_ids(self, which=0, astensor=True, ):
-        '''
+        """
         get node indices for obs-nodes (samples), choices are:
             1. all the node ids (by `which=None`)
             2. only the ids of the "reference" data (by `which=0`)
             3. only the ids of the "query" data (by `which=1`)
-        '''
+        """
         if which is None:
             obs_ids = np.arange(self.n_obs)
         elif which in [0, self.dataset_names[0]]:
@@ -275,12 +275,12 @@ class DataPair(object):
             return obs_ids
 
     def get_vnode_ids(self, which=0, astensor=True, ):
-        '''
+        """
         get node indices for var-nodes, choices are:
             1. all the node ids
             2. only the ids of the "reference" data (by `which=0`)
             3. only the ids of the "query" data (by `which=1`)
-        '''
+        """
         if which in (None, 'all'):
             vnode_ids = np.arange(self.n_vnodes)
         elif which in (0, self.dataset_names[0]):
@@ -298,9 +298,9 @@ class DataPair(object):
             return vnode_ids
 
     def get_vnode_ids_by_name(self, varlist, which=0, unseen=np.nan):
-        '''
+        """
         looking-up var-node indices for the given names
-        '''
+        """
         if isinstance(varlist, str):
             varlist = [varlist]
         gids = [self._n2i_dict[which].get(g, unseen) for g in varlist]
@@ -339,8 +339,8 @@ class DataPair(object):
     ### 'make_xxx' functions        
 
     def make_ov_adj(self, link2ord=False):
-        ''' observation-variable bipartite network
-        '''
+        """ observation-variable bipartite network
+        """
         ov_adj = self._ov_adj.copy()
         if link2ord:
             print('computing the second-order neighbors')
@@ -349,9 +349,9 @@ class DataPair(object):
 
     def make_whole_net(self, link2ord=False, selfloop_o=True, selfloop_v=True,
                        ):
-        '''
+        """
         make the whole hetero-graph (e.g. cell-gene graph)
-        '''
+        """
         ntypes = self.ntypes
         etypes = self.etypes
         ov_adj = self.make_ov_adj(link2ord)
@@ -397,11 +397,11 @@ class DataPair(object):
             raise ValueError('`dataset_names` should be of length 2!')
 
     def set_features(self, features, varnames_feat=None):
-        '''
+        """
         setting feature matrices, where features are aligned across datasets.
         varnames_feat:
             if provided, should be a sequence of two name-lists
-        '''
+        """
         if len(features) == 2:
             print('[*] Setting aligned features for observation nodes '
                   '(self._features)')
@@ -424,9 +424,9 @@ class DataPair(object):
             raise ValueError('`features` should be a list or tuple of length 2!')
 
     def set_ov_adj(self, ov_adjs):
-        '''
+        """
         set un-aligned features, for making observation-variable adjacent matrix
-        '''
+        """
         if len(ov_adjs) == 2:
             print('[*] Setting un-aligned features (`self._ov_adjs`) for '
                   'making links connecting observation and variable nodes')
@@ -450,8 +450,8 @@ class DataPair(object):
 
     @property
     def _ov_adj(self, ):
-        ''' merged adjacent matrix between observation and variable nodes 
-        '''
+        """ merged adjacent matrix between observation and variable nodes 
+        """
         return sparse.block_diag(self._ov_adjs)
 
     def set_oo_adj(self, oo_adjs=None):
@@ -467,12 +467,12 @@ class DataPair(object):
                 'matrix or a sequence of two sparse matrices')
 
     def set_vv_adj(self, vv_adj, varnames_node=None):
-        '''
+        """
         vv_adj: 
             adjacent matrix between variables from these 2 datasets.
             e.g. gene-gene network, with each edge connecting each pair of 
             homologous genes.
-        '''
+        """
         print('[*] Setting adjacent matrix connecting variables from these '
               '2 datasets (`self._vv_adj`)')
         self._vv_adj = sparse.csr_matrix(vv_adj)
@@ -488,9 +488,9 @@ class DataPair(object):
     def set_obs_dfs(self,
                     obs1: Union[None, pd.DataFrame] = None,
                     obs2: Union[None, pd.DataFrame] = None):
-        '''
+        """
         private observation annotaions
-        '''
+        """
 
         def _check_obs(obs, n_obs, ):  # val, key = self.KEY_DATASET
             if obs is None:
@@ -514,10 +514,10 @@ class DataPair(object):
                              df: Union[None, pd.DataFrame] = None,
                              ignore_index=True,
                              **kwannos):
-        '''
+        """
         Shared and merged annotation labels for ALL of the observations in both
         datasets. (self.obs, pd.DataFrame)
-        '''
+        """
         if not hasattr(self, 'obs'):
             self.obs = self._obs_id2name.to_frame(self.KEY_OBSNAME)
             dsn_lbs = self.n_obs1 * [self.dataset_names[0]] + \
@@ -594,9 +594,9 @@ class DataPair(object):
 
 
 # In[]
-'''     functions for `DataPair` object construction from `sc.AnnData`
+"""     functions for `DataPair` object construction from `sc.AnnData`
 ===============================================================================
-'''
+"""
 
 
 def _check_sparse_toarray(mat):
@@ -625,7 +625,7 @@ def datapair_from_adatas(
         with_single_vnodes: bool = True,
         **kwds
 ) -> DataPair:
-    '''
+    """
     inputs
     -------
 
@@ -650,7 +650,7 @@ def datapair_from_adatas(
                          vars_use = [hvgs1, hvgs2],
                          df_varmap = homo_gene_matches,
                          dataset_names = ['reference', 'query'])
-    '''
+    """
     adata1, adata2 = adatas
     adata_raw1 = adata1.raw.to_adata() if adata1.raw is not None else adata1
     adata_raw2 = adata2.raw.to_adata() if adata2.raw is not None else adata2

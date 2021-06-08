@@ -78,10 +78,10 @@ def prepare4train(
 
 
 class Trainer(BaseTrainer):
-    '''
+    """
     
     
-    '''
+    """
 
     def __init__(self,
                  model,
@@ -171,12 +171,12 @@ class Trainer(BaseTrainer):
               eps=1e-4,
               cat_class='cell',
               **other_inputs):
-        '''
+        """
                 Main function for model training
         ================================================
         
         other_inputs: other inputs for `model.forward()`
-        '''
+        """
         #        g = self.g
         train_idx1, train_idx2 = self.train_idx
         test_idx1, test_idx2 = self.test_idx
@@ -272,8 +272,8 @@ class Trainer(BaseTrainer):
                      feat_dict=None,
                      g=None,
                      **other_inputs):
-        ''' get the current states of the model output
-        '''
+        """ get the current states of the model output
+        """
         if feat_dict is None:
             feat_dict = self.feat_dict
         elif self.use_cuda:

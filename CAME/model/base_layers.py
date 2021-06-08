@@ -47,7 +47,7 @@ def _unzip_canonical_etypes(canonical_etypes):
 # In[]
 
 class BaseMixConvLayer(nn.Module):
-    '''
+    """
     Basic one single layer for (cell-gene) graph convolution
     
     Parameters
@@ -85,7 +85,7 @@ class BaseMixConvLayer(nn.Module):
         Default: 'sum'
         
     
-    '''
+    """
 
     def __init__(self,
                  in_dim_dict,
@@ -178,7 +178,7 @@ class BaseMixConvLayer(nn.Module):
             nn.init.zeros_(self.h_bias[ntype])
 
     def build_mix_conv(self, mod_kwdicts, aggregate):
-        '''
+        """
         mod_kwdicts: list of tuples, each tuple should be formed as:
             (canonical_etype, mod_kind, kwdict)
             
@@ -187,7 +187,7 @@ class BaseMixConvLayer(nn.Module):
             dict(h_dim = 16, n_heads=8, feat_drop=0.05,
                  attn_drop=0.6, negative_slope=0.2,)
             )
-        '''
+        """
         conv_dict = {}
 
         for canonical_etype, mod_kind, kwdict in mod_kwdicts:
@@ -246,9 +246,9 @@ class BaseMixConvLayer(nn.Module):
 
 # In[]
 class HeteroLayerNorm(nn.Module):
-    '''
+    """
     LayerNorm for different type of nodes
-    '''
+    """
 
     def __init__(self, in_dim_dict, **kwds):
 
@@ -398,7 +398,7 @@ class RelGraphConvLayer(nn.Module):
 # In[]
 
 class GeneralRGCLayer(nn.Module):
-    ''' A variant of the Relational graph convolution (RGCN) layer, 
+    """ A variant of the Relational graph convolution (RGCN) layer, 
         alowing different number dimensions for each node-type.
     
     Parameters
@@ -434,7 +434,7 @@ class GeneralRGCLayer(nn.Module):
         Aggregation function for reducing messages from different types of relations.
         Default: 'sum'
         
-    '''
+    """
 
     def __init__(self,
                  in_dim_dict,
@@ -582,12 +582,12 @@ class GeneralRGCLayer(nn.Module):
 
 
 class GraphAttentionLayer(nn.Module):
-    ''' 
+    """ 
     Modified version of `dgl.nn.GATConv`
     * message passing with attentions.
     * directed and assymetric message passing, allowing different dmensions
         of source and destination node-features.
-    '''
+    """
 
     def __init__(self,
                  in_dim,
@@ -745,7 +745,7 @@ class GraphAttentionLayer(nn.Module):
 # In[]
 
 class GraphConvLayer(nn.Module):
-    ''' 
+    """ 
     Notes
     -----
     * simliar to `dgl.nn.GraphConv`, while normalization can be 'left', which 
@@ -779,7 +779,7 @@ class GraphConvLayer(nn.Module):
         The learnable weight tensor.
     bias : torch.Tensor
         The learnable bias tensor.
-    '''
+    """
 
     def __init__(self,
                  in_dim,
@@ -791,8 +791,8 @@ class GraphConvLayer(nn.Module):
         super(GraphConvLayer, self).__init__()
 
         if norm not in ('none', 'both', 'right', 'left'):
-            raise ValueError('''Invalid norm value. Must be either "none",
-                             "both", "right", "left". But got "{}".'''.format(norm))
+            raise ValueError("""Invalid norm value. Must be either "none",
+                             "both", "right", "left". But got "{}".""".format(norm))
         self._in_dim = in_dim
         self._out_dim = out_dim
         self._norm = norm
@@ -818,7 +818,7 @@ class GraphConvLayer(nn.Module):
             nn.init.zeros_(self.bias)
 
     def forward(self, g, feat, weight=None, static_weight=None):
-        '''(modified GCN)
+        """(modified GCN)
         
         Parameters
         ----------
@@ -835,7 +835,7 @@ class GraphConvLayer(nn.Module):
         -------
         torch.Tensor
             The output feature
-        '''
+        """
         g = g.local_var()
         if isinstance(feat, tuple):
             feat = feat[0]

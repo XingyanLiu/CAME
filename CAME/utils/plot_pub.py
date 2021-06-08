@@ -33,7 +33,6 @@ def _save_with_adjust(fig, fpath=None, figsize=None, **kwds):
     plt.close()
 
 
-''' plot for publication '''
 def plot_pure_umap(
         adata, color, 
         ax=None, figsize=(4, 4), 
@@ -42,6 +41,7 @@ def plot_pure_umap(
         transparent=True,
         ftype='svg',
         **kwds):
+    """ plot for publication """
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
     sc.pl.umap(adata, color=color, title=title, ax=ax, 

@@ -37,9 +37,9 @@ def unpack_dict_of_lists(d):
 
 
 def dict_has_keys(d: Mapping, *keys):
-    '''
+    """
     return True if all the keys are in the dict, else False.
-    '''
+    """
     dk = d.keys()
     for k in keys:
         if k not in dk:
@@ -49,15 +49,15 @@ def dict_has_keys(d: Mapping, *keys):
 
 
 # In[]
-''' I/O functions
+""" I/O functions
     handling AnnData object(s)
-'''
+"""
 
 
 def save_named_mtx(adata, dirname, field=None, raw=True, backup_npz=True,
                    **kwds):
     check_dirs(dirname)
-    ''' better set field='integer' if possible '''
+    """ better set field='integer' if possible """
     if adata.raw is not None:
         adata = adata.raw
 
@@ -93,10 +93,10 @@ def mtx2df(adata):
 
 
 def load_namelist(fpath, header=None, tolist=True, icol=0, **kw):
-    '''
+    """
     icol:
     only return the first column by default
-    '''
+    """
     names = pd.read_csv(fpath, header=header, **kw)
     names = names.iloc[:, icol]
     return names.tolist() if tolist else names
@@ -114,9 +114,9 @@ def load_dense(fpath, ):
 
 
 def load_sparse(fpath, backup_npz=True):
-    '''
+    """
     `fpath` should be ended with '.mtx' or 'npz'
-    '''
+    """
     fpath = Path(fpath)
     if fpath.suffix == '.mtx':
         mat = io.mmread(str(fpath))
@@ -133,7 +133,7 @@ def load_sparse(fpath, backup_npz=True):
 
 def adata_from_raw(dirname, backup_npz=True, name_mtx='matrix',
                    dtype='float32', **kw):
-    '''
+    """
     read matrix and annotated names from directory `dirname`
     --- Example ---
     |-dirname
@@ -144,7 +144,7 @@ def adata_from_raw(dirname, backup_npz=True, name_mtx='matrix',
     Alternative (for load mtx file):
         `adata = sc.read_10x_mtx(dirname, )`
         
-    '''
+    """
     fn_mat_npz = f'{name_mtx}.npz'
     files = os.listdir(dirname)
     if fn_mat_npz in files:
@@ -200,9 +200,9 @@ def add_columns(
 
 
 # In[]  
-'''     functions for prepare data [0]
+"""     functions for prepare data [0]
 =================================================
-'''
+"""
 
 
 def add_obs_annos(adata: sc.AnnData,
@@ -242,10 +242,10 @@ def make_adata(mat,
                ignore_index=False,
                assparse=True,
                ):
-    ''' An alternative way to construct AnnData (BUG fixed).
+    """ An alternative way to construct AnnData (BUG fixed).
     Something might go wrong when saving the AnnData object constructed 
     by the build-in function `sc.AnnData`.
-    '''
+    """
     if assparse and not sparse.issparse(mat):
         mat = sparse.csr_matrix(mat)
     adata = sc.AnnData(mat)
@@ -275,7 +275,7 @@ def merge_adatas(adatas: Union[Mapping[str, sc.AnnData],
                  obs_keys=None,
                  dsnames=None,
                  key_dsname=None):
-    ''' (a new adata will be created, use the raw matrix)
+    """ (a new adata will be created, use the raw matrix)
     
     adatas: a list or a dict of AnnData objects.
         use data from adata.raw if not None.
@@ -284,7 +284,7 @@ def merge_adatas(adatas: Union[Mapping[str, sc.AnnData],
     dsnames: names for these datasets, if None, use numbers ranging from 
         0 to (n_datasets-1)
     key_dsname: if provided as a str, a column will be added to the merged `obs`.
-    '''
+    """
     if isinstance(adatas, Mapping):
         _dsnames, _adatas = list(zip(*adatas.items()))
         dsnames = _dsnames if dsnames is None else dsnames
@@ -324,7 +324,7 @@ def merge_adatas(adatas: Union[Mapping[str, sc.AnnData],
 
 def merge_named_matrices(mat_list, gene_lists, dsnames=None, verbose=True,
                          union=False):
-    '''
+    """
     This function code is copied from `scanorama.merge_datasets`.
 
     parameters
@@ -343,7 +343,7 @@ def merge_named_matrices(mat_list, gene_lists, dsnames=None, verbose=True,
     ret_genes:
         a gene list shared by all the mat_list
     
-    '''
+    """
     import sys
     if union:
         sys.stderr.write(
@@ -421,10 +421,10 @@ def align_adata_vars(adata1: sc.AnnData,  # better be raw data
                      unify_names=False,
                      #                     merge=False
                      ) -> List[sc.AnnData]:
-    '''
+    """
     adata1: reference data
     adata2: query data
-    '''
+    """
     vars_all1, vars_all2 = list(map(all_vars_of_adata, [adata1, adata2]))
     if df_varmap_1v1 is None:
         vars1 = vars2 = list(set(adata1.var_names).intersection(adata2.var_names))
@@ -466,10 +466,10 @@ def regu_gname(gname, pattern='^X[0-9]{2,3}'):
 
 
 def change_names(gnames, foo_change=regu_gname, **kw):
-    '''
+    """
     foo_change: function to map a name-string to a new one
     **kw: other kwargs for foo_change
-    '''
+    """
     return list(map(foo_change, gnames, **kw))
 
 
@@ -512,13 +512,13 @@ def subset_matches(df_match: pd.DataFrame,
                    union: bool = False,
                    cols: Union[None, Sequence[str]] = None,
                    indicators=False):
-    ''' 
+    """ 
     (take a subset of homo-gene matches)
     
     df_match: pd.DataFrame with at least 2 columns
     left: list-like, for subsetting elements in the first column.
     right: list-like, for subsetting elements in the second column.
-    '''
+    """
     if cols is None:
         cols = df_match.columns[: 2]
 
@@ -532,15 +532,15 @@ def subset_matches(df_match: pd.DataFrame,
 
 
 def take_freq1(lst):
-    ''' take elements that occur only once in `lst`
-    '''
+    """ take elements that occur only once in `lst`
+    """
     vcnts = pd.value_counts(lst)
     return vcnts[vcnts == 1].index.to_list()
 
 
 def take_freq1more(lst):
-    ''' take elements that occur more than once in `lst`
-    '''
+    """ take elements that occur more than once in `lst`
+    """
     vcnts = pd.value_counts(lst)
     return vcnts[vcnts > 1].index.to_list()
 
@@ -556,9 +556,9 @@ def is1v1pairs(df: pd.DataFrame):
 
 
 def reverse_dict_of_list(d: Mapping, ) -> Mapping:
-    '''
+    """
     the values of the dict must be list-like type
-    '''
+    """
     d_rev = {}
     for k in d.keys():
         vals = d[k]
@@ -568,9 +568,9 @@ def reverse_dict_of_list(d: Mapping, ) -> Mapping:
 
 
 def reverse_dict(d: Mapping, ) -> Mapping:
-    '''
+    """
     the values of the dict must be un-changable type
-    '''
+    """
     d_rev = {d[k]: k for k in d.keys()}
     return d_rev
 
@@ -585,14 +585,14 @@ def _has_duplicates(lst, error=True):
 
 
 def make_id_name_maps(names1, names2):
-    ''' concatenate 2 list of names, and return 2 kinds of maps:
+    """ concatenate 2 list of names, and return 2 kinds of maps:
         1. integer id --> name
         2. name --> integer id (a tuple of 2 dicts)
     Note:
         using 2 dict to map a name to its id for that
         -- the 2 name-lists may share the same name!
         (while the indices are unique)
-    '''
+    """
     _has_duplicates(names1)
     _has_duplicates(names2)
     # id --> name
@@ -610,7 +610,7 @@ def make_bipartite_adj(df_map: pd.DataFrame,
                        key_data=None,
                        with_singleton=True,
                        symmetric=True):
-    '''
+    """
     df_map: pd.DataFrame with 2 columns.
         each row represent an edge between 2 nodes from the left and right 
         group of nodes of the bipartite-graph.
@@ -622,7 +622,7 @@ def make_bipartite_adj(df_map: pd.DataFrame,
     with_singleton: whether allow nodes without any neighbors. (default: True)
         if nodes1 and nodes2 are not provided, this parameter makes no difference.
     
-    '''
+    """
     nodes1 = list(set(df_map.iloc[:, 0])) if nodes1 is None else nodes1
     nodes2 = list(set(df_map.iloc[:, 1])) if nodes2 is None else nodes2
 
@@ -648,9 +648,9 @@ def make_bipartite_adj(df_map: pd.DataFrame,
 
 
 def pivot_df_to_sparse(df, row=0, col=1, key_data=None, **kwds):
-    '''
+    """
     row, col: str or int, int for column index, and str for column name
-    '''
+    """
 
     def _get_df_vals(key):
         if isinstance(key, str):
@@ -671,7 +671,7 @@ def pivot_to_sparse(rows: Sequence, cols: Sequence,
                     data: Optional[Sequence] = None,
                     rownames: Sequence = None,
                     colnames: Sequence = None):
-    '''
+    """
     `rows` and `cols` hould be of the same length!
     rownames: 
         If provided, the resulting matrix rows are restricted to `rownames`,
@@ -681,7 +681,7 @@ def pivot_to_sparse(rows: Sequence, cols: Sequence,
         if not provided, will be set as `rows.unique()`
     colnames: 
         if not provided, will be set as `cols.unique()`
-    '''
+    """
 
     def _make_ids_from_name(args):  # vals, names=None
         vals, names = args
@@ -732,7 +732,7 @@ def label_binarize_each(labels, classes, sparse_out=True):
 def agg_group_edges(adj, labels1, labels2=None,
                     groups1=None, groups2=None,
                     asdf=True, verbose=True):
-    '''
+    """
     adj: 
         adjacent matrix of shape (N0, N1), if `labels2` is None, then set N0=N1.
     labels1:
@@ -743,7 +743,7 @@ def agg_group_edges(adj, labels1, labels2=None,
     return
     ======
     group_conn: summation of connected edges between given groups
-    '''
+    """
     #    if sparse.issparse(adj):
     adj = sparse.csc_matrix(adj)
 
@@ -771,10 +771,10 @@ def agg_group_edges(adj, labels1, labels2=None,
 
 
 def scipy_edge_dict_for_dgl(edge_dict, foo=None):
-    '''
+    """
     foo: a callable object. 
         For example, `torch.LongTensor`
-    '''
+    """
 
     def _spsparse2edge(spmat, ):
         spmat = sparse.coo_matrix(spmat)
@@ -791,8 +791,8 @@ def scipy_edge_dict_for_dgl(edge_dict, foo=None):
 
 
 def homograph_from_scipy(adj, as_dgl=True, self_loop=True):
-    ''' making a homolohous DGL graph from a scipy.sparse matrix
-    '''
+    """ making a homolohous DGL graph from a scipy.sparse matrix
+    """
     from networkx import from_scipy_sparse_matrix
     g = from_scipy_sparse_matrix(adj)
     if as_dgl:
@@ -820,10 +820,10 @@ def add_new_edgetype_to_dglgraph(
 # In[]
 
 def _order_contingency_array(mat, axis=1):
-    '''
+    """
     axis = 0: re-order the columns
     axis = 1: re-order the rows
-    '''
+    """
     order = np.argsort(np.argmax(mat, axis=axis))
     if axis == 1:
         print('Re-order the rows')
@@ -834,10 +834,10 @@ def _order_contingency_array(mat, axis=1):
 
 
 def _order_contingency_df(df: pd.DataFrame, axis=1):
-    '''
+    """
     axis = 0: re-order the columns
     axis = 1: re-order the rows
-    '''
+    """
     order = np.argsort(np.argmax(df.values, axis=axis))
     if axis == 1:
         print('Re-order the rows')
@@ -889,14 +889,14 @@ def _binarize_mat(mat, inplace=False):
 
 
 # In[]
-''' merge / split / take ... groups;
+""" merge / split / take ... groups;
     group averages
     
-'''
+"""
 
 
 def compute_unkn_rate(gcnt, ):
-    ''' unknown rate computing '''
+    """ unknown rate computing """
     n1, n2 = gcnt.sum(0)
     dsn1, dsn2 = gcnt.columns
     unkn_rate = gcnt.loc[gcnt[dsn1].isna(), dsn2].sum() / n2
@@ -905,7 +905,7 @@ def compute_unkn_rate(gcnt, ):
 
 
 def compute_unkn_rate_for2(gcnt1, gcnt2, names):
-    ''' unknown rate computing '''
+    """ unknown rate computing """
     gcnt = pd.concat([gcnt1, gcnt2], axis=1, keys=names)
     n1, n2 = gcnt.sum(0)
     dsn1, dsn2 = gcnt.columns
@@ -916,7 +916,7 @@ def compute_unkn_rate_for2(gcnt1, gcnt2, names):
 
 def take_group_labels(labels: Sequence, group_names: Sequence,
                       indicate=False, remove=False):
-    '''
+    """
     labels: list-like
     group_names: names of groups that you want to take out
     col: str, column name in df.columns
@@ -925,7 +925,7 @@ def take_group_labels(labels: Sequence, group_names: Sequence,
         else, return the labels.
     remove: bool; False by defaut.
         True if you want to keep groups that NOT in the `given group_names`
-    '''
+    """
     if isinstance(group_names, (str, int)):
         group_names = [group_names]
     if remove:
@@ -940,8 +940,8 @@ def take_group_labels(labels: Sequence, group_names: Sequence,
 
 def remove_small_groups(labels, min_samples=10,
                         indicate=False, ):
-    ''' return labels with small groups removed
-    '''
+    """ return labels with small groups removed
+    """
     vcnts = pd.value_counts(labels)
     #    print(vcnts)
     groups_rmv = list(vcnts[vcnts <= min_samples].index)
@@ -953,8 +953,8 @@ def remove_small_groups(labels, min_samples=10,
 def remove_adata_small_groups(adata: sc.AnnData,
                               key: str,
                               min_samples=10):
-    ''' return adata with small groups removed, grouped by `key`
-    '''
+    """ return adata with small groups removed, grouped by `key`
+    """
     indicators = remove_small_groups(adata.obs[key],
                                      min_samples=min_samples,
                                      indicate=True, )
@@ -973,8 +973,8 @@ def take_adata_groups(adata: sc.AnnData,
                       group_names: Sequence,
                       onlyx: bool = False,
                       copy: bool = False):
-    '''
-    '''
+    """
+    """
     indicators = take_group_labels(adata.obs[key], group_names,
                                    indicate=True)
     if copy:
@@ -985,13 +985,13 @@ def take_adata_groups(adata: sc.AnnData,
 
 def merge_group_labels(labels: Sequence,
                        group_lists: Sequence):
-    '''
+    """
     labels: list-like
     group_lists: a list of lists of group names to be merged
     
     === TEST ===
     >>> merge_groups(adata.obs['batch'], [list('AB'), list('EF')]).unique()
-    '''
+    """
     if not isinstance(group_lists[0], list):
         ## merge only one set of groups
         groups = group_lists  # list(map(str, group_lists))
@@ -1011,7 +1011,7 @@ def merge_adata_groups(adata: sc.AnnData, key: str,
                        group_lists: Sequence,
                        new_key=None,
                        rename=False, copy=False):
-    '''
+    """
     merge the given groups into one single group
     which is named as '_'.join(groups[i]) by default
     `group_lists`: a list of lists of group names
@@ -1020,7 +1020,7 @@ def merge_adata_groups(adata: sc.AnnData, key: str,
     >>> merge_adata_groups(adata, 'batch', [list('AB'), list('EF')], copy=True)
     >>> merge_adata_groups(adata, 'batch', [list('AB'), list('EF')],)
     >>> adata
-    '''
+    """
     adata = adata.copy() if copy else adata
     labels = adata.obs[key].copy()
     #    group_lists = [group_lists] if not isinstance(group_lists[0], list) else group_lists
@@ -1040,10 +1040,10 @@ def merge_adata_groups(adata: sc.AnnData, key: str,
 def split_adata(adata: sc.AnnData,
                 key: str,
                 ) -> Mapping[str, sc.AnnData]:
-    '''
+    """
     key: a column-name of `adata.obs`
     output: dict
-    '''
+    """
     groups = adata.obs[key].unique()
     adts = {}
     for gname in groups:
@@ -1078,8 +1078,8 @@ def bisplit_adata(adata: sc.AnnData,
 
 
 # In[]
-''' filtering out mito-genes
-'''
+""" filtering out mito-genes
+"""
 
 
 def filter_mitogenes(adata):
@@ -1092,8 +1092,8 @@ def _filter_mito(lst):
 
 
 # In[]
-'''     normalize / z-score grouped by ...
-'''
+"""     normalize / z-score grouped by ...
+"""
 
 
 def normalize_default(adata, target_sum=1e4, copy=False, log_only=False,
@@ -1153,10 +1153,10 @@ def normalize_default_rev0(adata, target_sum=5e2,
 
 
 def zscore(X, with_mean=True, scale=True, ):
-    ''' For each column of X, do centering (z-scoring)
+    """ For each column of X, do centering (z-scoring)
     ====
     code borrowed from `scanpy.pp._simple`
-    '''
+    """
     scaler = StandardScaler(with_mean=with_mean, copy=True).partial_fit(X)
     if scale:
         # user R convention (unbiased estimator)
@@ -1174,7 +1174,7 @@ def zscore(X, with_mean=True, scale=True, ):
 
 
 def group_zscore(X, labels, with_mean=True, scale=True, max_value=None):
-    '''
+    """
     For each column of X, do within-group centering (z-scoring)
     ======
     X: np.array, shape (n_samples, n_features)
@@ -1182,7 +1182,7 @@ def group_zscore(X, labels, with_mean=True, scale=True, max_value=None):
         
     with_mean: boolean, True by default
         If True, center the data before scaling, and X shoud be a dense matrix.
-    '''
+    """
     isdf = False
     if isinstance(X, pd.DataFrame):
         isdf = True
@@ -1212,7 +1212,7 @@ def group_zscore_adata(adt, key='counts', groupby='batch', key_new=None,
                        max_value=None,
                        with_mean=True,
                        cover=True, **kwds):
-    '''
+    """
     adt: AnnData
     key: str in ['X_pca', 'count']
         can be a key from adt.obsm, e.g. `key='X_pca'`
@@ -1222,7 +1222,7 @@ def group_zscore_adata(adt, key='counts', groupby='batch', key_new=None,
         A key from adt.obs, from which the labels are take
     cover: bool
         whether to cover the old X with the scored X
-    '''
+    """
     labels = adt.obs[groupby]
     if key == 'counts':
         print('doing z-score scaling on count matrix, transformed into a dense array')
@@ -1248,14 +1248,14 @@ def group_zscore_adata(adt, key='counts', groupby='batch', key_new=None,
 
 def wrapper_scale(adata, zero_center=True, max_value=None,
                   groupby=None, copy=False, **kwds):
-    '''
+    """
     Wrapper function for centering and scaling data matrix `X` in sc.AnnData,
     extended for within-batch cprocessing.
     
     Example
     =======
         wrapper_scale(adata, groupby='batch')
-    '''
+    """
     if groupby is not None:
         print(f'doing within-group scaling, group by [ {groupby} ]')
         return group_zscore_adata(adata, key='counts',
@@ -1271,11 +1271,11 @@ def wrapper_scale(adata, zero_center=True, max_value=None,
 
 
 def normalize_col(X, scale_factor=1, by='sum'):
-    '''
+    """
     make the column elements of X to unit sum
     scale_factor: numeric, None
         if None: use the median of sum level as the scaling factor.
-    '''
+    """
     if by == 'sum':
         norms = X.sum(axis=0)
     elif by == 'max':
@@ -1307,11 +1307,11 @@ def normalize_col(X, scale_factor=1, by='sum'):
 
 
 def normalize_row(X, scale_factor=1, by='sum'):
-    '''
+    """
     make the row elements of X to unit sum
     scale_factor: numeric, None
         if None: use the median of sum level as the scaling factor.
-    '''
+    """
     if by == 'sum':
         norms = X.sum(axis=1)
     elif by == 'max':
@@ -1342,10 +1342,10 @@ def normalize_row(X, scale_factor=1, by='sum'):
 
 
 def normalize_norms(X, scale_factor=1, axis=0, by='sum'):
-    ''' wrapper of `normalize_colsum` and `normalize_rowsum`
+    """ wrapper of `normalize_colsum` and `normalize_rowsum`
     axis = 0: apply to each column;
     axis = 1: apply to each row.
-    '''
+    """
     foo = normalize_col if axis == 0 else normalize_row
     return foo(X, scale_factor=scale_factor, by=by)
 
@@ -1398,9 +1398,9 @@ def wrapper_normalize(df, method='maxmin', axis=0, **kwds):
 
 
 def mean_of_nozeros(mat, axis=0):
-    '''
+    """
     mat: np.arrary or scipy.sparse. matrix
-    '''
+    """
     mat = mat.copy()
     print('making a copy')
     sums = mat.sum(axis=axis)
@@ -1415,16 +1415,16 @@ def mean_of_nozeros(mat, axis=0):
 
 # In[]
 
-'''     group averages
-'''
+"""     group averages
+"""
 
 
 def group_value_counts(df, count_on, group_by, split=True, **kwds):
-    ''' extended function of pd.value_counts
+    """ extended function of pd.value_counts
     count_on: str; which column to apply function `pd.value_counts`
     group_by: str; which column to group-by
     split: bool; split the Series and concatenate them as columns if True.
-    '''
+    """
     vcnt = df.groupby(group_by)[count_on].apply(pd.value_counts, **kwds)
     if split:  # split the Series and concatenate them as columns
         lvls = df[group_by].unique()
@@ -1436,7 +1436,7 @@ def group_value_counts(df, count_on, group_by, split=True, **kwds):
 def group_mean(X, labels,
                binary=False, classes=None, features=None,
                print_groups=True):
-    '''
+    """
     This function may work with more efficiency than `df.groupby().mean()` 
     when handling sparse matrix. (obviously~)
     ---
@@ -1445,7 +1445,7 @@ def group_mean(X, labels,
     classes: optional, names of groups
     features: optional, names of features
         
-    '''
+    """
     classes = np.unique(labels, ) if classes is None else classes
     if binary:
         X = (X > 0)  # .astype('float')
@@ -1498,14 +1498,14 @@ def group_median_dense(
 def group_mean_adata(adata: sc.AnnData,
                      groupby: str,
                      features=None, binary=False, use_raw=False):
-    '''
+    """
     groupby: a column name in adata.obs
     features: a subset of names in adata.var_names (or adata.raw.var_names)
     
     return
     ------
     a pd.DataFrame with features as index and groups as columns
-    '''
+    """
     labels = adata.obs[groupby]
     print(f'Computing averages grouped by {groupby}')
     if use_raw and adata.raw is not None:
@@ -1532,9 +1532,9 @@ def group_mean_multiadata(adatas: Sequence[sc.AnnData],
                           keys: Union[str, Sequence],
                           use_genes=None, binary=False,
                           use_raw=True, tags=None, ):
-    '''
+    """
     tags: tag of each adata to avoid column-name collision
-    '''
+    """
     n = len(adatas)
     if isinstance(keys, str):
         keys = [keys] * n
@@ -1561,9 +1561,9 @@ def quick_preprocess(
         nneigh=10,  # 20 was used for clustering
         copy=True,
         **hvg_kwds):
-    '''
+    """
     if `normalize_data` is True, an adata with RAW counts is requered!
-    '''
+    """
     if copy:
         _adata = adata.copy()
         print('A copy of AnnData made!')
@@ -1606,9 +1606,9 @@ def quick_pre_vis(adata, hvgs=None,
                   vis='umap',
                   color=None,
                   copy=True, **hvg_kwds):
-    ''' go through the default pipeline and have a overall visualization of
+    """ go through the default pipeline and have a overall visualization of
     the data.
-    '''
+    """
 
     _adata = quick_preprocess(
         adata, hvgs=hvgs,
@@ -1655,11 +1655,11 @@ def quick_pre_clust(
 
 
 def get_scnet(adata):
-    ''' Extract the pre-computed single-cell KNN network
+    """ Extract the pre-computed single-cell KNN network
     ---------------------------------------------------------
     If the adata has not been preprocessed, please run 
     `adata_processed = quick_preprocess(adata, **kwds)` first.
-    '''
+    """
     key0 = 'neighbors'
     key = 'connectivities'
     if key in adata.obsp.keys():
@@ -1672,7 +1672,7 @@ def get_scnet(adata):
 def get_hvgs(adata, force_redo=False, batch_key=None,
              n_top_genes=2000,
              **hvg_kwds):
-    ''' if `force_redo` is True, data should be normalized and log-transformed.
+    """ if `force_redo` is True, data should be normalized and log-transformed.
     
     Parameters
     ----------
@@ -1683,7 +1683,7 @@ def get_hvgs(adata, force_redo=False, batch_key=None,
     n_top_genes
         Number of highly-variable genes to keep. 
         If specified, other parameters will be ignored.
-    '''
+    """
     key_hvg = 'highly_variable'
     if force_redo or key_hvg not in adata.var.columns:
         print(f'performing HVG-selection...\n '
@@ -1733,11 +1733,11 @@ def get_marker_name_table(adata, key='rank_genes_groups'):
 
 
 def top_markers_from_df(marker_df, n=5, groups=None, unique=True, ):
-    '''
+    """
     marker_df: a data-frame with cluster names as columns, and genes as values
     groups: a list of cluster names (column names)
     return a flattened marker list
-    '''
+    """
     groups = marker_df.columns if groups is None else groups
     top = marker_df[groups].iloc[: n]
     #    top = marker_df[groups].iloc[: n].values.T.flatten()
@@ -1768,11 +1768,11 @@ def compute_and_get_DEGs(adata: sc.AnnData,
                          do_normalize=False,
                          method='t-test',
                          **kwds):
-    '''
+    """
     
     By default, assume that the counts in adata has been normalized.
     If `force_redo`: re-compute DEGs and the original DEGs in adata will be ignored
-    '''
+    """
     if not inplace:
         print('making a copy')
         adata = adata.copy()
@@ -1811,8 +1811,8 @@ def get_leiden_labels(adata, hvgs=None,
                       key_added='leiden',
                       copy=False,
                       ):
-    ''' assume that the `X_pca` is already computed
-    '''
+    """ assume that the `X_pca` is already computed
+    """
     adata = adata.copy() if copy else adata
     if 'X_pca' not in adata.obsm.keys():
         sc.tl.pca(adata, n_comps=n_pcs)

@@ -46,10 +46,10 @@ def as_probabilities(logits):
 
 
 def predict_from_logits(logits, classes=None):
-    '''
+    """
     logits: shape=(n_sample, n_classes)
     classes: list-like, unique categories
-    '''
+    """
     logits = detach2numpy(logits)
     preds = np.argmax(logits, axis=1)
     if classes is not None:

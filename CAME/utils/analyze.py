@@ -92,7 +92,7 @@ class ResultsContainer(object):
 
 
 class ResultsAnalyzer(object):
-    '''
+    """
     
     ==== Attributes ====
 
@@ -143,7 +143,7 @@ class ResultsAnalyzer(object):
     * correlations (consine distances) of each homologous pairs
     * (top k) homologous pairs with the highest / lowest correlations
     
-    '''
+    """
 
     def __init__(
             self,
@@ -231,8 +231,8 @@ class ResultsAnalyzer(object):
         print('setting default directory for results')
 
     def set_hidden_states(self, hidden_dict: Mapping[str, np.ndarray], ):
-        ''' Setting hidden states for observations (cells) and variables (genes)
-        '''
+        """ Setting hidden states for observations (cells) and variables (genes)
+        """
         self.h_obs = hidden_dict[self.KEY_OBS]
         self.h_var = hidden_dict[self.KEY_VAR]
 
@@ -342,15 +342,15 @@ class ResultsAnalyzer(object):
     #    def
 
     # In[]
-    '''     functions for computation
+    """     functions for computation
     ========================================================
-    '''
+    """
 
     def confusion_matrix(self, key1, key2, which=1,
                          classes_on=None,
                          normalize=None, **kwds):
-        ''' confusion matrix (with or without row-normalization)
-        '''
+        """ confusion matrix (with or without row-normalization)
+        """
         lbs_y = self.get_obs_anno(key1, which=which)  # y_true
         lbs_x = self.get_obs_anno(key2, which=which)
 
@@ -385,7 +385,7 @@ class ResultsAnalyzer(object):
                          adjust=False,
                          return_data=False,
                          **kwds):
-        '''Computing UMAP embeddings from the hidden-states of the observations,
+        """Computing UMAP embeddings from the hidden-states of the observations,
         the results will be backed up into:
         (if adjust)
             .extra.obs_distances_adjusted
@@ -400,7 +400,7 @@ class ResultsAnalyzer(object):
         **kwds: other papameters for `paired_data_neighbors`;
             ks=10, ks_inner=5, binarize = False, 
             func_norm = None, algorithm = 'auto', ...
-        '''
+        """
         adt = self.hdata_obs  # .copy()
         #        key_dist0 = 'distances'
         #        key_conn0 = 'connectivities'
@@ -445,13 +445,13 @@ class ResultsAnalyzer(object):
                               exact=True,
                               adjust=2,
                               key_added=None):
-        '''
+        """
         the results will be backed up into:
             .extra.var_distances
             .extra.var_connect
             .extra.var_connect_adjusted 
         
-        '''
+        """
         #        key_added = 'integrative' if adjust else None
         adt = self.hdata_var
         self.split_var_by_dataset()
@@ -505,13 +505,13 @@ class ResultsAnalyzer(object):
             return_data=False,
             #           key_added='integrative',
             **kwds):
-        ''' Computing UMAP embeddings from the hidden-states of the variables,
+        """ Computing UMAP embeddings from the hidden-states of the variables,
         the results will be backed up into:
             .extra.var_distances
             .extra.var_connect
             .extra.var_connect_adjusted (if adjust is True)
             .extra.var_umap
-        '''
+        """
         adt = self.hdata_var
         key_added = None
         if force_redo or 'connectivities' not in adt.obsp.keys():
@@ -560,14 +560,14 @@ class ResultsAnalyzer(object):
                            return_df=True,
                            sort=True,
                            **kwds):
-        ''' correlations (consine distances) of each linked (homologous) pairs
+        """ correlations (consine distances) of each linked (homologous) pairs
         of variables.
         
         returns
         -------
         pd.DataFrame with columns:
             (name1, name2), corr, is1v1
-        '''
+        """
         #        from scipy.spatial.distance import cdist
 
         vv_adj = sparse.triu(self.vv_adj).tocoo()
@@ -625,8 +625,8 @@ class ResultsAnalyzer(object):
             key_added='joint_module',
             neighbors_key=None,  # or 'integrative'
             **kwds):
-        ''' jointly cluster vars
-        '''
+        """ jointly cluster vars
+        """
         #        if neighbors_key is None:
         #            neighbors_key = self.params['compute_var_umap']['neighbors_key']
         cluster_func = {'leiden': sc.tl.leiden,
@@ -664,13 +664,13 @@ class ResultsAnalyzer(object):
             method='leiden',
             resplit=True,
             **kwds):
-        '''
+        """
         for each dataset, build a KNN-graph for variables, and detect modules
         using 'leiden' or 'louvain' algorithm.
         
         output: 
             A pair of dataframes indexed by var-names
-        '''
+        """
         if not hasattr(self, 'hdata_var1'):
             self.split_var_by_dataset(set_attr=True)
 
@@ -785,9 +785,9 @@ class ResultsAnalyzer(object):
 
     def compute_averages(self, groupby: Union[str, Sequence[str]],
                          mat=None, ):
-        '''
+        """
         mat: if provided, should be a matrix of shape (self.n_obs, self.n_var)
-        '''
+        """
         # obs_labels
         groupby_obs1, groupby_obs2 = _check_str_seq(groupby, 2)
         if not hasattr(self, 'hdata_obs1'):
@@ -894,8 +894,8 @@ class ResultsAnalyzer(object):
         return edge_df.loc[kept, :]
 
     def write_graph(self, fname=None, suffix='.gpickle', resdir=None):
-        ''' saving the abstracted graph
-        '''
+        """ saving the abstracted graph
+        """
         from networkx.readwrite.gpickle import write_gpickle
         g = self.abstracted_graph
 
@@ -935,9 +935,9 @@ class ResultsAnalyzer(object):
             fp=None,
             order_cols=True, order_rows=True,
             **kwds):
-        '''
+        """
         A Contingency matrix does not assume the same classes
-        '''
+        """
         mat = self.contingency_mat(key1, key2, which=which,
                                    order_cols=order_cols, order_rows=order_rows,
                                    normalize_axis=normalize_axis,
@@ -963,8 +963,8 @@ class ResultsAnalyzer(object):
             savefig=True,
             fn_fig=None,
             **kwds):
-        ''' Using Contingency Matrix, other than confusion matrix!!!
-        '''
+        """ Using Contingency Matrix, other than confusion matrix!!!
+        """
         mat = self.contingency_mat(key1, key2, which=which,
                                    order_cols=False,
                                    normalize_axis=normalize_axis,
@@ -1035,8 +1035,8 @@ class ResultsAnalyzer(object):
         return fig
 
     def plot_obstracted_graph(self, **kwds):  # TODO !!!
-        '''bipartite abstracted graph 
-        '''
+        """bipartite abstracted graph 
+        """
         pass
 
     # ================== I/O functions ================
@@ -1047,11 +1047,11 @@ class ResultsAnalyzer(object):
         self.export_var_link_weights()
 
     def export_var_annos(self, fname=None, resdir=None, tag=None):
-        ''' Annotations of ALL the variables from both datasets.
+        """ Annotations of ALL the variables from both datasets.
 
         If `fname` is not given, it will be decided autometically, and `tag`
         can be set to avoid file over-written.
-        '''
+        """
         attr_name = 'var'
         self.set_var_annos(var=self.hdata_var.obs)
         df = getattr(self, attr_name)
@@ -1063,11 +1063,11 @@ class ResultsAnalyzer(object):
                         index_label='node_id')
 
     def export_obs_annos(self, fname=None, resdir=None, tag=None):
-        ''' Annotations of ALL the observations from both datasets.
+        """ Annotations of ALL the observations from both datasets.
 
         If `fname` is not given, it will be decided autometically, and `tag`
         can be set to avoid file over-written.
-        '''
+        """
         attr_name = 'obs'
         df = getattr(self, attr_name)
         self._export_df(df, fname, resdir=resdir,
@@ -1078,11 +1078,11 @@ class ResultsAnalyzer(object):
                         index_label='node_id')
 
     def export_var_link_weights(self, fname=None, resdir=None, tag=None):
-        ''' correlations (consine distances) of each homologous pairs.
+        """ correlations (consine distances) of each homologous pairs.
 
         If `fname` is not given, it will be decided autometically, and `tag`
         can be set to avoid file over-written.
-        '''
+        """
         attr_name = 'var_link_weights'
         df = getattr(self, attr_name)
         self._export_df(df, fname, resdir=resdir,
@@ -1093,11 +1093,11 @@ class ResultsAnalyzer(object):
                         index_label=self.dataset_names)
 
     def export_abstracted_edges(self, fname=None, resdir=None, tag=None):  # TODO: change
-        '''
+        """
         
         If `fname` is not given, it will be decided autometically, and `tag`
         can be set to avoid file over-written.
-        '''
+        """
         import networkx as nx
         g = self.abstracted_graph
         df = nx.to_pandas_edgelist(g)
@@ -1109,11 +1109,11 @@ class ResultsAnalyzer(object):
                         index_label=self.dataset_names)
 
     def export_module_connection(self, fname=None, resdir=None, tag=None):
-        '''
+        """
         
         If `fname` is not given, it will be decided autometically, and `tag`
         can be set to avoid file over-written.
-        '''
+        """
         #        import networkx as nx
         #        g = self.abstracted_graph
         df = self.get_module_connection()
@@ -1177,7 +1177,7 @@ class ResultsAnalyzer(object):
 
 
 # In[]
-''' link-weights between homologous gene pairs '''
+""" link-weights between homologous gene pairs """
 
 
 def weight_linked_vars(
@@ -1191,7 +1191,7 @@ def weight_linked_vars(
         sort=True,
         index_names=(0, 1),
         **kwds):
-    ''' correlations (consine distances) of each linked (homologous) pairs
+    """ correlations (consine distances) of each linked (homologous) pairs
     of variables.
     X: 
         np.ndarray;
@@ -1207,7 +1207,7 @@ def weight_linked_vars(
     -------
     pd.DataFrame with columns:
         (name1, name2), distance, weight
-    '''
+    """
     adj = sparse.triu(adj).tocoo()
 
     foo = lambda x1, x2: cdist(x1[None, :], x2[None, :], metric=metric)[0, 0]
@@ -1243,8 +1243,8 @@ def weight_linked_vars(
 
 
 # In[]
-''' compute module eigen-vector
-'''
+""" compute module eigen-vector
+"""
 
 
 def _compute_svd(X, k=1, only_comps=True, whiten=False, **kwds):
@@ -1263,10 +1263,10 @@ def _compute_svd(X, k=1, only_comps=True, whiten=False, **kwds):
 
 
 def _compute_svd_eigen_corr(X, whiten=False, **kwds):
-    '''
+    """
     compute the first eigen-vector and the correlations between each "sample"
     (row of X) and the eigen-vector.
-    '''
+    """
     comps = _compute_svd(X, k=1, only_comps=True, whiten=whiten, **kwds)
     corr = 1 - cdist(X, comps[None, :], metric='correlation')[:, 0]
     #    corr = 1 - cdist(X, comps[None,:], metric='cosine')[:, 0]
@@ -1275,10 +1275,10 @@ def _compute_svd_eigen_corr(X, whiten=False, **kwds):
 
 
 def compute_group_eigens(X, labels, groups=None, whiten=False, **kwds):
-    ''' compute eigen-vector for each group
+    """ compute eigen-vector for each group
     groups:
         if provided, compute only for these groups, with the order kept.
-    '''
+    """
     groups = np.unique(labels, ) if groups is None else groups
 
     eigens = {}
@@ -1304,8 +1304,8 @@ def compute_group_eigens(X, labels, groups=None, whiten=False, **kwds):
 
 
 # In[]
-# '''     KNN-searching for each dataset separately, and conbined with homo-links
-# '''
+# """     KNN-searching for each dataset separately, and conbined with homo-links
+# """
 # def independ_neighbors(
 #        adata,
 #        split_by='dataset',
@@ -1326,9 +1326,9 @@ def jointly_extract_modules(
 
 
 # In[]
-'''     module extraction     
+"""     module extraction     
 ==================================
-'''
+"""
 
 
 def _filter_for_abstract(
@@ -1400,7 +1400,7 @@ def _extract_modules(
         method='leiden', copy=False,
         force_redo=False,
         **kwds):
-    '''
+    """
     build a KNN-graph, and detect modules using 'leiden' or 'louvain' algorithm.
     * `use_rep='X'` indicates the `adata.X` should be the reducted embeddings.
     * method should either be 'leiden' or 'louvain'
@@ -1409,7 +1409,7 @@ def _extract_modules(
         mod: a pd.DataFrame indexed by `adata.obs_names` with columns: 
             ['module', 'degree']
         mod_conn: inter-module-connection
-    '''
+    """
     adata = adata.copy() if copy else adata
     cluster_func = {'leiden': sc.tl.leiden,
                     'louvain': sc.tl.louvain}[method]
@@ -1453,9 +1453,9 @@ def _match_groups(mod_lbs1: Union[pd.Series, Mapping],
                   fix_left=True,
                   as_cats=True,
                   **kwds):
-    '''
+    """
     match two different sets of groups (modules), and re-arrange the group_labels
-    '''
+    """
     tokens1 = list(mod_lbs1.keys())
     tokens2 = list(mod_lbs2.keys())
 
@@ -1501,9 +1501,9 @@ def _match_groups(mod_lbs1: Union[pd.Series, Mapping],
 
 
 def order_by_similarities(sims: pd.DataFrame):
-    '''
+    """
     sims: pd.DataFrame with the same index and columns
-    '''
+    """
 
     ordered = sims.index.tolist()
     return ordered
@@ -1538,10 +1538,10 @@ def _subgroup_edges(
 def adata_subgroup_edges(
         adata, groups, groupby='module', key=None,
         **kwds):
-    '''
+    """
     take a subset of the KNN-graph from adata, melt to an edge-dataframe, with
     columns ['source', 'target', 'weight'] by default.
-    '''
+    """
 
     dist, conn = get_adata_neighbors(adata, key=key, )
     lbs = adata.obs[groupby]
@@ -1557,11 +1557,11 @@ def edges_from_adata(
         key_row='source',
         key_col='target',
         as_attrs=False):
-    ''' transform the connectivities in `adata` into an edge-dataframe, with
+    """ transform the connectivities in `adata` into an edge-dataframe, with
     columns ['source', 'target', 'weight'] by default.
     
     kind: 'conn', 'dist'
-    '''
+    """
     dist, conn = get_adata_neighbors(adata, key=key_neigh)
     names = adata.obs_names
     if kind == 'conn':
@@ -1590,8 +1590,8 @@ def nx_from_adata(
         adata, key_neigh=None,
         keys_attr=None,
 ) -> nx.Graph:
-    ''' nx.Graph from the KNN graph of `adata`
-    '''
+    """ nx.Graph from the KNN graph of `adata`
+    """
     node_data = adata.obs if keys_attr is None else adata.obs[keys_attr]
     edges = edges_from_adata(adata, 'conn', as_attrs=True)
     nodes = make_nx_input_from_df(node_data)
@@ -1621,9 +1621,9 @@ def neighbor_induced_edgedf(
 
 
 def neighbor_induced_subgraph(g: nx.Graph, nodes):
-    ''' Note that the returned graph also contains the edges connecting the 
+    """ Note that the returned graph also contains the edges connecting the 
     neighbor-nodes if there is any.
-    '''
+    """
     nodes = [n for n in nodes if n in list(g)]
     subnodes = nx_neighbors(g, nodes, with_self=True)
 
@@ -1631,8 +1631,8 @@ def neighbor_induced_subgraph(g: nx.Graph, nodes):
 
 
 def nx_neighbors(g, nodes, with_self=False):
-    ''' find all the neighbors of given nodes
-    '''
+    """ find all the neighbors of given nodes
+    """
     if isinstance(nodes, str):
         nodes = [nodes]
     tmp = []
@@ -1649,12 +1649,12 @@ def nx_to_dfs(
         nodelist: Union[Sequence, None] = None,
         source="source", target="target",
         **kwds):
-    '''
+    """
     outputs:
         edgedf, nodedf
     example:
     >>> edgedf, nodedf = nx_to_dfs(g)
-    '''
+    """
     if isinstance(nodelist, str):
         nodelist = [nodelist]
 
@@ -1675,9 +1675,9 @@ def nx_to_nodedf(g, nodelist=None):
 
 def export_subgraph_df(
         g, nodenames=None, fdir=Path('.'), tag='', tfset=None):
-    '''
+    """
     export graph to '.csv' files for other visualization
-    '''
+    """
     if nodenames is not None:
         g = nx.subgraph(g, nodenames)
     print(nx.info(g))
@@ -1694,9 +1694,9 @@ def export_subgraph_df(
 
 def export_neighbor_subgraph_df(
         g, nodenames=None, fdir=Path('.'), tag='', tfset=None):
-    '''
+    """
     temp function; 
-    '''
+    """
     if nodenames is not None:
         g = neighbor_induced_subgraph(g, nodenames)
     print(nx.info(g))
@@ -1712,13 +1712,13 @@ def export_neighbor_subgraph_df(
 
 
 # In[]
-'''     functions for cell/gene embeddings
+"""     functions for cell/gene embeddings
 ==================================================
-'''
+"""
 
 
 def set_adata_obsm(adata, X_h, key_add='X_h', copy=False):
-    '''
+    """
     key_add: which key will be added to adata.obsm
         probably be 'X_umap', 'X_h', 'X_pca', etc.
         
@@ -1727,7 +1727,7 @@ def set_adata_obsm(adata, X_h, key_add='X_h', copy=False):
     >>> sc.pp.neighbors(adata, metric='cosine', n_neighbors=15, use_rep='X_h')
     >>> sc.tl.umap(adata)
     >>> sc.pl.umap(adata, color='cell_type')
-    '''
+    """
     if copy:
         print('Making a copy.')
         adata = adata.copy()
@@ -1739,9 +1739,9 @@ def set_adata_obsm(adata, X_h, key_add='X_h', copy=False):
 
 
 def get_adata_neighbors(adata, key: Union[str, None] = None):
-    '''
+    """
     getting distances and connectivities from adata
-    '''
+    """
     key_dist = 'distances'
     key_conn = 'connectivities'
     if key is not None:
@@ -1752,14 +1752,14 @@ def get_adata_neighbors(adata, key: Union[str, None] = None):
 
 
 # In[]
-'''     abstracted graph
+"""     abstracted graph
 ===================================
-'''
+"""
 
 
 def write_graph_cyjs(g, fp='tmp.ctjs', return_dct=False, attrs=None, **kwds):
-    ''' Cytoscape Json format
-    '''
+    """ Cytoscape Json format
+    """
     from networkx.readwrite.json_graph import cytoscape_data
 
     dct = cytoscape_data(g, attrs)
@@ -1788,7 +1788,7 @@ def make_abstracted_graph(
         global_adjust_vv=True,
         vargroup_filtered='filtered',
         **kwds):
-    '''
+    """
     obs_labels1, obs_labels2,
     
     var_labels1, var_labels2,
@@ -1798,7 +1798,7 @@ def make_abstracted_graph(
     df_var_links,
     
     norm_mtd_ov: one of {None, 'zs', 'maxmin', 'max'}
-    '''
+    """
     tag_obs1, tag_obs2 = tags_obs
     tag_var1, tag_var2 = tags_var
     var_labels1, var_labels2, avg_expr1, avg_expr2, df_var_links = \
@@ -1909,7 +1909,7 @@ def abstract_vv_edges(
         tag_var1: str = '',
         tag_var2: str = '',
 ):
-    '''
+    """
     df_links: pd.DataFrame, shape=(n_edges, *)
         If `keys_edge` is provided, it should be a tuple of 2 column-names
         in df_links.columns, indicating the edge columns. 
@@ -1922,7 +1922,7 @@ def abstract_vv_edges(
         in df_links.columns, indicating the edge columns.
     var_labels1, var_labels2:
         grouping labels for the two sets of variables, respectively.
-    '''
+    """
     #    _var_labels1 = pd.Series({k: f'{tag_var1}{c}' for k, c in var_labels1.items()})
     #    _var_labels2 = pd.Series({k: f'{tag_var1}{c}' for k, c in var_labels2.items()})
 
@@ -1963,7 +1963,7 @@ def aggregate_links(
         key_weight: str = 'weight',
         keys_link: Union[None, Sequence[str]] = None,
 ):
-    '''
+    """
     df_links: pd.DataFrame, shape=(n_edges, *)
         If `keys_edge` is provided, it should be a tuple of 2 column-names
         in df_links.columns, indicating the edge columns. 
@@ -1981,7 +1981,7 @@ def aggregate_links(
     norm_sizes:
         if provided, should be a pair of pd.Series, dict, Mapping, list
         it can be also set as 'auto', which means decide sizes by the group-labels.
-    '''
+    """
     rnames0 = labels1.keys()
     cnames0 = labels2.keys()
 
@@ -2020,13 +2020,13 @@ def aggregate_links(
 def weight_normalize_by_size(adj, sizes1, sizes2,
                              norm_func=max,  # denominator
                              global_adjust=False):
-    '''
+    """
     adj: pd.DataFrame, shape = (n1, n2)
     sizes1, sizes2: pd.Series, dict, Mapping, list-like
         shape = (n1,) and (n2,)
     global_adjust: bool; whether to perform a global adjustment after 
         size-normalization.
-    '''
+    """
     if not isinstance(adj, pd.DataFrame): adj = pd.DataFrame(adj)
     if isinstance(sizes1, list):
         sizes1 = dict(list(zip(adj.index, sizes1)))
@@ -2055,11 +2055,11 @@ def abstract_ov_edges(
         cut=0,
         global_adjust: bool = False,
         return_full_adj=False):
-    '''
+    """
     avg_expr: pd.DataFrame; each column represent the average expressoions 
         for each observation group, and each row as a variable.
     norm_method: one of {None, 'zs', 'maxmin', 'max'}
-    '''
+    """
     df = avg_expr.copy()
     if norm_method is not None:
         df = utp.wrapper_normalize(df, method=norm_method, axis=norm_axis)
@@ -2101,10 +2101,10 @@ def adj_to_edges(
         key_data='weight',
         cut=None,
         as_attrs=False):
-    '''
+    """
     Melt (Un-pivot) a pd.DataFrame of adjacent matrix into a list of edges, works
     similar to `pd.melt()` but ignoring ALL of the zeros instead.
-    '''
+    """
     if isinstance(adj, pd.DataFrame):
         rownames = adj.index
         colnames = adj.columns
@@ -2145,7 +2145,7 @@ def abstract_nodes(labels,  # df, groupby,
                    tag='',
                    return_df=False,
                    **attrs):
-    '''
+    """
     Taking each of the groups in `labels` as an abstracted node, and making a 
     list of node attributes for further input to `networkx.Graph.add_nodes_from()`
     
@@ -2159,7 +2159,7 @@ def abstract_nodes(labels,  # df, groupby,
     >>> g = nx.Graph()
     >>> g.add_nodes_from(node_attrs, 'node name')
 
-    '''
+    """
     #    labels = df[groupby]
     if group_ord is None:
         df_nodes = labels.value_counts().to_frame(key_count)
@@ -2181,7 +2181,7 @@ def make_nx_input_from_df(
         df: pd.DataFrame,
         key_id: Union[None, str, list] = None,
         **attrs):
-    '''
+    """
     
     df: pd.DataFrame with each column containing node attributes
         
@@ -2203,7 +2203,7 @@ def make_nx_input_from_df(
     >>> g = nx.Graph()
     >>> g.add_nodes_from(node_attrs)
     
-    '''
+    """
     if key_id is not None:
         df = df.set_index(key_id, drop=True)
 
@@ -2223,14 +2223,14 @@ def make_nx_input_from_df(
 def nx_multipartite_graph(*node_layers,
                           edges=None,
                           subset_key='subset', **attrs):
-    '''
+    """
     
     
     === Example ====
     >>> g = uta.nx_multipartite_graph([0, 1], [2, 3, 4, 5], [6, 7, 8], )
     >>> pos = nx.multipartite_layout(g, subset_key=subset_key, )
     >>> nx.draw(g, pos, with_labels=True, )
-    '''
+    """
     import networkx as nx
 
     #    print(nodes)
@@ -2253,10 +2253,10 @@ def nx_multipartite_graph(*node_layers,
 
 def wrapper_confus_mat(y_true, y_pred, classes_on=None,
                        normalize='true', as_df=True):
-    ''' 
+    """ 
     normalize: 'true', 'pred', 'all', None
         by default, normalized by row (true classes)
-    '''
+    """
     from sklearn import metrics
     if classes_on is None:
         classes_on = np.unique(list(y_true) + list(y_pred))
@@ -2282,11 +2282,11 @@ def wrapper_contingency_mat(y_true, y_pred,
                             normalize_axis=None,
                             as_df=True,
                             eps=None, assparse=False):
-    ''' 
+    """ 
     Modified and wrapped function from `sklearn`:
     >>> mat = sklearn.metrics.cluster.contingency_matrix(
             y_true, y_pred, eps=eps, sparse=assparse)
-    '''
+    """
     if eps is not None and sparse:
         raise ValueError("Cannot set 'eps' when sparse=True")
 
@@ -2325,9 +2325,9 @@ def wrapper_contingency_mat(y_true, y_pred,
 
 
 # In[]
-'''     KNN searching with batch considered
+"""     KNN searching with batch considered
 =====================================================
-'''
+"""
 
 
 def adata_neighbors(adata,
@@ -2371,12 +2371,12 @@ def paired_data_neighbors(
         metric_kwds=None,
         key_added: Union[None, str] = 'adjusted',
         **kwds) -> sc.AnnData:
-    '''
+    """
     X1, X2: np.ndarray, shape = (n_obs1, n_var) and (n_obs2, n_var)
     adata: if provided, should contain (n_obs1 + n_obs2) data observations, and
         each columns should be matched with `X1` followed by `X2`!!!
     
-    '''
+    """
     if adata is None:
         X = np.vstack([X1, X2])
         adata = sc.AnnData(X=X, )

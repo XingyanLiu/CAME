@@ -26,7 +26,7 @@ def detach2numpy(x):
 
 # In[]
 class CGCNet(nn.Module):
-    '''
+    """
     cell-gene-cell network 
     =======================
     (used when features are 1-to-1 aligned)
@@ -43,7 +43,7 @@ class CGCNet(nn.Module):
     * attention can be applied on the last layer (`self.cell_classifier`);
     * the graph for the embedding layer and the hidden layers can be different;
     * allow expression values as static edge weights. (but seems not work...)
-    '''
+    """
 
     def __init__(self,
                  g,
@@ -135,10 +135,10 @@ class CGCNet(nn.Module):
                           i_layer=-1,
                           detach2np: bool = True,
                           **kwds):
-        '''
+        """
         detach2np: whether tensors be detached and transformed into numpy.ndarray
         
-        '''
+        """
         if (feat_dict is not None) and (g is not None):
             logging.info('Forward passing...')
             # activate the random dropouts, which gives a better integrated embedding
@@ -157,10 +157,10 @@ class CGCNet(nn.Module):
         return h_dict
 
     def get_attentions(self, feat_dict, g, fuse='mean'):
-        '''
+        """
         output:
             cell-by-gene attention matrix
-        '''
+        """
         # getting subgraph and the hidden states
         g_sub = g.to('cuda')['gene', 'expressed_by', 'cell']
         h_dict = self.get_hidden_states(feat_dict=feat_dict, g=g, detach2np=False)

@@ -37,9 +37,9 @@ def _capital_strs(strs):
 
 
 # In[]
-''' I/O functions
+""" I/O functions
     handling AnnData object(s)
-'''
+"""
 
 
 def save_pickle(obj, fpath):
@@ -49,9 +49,9 @@ def save_pickle(obj, fpath):
 
 
 def load_pickle(fp):
-    '''
+    """
     >>> load_pickle('results.pickle')
-    '''
+    """
     with open(fp, 'rb') as f:
         res = pickle.load(f)
     return res
@@ -66,9 +66,9 @@ def check_dirs(path):
 
 
 def write_info(fn, **dicts):
-    '''
+    """
     key words parameter-dicts
-    '''
+    """
     f = open(fn, 'w')
     print('file name:\n\t', fn, file=f)
     for kw, val in dicts.items():
@@ -122,8 +122,8 @@ def dec_timewrapper(tag='function'):
 
 
 def make_pairs_from_lists(lst1, lst2=None, inverse=False, skip_equal=True):
-    ''' making combinational pairs
-    '''
+    """ making combinational pairs
+    """
     lst2 = lst1 if lst2 is None else lst2
     pairs = []
     for x in lst1:
@@ -140,7 +140,7 @@ def subsample_single(N,
                      frac=0.25, n_min=50,
                      n_out=None,
                      seed=0):
-    '''
+    """
     N:
         The total number of the original indices to be subsampled
     frac: 
@@ -154,7 +154,7 @@ def subsample_single(N,
         `frac` and `n_min` will be ignored.
     seed:
         random state
-    '''
+    """
     #    N = len(ids)
     if n_out is None:
         n_ids_sub = max([np.ceil(N * frac), n_min])
@@ -181,13 +181,13 @@ def subsample_each_group(
         n_out=50,
         seed=0,
 ):
-    '''
+    """
     randomly sample indices from each group, labeled by `group_labels`.
     and return the sampled indices.
     
     n_out: number of samples for each group
     
-    '''
+    """
     np.random.seed(seed)
     if isinstance(group_labels, pd.Series):
         ids_all = group_labels.index
