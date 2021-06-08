@@ -39,7 +39,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse'),
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[2]  # [::-1]
+dsnames = DATASET_PAIRS[-2]  # [::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -269,6 +269,8 @@ for _adt, sp, _df_top in zip([gadt1, gadt2],
         nm = _adt.obs['dataset'][0]
         ftps = ['pdf', 'svg', 'png']
         ftp = ftps[1]
+        if c not in _adt.obs.columns:
+            continue
         ax = pl.umap_with_annotates(_adt, color=c, text_ids=text_ids,
                                     #                                      edges=True, size=30,
                                     title=f'{sp} {c}',
