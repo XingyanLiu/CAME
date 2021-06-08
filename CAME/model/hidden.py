@@ -91,8 +91,8 @@ class HiddenRGCN(nn.Module):
         for layer in self.layers[: -1]:
             h_dict = layer(g, h_dict, **kwds)
             self.hidden_states.append(h_dict)
-        # custom for the last layer
-        h_dict = layer(g, h_dict, norm=norm, bias=bias, activate=activate, **kwds)
+        # custom for the last layer (facilitate residual layer)
+        h_dict = self.layers[-1](g, h_dict, norm=norm, bias=bias, activate=activate, **kwds)
         self.hidden_states.append(h_dict)
 
         return h_dict
@@ -177,14 +177,6 @@ class HiddenRRGCN(nn.Module):
                     layernorm_ntypes=layernorm_ntypes
                 ))
 
-    #        self.residual = residual
-    #        if residual:
-    #            self.layernorm_res = HeteroLayerNorm(dim_dict)
-    #            self.bias_res = nn.ModuleDict()
-    #            for ntype in ntypes:
-    #                self.bias_res[ntype] = nn.Parameter(th.Tensor(h_dim))
-    #                nn.init.zeros_(self.bias_res[ntype])
-
     def forward(self, g, h_dict,  # residual=False,
                 norm=True, bias=True, activate=True,
                 **kwds, ):
@@ -192,7 +184,6 @@ class HiddenRRGCN(nn.Module):
         No copies made for h_dict, so make sure the forward functions do not
         make any changes directly on the h_dict !
         """
-        #        h_dict0 = h_dict
         self.hidden_states = []
         for i, layer in enumerate(self.layers[: -1]):
             h_dict = layer(g, h_dict, **kwds)
@@ -200,30 +191,9 @@ class HiddenRRGCN(nn.Module):
             if self.layernorms and i < self.num_hidden_layers:
                 h_dict = self.layernorms[i](h_dict)
             self.hidden_states.append(h_dict)
-
-        #        if self.residual:
-        #            # custom for the last layer
-        #            h_dict = self._sum(
-        #                    h_dict0,
-        #                    layer(g, h_dict, norm=True, bias=True, activate=False, **kwds)
-        #                    )
-        #            h_dict = {k: self.leaky_relu(h) for k, h in h_dict.items()}
-        #        else:
-        #            h_dict = layer(g, h_dict, **kwds)
-
-        h_dict = layer(g, h_dict, norm=norm, bias=bias, activate=activate, **kwds)
+        # for residual connection, not normalize
+        h_dict = self.layers[-1](g, h_dict, norm=norm, bias=bias, activate=activate, **kwds)
         self.hidden_states.append(h_dict)
         return h_dict
 
-#    @staticmethod
-#    def _sum(*dicts, keys=None):
-#        """ sum-up the features from dicts grouped-by keys
-#        """
-#        results = dict()
-#        for d in dicts:
-#            for k, feat in d.items():
-#                if k not in results.keys():
-#                    results[k] = feat
-#                else:
-#                    results[k] = results[k] + feat
-#        return results
+
