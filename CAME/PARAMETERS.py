@@ -85,3 +85,6 @@ def get_model_params(kwdict_outgat={}, **kwds) -> dict:
     if len(kwdict_outgat) > 0:
         params['kwdict_outgat'].update(kwdict_outgat)
     return params
+
+if __name__ == '__main__':
+    pass

@@ -110,7 +110,7 @@ def main_for_aligned(
     classes0 = ENV_VARs['classes']
     classes = classes0[:-1] if 'unknown' in classes0 else classes0
     n_classes = len(classes)
-    params_model = get_model_params(params_model)
+    params_model = get_model_params(**params_model)
     params_model.update(
         in_dim_dict={'cell': adpair.n_feats, 'gene': 0},
         out_dim=n_classes,
@@ -258,7 +258,7 @@ def main_for_unaligned(
     classes0 = ENV_VARs['classes']
     classes = classes0[:-1] if 'unknown' in classes0 else classes0
     n_classes = len(classes)
-    params_model = get_model_params(params_model)
+    params_model = get_model_params(**params_model)
     params_model.update(
         in_dim_dict={'cell': dpair.n_feats, 'gene': 0},
         out_dim=n_classes,

@@ -112,7 +112,7 @@ def main_for_unaligned(
     G = ENV_VARs['G']
     classes1, classes2 = ENV_VARs['classes']
     n_classes1, n_classes2 = len(classes1), len(classes2)
-    params_model = get_model_params(params_model)
+    params_model = get_model_params(**params_model)
     params_model.update(
         in_dim_dict={'cell': dpair.n_feats, 'gene': 0},
         out_dim=n_classes1 + n_classes2,
