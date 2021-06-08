@@ -20,9 +20,6 @@ from scipy.special import softmax
 import networkx as nx
 import torch
 
-# ROOT = os.path.dirname(os.path.abspath(__file__))
-# os.chdir(ROOT)
-
 import CAME
 from CAME import pipeline, pp, pl
 
