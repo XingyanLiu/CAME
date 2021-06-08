@@ -13,7 +13,7 @@ import random
 import numpy as np
 from pandas import DataFrame, value_counts
 import torch
-from torch import Tensor
+from torch import Tensor, LongTensor
 import dgl
 
 from ..datapair.aligned import AlignedDataPair
@@ -64,11 +64,11 @@ def prepare4train(
         test_idx: Optional[Sequence] = None,
         **kwds  # for code compatibility (not raising error)
 ) -> dict:
-    '''
+    """
     dpair: DataPair
     test_idx: if provided, should be an index-sequence of the same length as 
         `cluster_labels`
-    '''
+    """
     if key_clust and cluster_labels is None:
         cluster_labels = dpair.obs_dfs[1][key_clust].values
     # else:
@@ -86,8 +86,8 @@ def prepare4train(
         train_idx = dpair.get_obs_ids(0, astensor=True)
         test_idx = dpair.get_obs_ids(1, astensor=True)
     else:
-        train_idx = torch.LongTensor([i for i in range(dpair.n_obs) if i not in test_idx])
-        test_idx = torch.LongTensor(test_idx)
+        train_idx = LongTensor([i for i in range(dpair.n_obs) if i not in test_idx])
+        test_idx = LongTensor(test_idx)
 
     G = dpair.get_whole_net(rebuild=False, )
 

@@ -105,7 +105,7 @@ came_inputs, (adata1, adata2) = pipeline.preprocess_unaligned(
     use_scnets=True,
 )
 
-dpair, trainer, h_dict = pipeline.main_for_unaligned(
+dpair, trainer, h_dict, ENV_VARs = pipeline.main_for_unaligned(
     **came_inputs,
     df_varmap=df_varmap,
     df_varmap_1v1=df_varmap_1v1,
@@ -119,7 +119,17 @@ dpair, trainer, h_dict = pipeline.main_for_unaligned(
     n_pass=100,
     params_model=dict(residual=True)
 )
-
+load_other_ckpt = False
+if load_other_ckpt:
+    pipeline.gather_came_results(
+            dpair,
+            trainer,
+            classes=ENV_VARs['classes'],
+            keys=(key_class1, key_class2),
+            keys_compare=(key_class1, key_class2),
+            resdir=resdir,
+            checkpoint='last',
+    )
 # out_cell = trainer.eval_current()['cell']
 # probas_all = CAME.as_probabilities(out_cell)
 # df_probs = pd.DataFrame(probas_all, columns = trainer.classes)

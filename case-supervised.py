@@ -115,7 +115,7 @@ came_inputs, (adata1, adata2) = preprocess_unaligned(
     use_scnets=False
 )
 n_epochs = 500
-dpair, trainer, h_dict = main_for_unaligned(
+dpair, trainer, h_dict, ENV_VARs = main_for_unaligned(
         **came_inputs,
         df_varmap=df_varmap,
         df_varmap_1v1=df_varmap_1v1,

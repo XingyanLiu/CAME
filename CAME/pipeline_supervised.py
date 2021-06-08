@@ -220,7 +220,7 @@ def main_for_unaligned(
                             figsize=(5, 3.),
                             fp=figdir / f'heatmap_probas.pdf'
                             )
-    return dpair, trainer, h_dict
+    return dpair, trainer, h_dict, ENV_VARs
 
 
 def preprocess_unaligned(
@@ -307,7 +307,7 @@ def __test2_sup__(n_epochs: int = 5):
         use_scnets=False, 
     )
 
-    dpair, trainer, _ = main_for_unaligned(
+    _ = main_for_unaligned(
         **came_inputs,
         df_varmap=df_varmap,
         df_varmap_1v1=df_varmap_1v1,
@@ -322,7 +322,7 @@ def __test2_sup__(n_epochs: int = 5):
         params_model=dict(residual=True)
     )
 
-    del dpair, trainer, _
+    del _
     torch.cuda.empty_cache()
     logging.debug('memory cleared\n')
     print('Test passed for UN-ALIGNED!')

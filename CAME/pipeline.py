@@ -189,7 +189,7 @@ def main_for_aligned(
                             figsize=(5, 3.),
                             fp=figdir / f'heatmap_probas.pdf'
                             )
-    return adpair, trainer, h_dict
+    return adpair, trainer, h_dict, ENV_VARs
 
 
 def main_for_unaligned(
@@ -335,7 +335,7 @@ def main_for_unaligned(
         df_data.T, lbs, name_label='true label',
         figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
     )
-    return dpair, trainer, h_dict
+    return dpair, trainer, h_dict, ENV_VARs
 
 
 def gather_came_results(
@@ -538,7 +538,7 @@ def __test1__(n_epochs: int = 5):
         df_varmap_1v1=df_varmap_1v1,
     )
 
-    adpair, trainer, _ = main_for_aligned(
+    _ = main_for_aligned(
         **came_inputs,
         dataset_names=dsnames,
         key_class1=key_class,
@@ -551,7 +551,7 @@ def __test1__(n_epochs: int = 5):
         params_model=dict(residual=True)
     )
 
-    del adpair, trainer, _
+    del _
     torch.cuda.empty_cache()
     logging.debug('memory cleared\n')
     print('Test passed for ALIGNED!')
@@ -580,7 +580,7 @@ def __test2__(n_epochs: int = 5):
         key_class=key_class,
     )
 
-    dpair, trainer, _ = main_for_unaligned(
+    _ = main_for_unaligned(
         **came_inputs,
         df_varmap=df_varmap,
         df_varmap_1v1=df_varmap_1v1,
@@ -595,7 +595,7 @@ def __test2__(n_epochs: int = 5):
         params_model=dict(residual=True)
     )
 
-    del dpair, trainer, _
+    del _
     torch.cuda.empty_cache()
     logging.debug('memory cleared\n')
     print('Test passed for UN-ALIGNED!')
