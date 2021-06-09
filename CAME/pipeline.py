@@ -272,8 +272,9 @@ def main_for_unaligned(
     ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
     trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
-    trainer.train(n_epochs=n_epochs,
+    trainer.train_minibatch(n_epochs=n_epochs,
                   params_lossfunc=params_lossfunc,
+                  batchsize=128,
                   n_pass=n_pass, )
     trainer.save_model_weights()
     # ========================== record results ========================

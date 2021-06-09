@@ -12,7 +12,7 @@ import torch
 from torch import Tensor
 import dgl
 
-from .train import BaseTrainer, make_class_weights, prepare4train, seed_everything
+from .train import BaseTrainer, make_class_weights, create_blocks, create_batch_idx, prepare4train, seed_everything
 from .evaluation import accuracy, get_AMI, get_F1_score
 from .plot import plot_records_for_trainer
 
@@ -105,8 +105,102 @@ class Trainer(BaseTrainer):
             tt='test accuracy and cluster index',
             fp=fp)
 
-    def train_minibatch(self, **kwargs):
-        # TODO: @qunlun
+    def train_minibatch(self, n_epochs=350,
+              use_class_weights=True,
+              params_lossfunc={},
+              n_pass=100,
+              eps=1e-4,
+              cat_class='cell',
+              batchsize = 128,
+              **other_inputs):
+        '''
+        Funtcion for minibatch trainging
+        '''
+        train_idx, test_idx, labels = self.train_idx, self.test_idx, self.labels
+        _train_labels, _test_labels = labels[train_idx], labels[test_idx]
+        #self.g.nodes['cell'].data['feat'] = self.feat_dict['cell']
+
+        if use_class_weights:
+            class_weights = self.class_weights
+
+        if not hasattr(self, 'ami_max'): self.ami_max = 0
+
+        print("start training".center(50, '='))
+        self.model.train()
+
+        batch_list = create_batch_idx(np.array(range(10455)), batchsize=512, shuffle=True)
+
+        for epoch in range(n_epochs):
+            self._cur_epoch += 1
+            for output_nodes in batch_list:
+                blocks = create_blocks(self.g, output_nodes)
+                #input_features = blocks[0].srcdata['feat']
+                batch_train_idx = torch.tensor(np.intersect1d(train_idx.cpu().numpy(), output_nodes))
+                self.optimizer.zero_grad()
+                t0 = time.time()
+                #print('asdasdasdasd')#ok
+                logits = self.model(self.feat_dict,
+                                    blocks,  # .to(self.device),
+                                    **other_inputs)
+                out_cell = logits[cat_class]  # .cuda()
+                loss = self.model.get_classification_loss(
+                    out_cell[batch_train_idx.to(self.device)],
+                    _train_labels,  # labels[train_idx],
+                    weight=class_weights,
+                    **params_lossfunc
+                )
+
+            # prediction of ALL
+            _, y_pred = torch.max(out_cell, dim=1)
+            y_pred_test = y_pred[test_idx]
+
+            ### evaluation (Acc.)
+            train_acc = accuracy(y_pred[train_idx], labels[train_idx])
+            test_acc = accuracy(y_pred_test, _test_labels)
+            ### F1-scores
+            microF1 = get_F1_score(_test_labels, y_pred_test, average='micro')
+            macroF1 = get_F1_score(_test_labels, y_pred_test, average='macro')
+            weightedF1 = get_F1_score(_test_labels, y_pred_test, average='weighted')
+
+            ### unsupervised cluster index
+            if self.cluster_labels is not None:
+                ami = get_AMI(self.cluster_labels, y_pred_test)
+
+            if self._cur_epoch >= n_pass - 1:
+                self.ami_max = max(self.ami_max, ami)
+                if ami > self.ami_max - eps:
+                    self._cur_epoch_best = self._cur_epoch
+                    self.save_model_weights()
+                    print('[current best] model weights backup')
+                elif self._cur_epoch % 43 == 0:
+                    self.save_model_weights()
+                    print('model weights backup')
+
+            loss.backward()
+            self.optimizer.step()
+            t1 = time.time()
+
+            ##########[ recording ]###########
+            self._record(dur=t1 - t0,
+                         train_loss=loss.item(),
+                         train_acc=train_acc,
+                         test_acc=test_acc,
+                         AMI=ami,
+                         microF1=microF1,
+                         macroF1=macroF1,
+                         weightedF1=weightedF1,
+                         )
+
+            dur_avg = np.average(self.dur)
+            test_acc_max = max(self.test_acc)
+            logfmt = "Epoch {:05d} | Train Acc: {:.4f} | Test Acc: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
+            self._cur_log = logfmt.format(
+                self._cur_epoch, train_acc,
+                test_acc, test_acc_max,
+                ami, dur_avg)
+
+            print(self._cur_log)
+        self._cur_epoch_adopted = self._cur_epoch
         raise NotImplementedError
 
     # In[]

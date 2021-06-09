@@ -22,6 +22,49 @@ from .base import check_dirs
 from .evaluation import accuracy, get_AMI
 from .plot import plot_records_for_trainer
 
+def create_blocks(g, output_nodes):
+    blocks = []
+    output_nodes_last = {}
+    output_nodes_last['cell'] = output_nodes
+    all_gene_out = g.in_edges(output_nodes_last['cell'], etype='expressed_by')[0].cpu().numpy()#genes expressed_by cells
+    all_gene_ID = np.array(list(set(all_gene_out)),dtype=np.int64)
+    output_nodes_last['gene'] = torch.tensor(all_gene_ID).to('cuda')
+    frontier = dgl.in_subgraph(g, output_nodes_last).to('cuda')
+    block = dgl.to_block(frontier, output_nodes_last)
+    blocks.append(block)
+    #the last block stores the target batch cells and their connected genes
+    for i in range(4-1):
+        all_cell_ID = block.srcnodes('cell').to('cuda')
+        all_gene_ID = block.srcnodes('gene').to('cuda')
+        output_nodes_dict = {'cell': all_cell_ID, 'gene' : all_gene_ID}
+        frontier = dgl.in_subgraph(g, output_nodes_dict).to('cuda')
+        block = dgl.to_block(frontier, output_nodes_dict)
+        blocks.append(block)
+    blocks.reverse()
+    return blocks
+
+
+def create_batch_idx(all_index, batchsize, shuffle=True):
+    '''
+    This function create batch idx, i.e. the cells IDs in a batch.
+    ########################################################################
+    all_index
+    type: array
+    value: stores all the cells' IDs , i.e. array([0, 1, 2,..., n])
+    ########################################################################
+    return: batchlist, which is on cpu.
+    ########################################################################
+    '''
+    batch_list = []
+    if shuffle:
+        np.random.shuffle(all_index)
+    if batchsize >= len(all_index):
+        batchsize = len(all_index)
+    batch_num = int(len(all_index) / batchsize) + 1
+    for i in range(batch_num-1):
+        batch_list.append(all_index[batchsize*i: batchsize*(i+1)])
+    batch_list.append(all_index[batchsize*(batch_num-1): ])
+    return batch_list
 
 def seed_everything(seed=123):
     random.seed(seed)
