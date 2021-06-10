@@ -22,7 +22,15 @@ from .base import check_dirs
 from .evaluation import accuracy, get_AMI
 from .plot import plot_records_for_trainer
 
-def create_blocks(g, output_nodes):
+
+def sub_graph(cell_ID, gene_ID, g):
+	###sub_graph for g
+	output_nodes_dict = {'cell': cell_ID, 'gene': gene_ID}
+	g_subgraph = dgl.node_subgraph(g, output_nodes_dict).to('cuda')
+
+	return g_subgraph
+
+def create_blocks(n_layers, g, output_nodes):
     blocks = []
     output_nodes_last = {}
     output_nodes_last['cell'] = output_nodes
@@ -33,7 +41,7 @@ def create_blocks(g, output_nodes):
     block = dgl.to_block(frontier, output_nodes_last)
     blocks.append(block)
     #the last block stores the target batch cells and their connected genes
-    for i in range(4-1):
+    for i in range(n_layers-1):
         all_cell_ID = block.srcnodes('cell').to('cuda')
         all_gene_ID = block.srcnodes('gene').to('cuda')
         output_nodes_dict = {'cell': all_cell_ID, 'gene' : all_gene_ID}

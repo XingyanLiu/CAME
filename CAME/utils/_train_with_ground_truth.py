@@ -12,7 +12,7 @@ import torch
 from torch import Tensor
 import dgl
 
-from .train import BaseTrainer, make_class_weights, create_blocks, create_batch_idx, prepare4train, seed_everything
+from .train import BaseTrainer, make_class_weights, create_blocks, create_batch_idx, sub_graph, prepare4train, seed_everything
 from .evaluation import accuracy, get_AMI, get_F1_score
 from .plot import plot_records_for_trainer
 
@@ -133,23 +133,22 @@ class Trainer(BaseTrainer):
         for epoch in range(n_epochs):
             self._cur_epoch += 1
             for output_nodes in batch_list:
-                blocks = create_blocks(self.g, output_nodes)
-                #input_features = blocks[0].srcdata['feat']
-                batch_train_idx = torch.tensor(np.intersect1d(train_idx.cpu().numpy(), output_nodes))
+                blocks = create_blocks(n_layers=3, g=self.g, output_nodes=output_nodes)
+                blocks.append(sub_graph(blocks[-1].dstnodes('cell').to('cuda'), blocks[-1].dstnodes('gene').to('cuda'), self.g))#add last block for GAT
+                batch_train_idx = torch.tensor(np.intersect1d(train_idx.cpu().numpy(), output_nodes)).to(self.device)
                 self.optimizer.zero_grad()
                 t0 = time.time()
-                #print('asdasdasdasd')#ok
                 logits = self.model(self.feat_dict,
                                     blocks,  # .to(self.device),
+                                    batch_train = True,
                                     **other_inputs)
                 out_cell = logits[cat_class]  # .cuda()
                 loss = self.model.get_classification_loss(
-                    out_cell[batch_train_idx.to(self.device)],
-                    _train_labels,  # labels[train_idx],
+                    out_cell[batch_train_idx],
+                    _train_labels[batch_train_idx],  # labels[train_idx],
                     weight=class_weights,
                     **params_lossfunc
                 )
-
             # prediction of ALL
             _, y_pred = torch.max(out_cell, dim=1)
             y_pred_test = y_pred[test_idx]
