@@ -133,16 +133,59 @@ if load_other_ckpt:
             checkpoint='last',
     )
 
-# In[]
-# ======================= further analysis =======================
+
 obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
 obs = dpair.obs
 classes = dpair.classes
 if 'unknown' in classes:
     classes = classes[: -1]
+    
+# In[]
+# ============== heatmap of predicted probabilities ==============
+name_label = 'celltype'
+cols_anno = ['celltype', 'predicted'][:]
+
+out_cell = trainer.eval_current()['cell']
+probas_all = CAME.as_probabilities(out_cell)
+probas_all = CAME.model.detach2numpy(torch.sigmoid(out_cell))
+df_probs = pd.DataFrame(probas_all, columns=classes)
+
+# df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
+df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
+
+indices = CAME.subsample_each_group(df_lbs['celltype'], n_out=50, )
+# indices = df_lbs.index
+df_data = df_probs.loc[indices, :].copy()
+df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
+lbs = df_lbs[name_label][indices]
+
+_ = pl.heatmap_probas(
+    df_data.T, lbs, name_label='true label',
+    figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
+)
+# In[]
+# ======================= further analysis =======================
 # h_dict = trainer.model.get_hidden_states()
 adt = pp.make_adata(h_dict['cell'], obs=dpair.obs, assparse=False)
 gadt = pp.make_adata(h_dict['gene'], obs=dpair.var, assparse=False)
 
+
+# In[]
+'''======================= cell embeddings ======================='''
+# from CAME_v0.utils.plot_pub import plot_pure_umap
+
+sc.set_figure_params(dpi_save=200)
+
+sc.pp.neighbors(adt, n_neighbors=15, metric='cosine', use_rep='X')
+sc.tl.umap(adt)
+sc.pl.umap(adt, color=['dataset', 'celltype'], ncols=1)
+# setting UMAP to the original adata
+obs_umap = adt.obsm['X_umap']
+adata1.obsm['X_umap'] = obs_umap[obs_ids1]
+adata2.obsm['X_umap'] = obs_umap[obs_ids2]
+
+ftype = ['.svg', ''][1]
+sc.pl.umap(adt, color='dataset', save=f'-dataset{ftype}')
+sc.pl.umap(adt, color='celltype', save=f'-ctype{ftype}')
 
 
