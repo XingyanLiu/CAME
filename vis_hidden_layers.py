@@ -248,6 +248,7 @@ for i, _x_umap in enumerate(obs_umaps_all):
             show=True, 
             save=f'_cell_layer_{i}'
             )
+    
 # In[]
 ''' separately cell UMAP '''
 adt1, adt2 = pp.bisplit_adata(adt, 'dataset', left_groups=[dsn1])
@@ -310,7 +311,7 @@ for _adt, _var_ids, _tag in zip([gadt1, gadt2],
                 _adt, color='module', 
                 basis=f'umap_layer{i}',
                 show=True, 
-                save=f'_{_tag}_cell_layer_{i}'
+                save=f'_{_tag}_gene_layer_{i}'
                 )
     
     
