@@ -23,6 +23,10 @@ def accuracy(logits, labels):
         _, preds = torch.max(logits, dim=1)
     else:
         preds = logits
+    if len(labels.shape) >= 2:
+        _, labels = torch.max(labels, dim=1)
+    else:
+        labels = labels
     correct = torch.sum(preds == labels)
     return correct.item() * 1.0 / len(labels)
 
@@ -35,7 +39,7 @@ def get_AMI(y_true, y_pred, **kwds):
     return ami
 
 
-def get_F1_score(y_true, y_pred, average='micro', **kwds):
+def get_F1_score(y_true, y_pred, average='macro', **kwds):
     y_true, y_pred = list(map(detach2numpy, (y_true, y_pred)))
     f1 = metrics.f1_score(y_true, y_pred, average=average, **kwds)
     return f1

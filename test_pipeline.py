@@ -12,6 +12,6 @@ mpl.use('Agg')
 
 if __name__ == '__main__':
 
-    CAME.__test1__()
-    CAME.__test2__()
-    pipeline_supervised.__test2_sup__(5)
+    # CAME.__test1__()
+    CAME.__test2__(100)
+    # pipeline_supervised.__test2_sup__(5)

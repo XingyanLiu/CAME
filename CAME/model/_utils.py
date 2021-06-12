@@ -5,13 +5,13 @@
 @time: 2021-06-12
 """
 
-from typing import Union, Sequence, Optional, Mapping, Any
+from typing import Union, Sequence, Optional, Mapping, Any, List
 import logging
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
 import dgl
-
+from sklearn.preprocessing import MultiLabelBinarizer
 from .cggc import CGGCNet
 from .cgc import CGCNet
 
@@ -22,6 +22,34 @@ def detach2numpy(x):
     elif isinstance(x, Mapping):
         x = {k: detach2numpy(v) for k, v in x.items()}
     return x
+
+
+def to_cuda(x):
+    if isinstance(x, th.Tensor):
+        return x.cuda()
+    elif isinstance(x, List) and isinstance(x[0], th.Tensor):
+        return [xx.cuda() for xx in x]
+    elif isinstance(x, Mapping):
+        return {k: v.cuda() for k, v in x.items()}
+
+
+def onehot_encode(
+        x: Sequence,
+        classes=None,
+        sparse_output: bool = True,
+        astensor: bool = True,
+        **kwargs
+):
+    x = detach2numpy(x)
+    if not isinstance(x[0], Sequence):
+        x = [[_x] for _x in x]
+    binarizer = MultiLabelBinarizer(classes=classes, sparse_output=sparse_output)
+    x_onehot = binarizer.fit_transform(x)
+    print(binarizer.classes)
+    if astensor:
+        return th.Tensor(x_onehot)
+    else:
+        return x_onehot
 
 
 def get_all_hidden_states(
