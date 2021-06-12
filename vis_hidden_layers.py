@@ -38,7 +38,7 @@ if not TEST_ON_MAC:
         ('testis_human', 'testis_mouse'),
         ('testis_human', 'testis_monkey'),
     ]
-    dsnames = DATASET_PAIRS[2]  # [::-1]
+    dsnames = DATASET_PAIRS[-2]  # [::-1]
     dsn1, dsn2 = dsnames
 
     from DATASET_NAMES import Tissues, NAMES_ALL
@@ -119,9 +119,9 @@ dpair, trainer, h_dict, ENV_VARs = pipeline.main_for_unaligned(
     resdir=resdir,
     check_umap=not True,  # True for visualizing embeddings each 40 epochs
     n_pass=100,
-    params_model=dict(residual=True)
+    params_model=dict(residual=False)
 )
-load_other_ckpt = False
+load_other_ckpt = not False
 if load_other_ckpt:
     obs, df_probs, h_dict = pipeline.gather_came_results(
             dpair,
@@ -146,26 +146,36 @@ name_label = 'celltype'
 cols_anno = ['celltype', 'predicted'][:]
 
 out_cell = trainer.eval_current()['cell']
+
 probas_all = CAME.as_probabilities(out_cell)
 probas_all = CAME.model.detach2numpy(torch.sigmoid(out_cell))
+#probas_all = np.apply_along_axis(lambda x: x / x.sum(), 1, probas_all,)
 df_probs = pd.DataFrame(probas_all, columns=classes)
 
-# df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
-df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
-
-indices = CAME.subsample_each_group(df_lbs['celltype'], n_out=50, )
-# indices = df_lbs.index
-df_data = df_probs.loc[indices, :].copy()
-df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
-lbs = df_lbs[name_label][indices]
-
-_ = pl.heatmap_probas(
-    df_data.T, lbs, name_label='true label',
-    figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
-)
+for i, _obs_ids in enumerate([obs_ids1, obs_ids2]):
+    # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
+    df_lbs = obs[cols_anno].iloc[_obs_ids].sort_values(cols_anno)
+    
+    indices = CAME.subsample_each_group(df_lbs['celltype'], n_out=50, )
+    # indices = df_lbs.index
+    df_data = df_probs.loc[indices, :].copy()
+    df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
+    lbs = df_lbs[name_label][indices]
+    
+    _ = pl.heatmap_probas(
+        df_data.T, lbs, name_label='true label', 
+        cmap_heat='RdBu_r',
+        figsize=(5, 3.), fp=figdir / f'heatmap_probas-{i}.pdf'
+    )
+    
 # In[]
 # ======================= further analysis =======================
-# h_dict = trainer.model.get_hidden_states()
+#trainer.model.rgcn.hidden_states
+#h_dict = trainer.model.get_hidden_states()
+h_dict_all = CAME.model.get_all_hidden_states(
+        trainer.model, trainer.feat_dict, trainer.g
+        )
+h_dict = h_dict_all[-1]
 adt = pp.make_adata(h_dict['cell'], obs=dpair.obs, assparse=False)
 gadt = pp.make_adata(h_dict['gene'], obs=dpair.var, assparse=False)
 
@@ -187,5 +197,8 @@ adata2.obsm['X_umap'] = obs_umap[obs_ids2]
 ftype = ['.svg', ''][1]
 sc.pl.umap(adt, color='dataset', save=f'-dataset{ftype}')
 sc.pl.umap(adt, color='celltype', save=f'-ctype{ftype}')
+
+# In[]
+
 
 
