@@ -24,7 +24,7 @@ import CAME
 from CAME import pipeline, pp, pl
 
 # In[]
-TEST_ON_MAC = True
+TEST_ON_MAC = not True
 if not TEST_ON_MAC:
     DATASET_PAIRS = [
         ('zebrafish_LD_10hr', 'mouse_NMDA_24hr'),
@@ -38,7 +38,7 @@ if not TEST_ON_MAC:
         ('testis_human', 'testis_mouse'),
         ('testis_human', 'testis_monkey'),
     ]
-    dsnames = DATASET_PAIRS[-2]  # [::-1]
+    dsnames = DATASET_PAIRS[2]  # [::-1]
     dsn1, dsn2 = dsnames
 
     from DATASET_NAMES import Tissues, NAMES_ALL
