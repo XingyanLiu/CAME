@@ -199,6 +199,120 @@ sc.pl.umap(adt, color='dataset', save=f'-dataset{ftype}')
 sc.pl.umap(adt, color='celltype', save=f'-ctype{ftype}')
 
 # In[]
+import umap
+def umap_reduce0(
+        X, 
+        n_neighbors=15,
+        metric='cosine',
+        **kwargs
+    ):
+    reducer = umap.UMAP(n_neighbors=n_neighbors, metric=metric, **kwargs)
+    return reducer.fit_transform(X)
 
+def umap_reduce(
+        X, 
+        n_neighbors=15,
+        metric='cosine',
+        **kwargs
+        ):
+    _adt = pp.make_adata(X, assparse=False)
+    sc.pp.neighbors(
+            _adt,
+            n_neighbors=n_neighbors,
+            metric=metric,
+            use_rep='X'
+            )
+    sc.tl.umap(_adt)
+    return _adt.obsm['X_umap']
+    
 
+h_dict_all = CAME.model.get_all_hidden_states(
+        trainer.model, trainer.feat_dict, trainer.g
+        )
+attn_mat = CAME.model.get_attentions(
+        trainer.model, trainer.feat_dict, trainer.g, 
+#        from_scratch=False
+        )
+#tmp = h_dict_all[0]['cell']
+#tmp.shape
+#umap_reduce(tmp)
+# In[]
+obs_umaps_all = [
+        umap_reduce(h['cell']) for h in h_dict_all
+        ]
 
+for i, _x_umap in enumerate(obs_umaps_all):    
+    adt.obsm[f'X_umap_layer{i}'] = _x_umap
+    sc.pl.embedding(
+            adt, color=['dataset', 'celltype'], basis=f'umap_layer{i}',
+            show=True, 
+            save=f'_cell_layer_{i}'
+            )
+# In[]
+''' separately cell UMAP '''
+adt1, adt2 = pp.bisplit_adata(adt, 'dataset', left_groups=[dsn1])
+
+for _adt, _obs_ids, _tag in zip([adt1, adt2], 
+                          [obs_ids1, obs_ids2],
+                          ['ref', 'que']
+                          ):
+    obs_umaps_all = [
+            umap_reduce(h['cell'][_obs_ids]) for h in h_dict_all
+            ]
+    
+    for i, _x_umap in enumerate(obs_umaps_all):    
+        _adt.obsm[f'X_umap_layer{i}'] = _x_umap
+        sc.pl.embedding(
+                _adt, color='celltype', 
+                basis=f'umap_layer{i}',
+                show=True, 
+                save=f'_{_tag}_cell_layer_{i}'
+                )
+
+ 
+# In[]
+''' combined gene UMAP at each layer'''
+
+sc.pp.neighbors(gadt, n_neighbors=15, metric='cosine', use_rep='X')
+sc.tl.leiden(gadt, resolution=0.8, key_added='module')
+
+# In[]
+
+var_umaps_all = [
+        umap_reduce(h['gene']) for h in h_dict_all
+        ]
+for i, _x_umap in enumerate(var_umaps_all):    
+    gadt.obsm[f'X_umap_layer{i}'] = _x_umap
+    sc.pl.embedding(
+            gadt, color=['dataset', 'module'], 
+            basis=f'umap_layer{i}',
+            show=True, 
+            save=f'_gene_layer_{i}'
+            )
+    
+
+# In[]
+''' independent gene UMAP at each layer'''
+var_ids1, var_ids2 = dpair.get_vnode_ids(0), dpair.get_vnode_ids(1)
+gadt1, gadt2 = pp.bisplit_adata(gadt, 'dataset', left_groups=[dsn1])
+
+for _adt, _var_ids, _tag in zip([gadt1, gadt2], 
+                          [var_ids1, var_ids2],
+                          ['ref', 'que']
+                          ):
+    obs_umaps_all = [
+            umap_reduce(h['gene'][_var_ids]) for h in h_dict_all
+            ]
+    
+    for i, _x_umap in enumerate(obs_umaps_all):    
+        _adt.obsm[f'X_umap_layer{i}'] = _x_umap
+        sc.pl.embedding(
+                _adt, color='module', 
+                basis=f'umap_layer{i}',
+                show=True, 
+                save=f'_{_tag}_cell_layer_{i}'
+                )
+    
+    
+    
+    
