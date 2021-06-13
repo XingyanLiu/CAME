@@ -314,6 +314,38 @@ for _adt, _var_ids, _tag in zip([gadt1, gadt2],
                 save=f'_{_tag}_gene_layer_{i}'
                 )
     
+# In[]
+''' attention matrix'''
+attn1 = attn_mat[obs_ids1, :][:, var_ids1]
+attn2 = attn_mat[obs_ids2, :][:, var_ids2]
     
-    
-    
+adta1 = pp.make_adata(attn1, obs=adt1.obs)
+adta2 = pp.make_adata(attn2, obs=adt2.obs)
+adta1.var_names = dpair.vnode_names1
+adta2.var_names = dpair.vnode_names2
+
+
+sc.tl.pca(adta1, n_comps=50)
+sc.pp.neighbors(adta1, n_neighbors=15, metric='cosine')
+sc.tl.umap(adta1)
+sc.pl.umap(adta1, color='celltype')
+sc.pl.pca(adta1, color='celltype')
+
+
+sc.tl.pca(adta2, n_comps=50)
+sc.pp.neighbors(adta2, n_neighbors=15, metric='cosine')
+sc.tl.umap(adta2)
+sc.pl.umap(adta2, color='celltype')
+sc.pl.pca(adta2, color='celltype')
+
+
+adta1_, adta2_ = pp.align_adata_vars(
+        adta1, adta2, df_varmap_1v1, unify_names=True)
+adta_ = pp.merge_adatas([adta1_, adta2_], union=False)
+pp.add_obs_annos(adta_, adt.obs)
+
+sc.tl.pca(adta_, n_comps=50)
+sc.pp.neighbors(adta_, n_neighbors=15, metric='cosine')
+sc.tl.umap(adta_)
+sc.pl.umap(adta_, color=['dataset', 'celltype'])
+sc.pl.pca(adta_, color=['dataset', 'celltype'])
