@@ -136,9 +136,9 @@ if load_other_ckpt:
 
 obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
 obs = dpair.obs
-classes = dpair.classes
+classes = dpair.classes.copy()
 if 'unknown' in classes:
-    classes = classes[: -1]
+    classes.remove('unknown')
     
 # In[]
 # ============== heatmap of predicted probabilities ==============
@@ -286,9 +286,9 @@ for i, _x_umap in enumerate(var_umaps_all):
     gadt.obsm[f'X_umap_layer{i}'] = _x_umap
     sc.pl.embedding(
             gadt, color=['dataset', 'module'], 
-            basis=f'umap_layer{i}',
+            basis=f'layer{i}_umap',
             show=True, 
-            save=f'_gene_layer_{i}'
+            save=f'_gene'
             )
     
 
