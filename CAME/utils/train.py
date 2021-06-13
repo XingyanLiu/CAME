@@ -15,7 +15,7 @@ from pandas import DataFrame, value_counts
 import torch
 from torch import Tensor, LongTensor
 import dgl
-
+import torch
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 from .base import check_dirs
@@ -52,7 +52,7 @@ def create_blocks(n_layers, g, output_nodes):
     return blocks
 
 
-def create_batch_idx(all_index, batchsize, shuffle=True):
+def create_batch_idx(train_idx, test_idx, batchsize, labels, shuffle=True):
     '''
     This function create batch idx, i.e. the cells IDs in a batch.
     ########################################################################
@@ -64,15 +64,27 @@ def create_batch_idx(all_index, batchsize, shuffle=True):
     ########################################################################
     '''
     batch_list = []
+    batch_labels = []
+    all_index = torch.cat((train_idx, test_idx), 0)
+
     if shuffle:
-        np.random.shuffle(all_index)
+        state = np.random.get_state()
+        np.random.shuffle(all_index.detach().cpu().numpy())
+        np.random.set_state(state)
+        np.random.shuffle(labels.detach().cpu().numpy())
+        all_index = all_index.to('cuda')
+        labels = labels.to('cuda')
+
+
     if batchsize >= len(all_index):
         batchsize = len(all_index)
     batch_num = int(len(all_index) / batchsize) + 1
     for i in range(batch_num-1):
         batch_list.append(all_index[batchsize*i: batchsize*(i+1)])
+        batch_labels.append(labels[batchsize*i: batchsize*(i+1)])
     batch_list.append(all_index[batchsize*(batch_num-1): ])
-    return batch_list
+    batch_labels.append(labels[batchsize*(batch_num-1): ])
+    return batch_list, batch_labels
 
 def seed_everything(seed=123):
     random.seed(seed)

@@ -118,7 +118,7 @@ class Trainer(BaseTrainer):
         '''
         train_idx, test_idx, labels = self.train_idx, self.test_idx, self.labels
         _train_labels, _test_labels = labels[train_idx], labels[test_idx]
-        #self.g.nodes['cell'].data['feat'] = self.feat_dict['cell']
+        #self.g.nodes['cell'].data['feat'] = self.feat_dict['cell'] #{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
 
         if use_class_weights:
             class_weights = self.class_weights
@@ -127,15 +127,17 @@ class Trainer(BaseTrainer):
 
         print("start training".center(50, '='))
         self.model.train()
-
-        batch_list = create_batch_idx(np.array(range(10455)), batchsize=512, shuffle=True)
-
+        batch_list, batch_labels = create_batch_idx(train_idx=train_idx, test_idx = test_idx, batchsize=10455, labels=labels, shuffle=True)
+        n_epochs = 500
         for epoch in range(n_epochs):
             self._cur_epoch += 1
-            for output_nodes in batch_list:
+            all_train_labels = []
+            all_test_labels = []
+            for output_nodes, output_labels in zip(batch_list, batch_labels):
                 blocks = create_blocks(n_layers=3, g=self.g, output_nodes=output_nodes)
                 blocks.append(sub_graph(blocks[-1].dstnodes('cell').to('cuda'), blocks[-1].dstnodes('gene').to('cuda'), self.g))#add last block for GAT
-                batch_train_idx = torch.tensor(np.intersect1d(train_idx.cpu().numpy(), output_nodes)).to(self.device)
+                block_batch_train_idx = output_nodes.clone().detach()  <= torch.max(train_idx)
+                block_batch_test_idx = output_nodes.clone().detach()  > torch.max(train_idx)
                 self.optimizer.zero_grad()
                 t0 = time.time()
                 logits = self.model(self.feat_dict,
@@ -144,18 +146,25 @@ class Trainer(BaseTrainer):
                                     **other_inputs)
                 out_cell = logits[cat_class]  # .cuda()
                 loss = self.model.get_classification_loss(
-                    out_cell[batch_train_idx],
-                    _train_labels[batch_train_idx],  # labels[train_idx],
+                    out_cell[block_batch_train_idx],
+                    output_labels[block_batch_train_idx],  # labels[train_idx],
                     weight=class_weights,
                     **params_lossfunc
                 )
+                loss.backward()
+                self.optimizer.step()
+                _, y_pred = torch.max(out_cell, dim=1)
+                y_pred_train = y_pred[block_batch_train_idx]
+                y_pred_test = y_pred[block_batch_test_idx]
             # prediction of ALL
-            _, y_pred = torch.max(out_cell, dim=1)
-            y_pred_test = y_pred[test_idx]
 
             ### evaluation (Acc.)
-            train_acc = accuracy(y_pred[train_idx], labels[train_idx])
-            test_acc = accuracy(y_pred_test, _test_labels)
+                if len(output_labels[block_batch_test_idx])>0 and len(output_labels[block_batch_train_idx])>0:
+                    train_acc = accuracy(y_pred[block_batch_train_idx], output_labels[block_batch_train_idx])
+                    test_acc = accuracy(y_pred[block_batch_test_idx], output_labels[block_batch_test_idx])
+            #test_acc = accuracy(y_pred_test, _test_labels)
+                    print('epoch', epoch,'loss',loss, 'train_acc', train_acc, 'test_acc', test_acc)
+            '''
             ### F1-scores
             microF1 = get_F1_score(_test_labels, y_pred_test, average='micro')
             macroF1 = get_F1_score(_test_labels, y_pred_test, average='macro')
@@ -175,8 +184,6 @@ class Trainer(BaseTrainer):
                     self.save_model_weights()
                     print('model weights backup')
 
-            loss.backward()
-            self.optimizer.step()
             t1 = time.time()
 
             ##########[ recording ]###########
@@ -201,7 +208,7 @@ class Trainer(BaseTrainer):
             print(self._cur_log)
         self._cur_epoch_adopted = self._cur_epoch
         raise NotImplementedError
-
+        '''
     # In[]
     def train(self, n_epochs=350,
               use_class_weights=True,
