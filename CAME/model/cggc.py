@@ -52,13 +52,11 @@ class CGGCNet(nn.Module):
                  h_dim=32,
                  h_dim_add=None,  # None --> rgcn2
                  out_dim=32,  # number of classes
-                 num_bases=-1,
                  num_hidden_layers=1,
                  norm='right',
                  use_weight=True,
                  dropout_feat=0.,
                  dropout=0,
-#                 use_self_loop=False,
                  negative_slope=0.2,
                  batchnorm_ntypes=None,
                  layernorm_ntypes=None,
@@ -103,7 +101,6 @@ class CGGCNet(nn.Module):
                                  norm=self.gcn_norm,
                                  use_weight=use_weight,
                                  dropout=dropout,
-#                                 use_self_loop=use_self_loop,
                                  negative_slope=negative_slope,
                                  batchnorm_ntypes=batchnorm_ntypes,
                                  layernorm_ntypes=layernorm_ntypes,

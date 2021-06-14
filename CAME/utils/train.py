@@ -18,7 +18,7 @@ import dgl
 import torch
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
-from .base import check_dirs
+from .base import check_dirs, save_json_dict
 from .evaluation import accuracy, get_AMI
 from .plot import plot_records_for_trainer
 
@@ -169,6 +169,14 @@ def prepare4train(
     return ENV_VARs
 
 
+def get_checkpoint_list(dirname):
+    all_ckpts = [
+        int(_fn.strip('weights_epoch.pt'))
+        for _fn in os.listdir(dirname) if _fn.endswith('.pt')
+    ]
+    return all_ckpts
+
+
 # In[]
 
 class BaseTrainer(object):
@@ -311,6 +319,23 @@ class BaseTrainer(object):
         self.model.load_state_dict(sdct)
         self._cur_epoch_adopted = n_epoch
         print('states loaded from:', fp)
+
+    def save_checkpoint_record(self):
+        cur_epoch = self._cur_epoch
+        if self._cur_epoch_best > 0:
+            cur_epoch_rec = self._cur_epoch_best
+        else:
+            cur_epoch_rec = self._cur_epoch
+        all_ckpts = get_checkpoint_list(self.dir_model)
+        all_ckpts = [x for x in all_ckpts if
+                     x not in {cur_epoch, cur_epoch_rec}]
+        ckpt_dict = {
+            'recommended': cur_epoch_rec,
+            'last': cur_epoch,
+            'others': all_ckpts
+        }
+        save_json_dict(ckpt_dict, self.dir_model / 'chckpoint_dict.json')
+        # load_json_dict(self.dir_model / 'chckpoint_dict.json')
 
     def eval_current(self, **other_inputs):
         """ get the current states of the model output
