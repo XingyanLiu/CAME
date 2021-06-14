@@ -26,6 +26,7 @@ from .utils.evaluation import (
         accuracy
         )                       
 from .utils.analyze import (
+        load_dpair_and_model,
         weight_linked_vars, 
         make_abstracted_graph,
         )             

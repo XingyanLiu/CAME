@@ -82,6 +82,11 @@ def load_dpair_and_model(
         from ..model import CGGCNet
         dpair = DataPair(**element_dict)
         model = CGGCNet(**model_params)
+    if os.path.exists(dirname / 'obs.csv'):
+        dpair.set_common_obs_annos(
+                pd.read_csv(dirname / 'obs.csv', index_col=0),
+                ignore_index=True
+                )
 
     ckpt = load_json_dict(
         model_dir / 'chckpoint_dict.json'
