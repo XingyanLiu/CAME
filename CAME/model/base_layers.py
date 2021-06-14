@@ -146,6 +146,7 @@ class BaseMixConvLayer(nn.Module):
         #            wdict = {}
         #        hs = self.conv(g, h_dict, mod_kwargs=wdict)
         #        hs = self.conv(g, h_dict)
+        #print('inputs', inputs)
         inputs_src = inputs_dst = inputs
         hs = self.conv(g, (inputs_src, inputs_dst), **kwds)
 
