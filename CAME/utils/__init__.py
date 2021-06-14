@@ -24,3 +24,7 @@ from .evaluation import (
 #        )
 #from preprocess import *
 from ._get_example_data import load_example_data
+from .downsample_counts import (
+        downsample_total_counts,
+        downsample_counts_per_cell
+)

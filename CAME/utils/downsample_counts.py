@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Dec 23 22:06:09 2020
-
-@author: Administrator
+@author: Xingyan Liu
+@file: vis_hidden_layers.py
+@time: Dec 23 22:06:09 2020
 """
 from typing import Union, Optional, Tuple, Collection, Sequence, Iterable
 from scipy.sparse import issparse, isspmatrix_csr, csr_matrix, spmatrix
-
+import logging
 import numba
 import numpy as np
 from scanpy import AnnData
 
+
 def downsample_total_counts(adata, frac=0.5, copy=False, **kwds):
     total0 = adata.X.data.sum()
     total1 = int(total0 * frac)
-    print('before:', total0, '\tafter:', total1)
+    logging.info('before:', total0, '\tafter:', total1)
     return downsample_counts(
                 adata, total_counts=total1, 
                 copy=copy, **kwds)
-    
+
+
 def downsample_counts_per_cell(adata, frac=0.5, copy=False, **kwds):
     cnts_per_cell0 = adata.X.sum(1)
     if hasattr(cnts_per_cell0, 'A1'):
         cnts_per_cell0 = cnts_per_cell0.A1
     cnts_per_cell = (cnts_per_cell0 * frac).flatten().astype(int)
-#    print('before:', total0, '\tafter:', total1)
     return downsample_counts(
                 adata, counts_per_cell=cnts_per_cell, 
                 copy=copy, **kwds)
