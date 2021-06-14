@@ -9,6 +9,8 @@ from .utils import base
 from .utils.base import (
         save_pickle,
         load_pickle,
+        save_json_dict,
+        load_json_dict,
         check_dirs,
         write_info,
         make_nowtime_tag,

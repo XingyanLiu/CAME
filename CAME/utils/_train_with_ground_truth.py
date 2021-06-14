@@ -141,7 +141,7 @@ class Trainer(BaseTrainer):
             all_train_labels = []
             all_test_labels = []
             for output_nodes, output_labels in zip(batch_list, batch_labels):
-                blocks = create_blocks(n_layers=3, g=self.g,
+                blocks = create_blocks(n_layers=3, g=self.g.cpu(),
                                        output_nodes=output_nodes)
                 blocks.append(sub_graph(blocks[-1].dstnodes('cell').to('cuda'),
                                         blocks[-1].dstnodes('gene').to('cuda'),

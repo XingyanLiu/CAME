@@ -38,7 +38,7 @@ class HiddenRGCN(nn.Module):
                  norm: str = 'right',
                  use_weight: bool = True,
                  dropout: Union[float, int] = 0.,
-                 use_self_loop: bool = False,
+#                 use_self_loop: bool = False,
                  negative_slope: Union[float, int] = 0.2,
                  batchnorm_ntypes: Optional[Sequence[str]] = None,
                  layernorm_ntypes: Optional[Sequence[str]] = None,  # g.ntypes
@@ -57,7 +57,7 @@ class HiddenRGCN(nn.Module):
 
         self.num_hidden_layers = len(self.dims) - 1
         self.dropout = dropout
-        self.use_self_loop = use_self_loop
+#        self.use_self_loop = use_self_loop
         self.leaky_relu = nn.LeakyReLU(negative_slope)
         #        self.hidden_states = []
 
@@ -112,7 +112,7 @@ class HiddenRRGCN(nn.Module):
                  norm: Union[str, None] = 'right',
                  use_weight=True,
                  dropout: Union[float, int] = 0.,
-                 use_self_loop: bool = False,
+#                 use_self_loop: bool = False,
                  negative_slope: Union[float, int] = 0.2,
                  batchnorm_ntypes: Optional[Sequence[str]] = None,  # g.ntypes
                  layernorm_ntypes: Optional[Sequence[str]] = None,  # g.ntypes
@@ -125,7 +125,7 @@ class HiddenRRGCN(nn.Module):
         self.canonical_etypes = canonical_etypes  # list(set(g.etypes))
         self.num_hidden_layers = num_hidden_layers
         self.dropout = dropout
-        self.use_self_loop = use_self_loop
+#        self.use_self_loop = use_self_loop
         self.leaky_relu = nn.LeakyReLU(negative_slope)
 
         self.layers = nn.ModuleList()

@@ -23,6 +23,7 @@ import logging
 
 from . import (
     save_pickle,
+    save_json_dict,
     make_nowtime_tag,
     write_info,
     as_probabilities,
@@ -42,8 +43,8 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
-# from .utils._train_multilabel import prepare4train, Trainer, seed_everything
+#from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
+from .utils._train_multilabel import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
@@ -116,14 +117,16 @@ def main_for_aligned(
     n_classes = len(classes)
     params_model = get_model_params(**params_model)
     params_model.update(
+        g_or_canonical_etypes=G.canonical_etypes,
         in_dim_dict={'cell': adpair.n_feats, 'gene': 0},
         out_dim=n_classes,
         layernorm_ntypes=G.ntypes,
     )
+    save_json_dict(params_model, resdir / 'model_params.json')
 
     # TODO: save model parameters, json file (whether eval?)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = CGCNet(G, **params_model)
+    model = CGCNet(**params_model)
 
     ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
@@ -268,14 +271,16 @@ def main_for_unaligned(
     n_classes = len(classes)
     params_model = get_model_params(**params_model)
     params_model.update(
+        g_or_canonical_etypes=G.canonical_etypes,
         in_dim_dict={'cell': dpair.n_feats, 'gene': 0},
         out_dim=n_classes,
         layernorm_ntypes=G.ntypes,
     )
+    save_json_dict(params_model, resdir / 'model_params.json')
 
     # TODO: save model parameters, json file (whether eval?)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = CGGCNet(G, **params_model)
+    model = CGGCNet(**params_model)
 
     ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
@@ -610,7 +615,7 @@ def __test2__(n_epochs: int = 5):
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
         params_model=dict(residual=False),
-        batch_size=32,
+        batch_size=None,
     )
 
     del _
