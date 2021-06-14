@@ -4,6 +4,8 @@ Created on Sun Apr 11 18:46:19 2021
 
 @author: Xingyan Liu
 """
+from typing import Optional
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -28,3 +30,14 @@ class LabelSmoothingCrossEntropy(nn.Module):
             loss = loss.mean()
         return loss * self.eps / c + (1 - self.eps) * F.nll_loss(
             log_preds, target, reduction=self.reduction, weight=weight)
+
+
+def multilabel_binary_cross_entropy(
+        logits: torch.Tensor,
+        target: torch.Tensor,
+        weight: Optional[torch.Tensor] = None,
+):
+    # probas = F.sigmoid(logits)
+    # loss = F.binary_cross_entropy(probas, target, weight=weight)
+    loss = F.binary_cross_entropy_with_logits(logits, target, weight=weight)
+    return loss

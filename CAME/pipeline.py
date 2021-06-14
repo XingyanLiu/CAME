@@ -41,7 +41,8 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
+#from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
+from .utils._train_multilabel import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
@@ -67,6 +68,7 @@ def main_for_aligned(
         params_lossfunc: dict = {},
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
+        plot_results: bool = True
 ):
     if resdir is None:
         tag_time = base.make_nowtime_tag()
@@ -158,37 +160,39 @@ def main_for_aligned(
     )
     test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
-    # ============= confusion matrix & alluvial plot ==============
-    labels_cat = obs[keys[0]]
-    cl_preds = obs['predicted']
-    sc.set_figure_params(fontsize=10)
-
-    lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
-    lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
-
-    uplt.plot_confus_multi_mats(
-        lblist_y,
-        lblist_x,
-        classes_on=classes,
-        fname=figdir / f'confusion_matrix(acc{test_acc:.1%}).png',
-    )
-    # ============== heatmap of predicted probabilities ==============
-    name_label = 'celltype'
-    cols_anno = ['celltype', 'predicted'][:]
-
-    # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
-    df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
-
-    indices = subsample_each_group(df_lbs['celltype'], n_out=50, )
-    # indices = df_lbs.index
-    df_data = df_probs.loc[indices, :].copy()
-    df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
-    lbs = df_lbs[name_label][indices]
-
-    _ = uplt.heatmap_probas(df_data.T, lbs, name_label='true label',
-                            figsize=(5, 3.),
-                            fp=figdir / f'heatmap_probas.pdf'
-                            )
+    # ============= confusion matrix & heatmap plot ==============
+    if plot_results:
+        labels_cat = obs[keys[0]] if key_class2 != 'clust_lbs' else obs['celltype']
+        cl_preds = obs['predicted']
+        sc.set_figure_params(fontsize=10)
+    
+        lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
+        lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
+        
+        uplt.plot_confus_multi_mats(
+            lblist_y,
+            lblist_x,
+            classes_on=classes,
+            fname=figdir / f'confusion_matrix(acc{test_acc:.1%}).png',
+        )
+    
+        # ============== heatmap of predicted probabilities ==============
+        name_label = 'celltype'
+        cols_anno = ['celltype', 'predicted'][:]
+    
+        # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
+        df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
+    
+        indices = subsample_each_group(df_lbs['celltype'], n_out=50, )
+        # indices = df_lbs.index
+        df_data = df_probs.loc[indices, :].copy()
+        df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
+        lbs = df_lbs[name_label][indices]
+    
+        _ = uplt.heatmap_probas(df_data.T, lbs, name_label='true label',
+                                figsize=(5, 3.),
+                                fp=figdir / f'heatmap_probas.pdf'
+                                )
     return adpair, trainer, h_dict, ENV_VARs
 
 
@@ -312,7 +316,7 @@ def main_for_unaligned(
     # #    adata2.obs['predicted'] = pd.Categorical(obs['predicted'][obs_ids2], categories=classes)
     # #    utp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
 
-    labels_cat = obs[keys[0]]
+    labels_cat = obs[keys[0]] if key_class2 != 'clust_lbs' else obs['celltype']
     cl_preds = obs['predicted']
     # ============= confusion matrix OR alluvial plot ==============
     sc.set_figure_params(fontsize=10)
