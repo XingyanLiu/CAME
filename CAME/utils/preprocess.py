@@ -1553,7 +1553,8 @@ def group_mean_multiadata(adatas: Sequence[sc.AnnData],
 # In[]
 
 def quick_preprocess(
-        adata, hvgs=None,
+        adata,
+        hvgs=None,
         normalize_data=True,
         target_sum=1e4,
         batch_key=None,

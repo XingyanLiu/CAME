@@ -47,7 +47,7 @@ class CGGCNet(nn.Module):
     """
 
     def __init__(self,
-                 g,
+                 g_or_canonical_etypes,
                  in_dim_dict={},
                  h_dim=32,
                  h_dim_add=None,  # None --> rgcn2
@@ -71,6 +71,10 @@ class CGGCNet(nn.Module):
                  residual=False,
                  **kwds):  # ignored
         super(CGGCNet, self).__init__()
+        if isinstance(g_or_canonical_etypes, dgl.DGLGraph):
+            canonical_etypes = g_or_canonical_etypes.canonical_etypes
+        else:
+            canonical_etypes = g_or_canonical_etypes
         self.in_dim_dict = in_dim_dict
         if h_dim_add is not None:
             if isinstance(h_dim_add, int):
@@ -80,7 +84,7 @@ class CGGCNet(nn.Module):
         else:
             self.h_dims = (h_dim, h_dim)
         self.out_dim = out_dim
-        self.rel_names_out = rel_names_out if rel_names_out is not None else g.etypes
+        self.rel_names_out = canonical_etypes if rel_names_out is None else rel_names_out
         self.gcn_norm = norm
         self.batchnorm_ntypes = batchnorm_ntypes
         self.layernorm_ntypes = layernorm_ntypes
@@ -92,7 +96,7 @@ class CGGCNet(nn.Module):
                                dropout=dropout)
 
         hidden_model = HiddenRRGCN if share_hidden_weights else HiddenRGCN
-        self.rgcn = hidden_model(g.canonical_etypes,
+        self.rgcn = hidden_model(canonical_etypes,
                                  h_dim=h_dim,
                                  out_dim=h_dim_add,  # additional hidden layer if not None
                                  num_hidden_layers=num_hidden_layers,

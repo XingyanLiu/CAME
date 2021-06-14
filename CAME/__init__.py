@@ -16,7 +16,7 @@ from .utils.base import (
         )
 from .utils import preprocess as pp
 from .utils import plot as pl
-from .utils.train import prepare4train, Trainer
+from .utils.train import prepare4train, Trainer, SUBDIR_MODEL
 from .utils.evaluation import (
         as_probabilities, 
         predict_from_logits, 

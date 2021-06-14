@@ -12,7 +12,8 @@ import torch
 from torch import Tensor
 import dgl
 
-from .train import BaseTrainer, make_class_weights, create_blocks, create_batch_idx, sub_graph, prepare4train, seed_everything
+from .train import BaseTrainer, make_class_weights, create_blocks, \
+    create_batch_idx, sub_graph, prepare4train, seed_everything
 from .evaluation import accuracy, get_AMI, get_F1_score
 from .plot import plot_records_for_trainer
 
@@ -105,20 +106,23 @@ class Trainer(BaseTrainer):
             tt='test accuracy and cluster index',
             fp=fp)
 
-    def train_minibatch(self, n_epochs=350,
-              use_class_weights=True,
-              params_lossfunc={},
-              n_pass=100,
-              eps=1e-4,
-              cat_class='cell',
-              batchsize = 128,
-              **other_inputs):
-        '''
-        Funtcion for minibatch trainging
-        '''
+    def train_minibatch(
+            self, n_epochs=350,
+            use_class_weights=True,
+            params_lossfunc={},
+            n_pass=100,
+            eps=1e-4,
+            cat_class='cell',
+            batchsize=128,
+            **other_inputs):
+
+        """
+        Function for mini-batch training
+        """
+
         train_idx, test_idx, labels = self.train_idx, self.test_idx, self.labels
         _train_labels, _test_labels = labels[train_idx], labels[test_idx]
-        #self.g.nodes['cell'].data['feat'] = self.feat_dict['cell'] #{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
+        # self.g.nodes['cell'].data['feat'] = self.feat_dict['cell'] #{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
 
         if use_class_weights:
             class_weights = self.class_weights
@@ -127,22 +131,30 @@ class Trainer(BaseTrainer):
 
         print("start training".center(50, '='))
         self.model.train()
-        batch_list, batch_labels = create_batch_idx(train_idx=train_idx, test_idx = test_idx, batchsize=10455, labels=labels, shuffle=True)
+        batch_list, batch_labels = create_batch_idx(train_idx=train_idx,
+                                                    test_idx=test_idx,
+                                                    batchsize=10455,
+                                                    labels=labels, shuffle=True)
         n_epochs = 500
         for epoch in range(n_epochs):
             self._cur_epoch += 1
             all_train_labels = []
             all_test_labels = []
             for output_nodes, output_labels in zip(batch_list, batch_labels):
-                blocks = create_blocks(n_layers=3, g=self.g, output_nodes=output_nodes)
-                blocks.append(sub_graph(blocks[-1].dstnodes('cell').to('cuda'), blocks[-1].dstnodes('gene').to('cuda'), self.g))#add last block for GAT
-                block_batch_train_idx = output_nodes.clone().detach()  <= torch.max(train_idx)
-                block_batch_test_idx = output_nodes.clone().detach()  > torch.max(train_idx)
+                blocks = create_blocks(n_layers=3, g=self.g,
+                                       output_nodes=output_nodes)
+                blocks.append(sub_graph(blocks[-1].dstnodes('cell').to('cuda'),
+                                        blocks[-1].dstnodes('gene').to('cuda'),
+                                        self.g))  # add last block for GAT
+                block_batch_train_idx = output_nodes.clone().detach() <= torch.max(
+                    train_idx)
+                block_batch_test_idx = output_nodes.clone().detach() > torch.max(
+                    train_idx)
                 self.optimizer.zero_grad()
                 t0 = time.time()
                 logits = self.model(self.feat_dict,
                                     blocks,  # .to(self.device),
-                                    batch_train = True,
+                                    batch_train=True,
                                     **other_inputs)
                 out_cell = logits[cat_class]  # .cuda()
                 loss = self.model.get_classification_loss(
@@ -156,14 +168,18 @@ class Trainer(BaseTrainer):
                 _, y_pred = torch.max(out_cell, dim=1)
                 y_pred_train = y_pred[block_batch_train_idx]
                 y_pred_test = y_pred[block_batch_test_idx]
-            # prediction of ALL
+                # prediction of ALL
 
-            ### evaluation (Acc.)
-                if len(output_labels[block_batch_test_idx])>0 and len(output_labels[block_batch_train_idx])>0:
-                    train_acc = accuracy(y_pred[block_batch_train_idx], output_labels[block_batch_train_idx])
-                    test_acc = accuracy(y_pred[block_batch_test_idx], output_labels[block_batch_test_idx])
-            #test_acc = accuracy(y_pred_test, _test_labels)
-                    print('epoch', epoch,'loss',loss, 'train_acc', train_acc, 'test_acc', test_acc)
+                ### evaluation (Acc.)
+                if len(output_labels[block_batch_test_idx]) > 0 and len(
+                        output_labels[block_batch_train_idx]) > 0:
+                    train_acc = accuracy(y_pred[block_batch_train_idx],
+                                         output_labels[block_batch_train_idx])
+                    test_acc = accuracy(y_pred[block_batch_test_idx],
+                                        output_labels[block_batch_test_idx])
+                    # test_acc = accuracy(y_pred_test, _test_labels)
+                    print('epoch', epoch, 'loss', loss, 'train_acc', train_acc,
+                          'test_acc', test_acc)
             '''
             ### F1-scores
             microF1 = get_F1_score(_test_labels, y_pred_test, average='micro')
@@ -209,6 +225,7 @@ class Trainer(BaseTrainer):
         self._cur_epoch_adopted = self._cur_epoch
         raise NotImplementedError
         '''
+
     # In[]
     def train(self, n_epochs=350,
               use_class_weights=True,
@@ -220,7 +237,7 @@ class Trainer(BaseTrainer):
         """
                 Main function for model training
         ================================================
-        
+
         other_inputs: other inputs for `model.forward()`
         """
         #        g = self.g
@@ -243,7 +260,7 @@ class Trainer(BaseTrainer):
             logits = self.model(self.feat_dict,
                                 self.g,  # .to(self.device),
                                 **other_inputs)
-            out_cell = logits[cat_class] # .cuda()
+            out_cell = logits[cat_class]  # .cuda()
             loss = self.model.get_classification_loss(
                 out_cell[train_idx],
                 _train_labels,  # labels[train_idx],
@@ -261,7 +278,8 @@ class Trainer(BaseTrainer):
             ### F1-scores
             microF1 = get_F1_score(_test_labels, y_pred_test, average='micro')
             macroF1 = get_F1_score(_test_labels, y_pred_test, average='macro')
-            weightedF1 = get_F1_score(_test_labels, y_pred_test, average='weighted')
+            weightedF1 = get_F1_score(_test_labels, y_pred_test,
+                                      average='weighted')
 
             ### unsupervised cluster index
             if self.cluster_labels is not None:

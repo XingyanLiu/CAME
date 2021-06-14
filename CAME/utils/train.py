@@ -22,13 +22,16 @@ from .base import check_dirs
 from .evaluation import accuracy, get_AMI
 from .plot import plot_records_for_trainer
 
+SUBDIR_MODEL = '_models'
+
 
 def sub_graph(cell_ID, gene_ID, g):
-	###sub_graph for g
-	output_nodes_dict = {'cell': cell_ID, 'gene': gene_ID}
-	g_subgraph = dgl.node_subgraph(g, output_nodes_dict).to('cuda')
+    # sub_graph for g
+    output_nodes_dict = {'cell': cell_ID, 'gene': gene_ID}
+    g_subgraph = dgl.node_subgraph(g, output_nodes_dict).to('cuda')
 
-	return g_subgraph
+    return g_subgraph
+
 
 def create_blocks(n_layers, g, output_nodes):
     blocks = []
@@ -40,7 +43,7 @@ def create_blocks(n_layers, g, output_nodes):
     frontier = dgl.in_subgraph(g, output_nodes_last).to('cuda')
     block = dgl.to_block(frontier, output_nodes_last)
     blocks.append(block)
-    #the last block stores the target batch cells and their connected genes
+    # the last block stores the target batch cells and their connected genes
     for i in range(n_layers-1):
         all_cell_ID = block.srcnodes('cell').to('cuda')
         all_gene_ID = block.srcnodes('gene').to('cuda')
@@ -53,7 +56,7 @@ def create_blocks(n_layers, g, output_nodes):
 
 
 def create_batch_idx(train_idx, test_idx, batchsize, labels, shuffle=True):
-    '''
+    """
     This function create batch idx, i.e. the cells IDs in a batch.
     ########################################################################
     all_index
@@ -62,7 +65,7 @@ def create_batch_idx(train_idx, test_idx, batchsize, labels, shuffle=True):
     ########################################################################
     return: batchlist, which is on cpu.
     ########################################################################
-    '''
+    """
     batch_list = []
     batch_labels = []
     all_index = torch.cat((train_idx, test_idx), 0)
@@ -75,7 +78,6 @@ def create_batch_idx(train_idx, test_idx, batchsize, labels, shuffle=True):
         all_index = all_index.to('cuda')
         labels = labels.to('cuda')
 
-
     if batchsize >= len(all_index):
         batchsize = len(all_index)
     batch_num = int(len(all_index) / batchsize) + 1
@@ -85,6 +87,7 @@ def create_batch_idx(train_idx, test_idx, batchsize, labels, shuffle=True):
     batch_list.append(all_index[batchsize*(batch_num-1): ])
     batch_labels.append(labels[batchsize*(batch_num-1): ])
     return batch_list, batch_labels
+
 
 def seed_everything(seed=123):
     random.seed(seed)
@@ -208,7 +211,7 @@ class BaseTrainer(object):
 
     def set_dir(self, dir_main=Path('.')):
         self.dir_main = Path(dir_main)
-        self.dir_model = self.dir_main / '_models'
+        self.dir_model = self.dir_main / SUBDIR_MODEL
         check_dirs(self.dir_model)
 
         print('main directory:', self.dir_main)
