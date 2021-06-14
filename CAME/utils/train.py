@@ -334,7 +334,8 @@ class BaseTrainer(object):
             'last': cur_epoch,
             'others': all_ckpts
         }
-        save_json_dict(ckpt_dict, self.dir_model / 'chckpoint_dict.json')
+        save_json_dict(
+            ckpt_dict, self.dir_model / 'chckpoint_dict.json')
         # load_json_dict(self.dir_model / 'chckpoint_dict.json')
 
     def eval_current(self, **other_inputs):
@@ -508,6 +509,7 @@ class Trainer(BaseTrainer):
 
             print(self._cur_log)
         self._cur_epoch_adopted = self._cur_epoch
+        self.save_checkpoint_record()
 
     def eval_current(self,
                      feat_dict=None,

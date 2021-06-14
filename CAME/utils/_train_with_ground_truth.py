@@ -320,6 +320,7 @@ class Trainer(BaseTrainer):
 
             print(self._cur_log)
         self._cur_epoch_adopted = self._cur_epoch
+        self.save_checkpoint_record()
 
     def eval_current(self,
                      feat_dict=None,
