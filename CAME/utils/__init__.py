@@ -23,3 +23,4 @@ from .evaluation import (
 #        make_abstracted_graph,
 #        )
 #from preprocess import *
+from ._get_example_data import load_example_data

@@ -382,7 +382,7 @@ def heatmap_probas(
                     vmax=1, vmin=0)
     fig.colorbar(mpl.cm.ScalarMappable(
         norm=mpl.colors.Normalize(vmin=vmin, vmax=vmax),
-        cmap='magma_r',
+        cmap=cmap_heat,
     ),
         cax=ax11, )
     # im = ax1.pcolor(df_data, cmap='magma_r', vmax=1, vmin=0)
