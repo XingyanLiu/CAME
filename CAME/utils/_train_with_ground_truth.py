@@ -11,10 +11,12 @@ import numpy as np
 import torch
 from torch import Tensor
 import dgl
-
-from .train import BaseTrainer, make_class_weights, create_blocks, create_batch_idx, sub_graph, prepare4train, seed_everything
+from evaluation import detach2numpy
+from .train import BaseTrainer, make_class_weights, create_blocks, create_batch, sub_graph,  prepare4train, seed_everything
 from .evaluation import accuracy, get_AMI, get_F1_score
 from .plot import plot_records_for_trainer
+
+B = shuffle = False
 
 
 class Trainer(BaseTrainer):
@@ -117,8 +119,9 @@ class Trainer(BaseTrainer):
         Funtcion for minibatch trainging
         '''
         train_idx, test_idx, labels = self.train_idx, self.test_idx, self.labels
-        _train_labels, _test_labels = labels[train_idx], labels[test_idx]
-        #self.g.nodes['cell'].data['feat'] = self.feat_dict['cell'] #{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
+        #_train_labels, _test_labels = labels[train_idx], labels[test_idx]
+        self.g.nodes['cell'].data['feat'] = torch.arange(self.g.num_nodes('cell')).to('cuda')#track the random shuffle
+        self.g.nodes['gene'].data['feat'] = torch.arange(self.g.num_nodes('gene')).to('cuda')
 
         if use_class_weights:
             class_weights = self.class_weights
@@ -127,52 +130,63 @@ class Trainer(BaseTrainer):
 
         print("start training".center(50, '='))
         self.model.train()
-        batch_list, batch_labels = create_batch_idx(train_idx=train_idx, test_idx = test_idx, batchsize=10455, labels=labels, shuffle=True)
+        train_labels, test_labels, batch_list, shuffled_idx = create_batch(train_idx=train_idx,
+                                                             test_idx=test_idx,
+                                                             batchsize=1024,
+                                                             labels=labels,
+                                                             shuffle=True)
         n_epochs = 500
+        feat_dict = {}
         for epoch in range(n_epochs):
             self._cur_epoch += 1
-            all_train_labels = []
-            all_test_labels = []
-            for output_nodes, output_labels in zip(batch_list, batch_labels):
+            all_train_preds = torch.tensor([]).to(self.device)
+            all_test_preds = torch.tensor([]).to(self.device)
+            t0 = time.time()
+            for output_nodes in batch_list:
                 blocks = create_blocks(n_layers=3, g=self.g, output_nodes=output_nodes)
-                blocks.append(sub_graph(blocks[-1].dstnodes('cell').to('cuda'), blocks[-1].dstnodes('gene').to('cuda'), self.g))#add last block for GAT
-                block_batch_train_idx = output_nodes.clone().detach()  <= torch.max(train_idx)
-                block_batch_test_idx = output_nodes.clone().detach()  > torch.max(train_idx)
-                self.optimizer.zero_grad()
-                t0 = time.time()
-                logits = self.model(self.feat_dict,
+                feat_dict['cell'] = self.feat_dict['cell'][blocks[0].nodes['cell'].data['feat'], :]
+                batch_train_idx = output_nodes.clone().detach() < len(train_idx)
+                batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
+                logits = self.model(feat_dict,
                                     blocks,  # .to(self.device),
                                     batch_train = True,
                                     **other_inputs)
+
                 out_cell = logits[cat_class]  # .cuda()
+                output_labels = labels[output_nodes]
+                out_train_labels = output_labels[batch_train_idx].clone().detach()
                 loss = self.model.get_classification_loss(
-                    out_cell[block_batch_train_idx],
-                    output_labels[block_batch_train_idx],  # labels[train_idx],
+                    out_cell[batch_train_idx],
+                    out_train_labels,
                     weight=class_weights,
                     **params_lossfunc
                 )
+                self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
                 _, y_pred = torch.max(out_cell, dim=1)
-                y_pred_train = y_pred[block_batch_train_idx]
-                y_pred_test = y_pred[block_batch_test_idx]
+                y_pred_train = y_pred[batch_train_idx]
+                y_pred_test = y_pred[batch_test_idx]
+                all_train_preds = torch.cat((all_train_preds, y_pred_train), 0)
+                all_test_preds = torch.cat((all_test_preds, y_pred_test), 0)
             # prediction of ALL
 
             ### evaluation (Acc.)
-                if len(output_labels[block_batch_test_idx])>0 and len(output_labels[block_batch_train_idx])>0:
-                    train_acc = accuracy(y_pred[block_batch_train_idx], output_labels[block_batch_train_idx])
-                    test_acc = accuracy(y_pred[block_batch_test_idx], output_labels[block_batch_test_idx])
+            train_acc = accuracy(train_labels, all_train_preds)
+            test_acc = accuracy(test_labels, all_test_preds)
+            t1 = time.time()
             #test_acc = accuracy(y_pred_test, _test_labels)
-                    print('epoch', epoch,'loss',loss, 'train_acc', train_acc, 'test_acc', test_acc)
-            '''
+            #print('epoch', epoch,'loss',loss.item(), 'train_acc', train_acc, 'test_acc', test_acc, 'time', t1-t0)
+
             ### F1-scores
-            microF1 = get_F1_score(_test_labels, y_pred_test, average='micro')
-            macroF1 = get_F1_score(_test_labels, y_pred_test, average='macro')
-            weightedF1 = get_F1_score(_test_labels, y_pred_test, average='weighted')
+            microF1 = get_F1_score(test_labels, all_test_preds, average='micro')
+            macroF1 = get_F1_score(test_labels, all_test_preds, average='macro')
+            weightedF1 = get_F1_score(test_labels, all_test_preds, average='weighted')
 
             ### unsupervised cluster index
             if self.cluster_labels is not None:
-                ami = get_AMI(self.cluster_labels, y_pred_test)
+                shuffled_test_idx = detach2numpy(shuffled_idx[shuffled_idx >= len(train_idx)]) - len(train_idx)
+                ami = get_AMI(self.cluster_labels[shuffled_test_idx], all_test_preds)
 
             if self._cur_epoch >= n_pass - 1:
                 self.ami_max = max(self.ami_max, ami)
@@ -207,8 +221,7 @@ class Trainer(BaseTrainer):
 
             print(self._cur_log)
         self._cur_epoch_adopted = self._cur_epoch
-        raise NotImplementedError
-        '''
+
     # In[]
     def train(self, n_epochs=350,
               use_class_weights=True,
