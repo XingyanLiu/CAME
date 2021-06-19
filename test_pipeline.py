@@ -14,6 +14,7 @@ if __name__ == '__main__':
 
 
     #CAME.__test1__()
-    CAME.__test2__()
+    #CAME.__test2__()
+    CAME.__test3__()
     #pipeline_supervised.__test2_sup__(5)
 

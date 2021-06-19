@@ -11,9 +11,8 @@ import numpy as np
 import torch
 from torch import Tensor
 import dgl
-from evaluation import detach2numpy
 from .train import BaseTrainer, make_class_weights, create_blocks, create_batch, sub_graph,  prepare4train, seed_everything
-from .evaluation import accuracy, get_AMI, get_F1_score
+from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
 
 B = shuffle = False
@@ -107,7 +106,7 @@ class Trainer(BaseTrainer):
             tt='test accuracy and cluster index',
             fp=fp)
 
-    def train_minibatch(self, n_epochs=350,
+    def train_minibatch(self, n_epochs=100,
               use_class_weights=True,
               params_lossfunc={},
               n_pass=100,
@@ -130,15 +129,15 @@ class Trainer(BaseTrainer):
 
         print("start training".center(50, '='))
         self.model.train()
-        train_labels, test_labels, batch_list, shuffled_idx = create_batch(train_idx=train_idx,
-                                                             test_idx=test_idx,
-                                                             batchsize=1024,
-                                                             labels=labels,
-                                                             shuffle=True)
-        n_epochs = 500
         feat_dict = {}
+        n_epochs = 1000
         for epoch in range(n_epochs):
             self._cur_epoch += 1
+            train_labels, test_labels, batch_list, shuffled_idx = create_batch(train_idx=train_idx,
+                                                                               test_idx=test_idx,
+                                                                               batchsize=batchsize,
+                                                                               labels=labels,
+                                                                               shuffle=True)
             all_train_preds = torch.tensor([]).to(self.device)
             all_test_preds = torch.tensor([]).to(self.device)
             t0 = time.time()

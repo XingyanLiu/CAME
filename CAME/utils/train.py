@@ -56,7 +56,7 @@ def create_blocks(n_layers, g, output_nodes):
     for i in range(n_layers):
         output_nodes_dict = {'cell': cell_ID, 'gene' : gene_ID}
         frontier = dgl.in_subgraph(g, output_nodes_dict)
-        block = dgl.to_block(frontier, output_nodes_dict)
+        #block = dgl.to_block(frontier, output_nodes_dict)
         blocks.append(block)
         cell_ID = block.nodes['cell'].data['feat']
         gene_ID = block.nodes['gene'].data['feat']

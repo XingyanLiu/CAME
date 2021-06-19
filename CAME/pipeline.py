@@ -41,8 +41,8 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-#from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
-from .utils._train_multilabel import prepare4train, Trainer, seed_everything
+from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
+#from .utils._train_multilabel import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
@@ -214,6 +214,7 @@ def main_for_unaligned(
         params_lossfunc: dict = {},
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
+        batch_train = False,
 ):
     if resdir is None:
         tag_time = base.make_nowtime_tag()
@@ -280,7 +281,7 @@ def main_for_unaligned(
     if batch_train:
         trainer.train_minibatch(n_epochs=n_epochs,
                       params_lossfunc=params_lossfunc,
-                      batchsize=128,
+                      batchsize=1024,
                       n_pass=n_pass, )
     else:
         trainer.train(n_epochs=n_epochs,
@@ -603,7 +604,8 @@ def __test2__(n_epochs: int = 500):
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
-        params_model=dict(residual=True)
+        params_model=dict(residual=True),
+        batch_train=False,
     )
 
     del _
