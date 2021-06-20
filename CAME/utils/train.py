@@ -167,18 +167,18 @@ class BaseTrainer(object):
             test_idx: Union[Tensor, List[Tensor]],
             ):
 
-        if self.use_cuda:
-            def _to_cuda(x):
-                if isinstance(x, Tensor):
-                    return x.cuda()
-                elif isinstance(x[0], Tensor):
-                    return [xx.cuda() for xx in x]
-            print('Using CUDA...')
-            model.cuda()
-            feat_dict = {k: feat_dict[k].cuda() for k in feat_dict.keys()}
-            labels = _to_cuda(labels)
-            train_idx = _to_cuda(train_idx)
-            test_idx = _to_cuda(test_idx)
+        # if self.use_cuda:
+        #     def _to_cuda(x):
+        #         if isinstance(x, Tensor):
+        #             return x.cuda()
+        #         elif isinstance(x[0], Tensor):
+        #             return [xx.cuda() for xx in x]
+        #     print('Using CUDA...')
+        #     model.cuda()
+        #     feat_dict = {k: feat_dict[k].cuda() for k in feat_dict.keys()}
+        #     labels = _to_cuda(labels)
+        #     train_idx = _to_cuda(train_idx)
+        #     test_idx = _to_cuda(test_idx)
 
         self.model = model
         self.feat_dict = feat_dict
@@ -196,6 +196,17 @@ class BaseTrainer(object):
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.device = device
         self.model.to(device)
+        self.feat_dict = to_device(self.feat_dict)
+        self.labels = to_device(self.labels)
+        self.train_idx = to_device(self.train_idx)
+        self.test_idx = to_device(self.test_idx)
+        return (
+            self.model,
+            self.feat_dict,
+            self.labels,
+            self.train_idx,
+            self.test_idx
+        )
 
     def set_train_params(self,
                          lr=1e-3,
