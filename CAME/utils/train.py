@@ -15,7 +15,6 @@ from pandas import DataFrame, value_counts
 import torch
 from torch import Tensor, LongTensor
 import dgl
-import torch
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 from .base import check_dirs, save_json_dict
