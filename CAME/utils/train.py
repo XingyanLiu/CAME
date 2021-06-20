@@ -18,9 +18,11 @@ import dgl
 import torch
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
-from .base import check_dirs
+from .base import check_dirs, save_json_dict
 from .evaluation import accuracy, get_AMI
 from .plot import plot_records_for_trainer
+
+SUBDIR_MODEL = '_models'
 
 
 '''
@@ -39,14 +41,15 @@ def seach_connected_cell_gene_ID(cell_ID, gene_ID, g):
 '''
 
 def sub_graph(cell_ID, gene_ID, g):
+
 	###sub_graph for g with input cell_ID and gene_ID
 	output_nodes_dict = {'cell': cell_ID, 'gene': gene_ID}
 	g_subgraph = dgl.node_subgraph(g, output_nodes_dict)
 
-	return g_subgraph
 
 
 def create_blocks(n_layers, g, output_nodes):
+
     #blocks = []
     cell_ID = output_nodes.clone().detach()
     gene_ID = g.in_edges(cell_ID, etype='expressed_by')[0]#genes expressed_by cells
@@ -67,7 +70,7 @@ def create_blocks(n_layers, g, output_nodes):
 
 
 def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
-    '''
+    """
     This function create batch idx, i.e. the cells IDs in a batch.
     ########################################################################
     all_idx
@@ -76,12 +79,13 @@ def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
     ########################################################################
     return: batchlist, which is on gpu with a shuffle.
     ########################################################################
-    '''
+    """
     batch_list = []
     batch_labels = []
     sample_size = len(train_idx) + len(test_idx)
     #all_idx = torch.cat((train_idx, test_idx), 0)
     if shuffle:
+
         all_idx = torch.randperm(sample_size).to('cuda')
         shuffled_labels = labels[all_idx] ###copy but not replace
         train_labels = shuffled_labels[all_idx < len(train_idx)].clone().detach()
@@ -194,6 +198,14 @@ def prepare4train(
     return ENV_VARs
 
 
+def get_checkpoint_list(dirname):
+    all_ckpts = [
+        int(_fn.strip('weights_epoch.pt'))
+        for _fn in os.listdir(dirname) if _fn.endswith('.pt')
+    ]
+    return all_ckpts
+
+
 # In[]
 
 class BaseTrainer(object):
@@ -236,7 +248,7 @@ class BaseTrainer(object):
 
     def set_dir(self, dir_main=Path('.')):
         self.dir_main = Path(dir_main)
-        self.dir_model = self.dir_main / '_models'
+        self.dir_model = self.dir_main / SUBDIR_MODEL
         check_dirs(self.dir_model)
 
         print('main directory:', self.dir_main)
@@ -336,6 +348,24 @@ class BaseTrainer(object):
         self.model.load_state_dict(sdct)
         self._cur_epoch_adopted = n_epoch
         print('states loaded from:', fp)
+
+    def save_checkpoint_record(self):
+        cur_epoch = self._cur_epoch
+        if self._cur_epoch_best > 0:
+            cur_epoch_rec = self._cur_epoch_best
+        else:
+            cur_epoch_rec = self._cur_epoch
+        all_ckpts = get_checkpoint_list(self.dir_model)
+        all_ckpts = [x for x in all_ckpts if
+                     x not in {cur_epoch, cur_epoch_rec}]
+        ckpt_dict = {
+            'recommended': cur_epoch_rec,
+            'last': cur_epoch,
+            'others': all_ckpts
+        }
+        save_json_dict(
+            ckpt_dict, self.dir_model / 'chckpoint_dict.json')
+        # load_json_dict(self.dir_model / 'chckpoint_dict.json')
 
     def eval_current(self, **other_inputs):
         """ get the current states of the model output
@@ -508,6 +538,7 @@ class Trainer(BaseTrainer):
 
             print(self._cur_log)
         self._cur_epoch_adopted = self._cur_epoch
+        self.save_checkpoint_record()
 
     def eval_current(self,
                      feat_dict=None,

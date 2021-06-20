@@ -11,6 +11,7 @@ import numpy as np
 import torch
 from torch import Tensor
 import dgl
+
 from .train import BaseTrainer, make_class_weights, create_blocks, create_batch, sub_graph,  prepare4train, seed_everything
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
@@ -106,6 +107,7 @@ class Trainer(BaseTrainer):
             tt='test accuracy and cluster index',
             fp=fp)
 
+
     def train_minibatch(self, n_epochs=100,
               use_class_weights=True,
               params_lossfunc={},
@@ -129,6 +131,7 @@ class Trainer(BaseTrainer):
 
         print("start training".center(50, '='))
         self.model.train()
+
         feat_dict = {}
         n_epochs = 1000
         for epoch in range(n_epochs):
@@ -148,7 +151,7 @@ class Trainer(BaseTrainer):
                 batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
                 logits = self.model(feat_dict,
                                     blocks,  # .to(self.device),
-                                    batch_train = True,
+                                    batch_train=True,
                                     **other_inputs)
 
                 out_cell = logits[cat_class]  # .cuda()
@@ -176,7 +179,6 @@ class Trainer(BaseTrainer):
             t1 = time.time()
             #test_acc = accuracy(y_pred_test, _test_labels)
             #print('epoch', epoch,'loss',loss.item(), 'train_acc', train_acc, 'test_acc', test_acc, 'time', t1-t0)
-
             ### F1-scores
             microF1 = get_F1_score(test_labels, all_test_preds, average='micro')
             macroF1 = get_F1_score(test_labels, all_test_preds, average='macro')
@@ -232,7 +234,7 @@ class Trainer(BaseTrainer):
         """
                 Main function for model training
         ================================================
-        
+
         other_inputs: other inputs for `model.forward()`
         """
         #        g = self.g
@@ -255,7 +257,7 @@ class Trainer(BaseTrainer):
             logits = self.model(self.feat_dict,
                                 self.g,  # .to(self.device),
                                 **other_inputs)
-            out_cell = logits[cat_class] # .cuda()
+            out_cell = logits[cat_class]  # .cuda()
             loss = self.model.get_classification_loss(
                 out_cell[train_idx],
                 _train_labels,  # labels[train_idx],
@@ -273,7 +275,8 @@ class Trainer(BaseTrainer):
             ### F1-scores
             microF1 = get_F1_score(_test_labels, y_pred_test, average='micro')
             macroF1 = get_F1_score(_test_labels, y_pred_test, average='macro')
-            weightedF1 = get_F1_score(_test_labels, y_pred_test, average='weighted')
+            weightedF1 = get_F1_score(_test_labels, y_pred_test,
+                                      average='weighted')
 
             ### unsupervised cluster index
             if self.cluster_labels is not None:
@@ -314,6 +317,7 @@ class Trainer(BaseTrainer):
 
             print(self._cur_log)
         self._cur_epoch_adopted = self._cur_epoch
+        self.save_checkpoint_record()
 
     def eval_current(self,
                      feat_dict=None,

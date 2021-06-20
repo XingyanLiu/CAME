@@ -9,6 +9,8 @@ from .utils import base
 from .utils.base import (
         save_pickle,
         load_pickle,
+        save_json_dict,
+        load_json_dict,
         check_dirs,
         write_info,
         make_nowtime_tag,
@@ -16,7 +18,7 @@ from .utils.base import (
         )
 from .utils import preprocess as pp
 from .utils import plot as pl
-from .utils.train import prepare4train, Trainer
+from .utils.train import prepare4train, Trainer, SUBDIR_MODEL
 from .utils.evaluation import (
         as_probabilities, 
         predict_from_logits, 
@@ -24,6 +26,7 @@ from .utils.evaluation import (
         accuracy
         )                       
 from .utils.analyze import (
+        load_dpair_and_model,
         weight_linked_vars, 
         make_abstracted_graph,
         )             

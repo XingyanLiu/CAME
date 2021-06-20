@@ -139,6 +139,18 @@ obs = dpair.obs
 classes = dpair.classes.copy()
 if 'unknown' in classes:
     classes.remove('unknown')
+
+# In[]
+
+_resdir = Path(r"_temp\('Baron_human', 'Baron_mouse')-(06-14 17.48.41)")
+_modeldir = _resdir / '_models'
+element_dict = CAME.load_pickle(_resdir / 'datapair_init.pickle')
+adpair = CAME.AlignedDataPair(**element_dict)
+model_params = CAME.load_json_dict(_resdir / 'model_params.json')
+tmpmodel = CAME.CGCNet(**model_params)
+ckpt = CAME.load_json_dict(_modeldir / 'chckpoint_dict.json')['recommended']
+tmpmodel.load_state_dict(torch.load(_modeldir / f'weights_epoch{ckpt}.pt'))
+
     
 # In[]
 # ============== heatmap of predicted probabilities ==============
