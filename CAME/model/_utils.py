@@ -121,9 +121,24 @@ def gat_model_outputs(
         model: nn.Module,
         feat_dict: Mapping,
         g: Union[dgl.DGLGraph, List[dgl.DGLGraph]],
-        mode: Literal['minibatch', 'full'] = 'minibatch',
+        mode: str = 'minibatch',
         **other_inputs
 ):
+    """
+    Function facilitate to make mini-batch-wise forward pass
+
+    Parameters
+    ----------
+    model: heterogeneous graph-neural-network model
+    feat_dict: dict of feature matrices
+    g: graph or a list or graph (blocks)
+    mode: should be either 'minibatch' or 'full'
+    other_inputs: other inputs for model.forward function
+
+    Returns
+    -------
+    model outputs (if mode == 'minibatch', will be merged by batch)
+    """
     if mode == 'minibatch':
         # get batch-list; blocks of graph
         outputs = []
