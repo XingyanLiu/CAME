@@ -8,18 +8,13 @@ Hidden layers (not including the embedding layer)
 =============================================================
 
 """
-from typing import Union, Sequence, Optional
+from typing import Union, Sequence, Optional, List
 # from torch.autograd import Variable, Function
-
 # from collections import defaultdict
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
-# import dgl
-# import dgl.nn as dglnn
-# import dgl.function as fn
-# import tqdm
-# from .layers.base_layers import RelGraphConvLayer
+from dgl import DGLGraph
 from .base_layers import GeneralRGCLayer, HeteroLayerNorm
 
 
@@ -38,7 +33,6 @@ class HiddenRGCN(nn.Module):
                  norm: str = 'right',
                  use_weight: bool = True,
                  dropout: Union[float, int] = 0.,
-#                 use_self_loop: bool = False,
                  negative_slope: Union[float, int] = 0.2,
                  batchnorm_ntypes: Optional[Sequence[str]] = None,
                  layernorm_ntypes: Optional[Sequence[str]] = None,  # g.ntypes
@@ -177,35 +171,45 @@ class HiddenRRGCN(nn.Module):
                     layernorm_ntypes=layernorm_ntypes
                 ))
 
-    def forward(self, g, h_dict,  # residual=False,
-                norm=True, bias=True, activate=True, batch_train=False,
-                **kwds, ):
+    def forward(
+            self,
+            g_or_blocks,
+            h_dict,  # residual=False,
+            norm=True, bias=True, activate=True, batch_train=False,
+            **kwds,
+    ):
         """
         No copies made for h_dict, so make sure the forward functions do not
         make any changes directly on the h_dict !
         """
         self.hidden_states = []
-        if batch_train:
-            for i, layer in enumerate(self.layers[: -1]):
-                h_dict = layer(g[i], h_dict, **kwds)
-
-                if self.layernorms and i < self.num_hidden_layers:
-                    h_dict = self.layernorms[i](h_dict)
-                self.hidden_states.append(h_dict)
-            # for residual connection, not normalize
-            h_dict = self.layers[-1](g[-1], h_dict, norm=norm, bias=bias, activate=activate, **kwds)
-            self.hidden_states.append(h_dict)
-
+        if isinstance(g_or_blocks, DGLGraph):
+            graphs = [g_or_blocks] * len(self.layers)
         else:
-            for i, layer in enumerate(self.layers[: -1]):
-                h_dict = layer(g, h_dict, **kwds)
+            graphs = g_or_blocks
 
-                if self.layernorms and i < self.num_hidden_layers:
-                    h_dict = self.layernorms[i](h_dict)
-                self.hidden_states.append(h_dict)
-            # for residual connection, not normalize
-            h_dict = self.layers[-1](g, h_dict, norm=norm, bias=bias, activate=activate, **kwds)
+        for i, layer in enumerate(self.layers[: -1]):
+            h_dict = layer(graphs[i], h_dict, **kwds)
+
+            if self.layernorms and i < self.num_hidden_layers:
+                h_dict = self.layernorms[i](h_dict)
             self.hidden_states.append(h_dict)
+        # for residual connection, not normalize
+        h_dict = self.layers[-1](
+            graphs[-1], h_dict, norm=norm, bias=bias, activate=activate, **kwds)
+        self.hidden_states.append(h_dict)
+        # else:
+        #     for i, layer in enumerate(self.layers[: -1]):
+        #         h_dict = layer(g, h_dict, **kwds)
+        #
+        #         if self.layernorms and i < self.num_hidden_layers:
+        #             h_dict = self.layernorms[i](h_dict)
+        #         self.hidden_states.append(h_dict)
+        #     # for residual connection, not normalize
+        #     h_dict = self.layers[-1](
+        #         g, h_dict, norm=norm, bias=bias, activate=activate, **kwds)
+        #     self.hidden_states.append(h_dict)
+
         return h_dict
 
 

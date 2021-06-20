@@ -59,8 +59,6 @@ class Trainer(BaseTrainer):
             self.labels_1dim = self.labels
             self.labels = onehot_encode(
                 self.labels, sparse_output=False, astensor=True)
-            # if self.use_cuda:
-            #     self.labels = to_device(self.labels)
         elif len(self.labels.size()) == 2:
             _, self.labels_1dim = torch.max(self.labels, dim=1)
 
@@ -90,9 +88,6 @@ class Trainer(BaseTrainer):
                 self.labels[self.train_idx], foo=foo, n_add=n_add)
         else:
             self.class_weights = Tensor(class_weights)
-
-        # if self.use_cuda:
-        #     self.class_weights = self.class_weights.cuda()
 
     def plot_class_losses(self, start=0, end=None, fp=None):
         plot_records_for_trainer(

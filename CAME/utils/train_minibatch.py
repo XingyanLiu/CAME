@@ -83,7 +83,7 @@ def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
         train_labels = labels[train_idx].clone().detach()
         test_labels = labels[test_idx].clone().detach()
         all_idx = torch.cat((train_idx, test_idx), 0)
-        if batchsize >= (sample_size):
+        if batchsize >= sample_size:
             batch_list.append(all_idx)
             #batch_labels.append(labels)
         else:
@@ -199,18 +199,17 @@ class Trainer(BaseTrainer):
         #_train_labels, _test_labels = labels[train_idx], labels[test_idx]
         self.g.nodes['cell'].data['feat'] = torch.arange(self.g.num_nodes('cell')).to('cuda')#track the random shuffle
         self.g.nodes['gene'].data['feat'] = torch.arange(self.g.num_nodes('gene')).to('cuda')
-        '''
-        downsample = False
-        if downsample:
-            self.g = self.g.to('cpu')
-            cell_ID = torch.arange(self.g.num_nodes('cell'))
-            gene_ID = torch.arange(self.g.num_nodes('gene'))
-            fanout = {'express': 1500, 'expressed_by': 200,
-                      'self_loop_cell': -1, 'similar_to': -1,
-                      'homolog_with': -1}
-            self.g = dgl.sampling.sample_neighbors(self.g, {'cell': cell_ID, 'gene': gene_ID},
-                                      fanout=fanout).to('cuda')
-        '''
+
+        # downsample = False
+        # if downsample:
+        #     self.g = self.g.to('cpu')
+        #     cell_ID = torch.arange(self.g.num_nodes('cell'))
+        #     gene_ID = torch.arange(self.g.num_nodes('gene'))
+        #     fanout = {'express': 1500, 'expressed_by': 200,
+        #               'self_loop_cell': -1, 'similar_to': -1,
+        #               'homolog_with': -1}
+        #     self.g = dgl.sampling.sample_neighbors(self.g, {'cell': cell_ID, 'gene': gene_ID},
+        #                               fanout=fanout).to('cuda')
         if use_class_weights:
             class_weights = self.class_weights
 
@@ -221,11 +220,12 @@ class Trainer(BaseTrainer):
         n_epochs = 100
         for epoch in range(n_epochs):
             self._cur_epoch += 1
-            train_labels, test_labels, batch_list, shuffled_idx = create_batch(train_idx=train_idx,
-                                                                               test_idx=test_idx,
-                                                                               batchsize=batchsize,
-                                                                               labels=labels,
-                                                                               shuffle=True)
+            train_labels, test_labels, batch_list, shuffled_idx = create_batch(
+                train_idx=train_idx,
+                test_idx=test_idx,
+                batchsize=batchsize,
+                labels=labels,
+                shuffle=True)
             all_train_preds = torch.tensor([]).to(self.device)
             all_test_preds = torch.tensor([]).to(self.device)
             t0 = time.time()

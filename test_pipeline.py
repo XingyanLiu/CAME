@@ -11,13 +11,13 @@ import matplotlib as mpl
 
 try:
     mpl.use('agg')
-except Exception:
-    print("An error occurred when setting matplotlib backend")
+except Exception as e:
+    print(f"An error occurred when setting matplotlib backend ({e})")
 
 if __name__ == '__main__':
 
 
     #CAME.__test1__()
-    CAME.__test2__(batch_size=None)
+    CAME.__test2__(3, batch_size=None)
     #pipeline_supervised.__test2_sup__(5)
 

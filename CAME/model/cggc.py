@@ -5,7 +5,7 @@ Created on Sat Mar 20 18:59:29 2021
 @author: Xingyan Liu
 """
 
-from typing import Union, Sequence, Optional
+from typing import Union, Sequence, Optional, List
 import logging
 import dgl
 import torch as th
@@ -114,9 +114,9 @@ class CGGCNet(nn.Module):
                 feat_dict, g, batch_train=False,
                 **kwds):
 
-        if batch_train:
+        if isinstance(g, List):
             h_dict = self.embed_layer(g[0], feat_dict, )
-            h_dict = self.rgcn.forward(g[1:-1],  h_dict, batch_train=batch_train, **kwds).copy()
+            h_dict = self.rgcn.forward(g[1:-1], h_dict, batch_train=batch_train, **kwds).copy()
             h_dict['cell'] = self.cell_classifier.forward(g[-1], h_dict, **kwds)['cell']#The last graph is a graph of batch_size cells and it's connected genes
 
         else:
@@ -124,9 +124,6 @@ class CGGCNet(nn.Module):
                 h_dict0 = self.embed_layer(g, feat_dict, )
                 h_dict = self.rgcn.forward(g, h_dict0, norm=True, activate=False, **kwds)
                 relu = self.rgcn.leaky_relu
-                # residual connection
-                # h_dict = {'cell': relu(h_dict0['cell'] + h_dict['cell']),
-                #           'gene': relu(h_dict['gene'])}
                 h_dict['cell'] = relu(h_dict0['cell'] + h_dict['cell'])
                 h_dict['gene'] = relu(h_dict0['gene'] + h_dict['gene'])
             else:

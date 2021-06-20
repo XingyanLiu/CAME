@@ -17,7 +17,7 @@ from torch import Tensor, LongTensor
 import dgl
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
-from ..model import to_device
+from ..model import to_device, onehot_encode, multilabel_binary_cross_entropy
 from .base import check_dirs, save_json_dict
 from .evaluation import accuracy, get_AMI, get_F1_score
 from .plot import plot_records_for_trainer
@@ -340,8 +340,11 @@ class Trainer(BaseTrainer):
 
         self.g = g
         self.set_class_weights()
-        ### infer n_classes
+        # infer n_classes
         self.n_classes = len(self.class_weights)
+        # for multi-label loss calculation
+        self.train_labels_1hot = onehot_encode(
+            self.train_labels, sparse_output=False, astensor=True)
 
         _record_names = (
             'dur',
@@ -372,6 +375,33 @@ class Trainer(BaseTrainer):
             tt='train accuracy and cluster index',
             fp=fp)
 
+    def plot_class_accs(self, start=0, end=None, fp=None):
+        plot_records_for_trainer(
+            self,
+            record_names=['train_acc', 'test_acc'],
+            start=start, end=end,
+            lbs=['training acc', 'testing acc'],
+            tt='classification accuracy',
+            fp=fp)
+
+    def plot_class_losses(self, start=0, end=None, fp=None):
+        plot_records_for_trainer(
+            self,
+            record_names=['train_loss', 'test_loss'],
+            start=start, end=end,
+            lbs=['training loss', 'testing loss'],
+            tt='classification losses',
+            fp=fp)
+
+    def plot_class_accs(self, start=0, end=None, fp=None):
+        plot_records_for_trainer(
+            self,
+            record_names=['train_acc', 'test_acc'],
+            start=start, end=end,
+            lbs=['training acc', 'testing acc'],
+            tt='classification accuracy',
+            fp=fp)
+
     # In[]
     def train(self, n_epochs=350,
               use_class_weights=True,
@@ -388,11 +418,13 @@ class Trainer(BaseTrainer):
         
         other_inputs: other inputs for `model.forward()`
         """
+        # setting device to train
         if device is None:
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.g = self.g.to(device)
         _, feat_dict, train_labels, test_labels, train_idx, test_idx = \
             self.all_to_device(device)
+        train_labels_1hot = self.train_labels_1hot.to(device)
 
         if use_class_weights:
             class_weights = to_device(self.class_weights, device)
@@ -417,9 +449,15 @@ class Trainer(BaseTrainer):
             out_cell = logits[cat_class]
             loss = self.model.get_classification_loss(
                 out_cell[train_idx],
-                train_labels,  # labels[train_idx],
+                train_labels,
                 weight=class_weights,
                 **params_lossfunc
+            )
+            # multi-label loss
+            loss += multilabel_binary_cross_entropy(
+                out_cell[train_idx],
+                train_labels_1hot,
+                weight=class_weights,
             )
 
             # prediction 
@@ -429,6 +467,7 @@ class Trainer(BaseTrainer):
             # evaluation (Acc.)
             train_acc = accuracy(y_pred[train_idx], train_labels)
             if test_labels is None:
+                # ground-truth unavailable
                 test_acc = microF1 = macroF1 = weightedF1 = -1.
             else:
                 test_acc = accuracy(y_pred_test, test_labels)
@@ -492,11 +531,9 @@ class Trainer(BaseTrainer):
         """
         if feat_dict is None:
             feat_dict = self.feat_dict
-        # elif self.use_cuda:
-        #     feat_dict = {k: v.cuda() for k, v in feat_dict.items()}
-        feat_dict = to_device(feat_dict, self.device)
         if g is None:
             g = self.g
+        feat_dict = to_device(feat_dict, self.device)
         g = g.to(self.device)
         with torch.no_grad():
             self.model.train()  # semi-supervised learning
