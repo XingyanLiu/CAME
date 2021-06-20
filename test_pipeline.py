@@ -7,6 +7,7 @@ Created on Wed May  5 20:08:52 2021
 import CAME
 from CAME import pipeline_supervised
 import matplotlib as mpl
+import logging
 
 
 try:
