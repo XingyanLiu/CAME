@@ -24,13 +24,13 @@ def detach2numpy(x):
     return x
 
 
-def to_cuda(x):
+def to_device(x, device='cuda'):
     if isinstance(x, th.Tensor):
-        return x.cuda()
+        return x.to(device)
     elif isinstance(x, List) and isinstance(x[0], th.Tensor):
-        return [xx.cuda() for xx in x]
+        return [xx.to(device) for xx in x]
     elif isinstance(x, Mapping):
-        return {k: v.cuda() for k, v in x.items()}
+        return {k: v.to(device) for k, v in x.items()}
 
 
 def onehot_encode(

@@ -11,14 +11,92 @@ import numpy as np
 import torch
 from torch import Tensor
 import dgl
-from .train import BaseTrainer, make_class_weights, create_blocks, create_batch, sub_graph,  prepare4train, seed_everything
+from .train import BaseTrainer, make_class_weights, prepare4train, seed_everything
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
 
 B = shuffle = False
 
 
-class Trainer_batch(BaseTrainer):
+def sub_graph(cell_ID, gene_ID, g):
+    """
+    Making sub_graph for g with input cell_ID and gene_ID
+    """
+    output_nodes_dict = {'cell': cell_ID, 'gene': gene_ID}
+    g_subgraph = dgl.node_subgraph(g, output_nodes_dict)
+    return g_subgraph
+
+
+def create_blocks(n_layers, g, output_nodes):
+
+    #blocks = []
+    cell_ID = output_nodes.clone().detach()
+    gene_ID = g.in_edges(cell_ID, etype='expressed_by')[0]#genes expressed_by cells
+    gene_ID = torch.unique(gene_ID)
+    block = sub_graph(cell_ID, gene_ID, g) # graph for GAT
+    blocks = [block]
+    for i in range(n_layers):
+        output_nodes_dict = {'cell': cell_ID, 'gene' : gene_ID}
+        frontier = dgl.in_subgraph(g, output_nodes_dict)
+        #block = dgl.to_block(frontier, output_nodes_dict)
+        blocks.append(block)
+        cell_ID = block.nodes['cell'].data['feat']
+        gene_ID = block.nodes['gene'].data['feat']
+        #all_cell_ID, all_gene_ID = seach_connected_cell_gene_ID(cell_ID, gene_ID, g)
+    blocks.reverse()
+
+    return blocks
+
+
+def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
+    """
+    This function create batch idx, i.e. the cells IDs in a batch.
+    ########################################################################
+    all_idx
+    type: array
+    value: stores all the cells' IDs , i.e. array([0, 1, 2,..., n])
+    ########################################################################
+    return: batchlist, which is on gpu with a shuffle.
+    ########################################################################
+    """
+    batch_list = []
+    batch_labels = []
+    sample_size = len(train_idx) + len(test_idx)
+    #all_idx = torch.cat((train_idx, test_idx), 0)
+    if shuffle:
+
+        all_idx = torch.randperm(sample_size).to('cuda')
+        shuffled_labels = labels[all_idx] ###copy but not replace
+        train_labels = shuffled_labels[all_idx < len(train_idx)].clone().detach()
+        test_labels = shuffled_labels[all_idx >= len(train_idx)].clone().detach()
+
+        if batchsize >= sample_size:
+            batch_list.append(all_idx)
+
+        else:
+            batch_num = int(len(all_idx) / batchsize) + 1
+            for i in range(batch_num-1):
+                batch_list.append(all_idx[batchsize*i: batchsize*(i+1)])
+            batch_list.append(all_idx[batchsize*(batch_num-1): ])
+
+    else:
+        train_labels = labels[train_idx].clone().detach()
+        test_labels = labels[test_idx].clone().detach()
+        all_idx = torch.cat((train_idx, test_idx), 0)
+        if batchsize >= (sample_size):
+            batch_list.append(all_idx)
+            #batch_labels.append(labels)
+        else:
+            batch_num = int(len(all_idx) / batchsize) + 1
+            for i in range(batch_num-1):
+                batch_list.append(all_idx[batchsize*i: batchsize*(i+1)])
+                batch_labels.append(labels[batchsize*i: batchsize*(i+1)])
+            batch_list.append(all_idx[batchsize*(batch_num-1): ])
+
+    return train_labels, test_labels, batch_list, all_idx
+
+
+class Trainer(BaseTrainer):
     """
     
     
@@ -114,9 +192,9 @@ class Trainer_batch(BaseTrainer):
               cat_class='cell',
               batchsize = 128,
               **other_inputs):
-        '''
+        """
         Funtcion for minibatch trainging
-        '''
+        """
         train_idx, test_idx, labels = self.train_idx, self.test_idx, self.labels
         #_train_labels, _test_labels = labels[train_idx], labels[test_idx]
         self.g.nodes['cell'].data['feat'] = torch.arange(self.g.num_nodes('cell')).to('cuda')#track the random shuffle

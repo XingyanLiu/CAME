@@ -17,7 +17,7 @@ from .train import BaseTrainer, make_class_weights, prepare4train, seed_everythi
 from .evaluation import accuracy, get_AMI, get_F1_score
 from .plot import plot_records_for_trainer
 from ..model.loss import multilabel_binary_cross_entropy
-from ..model._utils import onehot_encode, to_cuda
+from ..model._utils import onehot_encode, to_device
 
 
 class Trainer(BaseTrainer):
@@ -60,7 +60,7 @@ class Trainer(BaseTrainer):
             self.labels = onehot_encode(
                 self.labels, sparse_output=False, astensor=True)
             if self.use_cuda:
-                self.labels = to_cuda(self.labels)
+                self.labels = to_device(self.labels)
         elif len(self.labels.size()) == 2:
             _, self.labels_1dim = torch.max(self.labels, dim=1)
 
