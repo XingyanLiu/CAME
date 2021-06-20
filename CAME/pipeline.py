@@ -43,8 +43,8 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-#from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
-from .utils._train_multilabel import prepare4train, Trainer, seed_everything
+from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
+#from .utils._train_multilabel import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
@@ -579,7 +579,7 @@ def __test1__(n_epochs: int = 5):
     print('Test passed for ALIGNED!')
 
 
-def __test2__(n_epochs: int = 5):
+def __test2__(n_epochs: int = 500):
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
     sp1, sp2 = ('human', 'mouse')

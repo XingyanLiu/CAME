@@ -25,68 +25,97 @@ from .plot import plot_records_for_trainer
 SUBDIR_MODEL = '_models'
 
 
-def sub_graph(cell_ID, gene_ID, g):
-    # sub_graph for g
-    output_nodes_dict = {'cell': cell_ID, 'gene': gene_ID}
-    g_subgraph = dgl.node_subgraph(g, output_nodes_dict).to('cuda')
+'''
+def seach_connected_cell_gene_ID(cell_ID, gene_ID, g):
+    cell_conne_with_gene = torch.unique(g.in_edges(gene_ID, etype='express')[0])
+    cell_conne_with_cell = torch.unique(g.in_edges(cell_ID, etype='similar_to')[0])
+    all_cell_ID = torch.cat((cell_ID, cell_conne_with_gene, cell_conne_with_cell), axis=0)
+    all_cell_ID = torch.unique(all_cell_ID)
+    
+    gene_connce_with_gene = torch.unique(g.in_edges(gene_ID, etype='homolog_with')[0])
+    gene_connce_with_cell = torch.unique(g.in_edges(cell_ID, etype='expressed_by')[0])
+    all_gene_ID = torch.cat((gene_connce_with_gene, gene_connce_with_cell), axis=0)
+    all_gene_ID = torch.unique(all_gene_ID)
+    
+    return all_cell_ID, all_gene_ID
+'''
 
-    return g_subgraph
+def sub_graph(cell_ID, gene_ID, g):
+
+	###sub_graph for g with input cell_ID and gene_ID
+	output_nodes_dict = {'cell': cell_ID, 'gene': gene_ID}
+	g_subgraph = dgl.node_subgraph(g, output_nodes_dict)
+
 
 
 def create_blocks(n_layers, g, output_nodes):
-    blocks = []
-    output_nodes_last = {}
-    output_nodes_last['cell'] = output_nodes
-    all_gene_out = g.in_edges(output_nodes_last['cell'], etype='expressed_by')[0].cpu().numpy()#genes expressed_by cells
-    all_gene_ID = np.array(list(set(all_gene_out)),dtype=np.int64)
-    output_nodes_last['gene'] = torch.tensor(all_gene_ID).to('cuda')
-    frontier = dgl.in_subgraph(g, output_nodes_last).to('cuda')
-    block = dgl.to_block(frontier, output_nodes_last)
-    blocks.append(block)
-    # the last block stores the target batch cells and their connected genes
-    for i in range(n_layers-1):
-        all_cell_ID = block.srcnodes('cell').to('cuda')
-        all_gene_ID = block.srcnodes('gene').to('cuda')
-        output_nodes_dict = {'cell': all_cell_ID, 'gene' : all_gene_ID}
-        frontier = dgl.in_subgraph(g, output_nodes_dict).to('cuda')
-        block = dgl.to_block(frontier, output_nodes_dict)
+
+    #blocks = []
+    cell_ID = output_nodes.clone().detach()
+    gene_ID = g.in_edges(cell_ID, etype='expressed_by')[0]#genes expressed_by cells
+    gene_ID = torch.unique(gene_ID)
+    block = sub_graph(cell_ID, gene_ID, g) # graph for GAT
+    blocks = [block]
+    for i in range(n_layers):
+        output_nodes_dict = {'cell': cell_ID, 'gene' : gene_ID}
+        frontier = dgl.in_subgraph(g, output_nodes_dict)
+        #block = dgl.to_block(frontier, output_nodes_dict)
         blocks.append(block)
-    blocks.reverse()
+        cell_ID = block.nodes['cell'].data['feat']
+        gene_ID = block.nodes['gene'].data['feat']
+        #all_cell_ID, all_gene_ID = seach_connected_cell_gene_ID(cell_ID, gene_ID, g)
+    blocks.reverse() 
+
     return blocks
 
 
-def create_batch_idx(train_idx, test_idx, batchsize, labels, shuffle=True):
+def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
     """
     This function create batch idx, i.e. the cells IDs in a batch.
     ########################################################################
-    all_index
+    all_idx
     type: array
     value: stores all the cells' IDs , i.e. array([0, 1, 2,..., n])
     ########################################################################
-    return: batchlist, which is on cpu.
+    return: batchlist, which is on gpu with a shuffle.
     ########################################################################
     """
     batch_list = []
     batch_labels = []
-    all_index = torch.cat((train_idx, test_idx), 0)
-
+    sample_size = len(train_idx) + len(test_idx)
+    #all_idx = torch.cat((train_idx, test_idx), 0)
     if shuffle:
-        state = np.random.get_state()
-        np.random.shuffle(all_index.detach().cpu().numpy())
-        np.random.set_state(state)
-        np.random.shuffle(labels.detach().cpu().numpy())
-        all_index = all_index.to('cuda')
-        labels = labels.to('cuda')
 
-    if batchsize >= len(all_index):
-        batchsize = len(all_index)
-    batch_num = int(len(all_index) / batchsize) + 1
-    for i in range(batch_num-1):
-        batch_list.append(all_index[batchsize*i: batchsize*(i+1)])
-        batch_labels.append(labels[batchsize*i: batchsize*(i+1)])
-    batch_list.append(all_index[batchsize*(batch_num-1): ])
-    batch_labels.append(labels[batchsize*(batch_num-1): ])
-    return batch_list, batch_labels
+        all_idx = torch.randperm(sample_size).to('cuda')
+        shuffled_labels = labels[all_idx] ###copy but not replace
+        train_labels = shuffled_labels[all_idx < len(train_idx)].clone().detach()
+        test_labels = shuffled_labels[all_idx >= len(train_idx)].clone().detach()
+
+        if batchsize >= sample_size:
+            batch_list.append(all_idx)
+
+        else:
+            batch_num = int(len(all_idx) / batchsize) + 1
+            for i in range(batch_num-1):
+                batch_list.append(all_idx[batchsize*i: batchsize*(i+1)])
+            batch_list.append(all_idx[batchsize*(batch_num-1): ])
+
+    else:
+        train_labels = labels[train_idx].clone().detach()
+        test_labels = labels[test_idx].clone().detach()
+        all_idx = torch.cat((train_idx, test_idx), 0)
+        if batchsize >= (sample_size):
+            batch_list.append(all_idx)
+            #batch_labels.append(labels)
+        else:
+            batch_num = int(len(all_idx) / batchsize) + 1
+            for i in range(batch_num-1):
+                batch_list.append(all_idx[batchsize*i: batchsize*(i+1)])
+                batch_labels.append(labels[batchsize*i: batchsize*(i+1)])
+            batch_list.append(all_idx[batchsize*(batch_num-1): ])
+
+    return train_labels, test_labels, batch_list, all_idx
+
 
 
 def seed_everything(seed=123):
