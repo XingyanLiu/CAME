@@ -1,0 +1,14 @@
+scipy
+dgl>=0.6
+torch>=1.9
+networkx>=2.5
+numpy
+adjustText==0.7.3
+matplotlib
+matplotlib_venn
+numba==0.53.1
+pandas
+scanpy>=1.7
+scikit_learn
+seaborn
+umap
