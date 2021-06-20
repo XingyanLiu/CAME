@@ -216,10 +216,10 @@ class DataPair(object):
 
         if set_attr:
             self._labels = labels_cat.codes.copy()
-            self._classes = classes
+            self._classes = classes.copy()
 
         if asint:
-            labels = self.labels
+            labels = self.labels.copy()
             if astensor:
                 labels = th.LongTensor(labels)
             if split:

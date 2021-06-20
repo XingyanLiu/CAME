@@ -19,7 +19,7 @@ from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 from ..model import to_device
 from .base import check_dirs, save_json_dict
-from .evaluation import accuracy, get_AMI
+from .evaluation import accuracy, get_AMI, get_F1_score
 from .plot import plot_records_for_trainer
 
 SUBDIR_MODEL = '_models'
@@ -64,6 +64,7 @@ def prepare4train(
         categories: Optional[Sequence] = None,
         cluster_labels: Optional[Sequence] = None,
         test_idx: Optional[Sequence] = None,
+        ground_truth: bool = True,
         **kwds  # for code compatibility (not raising error)
 ) -> dict:
     """
@@ -73,16 +74,15 @@ def prepare4train(
     """
     if key_clust and cluster_labels is None:
         cluster_labels = dpair.obs_dfs[1][key_clust].values
-    # else:
-    #     cluster_labels = None
 
     feat_dict = dpair.get_feature_dict(scale=scale_within,
                                        unit_var=unit_var,
                                        clip=clip,
                                        clip_range=clip_range)
-    labels0, classes = dpair.get_obs_labels(
+    labels, classes = dpair.get_obs_labels(
         key_class, categories=categories, add_unknown_force=False)
-    classes = classes[:-1] if 'unknown' in classes else classes
+    if 'unknown' in classes:
+        classes.remove('unknown')
 
     if test_idx is None:
         train_idx = dpair.get_obs_ids(0, astensor=True)
@@ -97,7 +97,8 @@ def prepare4train(
         classes=classes,
         G=G,
         feat_dict=feat_dict,
-        labels=labels0,
+        train_labels=labels[train_idx],
+        test_labels=labels[test_idx] if ground_truth else None,
         train_idx=train_idx,
         test_idx=test_idx,
         cluster_labels=cluster_labels,
@@ -123,7 +124,8 @@ class BaseTrainer(object):
     def __init__(self,
                  model,
                  feat_dict: Mapping,
-                 labels: Union[Tensor, List[Tensor]],
+                 train_labels: Union[Tensor, List[Tensor]],
+                 test_labels: Union[Tensor, List[Tensor]],
                  train_idx: Union[Tensor, List[Tensor]],
                  test_idx: Union[Tensor, List[Tensor]],
                  cluster_labels: Optional[Sequence] = None,
@@ -135,7 +137,9 @@ class BaseTrainer(object):
 
         # self.use_cuda = use_cuda and torch.cuda.is_available()
         self.set_inputs(
-            model, feat_dict, labels, train_idx, test_idx,
+            model, feat_dict,
+            train_labels, test_labels,
+            train_idx, test_idx,
             )
 
         self.cluster_labels = cluster_labels
@@ -162,27 +166,15 @@ class BaseTrainer(object):
     def set_inputs(
             self, model,
             feat_dict: Mapping,
-            labels: Union[Tensor, List[Tensor]],
+            train_labels: Union[Tensor, List[Tensor]],
+            test_labels: Union[Tensor, List[Tensor], None],
             train_idx: Union[Tensor, List[Tensor]],
             test_idx: Union[Tensor, List[Tensor]],
             ):
-
-        # if self.use_cuda:
-        #     def _to_cuda(x):
-        #         if isinstance(x, Tensor):
-        #             return x.cuda()
-        #         elif isinstance(x[0], Tensor):
-        #             return [xx.cuda() for xx in x]
-        #     print('Using CUDA...')
-        #     model.cuda()
-        #     feat_dict = {k: feat_dict[k].cuda() for k in feat_dict.keys()}
-        #     labels = _to_cuda(labels)
-        #     train_idx = _to_cuda(train_idx)
-        #     test_idx = _to_cuda(test_idx)
-
         self.model = model
         self.feat_dict = feat_dict
-        self.labels = labels
+        self.train_labels = train_labels
+        self.test_labels = test_labels
         self.train_idx = train_idx
         self.test_idx = test_idx
         # inference device
@@ -196,14 +188,17 @@ class BaseTrainer(object):
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.device = device
         self.model.to(device)
-        self.feat_dict = to_device(self.feat_dict)
-        self.labels = to_device(self.labels)
-        self.train_idx = to_device(self.train_idx)
-        self.test_idx = to_device(self.test_idx)
+        self.feat_dict = to_device(self.feat_dict, device)
+        self.train_labels = to_device(self.train_labels, device)
+        if self.test_labels is not None:
+            self.test_labels = to_device(self.test_labels, device)
+        self.train_idx = to_device(self.train_idx, device)
+        self.test_idx = to_device(self.test_idx, device)
         return (
             self.model,
             self.feat_dict,
-            self.labels,
+            self.train_labels,
+            self.test_labels,
             self.train_idx,
             self.test_idx
         )
@@ -317,9 +312,10 @@ class Trainer(BaseTrainer):
                  model,
                  feat_dict: Mapping,
                  g: dgl.DGLGraph,
-                 labels: Tensor,
+                 train_labels: Tensor,
                  train_idx: Tensor,
                  test_idx: Tensor,
+                 test_labels: Optional[Tensor] = None,
                  cluster_labels: Optional[Sequence] = None,
                  lr=1e-3,
                  l2norm=1e-2,  # 1e-2 is tested for all datasets
@@ -330,7 +326,8 @@ class Trainer(BaseTrainer):
         super(Trainer, self).__init__(
             model,
             feat_dict=feat_dict,
-            labels=labels,
+            train_labels=train_labels,
+            test_labels=test_labels,
             train_idx=train_idx,
             test_idx=test_idx,
             cluster_labels=cluster_labels,
@@ -341,7 +338,7 @@ class Trainer(BaseTrainer):
             **kwds  # for code compatibility (not raising error)
         )
 
-        self.g = g.to(self.device)
+        self.g = g
         self.set_class_weights()
         ### infer n_classes
         self.n_classes = len(self.class_weights)
@@ -349,19 +346,24 @@ class Trainer(BaseTrainer):
         _record_names = (
             'dur',
             'train_loss',
+            'test_loss',
             'train_acc',
+            'test_acc',
             'AMI',
+            'microF1',
+            'macroF1',
+            'weightedF1',
         )
         self.set_recorder(*_record_names)
 
     def set_class_weights(self, class_weights=None, foo=np.sqrt, n_add=0):
         if class_weights is None:
             self.class_weights = make_class_weights(
-                self.labels[self.train_idx], foo=foo, n_add=n_add)
+                self.train_labels, foo=foo, n_add=n_add)
         else:
             self.class_weights = Tensor(class_weights)
-        if self.use_cuda:
-            self.class_weights = self.class_weights.cuda()
+        # if self.use_cuda:
+        #     self.class_weights = self.class_weights.cuda()
 
     def plot_cluster_index(self, start=0, end=None, fp=None):
         plot_records_for_trainer(
@@ -380,6 +382,7 @@ class Trainer(BaseTrainer):
               n_pass=100,
               eps=1e-4,
               cat_class='cell',
+              device=None,
               **other_inputs):
         """
                 Main function for model training
@@ -387,15 +390,23 @@ class Trainer(BaseTrainer):
         
         other_inputs: other inputs for `model.forward()`
         """
-        train_idx, test_idx, labels = self.train_idx, self.test_idx, self.labels
-        _train_labels, _test_labels = labels[train_idx], labels[test_idx]
+        if device is None:
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.g = self.g.to(device)
+        _, feat_dict, train_labels, test_labels, train_idx, test_idx = \
+            self.all_to_device(device)
 
         if use_class_weights:
             class_weights = self.class_weights
+        else:
+            class_weights = None
+        if not hasattr(self, 'ami_max'):
+            self.ami_max = 0.
+        if not hasattr(self, 'test_acc_max'):
+            self.test_acc_max = 0.
 
-        print("start training".center(50, '='))
+        print(f"start training (device='{device}')".center(50, '='))
         self.model.train()
-        _train_labels = self.labels[train_idx]  # might be changed during AL
 
         for epoch in range(n_epochs):
             self._cur_epoch += 1
@@ -403,12 +414,12 @@ class Trainer(BaseTrainer):
             self.optimizer.zero_grad()
             t0 = time.time()
             logits = self.model(self.feat_dict,
-                                self.g,  # .to(self.device),
+                                self.g,
                                 **other_inputs)
             out_cell = logits[cat_class]
             loss = self.model.get_classification_loss(
                 out_cell[train_idx],
-                _train_labels,  # labels[train_idx],
+                train_labels,  # labels[train_idx],
                 weight=class_weights,
                 **params_lossfunc
             )
@@ -418,15 +429,28 @@ class Trainer(BaseTrainer):
             y_pred_test = y_pred[test_idx]
 
             # evaluation (Acc.)
-            train_acc = accuracy(y_pred[train_idx], labels[train_idx])
+            train_acc = accuracy(y_pred[train_idx], train_labels)
+            if test_labels is None:
+                test_acc = microF1 = macroF1 = weightedF1 = -1.
+            else:
+                test_acc = accuracy(y_pred_test, test_labels)
+                # F1-scores
+                microF1 = get_F1_score(test_labels, y_pred_test,
+                                       average='micro')
+                macroF1 = get_F1_score(test_labels, y_pred_test,
+                                       average='macro')
+                weightedF1 = get_F1_score(test_labels, y_pred_test,
+                                          average='weighted')
 
             # unsupervised cluster index
             if self.cluster_labels is not None:
                 ami = get_AMI(self.cluster_labels, y_pred_test)
+            else:
+                ami = -1.
 
             if self._cur_epoch >= n_pass - 1:
-                ami_max = max(self.AMI[n_pass - 1:])
-                if ami >= ami_max - eps:
+                self.ami_max = max(self.ami_max, ami)
+                if ami >= self.ami_max - eps:
                     self._cur_epoch_best = self._cur_epoch
                     self.save_model_weights()
                     print('[current best] model weights backup')
@@ -443,17 +467,21 @@ class Trainer(BaseTrainer):
             self._record(dur=t1 - t0,
                          train_loss=loss.item(),
                          train_acc=train_acc,
+                         test_acc=test_acc,
                          AMI=ami,
+                         microF1=microF1,
+                         macroF1=macroF1,
+                         weightedF1=weightedF1,
                          )
 
             dur_avg = np.average(self.dur)
-            logfmt = "Epoch {:05d} | Train Acc: {:.4f} | AMI={:.4f} | Time: {:.4f}"
+            self.test_acc_max = max(test_acc, self.test_acc_max)
+            logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test Acc or AMI: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
             self._cur_log = logfmt.format(
-                self._cur_epoch,
-                train_acc,
-                ami,
-                dur_avg)
-
+                self._cur_epoch, train_acc,
+                ami if test_labels is None else test_acc,
+                self.ami_max if test_labels is None else self.test_acc_max,
+                ami, dur_avg)
             print(self._cur_log)
         self._cur_epoch_adopted = self._cur_epoch
         self.save_checkpoint_record()
@@ -466,12 +494,12 @@ class Trainer(BaseTrainer):
         """
         if feat_dict is None:
             feat_dict = self.feat_dict
-        elif self.use_cuda:
-            feat_dict = {k: v.cuda() for k, v in feat_dict.items()}
+        # elif self.use_cuda:
+        #     feat_dict = {k: v.cuda() for k, v in feat_dict.items()}
+        feat_dict = to_device(feat_dict, self.device)
         if g is None:
             g = self.g
-        else:
-            g = g.to(self.device)
+        g = g.to(self.device)
         with torch.no_grad():
             self.model.train()  # semi-supervised learning
             # self.model.eval()

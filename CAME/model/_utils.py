@@ -8,6 +8,7 @@
 from typing import Union, Sequence, Optional, Mapping, Any, List
 import logging
 import torch as th
+import torch.cuda
 import torch.nn as nn
 import torch.nn.functional as F
 import dgl
@@ -26,6 +27,9 @@ def detach2numpy(x):
 
 def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor]],
               device='cuda'):
+    if not torch.cuda.is_available():
+        device = 'cpu'
+        logging.warning("`to_device(x)`: CUDA is not available")
     if isinstance(x, th.Tensor):
         return x.to(device)
     elif isinstance(x, List) and isinstance(x[0], th.Tensor):
