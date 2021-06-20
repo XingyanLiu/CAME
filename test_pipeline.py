@@ -8,7 +8,11 @@ import CAME
 from CAME import pipeline_supervised
 import matplotlib as mpl
 
-mpl.use('Agg')
+
+try:
+    mpl.use('agg')
+except Exception:
+    print("An error occurred when setting matplotlib backend")
 
 if __name__ == '__main__':
 

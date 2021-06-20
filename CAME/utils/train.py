@@ -362,8 +362,6 @@ class Trainer(BaseTrainer):
                 self.train_labels, foo=foo, n_add=n_add)
         else:
             self.class_weights = Tensor(class_weights)
-        # if self.use_cuda:
-        #     self.class_weights = self.class_weights.cuda()
 
     def plot_cluster_index(self, start=0, end=None, fp=None):
         plot_records_for_trainer(
@@ -397,7 +395,7 @@ class Trainer(BaseTrainer):
             self.all_to_device(device)
 
         if use_class_weights:
-            class_weights = self.class_weights
+            class_weights = to_device(self.class_weights, device)
         else:
             class_weights = None
         if not hasattr(self, 'ami_max'):
@@ -405,7 +403,7 @@ class Trainer(BaseTrainer):
         if not hasattr(self, 'test_acc_max'):
             self.test_acc_max = 0.
 
-        print(f"start training (device='{device}')".center(50, '='))
+        print(f" start training (device='{device}') ".center(60, '='))
         self.model.train()
 
         for epoch in range(n_epochs):
