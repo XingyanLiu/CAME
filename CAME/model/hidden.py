@@ -175,7 +175,7 @@ class HiddenRRGCN(nn.Module):
             self,
             g_or_blocks,
             h_dict,  # residual=False,
-            norm=True, bias=True, activate=True, batch_train=False,
+            norm=True, bias=True, activate=True,
             **kwds,
     ):
         """
@@ -198,17 +198,6 @@ class HiddenRRGCN(nn.Module):
         h_dict = self.layers[-1](
             graphs[-1], h_dict, norm=norm, bias=bias, activate=activate, **kwds)
         self.hidden_states.append(h_dict)
-        # else:
-        #     for i, layer in enumerate(self.layers[: -1]):
-        #         h_dict = layer(g, h_dict, **kwds)
-        #
-        #         if self.layernorms and i < self.num_hidden_layers:
-        #             h_dict = self.layernorms[i](h_dict)
-        #         self.hidden_states.append(h_dict)
-        #     # for residual connection, not normalize
-        #     h_dict = self.layers[-1](
-        #         g, h_dict, norm=norm, bias=bias, activate=activate, **kwds)
-        #     self.hidden_states.append(h_dict)
 
         return h_dict
 

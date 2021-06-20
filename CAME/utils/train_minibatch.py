@@ -5,7 +5,7 @@ Created on Sun Apr 11 19:55:09 2021
 @author: Xingyan Liu
 """
 from pathlib import Path
-from typing import Sequence, Union, Mapping
+from typing import Sequence, Union, Mapping, Optional
 import time
 import numpy as np
 import torch
@@ -38,7 +38,7 @@ def create_blocks(n_layers, g, output_nodes):
     for i in range(n_layers):
         output_nodes_dict = {'cell': cell_ID, 'gene' : gene_ID}
         frontier = dgl.in_subgraph(g, output_nodes_dict)
-        #block = dgl.to_block(frontier, output_nodes_dict)
+        block = dgl.to_block(frontier, output_nodes_dict)
         blocks.append(block)
         cell_ID = block.nodes['cell'].data['feat']
         gene_ID = block.nodes['gene'].data['feat']
@@ -106,9 +106,10 @@ class Trainer(BaseTrainer):
                  model,
                  feat_dict: Mapping,
                  g: dgl.DGLGraph,
-                 labels: Tensor,
                  train_idx: Tensor,
                  test_idx: Tensor,
+                 train_labels: Tensor,
+                 test_labels: Optional[Tensor] = None,
                  cluster_labels: Union[None, Sequence, Tensor] = None,
                  lr=1e-3,
                  l2norm=1e-2,  # 1e-2 is tested for all datasets
@@ -236,7 +237,7 @@ class Trainer(BaseTrainer):
                 batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
                 logits = self.model(feat_dict,
                                     blocks,  # .to(self.device),
-                                    batch_train = True,
+                                    # batch_train = True, # TODO: remove
                                     **other_inputs)
 
                 out_cell = logits[cat_class]  # .cuda()
@@ -253,10 +254,10 @@ class Trainer(BaseTrainer):
                 self.optimizer.step()
                 _, y_pred = torch.max(out_cell, dim=1)
                 y_pred_train = y_pred[batch_train_idx]
-                y_pred_test = y_pred[batch_test_idx]
+                # y_pred_test = y_pred[batch_test_idx]
                 all_train_preds = torch.cat((all_train_preds, y_pred_train), 0)
-                all_test_preds = torch.cat((all_test_preds, y_pred_test), 0)
-            # prediction of ALL
+                # all_test_preds = torch.cat((all_test_preds, y_pred_test), 0)
+            # prediction of ALL test data; TODO: `CAME.model._utils.py`
 
             ### evaluation (Acc.)
             train_acc = accuracy(train_labels, all_train_preds)

@@ -5,7 +5,7 @@
 @time: 2021-06-12
 """
 
-from typing import Union, Sequence, Optional, Mapping, Any, List
+from typing import Union, Sequence, Optional, Mapping, Any, List, Literal
 import logging
 import torch as th
 import torch.cuda
@@ -115,5 +115,27 @@ def get_attentions(
         (attn, (ig, ic)), shape=(n_vnodes, n_obs)).tocsc().T
 
     return attn_mat
+
+
+def gat_model_outputs(
+        model: nn.Module,
+        feat_dict: Mapping,
+        g: Union[dgl.DGLGraph, List[dgl.DGLGraph]],
+        mode: Literal['minibatch', 'full'] = 'minibatch',
+        **other_inputs
+):
+    if mode == 'minibatch':
+        # get batch-list; blocks of graph
+        outputs = []
+        batch_list = [] # TODO
+
+        for output_nodes in batch_list:
+            pass
+        raise NotImplementedError
+    elif mode == 'full':
+        # with torch.no_grad():
+        outputs = model.forward(feat_dict, g, **other_inputs)
+
+    return outputs
 
 
