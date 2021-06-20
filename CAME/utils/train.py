@@ -369,10 +369,10 @@ class Trainer(BaseTrainer):
     def plot_cluster_index(self, start=0, end=None, fp=None):
         plot_records_for_trainer(
             self,
-            record_names=['train_acc', 'AMI'],
+            record_names=['test_acc', 'AMI'],
             start=start, end=end,
-            lbs=['train accuracy', 'AMI'],
-            tt='train accuracy and cluster index',
+            lbs=['test accuracy', 'AMI'],
+            tt='test accuracy and cluster index',
             fp=fp)
 
     def plot_class_accs(self, start=0, end=None, fp=None):
