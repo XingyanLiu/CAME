@@ -17,6 +17,7 @@ from torch import Tensor, LongTensor
 import dgl
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
+from ..model import to_device
 from .base import check_dirs, save_json_dict
 from .evaluation import accuracy, get_AMI
 from .plot import plot_records_for_trainer
@@ -128,15 +129,14 @@ class BaseTrainer(object):
                  cluster_labels: Optional[Sequence] = None,
                  lr: float = 1e-3,
                  l2norm: float = 1e-2,  # 1e-2 is tested for all datasets
-                 use_cuda: bool = True,
                  dir_main: Union[str, Path] = Path('.'),
                  **kwds  # for code compatibility (not raising error)
                  ):
 
-        self.use_cuda = use_cuda and torch.cuda.is_available()
-        self.set_inputs(model, feat_dict,
-                        labels, train_idx, test_idx,
-                        )
+        # self.use_cuda = use_cuda and torch.cuda.is_available()
+        self.set_inputs(
+            model, feat_dict, labels, train_idx, test_idx,
+            )
 
         self.cluster_labels = cluster_labels
         self.set_train_params(
@@ -159,12 +159,13 @@ class BaseTrainer(object):
         print('main directory:', self.dir_main)
         print('model directory:', self.dir_model)
 
-    def set_inputs(self, model,
-                   feat_dict: Mapping,
-                   labels: Union[Tensor, List[Tensor]],
-                   train_idx: Union[Tensor, List[Tensor]],
-                   test_idx: Union[Tensor, List[Tensor]],
-                   ):
+    def set_inputs(
+            self, model,
+            feat_dict: Mapping,
+            labels: Union[Tensor, List[Tensor]],
+            train_idx: Union[Tensor, List[Tensor]],
+            test_idx: Union[Tensor, List[Tensor]],
+            ):
 
         if self.use_cuda:
             def _to_cuda(x):
@@ -189,6 +190,12 @@ class BaseTrainer(object):
             self.device = self.train_idx.device
         except AttributeError:
             self.device = self.train_idx[0].device
+
+    def all_to_device(self, device=None):
+        if device is None:
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = device
+        self.model.to(device)
 
     def set_train_params(self,
                          lr=1e-3,

@@ -24,7 +24,8 @@ def detach2numpy(x):
     return x
 
 
-def to_device(x, device='cuda'):
+def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor]],
+              device='cuda'):
     if isinstance(x, th.Tensor):
         return x.to(device)
     elif isinstance(x, List) and isinstance(x[0], th.Tensor):

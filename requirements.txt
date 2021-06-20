@@ -1,11 +1,11 @@
+scanpy
 scipy
 dgl>=0.6
 torch>=1.9
-networkx>=2.5
-numpy
+networkx
+scikit-learn
 matplotlib
 seaborn
 pandas
-scikit-learn
-scanpy
+
 
