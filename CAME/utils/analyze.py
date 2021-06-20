@@ -26,7 +26,7 @@ import networkx as nx
 
 import scanpy as sc
 from . import preprocess as pp
-from . import plot as pp
+from . import plot as pl
 from ..datapair import DataPair, AlignedDataPair
 from . import _knn
 from .base import (

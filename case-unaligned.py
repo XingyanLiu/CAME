@@ -34,9 +34,10 @@ DATASET_PAIRS = [
     ('Lake_2018', 'Tosches_lizard'),
     ('Tosches_turtle', 'Tosches_lizard'),
     ('testis_human', 'testis_mouse'),
+    ('testis_human', 'testis_mouse0'),    
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[-2]  # [::-1]
+dsnames = DATASET_PAIRS[0]  # [::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -46,7 +47,7 @@ for _tiss in Tissues:
     species = list(NameDict.keys())
     pair_species = CAME.base.make_pairs_from_lists(species, species)
     for _sp1, _sp2 in pair_species:
-        if dsn1 in NameDict[_sp1] and dsn2 in NameDict[_sp2]:
+        if dsn1 in NameDict[_sp1] and dsn2 in NameDict[_sp2] + ['testis_mouse0']:
             tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
             break
 
@@ -83,8 +84,17 @@ adata_raw2 = sc.read_h5ad(dir_formal / f'raw-{dsn2}.h5ad')
 adatas = [adata_raw1, adata_raw2]
 
 # In[]
+# temp: remove known-ref-type
+if True:
+    rm_groups = ['inhibitory neuron', 'excitatory neuron']
+    adata_raw1 = pp.remove_adata_groups(adata_raw1, key_class1, rm_groups, copy=False)
+    adatas = [adata_raw1, adata_raw2]
+
+
+# In[]
 ''' subsampling and filtering genes
 '''
+
 for _adt, _name in zip([adata_raw1, adata_raw2], dsnames):
     if _adt.shape[0] >= 2e4:
         print(f'Doing subsampling for {_name}')
@@ -114,7 +124,7 @@ dpair, trainer, h_dict, ENV_VARs = pipeline.main_for_unaligned(
     resdir=resdir,
     check_umap=not True,  # True for visualizing embeddings each 40 epochs
     n_pass=100,
-    params_model=dict(residual=True)
+    params_model=dict(residual=False)
 )
 load_other_ckpt = False
 if load_other_ckpt:
@@ -183,6 +193,33 @@ ax = pl.heatmap(sim, order_col=True, order_row=True, figsize=(5, 4),
                 fp=resdir / 'celltype_embed_sim.png')
 ax.figure.show()
 
+# In[]
+# ============== heatmap of predicted probabilities ==============
+name_label = 'celltype'
+cols_anno = ['celltype', 'predicted'][:]
+
+out_cell = trainer.eval_current()['cell']
+
+probas_all = CAME.as_probabilities(out_cell)
+probas_all = CAME.model.detach2numpy(torch.sigmoid(out_cell))
+#probas_all = np.apply_along_axis(lambda x: x / x.sum(), 1, probas_all,)
+df_probs = pd.DataFrame(probas_all, columns=classes)
+
+for i, _obs_ids in enumerate([obs_ids1, obs_ids2]):
+    # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
+    df_lbs = obs[cols_anno].iloc[_obs_ids].sort_values(cols_anno)
+    
+    indices = CAME.subsample_each_group(df_lbs['celltype'], n_out=50, )
+    # indices = df_lbs.index
+    df_data = df_probs.loc[indices, :].copy()
+    df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
+    lbs = df_lbs[name_label][indices]
+    
+    _ = pl.heatmap_probas(
+        df_data.T, lbs, name_label='true label', 
+        cmap_heat='RdBu_r',
+        figsize=(5, 3.), fp=figdir / f'heatmap_probas-{i}.pdf'
+    )
 # In[]
 '''===================== gene embeddings ====================='''
 sc.set_figure_params(dpi_save=200)

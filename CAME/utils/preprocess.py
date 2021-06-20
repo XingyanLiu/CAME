@@ -961,10 +961,10 @@ def remove_adata_small_groups(adata: sc.AnnData,
 
 
 def remove_adata_groups(adata: sc.AnnData, key: str,
-                        group_names: Sequence):
+                        group_names: Sequence, copy=True):
     indicators = take_group_labels(adata.obs[key], group_names,
                                    indicate=True, remove=True)
-    return adata[indicators, :].copy()
+    return adata[indicators, :].copy() if copy else adata[indicators, :]
 
 
 def take_adata_groups(adata: sc.AnnData,
