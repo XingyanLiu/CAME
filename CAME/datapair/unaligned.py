@@ -115,7 +115,7 @@ class DataPair(object):
         self.set_vv_adj(vv_adj, varnames_node)
         self.set_oo_adj(oo_adjs)
         self.set_obs_dfs(*obs_dfs)
-        self.set_var_dfs(*var_dfs)  # TODO!!!
+        # self.set_var_dfs(*var_dfs)  # TODO!!!
         self.set_common_obs_annos(ignore_index=True)
         self.set_vnode_annos(ignore_index=True)
         self.set_ntypes(ntypes)

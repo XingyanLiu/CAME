@@ -40,11 +40,18 @@ def _save_with_adjust(fig, fpath=None, figsize=None, **kwds):
     plt.close()
 
 
+def rotate_xticklabels(ax, angle=45, **kwargs):
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=angle,
+                       **kwargs)
+
+
+def rotate_yticklabels(ax, angle=45, **kwargs):
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=angle,
+                       **kwargs)
+
+
 # In[]
-""" colors 
-"""
-
-
+# colors
 def view_color_map(cmap='viridis', n=None, figsize=(6, 2), s=150, k=20,
                    ax=None,
                    grid=False, **kwds):

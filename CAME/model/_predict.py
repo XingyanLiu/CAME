@@ -22,7 +22,7 @@ def sigmoid(x: np.ndarray):
 def as_probabilities(
         logits,
         mode: str = 'softmax',
-) -> np.ndarrary:
+):
     """
     Transform model-output logits into probabilities.
 
@@ -126,7 +126,7 @@ def compute_reject_thd(probas_train, preds_train,
                        n_classes=None,
                        qt=0.005,
                        thd_min=0, thd_max=0.6,
-                       ) -> np.ndarray:
+                       ):
     ''' rejection thresholds for each class
     train_labels: integer labels ranging from 0 to (n_classes - 1)
 
