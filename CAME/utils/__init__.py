@@ -13,16 +13,11 @@ from .base import (
         make_nowtime_tag,
         subsample_each_group,
         )
-from .evaluation import (
-        as_probabilities, 
-        predict, 
-        accuracy
-        )
+from .evaluation import accuracy
 #from .analyze import (
 #        weight_linked_vars, 
 #        make_abstracted_graph,
 #        )
-#from preprocess import *
 from ._get_example_data import load_example_data
 from .downsample_counts import (
         downsample_total_counts,

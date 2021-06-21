@@ -12,7 +12,6 @@ Created on Thu Aug  6 00:21:15 2020
         groups / ...
     * statistics computation
 
-
 """
 
 import os
@@ -22,7 +21,6 @@ import re
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, label_binarize
-
 import scanpy as sc
 
 from scipy import sparse, io

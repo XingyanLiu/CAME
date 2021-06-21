@@ -6,16 +6,10 @@ Created on Sun Apr 11 19:43:10 2021
 """
 
 import numpy as np
-from scipy.special import softmax
 from sklearn import metrics
 import torch
 from typing import Sequence
-
-
-def detach2numpy(x):
-    if isinstance(x, torch.Tensor):
-        x = x.cpu().clone().detach().numpy()
-    return x
+from ..model import detach2numpy
 
 
 def accuracy(logits, labels):
@@ -45,27 +39,3 @@ def get_F1_score(y_true, y_pred, average='macro', **kwds):
     return f1
 
 
-def as_probabilities(logits):
-    return softmax(detach2numpy(logits), axis=1)
-
-
-def predict_from_logits(logits, classes=None):
-    """
-    logits: shape=(n_sample, n_classes)
-    classes: list-like, unique categories
-    """
-    logits = detach2numpy(logits)
-    preds = np.argmax(logits, axis=1)
-    if classes is not None:
-        preds = np.take(classes, preds)
-    return preds
-
-
-def predict(model: torch.nn.Module,
-            feat_dict: dict,
-            g=None,
-            classes: Sequence = None,
-            key: str = 'cell',
-            **other_inputs):
-    logits = model.forward(feat_dict, g, **other_inputs)[key]
-    return predict_from_logits(logits, classes=classes)

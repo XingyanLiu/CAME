@@ -22,6 +22,8 @@ def detach2numpy(x):
         x = x.cpu().clone().detach().numpy()
     elif isinstance(x, Mapping):
         x = {k: detach2numpy(v) for k, v in x.items()}
+    elif isinstance(x, List):
+        x = [detach2numpy(v) for v in x]
     return x
 
 
