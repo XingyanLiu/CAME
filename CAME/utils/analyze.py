@@ -65,6 +65,7 @@ def load_dpair_and_model(
         subdir_model: str = '_models',
 ):
     import torch
+    dirname = Path(dirname)
     model_dir = dirname / subdir_model
     element_dict = load_pickle(dirname / 'datapair_init.pickle')
     model_params = load_json_dict(dirname / 'model_params.json')
