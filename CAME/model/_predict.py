@@ -5,6 +5,7 @@
 @File: _predict.py
 @Project: CAME
 """
+import collections
 import logging
 from typing import Union, Sequence, Optional
 import numpy as np
@@ -69,6 +70,72 @@ def predict(model: torch.nn.Module,
             **other_inputs):
     logits = model.forward(feat_dict, g, **other_inputs)[key]
     return predict_from_logits(logits, classes=classes)
+
+
+def translate_binary_labels(
+        labels,
+        trans_mode: Union[str, int] = 'multi-label',
+        classes: Optional[Sequence] = None,
+):
+    """
+    Parameters
+    ----------
+    labels: np.ndarray or sparse matrix
+        two-dimensional binary labels, of shape (n_samples, n_classes)
+    trans_mode: str
+        {0, 'ml', 'multi-label'}: return an array of multi-label tuples
+        {1, 'unc', 'uncertain'}: "0"or">2" -> "uncertain"
+        {2, 'unk', 'unknown'}: "0"->"unknown", ">2"->"multi-type"
+    classes
+
+    Returns
+    -------
+    depends on `trans_mode`
+    """
+    from sklearn.preprocessing import MultiLabelBinarizer
+    if classes is None:
+        classes = np.arange(labels.shape[1])
+    else:
+        classes = np.asarray(classes)
+    binarizer = MultiLabelBinarizer(classes=classes)
+    binarizer.fit([classes])
+    label_tuples = binarizer.inverse_transform(labels)
+    if trans_mode in {0, 'ml', 'multi-label', 'multilabel'}:
+        return label_tuples
+    elif trans_mode in {1, 'unc', 'uncertain'}:
+        func = lambda x: x[0] if len(x) == 1 else 'uncertain'
+        return list(map(func, label_tuples))
+    elif trans_mode in {2, 'unk', 'unknown'}:
+        def func(x):
+            if len(x) <= 0:
+                return 'unknown'
+            elif len(x) == 1:
+                return x[0]
+            elif len(x) >= 2:
+                return 'multi-type'
+    else:
+        raise ValueError("invalid `trans_mode`")
+    return list(map(func, label_tuples))
+
+
+def translate_pvalues(
+        pvalues,
+        p_cut: float = 0.001,
+        trans_mode: Union[str, int] = 'multi-label',
+        classes: Optional[Sequence] = None,
+):
+    """
+    Parameters
+    ----------
+    pvalues: : np.ndarray or sparse matrix
+        two-dimensional p-values, of shape (n_samples, n_classes)
+    p_cut: p-value cit-off
+    trans_mode: str
+        {0, 'ml', 'multi-label'}: return an array of multi-label tuples
+        {1, 'unc', 'uncertain'}: "0"or">2 passed" -> "uncertain"
+        {2, 'top', 'top1-or-unknown'}: "0"->"unknown", ">2"->top1 min-p-value
+    """
+    pass
 
 
 def uncertainty_entropy(p, axis=1):
@@ -221,29 +288,69 @@ class Predictor(object):
             self,
             logits,
             p: float = 0.001,
-            k: int = 1,
+            trans_mode: Union[int, str, None] = 'top1-or-unknown',
     ) -> np.ndarray:
         probas = as_probabilities(logits, mode=self._mode)
         # decide thresholds and cut-off
         thresholds = self.decide_thresholds(p)
-        preds = np.vstack([
+        binary_labels = np.vstack([
             (probas[:, i] > thresholds[i])
             for i in range(self.n_classes)
         ]).astype(int).T
-
-        return preds
+        if trans_mode is not None:
+            if trans_mode in {3, 'top', 'top1-or-unknown'}:
+                preds = np.take(self.classes, np.argmax(probas, axis=1))
+                preds[binary_labels.sum(1) <= 0] = 'unknown'
+                return preds
+            else:
+                return self.translate_binary_labels(binary_labels, trans_mode)
+        else:
+            return binary_labels
 
     def predict_pvalues(
             self,
             logits,
     ) -> np.ndarray:
         probas = as_probabilities(logits, mode=self._mode)
-
         pvalues = np.vstack([
             stats.norm(m, std).sf(probas[:, i])
             for i, (m, std) in enumerate(self._background_mean_std)
         ]).T
         return pvalues
+
+    def translate_binary_labels(
+            self, labels,
+            trans_mode: Union[str, int] = 'multi-label',
+    ):
+        """
+        Parameters
+        ----------
+        labels: two-dimensional binary labels, of shape (n_samples, n_classes)
+        trans_mode: str
+            {0, 'ml', 'multi-label'}: return an array of multi-label tuples
+            {1, 'unc', 'uncertain'}: "0"or">2" -> "uncertain"
+            {2, 'unk', 'unknown'}: "0"->"unknown", ">2"->"multi-type"
+        """
+        return translate_binary_labels(labels, trans_mode, self.classes)
+
+    def translate_pvalues(
+            self,
+            pvalues,
+            p_cut: float = 0.001,
+            trans_mode: Union[str, int] = 'multi-label',
+    ):
+        """
+        Parameters
+        ----------
+        pvalues: two-dimensional p-values, of shape (n_samples, n_classes)
+        p_cut: p-value cit-off
+        trans_mode: str
+            {0, 'ml', 'multi-label'}: return an array of multi-label tuples
+            {1, 'unc', 'uncertain'}: "0"or">2 passed" -> "uncertain"
+            {2, 'top1', 'top1-unknown'}: "0"->"unknown", ">2"->top1 min-p-value
+        """
+        return translate_pvalues(
+            pvalues, p_cut, trans_mode, classes=self.classes)
 
     def __str__(self):
         desc = f'''
@@ -273,8 +380,10 @@ def __test__():
     )
     predictor.save(f'{test_datadir}/predictor.json')
     # predictor = Predictor.load(f'{test_datadir}/predictor.json')
-    pred_test = predictor.predict(df_logits.values[obs_ids2, :])
-    logging.info(f"pred_test {pred_test.shape}:\n{pred_test}")
+    pred_test = predictor.predict(
+        df_logits.values[obs_ids2, :], p=1e-4, trans_mode=3)
+    logging.info(f"pred_test {len(pred_test)}:\n{pred_test}")
+    logging.debug(collections.Counter(pred_test))
     pval_test = predictor.predict_pvalues(df_logits.values[obs_ids2, :])
     logging.info(f"pval_test {pval_test.shape}:\n{pval_test}")
 
