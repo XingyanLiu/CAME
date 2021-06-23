@@ -1167,7 +1167,7 @@ def nx_multipartite_graph(*node_layers,
 # In[]
 def arrange_contingency_mat(
         mat: pd.DataFrame,
-        novel_name='unknown',
+        novel_names=['unknown', 'uncertain', 'multi-type'],
 ):
     """
     alignment of column and row names
@@ -1176,9 +1176,10 @@ def arrange_contingency_mat(
     common = list(set1.intersection(set2))
     index = common + list(set1.difference(common))
     columns = common + list(set2.difference(common))
-    if novel_name in columns:
-        columns.remove(novel_name)
-        columns += [novel_name]
+    for nm in novel_names:
+        if nm in columns:
+            columns.remove(nm)
+            columns += [nm]
 
     mat = mat.reindex(index)[columns]
     return mat
