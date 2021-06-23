@@ -125,16 +125,23 @@ for type_rm in all_types:
         n_epochs=350,
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
-        n_pass=100,
+        n_pass=200,
         params_model=dict(residual=False)
     )
+    del trainer.model, trainer, h_dict
+    
     # In[]
+    
 
-    obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
+    # obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
 
-    df_logits2 = pd.read_csv(resdir / 'df_logits2.csv', index_col=0)
-    predictor = CAME.Predictor.load(resdir / 'predictor.json')
-    pred_test = predictor.predict(
-        df_logits2.values, p=1e-4, trans_mode=3)
+    # df_logits2 = pd.read_csv(resdir / 'df_logits2.csv', index_col=0)
+    # predictor = CAME.Predictor.load(resdir / 'predictor.json')
+    # pred_test = predictor.predict(
+    #     df_logits2.values, p=1e-4, trans_mode=3)
 
     # pl.plot_co
+    
+    
+    
+    

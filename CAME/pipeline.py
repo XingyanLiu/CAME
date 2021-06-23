@@ -375,12 +375,12 @@ def gather_came_results(
             f'got {checkpoint}'
         )
     out_cell = trainer.eval_current()['cell']
-    out_cell = out_cell.clone().detach().numpy()
+    out_cell = out_cell.cpu().clone().detach().numpy()
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
     pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
     predictor = Predictor(classes=classes).fit(
             out_cell[dpair.obs_ids1],
-            trainer.train_labels.clone().detach().numpy(),
+            trainer.train_labels.cpu().clone().detach().numpy(),
         )
     predictor.save(resdir / f'predictor.json')
 
@@ -493,7 +493,7 @@ def preprocess_unaligned(
         nneigh=nneigh_scnet,
     )
     # NOTE:
-    # bu default, the original adatas are not changed
+    # by default, the original adatas are not changed
     # using the median total-counts as the scale factor (better than fixed number)
     adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
     adata2 = pp.quick_preprocess(adatas[1], **params_preproc)

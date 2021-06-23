@@ -37,7 +37,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse0'),    
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[0]  # [::-1]
+dsnames = DATASET_PAIRS[4]  # [::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
