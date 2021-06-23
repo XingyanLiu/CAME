@@ -59,21 +59,23 @@ def plot_uk_results(
     for ftype in fig_types:
         pl._save_with_adjust(ax.figure, figdir / f"contmat-{p:.1e}.{ftype}")
 
+    classes2 = [c for c in contmat.columns if c in df_logits2.columns]
     df_probas = pd.DataFrame(
         data=CAME.as_probabilities(df_logits2, mode=prob_func),
         # data=predictor.predict_pvalues(df_logits2.values),
         columns=df_logits2.columns
-    )[contmat.columns[:-1]]
+    )[classes2]
 
-    fig = pl.grid_display_probas(df_probas, y_true, contmat.index)
+    fig = pl.grid_display_probas(
+        df_probas, y_true, contmat.index, figsize=(6, 6))
     for ftype in fig_types:
         pl._save_with_adjust(fig, figdir / f"vlnGrid-{prob_func}.{ftype}")
 
-    fig = pl.wrapper_heatmap_scores(
+    gs = pl.wrapper_heatmap_scores(
         df_probas, obs2, ignore_index=True
     )
     for ftype in fig_types:
-        pl._save_with_adjust(fig, figdir / f"heatMap-{prob_func}.{ftype}")
+        pl._save_with_adjust(gs.figure, figdir / f"heatMap-{prob_func}.{ftype}")
 
 
 def plot_all(dirname,
@@ -93,5 +95,9 @@ def plot_all(dirname,
 # In[]
 
 dirname = Path("../_temp/('Baron_human', 'Baron_mouse')-(06-20 19.49.07)")
+dirname = Path("_case_res/uk-('Lake_2018', 'Tasic18')(06-23 14.37.55)")
 subdirs = os.listdir(dirname)
-plot_all(dirname, 5e-4, 'softmax')
+plot_all(dirname, 5e-5, 'sigmoid')
+
+
+

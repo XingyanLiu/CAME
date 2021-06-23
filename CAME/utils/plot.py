@@ -442,7 +442,7 @@ def grid_display_probas(
         df,
         labels,
         classes=None,
-        figsize=(8, 8),
+        figsize=(6, 5),
         sharey=True,
 ):
     """ violin plots of the distributions """
@@ -456,7 +456,7 @@ def grid_display_probas(
     for i, cl in enumerate(classes):
         df_sub = df[labels == cl]
         y_mid = 0.4  # (df_sub.max() + df_sub.min()) / 2
-        sns.violinplot(data=df_sub, ax=axs[i, 1], linewidth=.05, vmin=0)
+        sns.violinplot(data=df_sub, ax=axs[i, 1], linewidth=.01, vmin=0)
         axs[i, 1].set_ylim(-0.1, 1.1)
         axs[i, 0].text(df.shape[1] - 1, y_mid, cl, ha='right')
         axs[i, 0].set_axis_off()
@@ -487,8 +487,10 @@ def wrapper_heatmap_scores(
         indices = subsample_each_group(df_lbs[col_label], n_out=n_subsample)
     else:
         indices = df_lbs.index
-    cols_ordered = sorted(df_lbs[col_pred].unique())
-    df_data = df_score.loc[indices, cols_ordered].copy()
+    cols_ordered = [c for c in sorted(df_lbs[col_pred].unique())
+                    if c in df_score.columns]
+    
+    df_data = df_score.loc[indices][cols_ordered].copy()
     lbs = df_lbs[col_label].loc[indices]
 
     gs = heatmap_probas(

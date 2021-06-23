@@ -1176,11 +1176,10 @@ def arrange_contingency_mat(
     common = list(set1.intersection(set2))
     index = common + list(set1.difference(common))
     columns = common + list(set2.difference(common))
-    try:
+    if novel_name in columns:
         columns.remove(novel_name)
         columns += [novel_name]
-    except KeyError:
-        pass
+
     mat = mat.reindex(index)[columns]
     return mat
 
