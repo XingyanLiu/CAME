@@ -34,6 +34,7 @@ from .PARAMETERS import (
     get_preprocess_params
 )
 from . import (
+    Predictor,
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
@@ -374,9 +375,17 @@ def gather_came_results(
             f'got {checkpoint}'
         )
     out_cell = trainer.eval_current()['cell']
+    out_cell = out_cell.clone().detach().numpy()
+    pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
+    pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
+    predictor = Predictor(classes=classes).fit(
+            out_cell[dpair.obs_ids1],
+            trainer.train_labels.clone().detach().numpy(),
+        )
+    predictor.save(resdir / f'predictor.json')
 
     labels_cat = dpair.get_obs_labels(keys, asint=False)
-    probas_all = as_probabilities(out_cell)
+    probas_all = as_probabilities(out_cell, mode='softmax')
     cl_preds = predict_from_logits(probas_all, classes=classes)
     obs = pd.DataFrame(
         {keys[0]: labels_cat,
@@ -391,12 +400,9 @@ def gather_came_results(
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
     dpair.save_init(resdir / 'datapair_init.pickle')
-    # save_pickle(dpair, resdir / 'dpair.pickle')
 
     # hidden states are stored in sc.AnnData to facilitated downstream analysis
     h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
-    adt = pp.make_adata(h_dict['cell'], obs=dpair.obs, assparse=False)
-    # gadt = pp.make_adata(h_dict['gene'], obs = adpair.var, assparse=False)
 
     # group counts statistics (optinal)
     gcnt = pp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')

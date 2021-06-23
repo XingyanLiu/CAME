@@ -135,6 +135,7 @@ def translate_pvalues(
         {1, 'unc', 'uncertain'}: "0"or">2 passed" -> "uncertain"
         {2, 'top', 'top1-or-unknown'}: "0"->"unknown", ">2"->top1 min-p-value
     """
+    # TODO: trans_mode 最好全局统一
     pass
 
 
@@ -218,11 +219,11 @@ class Predictor(object):
         dct = {
             'classes': list(self.classes),
             'mode': self._mode,
-            'mean': list(mean),
-            'std': list(std)
+            'mean': list(map(float, mean)),
+            'std': list(map(float, std))
         }
+        logging.warning(dct)
         save_json_dict(dct, json_path, encoding=encoding)
-        logging.debug(dct)
         logging.info(json_path)
 
     def set_backgrounds(
@@ -287,7 +288,7 @@ class Predictor(object):
     def predict(
             self,
             logits,
-            p: float = 0.001,
+            p: float = 1e-4,
             trans_mode: Union[int, str, None] = 'top1-or-unknown',
     ) -> np.ndarray:
         probas = as_probabilities(logits, mode=self._mode)
@@ -365,26 +366,27 @@ class Predictor(object):
 def __test__():
     test_datadir = "./_temp/('Baron_human', 'Baron_mouse')-(06-20 19.49.07)"
     dpair, model = load_dpair_and_model(test_datadir)
-    labels, classes = dpair.get_obs_labels(
-        "cell_ontology_class", add_unknown_force=False)
+    # labels, classes = dpair.get_obs_labels(
+    #     "cell_ontology_class", add_unknown_force=False)
     obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
     df_logits = pd.read_csv(f'{test_datadir}/df_logits.csv', index_col=0)
     classes = df_logits.columns
 
     proba = as_probabilities(df_logits.values, mode='sigmoid')
 
-    predictor = Predictor(classes=classes)
-    predictor.fit(
-        df_logits.values[obs_ids1, :],
-        labels[obs_ids1],
-    )
-    predictor.save(f'{test_datadir}/predictor.json')
-    # predictor = Predictor.load(f'{test_datadir}/predictor.json')
+    # predictor = Predictor(classes=classes)
+    # predictor.fit(
+    #     df_logits.values[obs_ids1, :],
+    #     labels[obs_ids1],
+    # )
+    # predictor.save(f'{test_datadir}/predictor.json')
+    predictor = Predictor.load(f'{test_datadir}/predictor.json')
     pred_test = predictor.predict(
-        df_logits.values[obs_ids2, :], p=1e-4, trans_mode=3)
+        df_logits.values[obs_ids1, :], p=1e-4, trans_mode=3)
     logging.info(f"pred_test {len(pred_test)}:\n{pred_test}")
     logging.debug(collections.Counter(pred_test))
-    pval_test = predictor.predict_pvalues(df_logits.values[obs_ids2, :])
+
+    pval_test = predictor.predict_pvalues(df_logits.values[obs_ids1, :])
     logging.info(f"pval_test {pval_test.shape}:\n{pval_test}")
 
     logging.info(predictor)

@@ -26,6 +26,7 @@ from .utils.analyze import (
         make_abstracted_graph,
         )
 from .model import (
+        Predictor,
         as_probabilities,
         predict_from_logits,
         predict,
