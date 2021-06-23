@@ -72,7 +72,8 @@ def plot_uk_results(
         pl._save_with_adjust(fig, figdir / f"vlnGrid-{prob_func}.{ftype}")
 
     gs = pl.wrapper_heatmap_scores(
-        df_probas, obs2, ignore_index=True
+        df_probas, obs2, ignore_index=True,
+        cmap_heat='magma_r' if prob_func == 'softmax' else 'RdBu_r'
     )
     for ftype in fig_types:
         pl._save_with_adjust(gs.figure, figdir / f"heatMap-{prob_func}.{ftype}")
@@ -97,7 +98,7 @@ def plot_all(dirname,
 dirname = Path("../_temp/('Baron_human', 'Baron_mouse')-(06-20 19.49.07)")
 dirname = Path("_case_res/uk-('Lake_2018', 'Tasic18')(06-23 14.37.55)")
 subdirs = os.listdir(dirname)
-plot_all(dirname, 5e-5, 'sigmoid')
+plot_all(dirname, 5e-4, 'sigmoid')
 
 
 
