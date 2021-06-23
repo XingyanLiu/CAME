@@ -40,11 +40,24 @@ def plot_uk_results(
     figdir = resdir / 'figs'
     if isinstance(fig_types, str):
         fig_types = [fig_types]
-
+        
     # load logits, metadata and predictor
     df_logits2 = pd.read_csv(resdir / 'df_logits2.csv', index_col=0)
-    predictor = CAME.Predictor.load(resdir / 'predictor.json')
+    # predictor = CAME.Predictor.load(resdir / 'predictor.json')
     obs = pd.read_csv(resdir / 'obs.csv', index_col=0)
+
+    ########################################
+    dpair, model = CAME.load_dpair_and_model(resdir)
+    labels, classes = dpair.get_obs_labels(
+        "cell_ontology_class", add_unknown_force=False)
+    classes = df_logits2.columns
+    predictor = CAME.Predictor(classes=classes)
+    predictor.fit(
+        pd.read_csv(resdir / 'df_logits1.csv', index_col=0).values,
+        labels[dpair.obs_ids1],
+    )
+    predictor.save(resdir / 'predictor-1.json')
+    ########################################
 
     dsn2 = obs['dataset'].iloc[-1]
     obs2 = obs[obs['dataset'] == dsn2]
@@ -97,8 +110,9 @@ def plot_all(dirname,
 
 dirname = Path("../_temp/('Baron_human', 'Baron_mouse')-(06-20 19.49.07)")
 dirname = Path("_case_res/uk-('Lake_2018', 'Tasic18')(06-23 14.37.55)")
+dirname = Path("_case_res/uk-('Lake_2018', 'Tosches_turtle')(06-23 16.25.15)")
 subdirs = os.listdir(dirname)
-plot_all(dirname, 5e-4, 'sigmoid')
+plot_all(dirname, 5e-2, 'sigmoid')
 
 
 
