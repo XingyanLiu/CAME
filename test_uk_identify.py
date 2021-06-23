@@ -142,6 +142,5 @@ for type_rm in all_types:
 
     # pl.plot_co
     
-    
-    
-    
+
+

@@ -162,9 +162,25 @@ def alluvial_plot(confsdf: pd.DataFrame,
 
 
 # In[]
-"""       functions for plotting confusion matrix
+"""     functions for plotting confusion or contingency matrix
 ==================================================================
 """
+
+
+def plot_contingency_mat(
+        y_true, y_pred,
+        norm_axis=1,
+        arrange: bool = True,
+        **kwds
+):
+    from .analyze import wrapper_contingency_mat
+    contmat = wrapper_contingency_mat(
+        y_true, y_pred, normalize_axis=norm_axis, **kwds)
+    if arrange:
+        from .analyze import arrange_contingency_mat
+        contmat = arrange_contingency_mat(contmat)
+    ax = heatmap(contmat, figsize=(4, 3))
+    return ax, contmat
 
 
 def plot_confus_mat(y_true, y_pred, classes_on=None,
@@ -189,7 +205,6 @@ def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
     """
     combime multiple confusion matrix-plots into a single plot
     """
-
     fig, axs = plt.subplots(nrows, ncols, sharey=True, figsize=figsize)
     for k in range(len(ytrue_lists)):
         if nrows == 1 or ncols == 1:
@@ -231,7 +246,7 @@ def plot_line_list(ys, lbs=None,
     ax.legend(loc=legend_loc)
     if tt is not None:
         ax.set_title(tt)
-    _save_with_adjust(fig, fp, )
+    _save_with_adjust(ax.figure, fp, )
 
     return ax
 
@@ -240,8 +255,10 @@ def plot_records_for_trainer(
         trainer, record_names, start=0, end=None,
         lbs=None, tt='training logs', fp=None,
         **kwds):
-    if lbs is None: lbs = record_names
-    if end is not None: end = int(min([trainer._cur_epoch + 1, end]))
+    if lbs is None:
+        lbs = record_names
+    if end is not None:
+        end = int(min([trainer._cur_epoch + 1, end]))
     line_list = [getattr(trainer, nm)[start: end] for nm in record_names]
 
     return plot_line_list(line_list, lbs=lbs, tt=tt, fp=fp, **kwds)
@@ -354,12 +371,8 @@ def heatmap(df_hmap: pd.DataFrame,
         ax.set_yticklabels(ax.get_yticklabels(), rotation=yrotation)
 
     if fp is not None:
-        _save_with_adjust(fig, fp)
+        _save_with_adjust(ax.figure, fp)
     return ax
-
-
-""" heatmap showing probabilities
-"""
 
 
 def heatmap_probas(
@@ -370,6 +383,8 @@ def heatmap_probas(
         vmax=1, vmin=0,
         xrotation=30,
         fp=None):
+    """ heatmap showing probabilities
+    """
     lbs = pd.Categorical(lbs, )
     pix_lbs = np.vstack([lbs.codes] * 2)
 
@@ -381,10 +396,10 @@ def heatmap_probas(
     ax1 = fig.add_subplot(gs[:-1, : -w_cbar])
     ax11 = fig.add_subplot(gs[:-1, -w_cbar:])
     ax2 = fig.add_subplot(gs[-1:, : -w_cbar])
-    im = ax1.imshow(df_data,  # .iloc[::-1, :],
+    im = ax1.imshow(df_data,
                     interpolation='nearest',
                     cmap=cmap_heat,
-                    #               origin='lower', #extent=[-3, 3, -3, 3],
+                    # origin='lower', #extent=[-3, 3, -3, 3],
                     aspect='auto',
                     vmax=1, vmin=0)
     fig.colorbar(mpl.cm.ScalarMappable(
@@ -418,14 +433,74 @@ def heatmap_probas(
         ax11.spines[loc].set_visible(False)
         ax2.spines[loc].set_visible(False)
     #    _ax.set_axis_off()
-    if fp: _save_with_adjust(fig, fp)
+    if fp:
+        _save_with_adjust(fig, fp)
+    return gs
 
+
+def grid_display_probas(
+        df,
+        labels,
+        classes=None,
+        figsize=(8, 8),
+        sharey=True,
+):
+    """ violin plots of the distributions """
+    if classes is None:
+        classes = list(set(labels))
+    fig, axs = plt.subplots(
+        len(classes), 2, figsize=figsize,
+        sharex=True, sharey=sharey,
+        gridspec_kw={'hspace': 0.0, 'wspace': 0.}
+    )
+    for i, cl in enumerate(classes):
+        df_sub = df[labels == cl]
+        y_mid = 0.4  # (df_sub.max() + df_sub.min()) / 2
+        sns.violinplot(data=df_sub, ax=axs[i, 1], linewidth=.05, vmin=0)
+        axs[i, 1].set_ylim(-0.1, 1.1)
+        axs[i, 0].text(df.shape[1] - 1, y_mid, cl, ha='right')
+        axs[i, 0].set_axis_off()
+    rotate_xticklabels(axs[-1, 1], ha='right')
+    return fig
+
+
+def wrapper_heatmap_scores(
+        df_score: pd.DataFrame,
+        obs: pd.DataFrame,
+        col_label: str = 'celltype',
+        col_pred: str = 'predicted',
+        figsize: tuple = (5, 3),
+        n_subsample: Optional[int] = 50,
+        ignore_index: bool = False,
+        fp=None,
+        **kwds
+):
+    """ sort columns and rows, plot heatmap of celltype scores """
+    cols_anno = [col_label, col_pred]
+    df_lbs = obs[cols_anno]
+    if ignore_index:
+        df_lbs = df_lbs.copy()
+        df_lbs.index = df_score.index
+    df_lbs = df_lbs.sort_values(cols_anno)
+    if n_subsample:
+        from .base import subsample_each_group
+        indices = subsample_each_group(df_lbs[col_label], n_out=n_subsample)
+    else:
+        indices = df_lbs.index
+    cols_ordered = sorted(df_lbs[col_pred].unique())
+    df_data = df_score.loc[indices, cols_ordered].copy()
+    lbs = df_lbs[col_label].loc[indices]
+
+    gs = heatmap_probas(
+        df_data.T, lbs, name_label='true label',
+        figsize=figsize, fp=fp, **kwds
+    )
     return gs
 
 
 # In[]
 def _get_affine_mat(angle_x=30, angle_y=150):
-    """ rortate x and y axis to mock 3D projection 
+    """ rotate x and y axis to mock 3D projection
     if angle_x=0, angle_y=90, an identity matrix will be returned.
     """
     angle_x, angle_y = tuple(map(lambda x: (x / 180) * np.pi, (angle_x, angle_y)))
@@ -511,14 +586,12 @@ def plot_mapped_graph(
 
 
 # In[]
-""" multiple-plots of embeddings
-"""
-
-
 def umap_grid(adatas, colors=None,
               ncols=1, figsize=None,
               sharex=True, sharey=True,
               fp=None, **kwds):
+    """ multiple-plots of embeddings
+    """
     n = len(adatas)
     if isinstance(colors, str) or colors is None:
         colors = [colors] * n
@@ -528,7 +601,6 @@ def umap_grid(adatas, colors=None,
                             sharex=sharex, sharey=sharey)
     for ax, adt, color in zip(axs.flatten(), adatas, colors):
         sc.pl.umap(adt, color=color, ax=ax, show=False,
-                   #                   title=f'',
                    **kwds)
 
     _save_with_adjust(fig, fp)
@@ -539,6 +611,8 @@ def plot_splitted_umaps(adata, splitby,
                         left_groups=None,
                         colors=None, ncols=1,
                         figsize=(4, 8), **kwds):
+    """ multiple-plots of embeddings
+    """
     from .preprocess import bisplit_adata
     adt1, adt2 = bisplit_adata(adata, splitby, left_groups)
 
@@ -617,7 +691,7 @@ def _get_value_index(srs: pd.Series, vals: Sequence, ):
 
 def _get_value_index_list(lst, vals, return_vals=False):
     """
-    # getting the indexes only the first-occurred one in the list
+    getting the indexes only the first-occurred one in the list
     """
     lst = list(lst)
     ids = []
@@ -707,7 +781,7 @@ def plot_distance_lines(
 """
 
 
-def _adjust_xlims(ax, scale=1):
+def _adjust_xlims(ax, scale=1.):
     if isinstance(scale, Sequence):
         xlims = ax.get_xlim()
         ax.set_xlim((xlims[0] * scale[0], xlims[1] * scale[1]))
@@ -716,7 +790,7 @@ def _adjust_xlims(ax, scale=1):
         ax.set_xlim((xlims[0] * scale, xlims[1] * scale))
 
 
-def _adjust_ylims(ax, scale=1):
+def _adjust_ylims(ax, scale=1.):
     if isinstance(scale, Sequence):
         ylims = ax.get_ylim()
         ax.set_ylim((ylims[0] * scale[0], ylims[1] * scale[1]))
@@ -736,8 +810,8 @@ def plot_multipartite_graph(
         alpha=0.85,
         figsize=(10, 8), fp=None,
         xscale=1.5, yscale=1.1,
-        edge_scale=5,
-        node_scale=1,
+        edge_scale=5.,
+        node_scale=1.,
         node_size_min=100,
         node_size_max=1800,
         with_labels=True,

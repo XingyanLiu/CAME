@@ -177,7 +177,6 @@ def subsample_single(N,
 
 def subsample_each_group(
         group_labels,
-        #        frac=0.5, n_min=50,
         n_out=50,
         seed=0,
 ):

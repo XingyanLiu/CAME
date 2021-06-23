@@ -18,6 +18,7 @@ from .utils.base import (
         )
 from .utils import preprocess as pp
 from .utils import plot as pl
+from .utils import analyze as ana
 from .utils.train import prepare4train, Trainer, SUBDIR_MODEL
 from .utils.evaluation import accuracy
 from .utils.analyze import (

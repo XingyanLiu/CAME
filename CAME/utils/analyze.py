@@ -1142,9 +1142,7 @@ def nx_multipartite_graph(*node_layers,
                           edges=None,
                           subset_key='subset', **attrs):
     """
-    
-    
-    === Example ====
+    === Example ===
     >>> g = nx_multipartite_graph([0, 1], [2, 3, 4, 5], [6, 7, 8], )
     >>> pos = nx.multipartite_layout(g, subset_key=subset_key, )
     >>> nx.draw(g, pos, with_labels=True, )
@@ -1167,6 +1165,24 @@ def nx_multipartite_graph(*node_layers,
 
 
 # In[]
+def arrange_contingency_mat(
+        mat: pd.DataFrame,
+        novel_name='unknown',
+):
+    """
+    alignment of column and row names
+    """
+    set1, set2 = set(mat.index), set(mat.columns)
+    common = list(set1.intersection(set2))
+    index = common + list(set1.difference(common))
+    columns = common + list(set2.difference(common))
+    try:
+        columns.remove(novel_name)
+        columns += [novel_name]
+    except KeyError:
+        pass
+    mat = mat.reindex(index)[columns]
+    return mat
 
 
 def wrapper_confus_mat(y_true, y_pred, classes_on=None,
@@ -1178,19 +1194,16 @@ def wrapper_confus_mat(y_true, y_pred, classes_on=None,
     from sklearn import metrics
     if classes_on is None:
         classes_on = np.unique(list(y_true) + list(y_pred))
-    #        classes_on = list(set(y_true).union(y_pred))
-    #    mat = metrics.confusion_matrix(y_true, y_pred, labels = classes_on,
-    #                               normalize=normalize)
     try:
         mat = metrics.confusion_matrix(y_true, y_pred, labels=classes_on,
                                        normalize=normalize)
     except:
-        print('probably the argument `normalize` was not accepted by the previous '
-              'version of scikit-learn')
+        logging.warning(
+            'The argument `normalize` may not be accepted by '
+            'the previous version of scikit-learn')
         mat = metrics.confusion_matrix(y_true, y_pred, labels=classes_on, )
     if as_df:
         mat = pd.DataFrame(mat, index=classes_on, columns=classes_on)
-
     return mat
 
 
@@ -1199,7 +1212,9 @@ def wrapper_contingency_mat(y_true, y_pred,
                             order_cols=False,
                             normalize_axis=None,
                             as_df=True,
-                            eps=None, assparse=False):
+                            eps=None,
+                            assparse=False
+                            ):
     """ 
     Modified and wrapped function from `sklearn`:
     >>> mat = sklearn.metrics.cluster.contingency_matrix(
@@ -1215,10 +1230,10 @@ def wrapper_contingency_mat(y_true, y_pred,
     # Using coo_matrix to accelerate simple histogram calculation,
     # i.e. bins are consecutive integers
     # Currently, coo_matrix is faster than histogram2d for simple cases
-    mat = sparse.coo_matrix((np.ones(class_idx.shape[0]),
-                             (class_idx, cluster_idx)),
-                            shape=(n_classes, n_clusters),
-                            dtype=np.int)
+    mat = sparse.coo_matrix(
+        (np.ones(class_idx.shape[0]), (class_idx, cluster_idx)),
+        shape=(n_classes, n_clusters), dtype=np.int
+    )
     if assparse:
         mat = mat.tocsr()
         mat.sum_duplicates()
@@ -1234,7 +1249,7 @@ def wrapper_contingency_mat(y_true, y_pred,
 
         if as_df:
             mat = pd.DataFrame(mat, index=classes, columns=clusters)
-        # reorder so that make clusters and classes matching each other as possible
+        # reorder to make clusters and classes matching each other as possible
         if order_cols:
             mat = pp.order_contingency_mat(mat, 0)
         if order_rows:
@@ -1252,7 +1267,7 @@ def adata_neighbors(adata,
                     n_neighbors=8,
                     metric='cosine',
                     exact=False,
-                    #                    algorithm = None, #'brute',
+                    # algorithm = None, #'brute',
                     use_rep='X',
                     key_added=None,
                     **kwds):
@@ -1298,15 +1313,13 @@ def paired_data_neighbors(
     if adata is None:
         X = np.vstack([X1, X2])
         adata = sc.AnnData(X=X, )
-    #    if use_rep == 'X_pca':
-    #        sc.tl.pca(adata, n_comps=n_pcs)
 
     distances, connectivities = _knn.pair_stitched_knn(
         X1, X2,
         ks=ks,
         ks_inner=ks_inner,
         metric=metric,
-        #        func_norm = 'umap',
+        # func_norm = 'umap',
         algorithm='auto',
         metric_params=metric_kwds,
         **kwds)
@@ -1335,7 +1348,7 @@ def set_precomputed_neighbors(
         distances,
         connectivities=None,
         n_neighbors=15,
-        metric='cisone',  # pretended parameter
+        metric='cosine',  # pretended parameter
         method='umap',  # pretended parameter
         metric_kwds=None,  # pretended parameter
         use_rep=None,  # pretended parameter
