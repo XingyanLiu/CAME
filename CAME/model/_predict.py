@@ -268,8 +268,18 @@ class Predictor(object):
         means, stds = [], []
         for i in range(self.n_classes):
             is_this = labels[:, i].toarray().flatten().astype(bool)
-            p_bg = probas[~ is_this, i] # TODO: may be empty
-            m, std = stats.norm.fit(p_bg)
+            # p_bg = probas[~ is_this, i] # TODO: may be empty
+            # m, std = stats.norm.fit(p_bg)
+            m = - np.inf
+            std = 0.25
+            for j in range(self.n_classes):
+                if j == i:
+                    continue
+                is_j = labels[:, i].toarray().flatten().astype(bool)
+                p_ji = probas[is_j, i]
+                _m, _std = stats.norm.fit(p_ji)
+                if _m > m:
+                    m, std = _m, _std
             means.append(m)
             stds.append(std)
         self.set_backgrounds(means, stds)
@@ -366,23 +376,23 @@ class Predictor(object):
 def __test__():
     test_datadir = "./_temp/('Baron_human', 'Baron_mouse')-(06-20 19.49.07)"
     dpair, model = load_dpair_and_model(test_datadir)
-    # labels, classes = dpair.get_obs_labels(
-    #     "cell_ontology_class", add_unknown_force=False)
+    labels, classes = dpair.get_obs_labels(
+        "cell_ontology_class", add_unknown_force=False)
     obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
     df_logits = pd.read_csv(f'{test_datadir}/df_logits.csv', index_col=0)
     classes = df_logits.columns
 
     proba = as_probabilities(df_logits.values, mode='sigmoid')
 
-    # predictor = Predictor(classes=classes)
-    # predictor.fit(
-    #     df_logits.values[obs_ids1, :],
-    #     labels[obs_ids1],
-    # )
-    # predictor.save(f'{test_datadir}/predictor.json')
-    predictor = Predictor.load(f'{test_datadir}/predictor.json')
+    predictor = Predictor(classes=classes)
+    predictor.fit(
+        df_logits.values[obs_ids1, :],
+        labels[obs_ids1],
+    )
+    predictor.save(f'{test_datadir}/predictor.json')
+    # predictor = Predictor.load(f'{test_datadir}/predictor.json')
     pred_test = predictor.predict(
-        df_logits.values[obs_ids1, :], p=1e-4, trans_mode=3)
+        df_logits.values[obs_ids1, :], p=5e-2, trans_mode=3)
     logging.info(f"pred_test {len(pred_test)}:\n{pred_test}")
     logging.debug(collections.Counter(pred_test))
 
