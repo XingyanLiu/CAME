@@ -186,6 +186,8 @@ class Predictor(object):
             mode: str = 'sigmoid',
             mean: Optional[Sequence] = None,
             std: Optional[Sequence] = None,
+            mean_fg: Optional[Sequence] = None,
+            std_fg: Optional[Sequence] = None,
     ):
         if isinstance(classes, int):
             self._classes = tuple(range(classes))
@@ -193,8 +195,13 @@ class Predictor(object):
             self._classes = tuple(classes)
         self._mode = mode
         self._background_mean_std = None
-        if (mean is not None) and (std is not None):
+        self._foreground_mean_std = None
+
+        if not (mean is None or std is None):
             self.set_backgrounds(mean, std)
+
+        if not (mean_fg is None or std_fg is None):
+            self.set_foregrounds(mean_fg, std_fg)
 
     @property
     def is_fitted(self) -> bool:
@@ -216,11 +223,17 @@ class Predictor(object):
 
     def save(self, json_path, encoding='utf-8'):
         mean, std = list(zip(*self._background_mean_std))
+        if self._foreground_mean_std:
+            mean_fg, std_fg = list(zip(*self._foreground_mean_std))
+        else:
+            mean_fg = std_fg = None
         dct = {
             'classes': list(self.classes),
             'mode': self._mode,
             'mean': list(map(float, mean)),
-            'std': list(map(float, std))
+            'std': list(map(float, std)),
+            'mean_fg': list(map(float, mean_fg)),
+            'std_fg': list(map(float, std_fg))
         }
         logging.warning(dct)
         save_json_dict(dct, json_path, encoding=encoding)
@@ -233,6 +246,14 @@ class Predictor(object):
     ):
         # assert len(self.classes) == len(mean)
         self._background_mean_std = tuple(zip(mean, std))
+
+    def set_foregrounds(
+            self,
+            mean: Sequence,
+            std: Sequence
+    ):
+        # assert len(self.classes) == len(mean)
+        self._foreground_mean_std = tuple(zip(mean, std))
 
     def fit(self,
             logits: np.ndarray,
@@ -260,29 +281,36 @@ class Predictor(object):
                 _classes = np.arange(self.n_classes)
             else:
                 _classes = self.classes
-            labels = onehot_encode(labels, classes=_classes, astensor=False)
+            labels = onehot_encode(
+                labels, classes=_classes, astensor=False, sparse_output=False
+            ).astype(bool)
         assert logits.shape == labels.shape
 
         probas = as_probabilities(logits, mode=self._mode)
         # step 1: fit Gaussian distribution of background (negative samples)
+        means_fg, stds_fg = [], []
         means, stds = [], []
         for i in range(self.n_classes):
-            is_i = labels[:, i].toarray().flatten().astype(bool)
+            is_i = labels[:, i].flatten()#.astype(bool)
             m_i, std_i = stats.norm.fit(probas[is_i, i])
-            # p_bg = probas[~ is_i, i] # TODO: may be empty
-            # m, std = stats.norm.fit(p_bg)
-            m = - np.inf
-            std = 0.25
-            for j in range(self.n_classes):
-                if j == i:
-                    continue
-                is_j = labels[:, i].toarray().flatten().astype(bool)
-                p_ji = probas[is_j, i]
-                _m, _std = stats.norm.fit(p_ji)
-                if _m > m:
-                    m, std = _m, _std
+            means_fg.append(m_i)
+            stds_fg.append(std_i)
+
+            p_bg = probas[~ is_i, i] # TODO: may be empty
+            m, std = stats.norm.fit(p_bg)
+            # m = - np.inf
+            # std = 0.25
+            # for j in range(self.n_classes):
+            #     if j == i:
+            #         continue
+            #     is_j = labels[:, i].flatten()#.astype(bool)
+            #     p_ji = probas[is_j, i]
+            #     _m, _std = stats.norm.fit(p_ji)
+            #     if _m > m:
+            #         m, std = _m, _std
             means.append(m)
             stds.append(std)
+        self.set_foregrounds(means_fg, stds_fg)
         self.set_backgrounds(means, stds)
         return self
 
@@ -290,11 +318,15 @@ class Predictor(object):
         if not self.is_fitted:
             raise AttributeError("predictor un-fitted!")
         thresholds = []
-        for m, std in self._background_mean_std:
-            thresholds.append(stats.norm(m, std).isf(p))
-            # thresholds.append(stats.norm(m, std).cdf(p))
+        # for m, std in self._background_mean_std:
+        #     thresholds.append(stats.norm(m, std).isf(p))
+
+        for m, std in self._foreground_mean_std:
+            thresholds.append(stats.norm(m, std).ppf(p))
         if map_class:
             thresholds = dict(zip(self.classes, thresholds))
+
+        logging.info(f"thresholds: {thresholds}")
         return thresholds
 
     def predict(
@@ -371,6 +403,7 @@ class Predictor(object):
         - is fitted: {self.is_fitted}
         - classes: {self.classes}
         - backgrounds: {self._background_mean_std}
+        - foregrounds: {self._foreground_mean_std}
         '''
         return desc
 
