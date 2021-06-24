@@ -267,8 +267,9 @@ class Predictor(object):
         # step 1: fit Gaussian distribution of background (negative samples)
         means, stds = [], []
         for i in range(self.n_classes):
-            is_this = labels[:, i].toarray().flatten().astype(bool)
-            # p_bg = probas[~ is_this, i] # TODO: may be empty
+            is_i = labels[:, i].toarray().flatten().astype(bool)
+            m_i, std_i = stats.norm.fit(probas[is_i, i])
+            # p_bg = probas[~ is_i, i] # TODO: may be empty
             # m, std = stats.norm.fit(p_bg)
             m = - np.inf
             std = 0.25
@@ -291,6 +292,7 @@ class Predictor(object):
         thresholds = []
         for m, std in self._background_mean_std:
             thresholds.append(stats.norm(m, std).isf(p))
+            # thresholds.append(stats.norm(m, std).cdf(p))
         if map_class:
             thresholds = dict(zip(self.classes, thresholds))
         return thresholds
