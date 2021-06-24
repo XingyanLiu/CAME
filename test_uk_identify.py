@@ -39,7 +39,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse0'),
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[4]  # [5]
+dsnames = DATASET_PAIRS[5]  # [5]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -91,18 +91,23 @@ sc.pp.filter_genes(adata_raw2, min_cells=3)
 
 
 all_types = list(
-    set(adata_raw10.obs[key_class1]).intersection(adata_raw2.obs[key_class1]))
+    set(adata_raw10.obs[key_class1]).intersection(adata_raw2.obs[key_class1])
+    )
 # In[]
 type_rm = all_types[0]
-for type_rm in all_types:
+additional = [['inhibitory neuron', 'excitatory neuron']]
+for type_rm in (additional + []):#all_types):
     resdir = resdir0 / f'rm-{type_rm}'
     figdir = resdir / 'figs'
     sc.settings.figdir = figdir
     CAME.check_dirs(figdir)
 
     # remove known-ref-type
-    adata_raw1 = pp.remove_adata_groups(
-        adata_raw10, key_class1, type_rm, copy=True)
+    if type_rm == '':
+        adata_raw1 = adata_raw10.copy()
+    else:
+        adata_raw1 = pp.remove_adata_groups(
+            adata_raw10, key_class1, type_rm, copy=True)
     adatas = [adata_raw1, adata_raw2]
 
     # In[]
