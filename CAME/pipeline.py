@@ -421,6 +421,14 @@ def preprocess_aligned(
         nneigh_clust: int = 20,
         ntop_deg: int = 50,
 ):
+    """
+    Steps:
+    * align variables
+    * preprocessing
+    * candidate genes (HVGs and DEGs)
+    * pre-clustering query data
+    * single-cell network
+    """
     adatas = pp.align_adata_vars(
         adatas[0], adatas[1], df_varmap_1v1, unify_names=True,
     )
@@ -432,69 +440,8 @@ def preprocess_aligned(
         n_pcs=n_pcs,
         nneigh=nneigh_scnet,
     )
-    # NOTE: using the median total-counts as the scale factor (better than fixed number)
-    adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
-    adata2 = pp.quick_preprocess(adatas[1], **params_preproc)
-
-    # the single-cell network
-    if use_scnets:
-        scnets = [pp.get_scnet(adata1), pp.get_scnet(adata2)]
-    else:
-        scnets = None
-    # get HVGs
-    hvgs1, hvgs2 = pp.get_hvgs(adata1), pp.get_hvgs(adata2)
-
-    # cluster labels
-    key_clust = 'clust_lbs'
-    clust_lbs2 = pp.get_leiden_labels(
-        adata2, force_redo=True,
-        nneigh=nneigh_clust,
-        neighbors_key='clust',
-        key_added=key_clust,
-        copy=False
-    )
-    adatas[1].obs[key_clust] = clust_lbs2
-
-    #    ntop_deg = 50
-    params_deg = dict(n=ntop_deg, force_redo=False,
-                      inplace=True, do_normalize=False)
-    ### need to be normalized first
-    degs1 = pp.compute_and_get_DEGs(
-        adata1, key_class, **params_deg)
-    degs2 = pp.compute_and_get_DEGs(
-        adata2, key_clust, **params_deg)
-    ###
-    vars_feat = list(set(degs1).union(degs2))
-    vars_node = list(set(hvgs1).union(hvgs2).union(vars_feat))
-
-    dct = dict(
-        adatas=adatas,
-        vars_feat=vars_feat,
-        vars_as_nodes=vars_node,
-        scnets=scnets,
-    )
-    return dct, (adata1, adata2)
-
-
-def preprocess_unaligned(
-        adatas,
-        key_class: str,
-        use_scnets: bool = True,
-        n_pcs: int = 30,
-        nneigh_scnet: int = 5,
-        nneigh_clust: int = 20,
-        ntop_deg: int = 50,
-):
-    logging.info('================ preprocessing ===============')
-    params_preproc = dict(
-        target_sum=None,
-        n_top_genes=2000,
-        n_pcs=n_pcs,
-        nneigh=nneigh_scnet,
-    )
-    # NOTE:
-    # by default, the original adatas are not changed
-    # using the median total-counts as the scale factor (better than fixed number)
+    # NOTE: using the median total-counts as the scale factor
+    # (may perform better than fixed number)
     adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
     adata2 = pp.quick_preprocess(adatas[1], **params_preproc)
 
@@ -524,7 +471,76 @@ def preprocess_unaligned(
         adata1, key_class, **params_deg)
     degs2 = pp.compute_and_get_DEGs(
         adata2, key_clust, **params_deg)
-    #
+    ###
+    vars_feat = list(set(degs1).union(degs2))
+    vars_node = list(set(hvgs1).union(hvgs2).union(vars_feat))
+
+    dct = dict(
+        adatas=adatas,
+        vars_feat=vars_feat,
+        vars_as_nodes=vars_node,
+        scnets=scnets,
+    )
+    return dct, (adata1, adata2)
+
+
+def preprocess_unaligned(
+        adatas,
+        key_class: str,
+        use_scnets: bool = True,
+        n_pcs: int = 30,
+        nneigh_scnet: int = 5,
+        nneigh_clust: int = 20,
+        ntop_deg: int = 50,
+):
+    """
+    Steps:
+    * preprocessing
+    * candidate genes (HVGs and DEGs)
+    * pre-clustering query data
+    * single-cell network
+    """
+    logging.info('================ preprocessing ===============')
+    params_preproc = dict(
+        target_sum=None,
+        n_top_genes=2000,
+        n_pcs=n_pcs,
+        nneigh=nneigh_scnet,
+    )
+    # NOTE:
+    # by default, the original adatas will not be changed
+    # using the median total-counts as the scale factor \
+    # may perform better than fixed number
+    adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
+    adata2 = pp.quick_preprocess(adatas[1], **params_preproc)
+
+    # the single-cell network
+    if use_scnets:
+        scnets = [pp.get_scnet(adata1), pp.get_scnet(adata2)]
+    else:
+        scnets = None
+    # get HVGs
+    hvgs1, hvgs2 = pp.get_hvgs(adata1), pp.get_hvgs(adata2)
+
+    # cluster labels
+    key_clust = 'clust_lbs'
+    clust_lbs2 = pp.get_leiden_labels(
+        adata2, force_redo=True,
+        nneigh=nneigh_clust,
+        neighbors_key='clust',
+        key_added=key_clust,
+        copy=False
+    )
+    adatas[1].obs[key_clust] = clust_lbs2
+
+    params_deg = dict(n=ntop_deg, force_redo=False,
+                      inplace=True, do_normalize=False)
+    # adata1&2 have already been normalized before
+    degs1 = pp.compute_and_get_DEGs(
+        adata1, key_class, **params_deg)
+    degs2 = pp.compute_and_get_DEGs(
+        adata2, key_clust, **params_deg)
+
     vars_use = [degs1, degs2]
     vars_as_nodes = [np.unique(np.hstack([hvgs1, degs1])),
                      np.unique(np.hstack([hvgs2, degs2]))]

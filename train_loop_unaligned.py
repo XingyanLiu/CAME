@@ -30,13 +30,14 @@ pipeline.seed_everything()
 
 
 # In[]
-RESDIR = Path('./results')
 
 # datadir = Path('D:/SQL/datasets')
 # dir_gmap = Path('D:/lxy/resources/exported_gene_matches')
 
 datadir = Path('datasets')
 dir_gmap = Path('resources/mart_exports/exported_gene_matches')
+
+RESDIR = Path('./results')
 
 key_class = 'cell_ontology_class'
 key_clust = 'clust_lbs'
@@ -54,7 +55,7 @@ n_epochs = 400
 n_pass = 100
 batch_size = 32
 
-resdir = RESDIR / 'minibatch' / f'batch_size-{batch_size}'
+resdir0 = RESDIR / 'minibatch' / f'batch_size-{batch_size}'
 
 for tiss in Tissues:
     print(f'Tissue: {tiss}')
@@ -78,8 +79,8 @@ for tiss in Tissues:
             if dsn2 == 'merged_mouse':
                 continue
 
-            fdir = resdir / '---'.join([header, dsn1, dsn2])
-            if fdir.exists():
+            resdir = resdir0 / '---'.join([header, dsn1, dsn2])
+            if resdir.exists():
                 print(f'already run for {dsnames}, skipped')
                 continue
 
@@ -91,7 +92,7 @@ for tiss in Tissues:
             adata_raw1, adata_raw2 = sc.read_h5ad(fn1), sc.read_h5ad(fn2)
             adatas = [adata_raw1, adata_raw2]
 
-            print('================ step1: preprocessing ===============')
+            print('================ preprocessing ===============')
             came_inputs, (adata1, adata2) = pipeline.preprocess_unaligned(
                     adatas,
                     key_class=key_class,
@@ -109,6 +110,7 @@ for tiss in Tissues:
                     resdir=resdir,
                     check_umap=not True,
                     n_pass=100,
+                    plot_results=True, # TODO: if raise error, change it to False
                     params_model=params_model,
                     params_lossfunc=params_lossfunc,
                     batch_size=batch_size,

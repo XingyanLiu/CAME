@@ -411,6 +411,7 @@ class Trainer(BaseTrainer):
               eps=1e-4,
               cat_class='cell',
               device=None,
+              backup_stride=43,
               **other_inputs):
         """
                 Main function for model training
@@ -491,7 +492,7 @@ class Trainer(BaseTrainer):
                     self._cur_epoch_best = self._cur_epoch
                     self.save_model_weights()
                     print('[current best] model weights backup')
-                elif self._cur_epoch % 43 == 0:
+                elif self._cur_epoch % backup_stride == 0:
                     self.save_model_weights()
                     print('model weights backup')
 
