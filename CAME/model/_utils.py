@@ -52,7 +52,7 @@ def onehot_encode(
         x = [[_x] for _x in x]
     binarizer = MultiLabelBinarizer(
         classes=classes,
-        sparse_output=sparse_output and (not astensor)
+        sparse_output=sparse_output and (not astensor),
     )
     x_onehot = binarizer.fit_transform(x)
     logging.info("classes = %s", binarizer.classes)

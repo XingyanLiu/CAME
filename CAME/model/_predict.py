@@ -300,18 +300,18 @@ class Predictor(object):
             means_fg.append(m_i)
             stds_fg.append(std_i)
 
-            p_bg = probas[~ is_i, i] # TODO: may be empty
-            m, std = stats.norm.fit(p_bg)
-            # m = - np.inf
-            # std = 0.25
-            # for j in range(self.n_classes):
-            #     if j == i:
-            #         continue
-            #     is_j = labels[:, i].flatten()#.astype(bool)
-            #     p_ji = probas[is_j, i]
-            #     _m, _std = stats.norm.fit(p_ji)
-            #     if _m > m:
-            #         m, std = _m, _std
+            # p_bg = probas[~ is_i, i] # TODO: may be empty
+            # m, std = stats.norm.fit(p_bg)
+            m = - np.inf
+            std = 0.25
+            for j in range(self.n_classes):
+                if j == i:
+                    continue
+                is_j = labels[:, j].flatten()#.astype(bool)
+                p_ji = probas[is_j, i]
+                _m, _std = stats.norm.fit(p_ji)
+                if _m > m:
+                    m, std = _m, _std
             means.append(m)
             stds.append(std)
         self.set_foregrounds(means_fg, stds_fg)
@@ -436,7 +436,7 @@ def __test__():
     logging.debug(collections.Counter(pred_test))
 
     pval_test = predictor.predict_pvalues(df_logits.values[obs_ids1, :])
-    logging.info(f"pval_test {pval_test.shape}:\n{pval_test}")
+    # logging.info(f"pval_test {pval_test.shape}:\n{pval_test}")
 
     logging.info(predictor)
     return predictor

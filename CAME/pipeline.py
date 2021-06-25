@@ -519,12 +519,12 @@ def preprocess_unaligned(
 
     params_deg = dict(n=ntop_deg, force_redo=False,
                       inplace=True, do_normalize=False)
-    ### need to be normalized first
+    # adata1&2 have already been normalized before
     degs1 = pp.compute_and_get_DEGs(
         adata1, key_class, **params_deg)
     degs2 = pp.compute_and_get_DEGs(
         adata2, key_clust, **params_deg)
-    ###
+    #
     vars_use = [degs1, degs2]
     vars_as_nodes = [np.unique(np.hstack([hvgs1, degs1])),
                      np.unique(np.hstack([hvgs2, degs2]))]
