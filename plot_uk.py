@@ -47,21 +47,21 @@ def plot_uk_results(
     df_logits2 = pd.read_csv(resdir / 'df_logits2.csv', index_col=0)
     
     predictor = CAME.Predictor.load(resdir / 'predictor.json')
-    # predictor.save(resdir / 'predictor-0.json') #backup
+    predictor.save(resdir / 'predictor-0.json') #backup
     
     obs = pd.read_csv(resdir / 'obs.csv', index_col=0)
 
     ########################################
-    # dpair, model = CAME.load_dpair_and_model(resdir)
-    # labels, classes = dpair.get_obs_labels(
-    #     "cell_ontology_class", add_unknown_force=False)
-    # classes = df_logits2.columns
-    # predictor = CAME.Predictor(classes=classes)
-    # predictor.fit(
-    #     pd.read_csv(resdir / 'df_logits1.csv', index_col=0).values,
-    #     labels[dpair.obs_ids1],
-    # )
-    # predictor.save(resdir / 'predictor.json')
+    dpair, model = CAME.load_dpair_and_model(resdir)
+    labels, classes = dpair.get_obs_labels(
+        "cell_ontology_class", add_unknown_force=False)
+    classes = df_logits2.columns
+    predictor = CAME.Predictor(classes=classes)
+    predictor.fit(
+        pd.read_csv(resdir / 'df_logits1.csv', index_col=0).values,
+        labels[dpair.obs_ids1],
+    )
+    predictor.save(resdir / 'predictor.json')
     # ########################################
 
     dsn2 = obs['dataset'].iloc[-1]
