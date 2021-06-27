@@ -322,11 +322,12 @@ class Predictor(object):
         if not self.is_fitted:
             raise AttributeError("predictor un-fitted!")
         thresholds = []
-        # for m, std in self._background_mean_std:
-        #     thresholds.append(stats.norm(m, std).isf(p))
+        for m, std in self._background_mean_std:
+            thresholds.append(stats.norm(m, std).isf(p))
 
-        for m, std in self._foreground_mean_std:
-            thresholds.append(stats.norm(m, std).ppf(p))
+        # for m, std in self._foreground_mean_std:
+            # thresholds.append(stats.norm(m, std).ppf(p))
+
         if map_class:
             thresholds = dict(zip(self.classes, thresholds))
 

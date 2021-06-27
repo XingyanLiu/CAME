@@ -20,15 +20,9 @@ from scipy import sparse
 import networkx as nx
 
 import scanpy as sc
-<<<<<<< HEAD
 from ..datapair import DataPair, AlignedDataPair
 from . import preprocess as pp
 from . import plot as pl
-=======
-from . import preprocess as pp
-from . import plot as pp
-from ..datapair import DataPair, AlignedDataPair
->>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
 from . import _knn
 from .base import (
     make_nowtime_tag,
@@ -71,10 +65,7 @@ def load_dpair_and_model(
         subdir_model: str = '_models',
 ):
     import torch
-<<<<<<< HEAD
     dirname = Path(dirname)
-=======
->>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
     model_dir = dirname / subdir_model
     element_dict = load_pickle(dirname / 'datapair_init.pickle')
     model_params = load_json_dict(dirname / 'model_params.json')
@@ -1152,12 +1143,16 @@ def nx_multipartite_graph(*node_layers,
                           subset_key='subset', **attrs):
     """
 <<<<<<< HEAD
+<<<<<<< HEAD
     === Example ===
 =======
     
     
     === Example ====
 >>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
+=======
+    === Example ===
+>>>>>>> c3b8013e132ade73651a514507222870cb67dfea
     >>> g = nx_multipartite_graph([0, 1], [2, 3, 4, 5], [6, 7, 8], )
     >>> pos = nx.multipartite_layout(g, subset_key=subset_key, )
     >>> nx.draw(g, pos, with_labels=True, )

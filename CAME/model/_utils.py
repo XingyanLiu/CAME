@@ -5,7 +5,7 @@
 @time: 2021-06-12
 """
 
-from typing import Union, Sequence, Optional, Mapping, Any, List, Literal
+from typing import Union, Sequence, Optional, Mapping, Any, List
 import logging
 import torch as th
 import torch.cuda
