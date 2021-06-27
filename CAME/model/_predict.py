@@ -327,6 +327,11 @@ class Predictor(object):
 
         # for m, std in self._foreground_mean_std:
             # thresholds.append(stats.norm(m, std).ppf(p))
+
+        thresholds = []
+        for (mb, _), (mf, _) in zip(self._background_mean_std,
+                                    self._foreground_mean_std):
+            thresholds.append((mb + mf) / 2)
         if map_class:
             thresholds = dict(zip(self.classes, thresholds))
 
