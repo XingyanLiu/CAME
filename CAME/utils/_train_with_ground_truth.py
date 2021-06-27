@@ -12,7 +12,7 @@ import torch
 from torch import Tensor
 import dgl
 
-from .train import BaseTrainer, make_class_weights, prepare4train, seed_everything
+from .train import BaseTrainer, make_class_weights,  prepare4train, seed_everything
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
 
@@ -107,17 +107,6 @@ class Trainer(BaseTrainer):
             tt='test accuracy and cluster index',
             fp=fp)
 
-    def train_minibatch(
-            self, n_epochs=100,
-            use_class_weights=True,
-            params_lossfunc={},
-            n_pass=100,
-            eps=1e-4,
-            cat_class='cell',
-            batchsize = 128,
-            **other_inputs
-    ):
-        raise NotImplementedError
 
     # In[]
     def train(self, n_epochs=350,

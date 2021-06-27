@@ -113,12 +113,10 @@ class CGGCNet(nn.Module):
     def forward(self,
                 feat_dict, g,
                 **kwds):
-
         if isinstance(g, List):
             h_dict = self.embed_layer(g[0], feat_dict, )
-            h_dict = self.rgcn.forward(g[1:-1], h_dict, **kwds).copy()
-            h_dict['cell'] = self.cell_classifier.forward(g[-1], h_dict, **kwds)['cell']#The last graph is a graph of batch_size cells and it's connected genes
-
+            h_dict = self.rgcn.forward(g[0], h_dict, **kwds).copy()
+            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict, **kwds)['cell']#The last graph is a graph of batch_size cells and it's connected genes
         else:
             if self.residual:
                 h_dict0 = self.embed_layer(g, feat_dict, )

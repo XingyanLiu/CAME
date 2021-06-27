@@ -17,13 +17,30 @@ from torch import Tensor, LongTensor
 import dgl
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
+
 from ..model import to_device, onehot_encode, multilabel_binary_cross_entropy
 from .base import check_dirs, save_json_dict
 from .evaluation import accuracy, get_AMI, get_F1_score
 from .plot import plot_records_for_trainer
 
+
 SUBDIR_MODEL = '_models'
 
+
+'''
+def seach_connected_cell_gene_ID(cell_ID, gene_ID, g):
+    cell_conne_with_gene = torch.unique(g.in_edges(gene_ID, etype='express')[0])
+    cell_conne_with_cell = torch.unique(g.in_edges(cell_ID, etype='similar_to')[0])
+    all_cell_ID = torch.cat((cell_ID, cell_conne_with_gene, cell_conne_with_cell), axis=0)
+    all_cell_ID = torch.unique(all_cell_ID)
+    
+    gene_connce_with_gene = torch.unique(g.in_edges(gene_ID, etype='homolog_with')[0])
+    gene_connce_with_cell = torch.unique(g.in_edges(cell_ID, etype='expressed_by')[0])
+    all_gene_ID = torch.cat((gene_connce_with_gene, gene_connce_with_cell), axis=0)
+    all_gene_ID = torch.unique(all_gene_ID)
+    
+    return all_cell_ID, all_gene_ID
+'''
 
 def seed_everything(seed=123):
     random.seed(seed)
@@ -114,7 +131,6 @@ def get_checkpoint_list(dirname):
     return all_ckpts
 
 
-# In[]
 class BaseTrainer(object):
     """
     DO NOT use it directly!

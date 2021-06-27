@@ -40,6 +40,11 @@ from . import (
 )
 #from .utils.train_minibatch import prepare4train, Trainer, seed_everything
 from .utils.train import prepare4train, Trainer, seed_everything
+from .utils.train_minibatch import Batch_Trainer
+from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
+#from .utils._train_multilabel import prepare4train, Trainer, seed_everything
+#from .utils.train_minibatch import prepare4train, Trainer, seed_everything
+from .utils.train import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
@@ -279,14 +284,15 @@ def main_for_unaligned(
 
     ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
-    trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
     if batch_size is not None:
+        trainer = Batch_Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
         trainer.train_minibatch(
             n_epochs=n_epochs,
             params_lossfunc=params_lossfunc,
             batchsize=batch_size,
             n_pass=n_pass, )
     else:
+        trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
         trainer.train(n_epochs=n_epochs,
                       params_lossfunc=params_lossfunc,
                       n_pass=n_pass, )
@@ -400,6 +406,7 @@ def gather_came_results(
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
     dpair.save_init(resdir / 'datapair_init.pickle')
+    # save_pickle(dpair, resdir / 'dpair.pickle')
 
     # hidden states are stored in sc.AnnData to facilitated downstream analysis
     h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
@@ -513,7 +520,6 @@ def preprocess_unaligned(
     # may perform better than fixed number
     adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
     adata2 = pp.quick_preprocess(adatas[1], **params_preproc)
-
     # the single-cell network
     if use_scnets:
         scnets = [pp.get_scnet(adata1), pp.get_scnet(adata2)]
@@ -632,7 +638,7 @@ def __test2__(n_epochs: int = 5, batch_size=None):
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
         params_model=dict(residual=False),
-        batch_size=batch_size,
+        batch_size=None,
     )
 
     del _

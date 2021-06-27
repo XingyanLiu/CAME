@@ -5,7 +5,7 @@
 @time: 2021-06-12
 """
 
-from typing import Union, Sequence, Optional, Mapping, Any, List, Literal
+from typing import Union, Sequence, Optional, Mapping, Any, List
 import logging
 import torch as th
 import torch.cuda
@@ -27,7 +27,7 @@ def detach2numpy(x):
     return x
 
 
-def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor]],
+def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor], dgl.DGLGraph],
               device='cuda'):
     if not torch.cuda.is_available():
         device = 'cpu'
@@ -38,6 +38,8 @@ def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor]],
         return [xx.to(device) for xx in x]
     elif isinstance(x, Mapping):
         return {k: v.to(device) for k, v in x.items()}
+    elif isinstance(x, dgl.DGLGraph):
+        return [x.to(device)]
 
 
 def onehot_encode(

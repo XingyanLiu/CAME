@@ -19,6 +19,15 @@ if __name__ == '__main__':
 
 
     #CAME.__test1__()
+<<<<<<< HEAD
+<<<<<<< HEAD
     CAME.__test2__(3, batch_size=None)
+=======
+    #CAME.__test2__()
+    CAME.__test3__()
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
+=======
+    CAME.__test2__(3, batch_size=None)
+>>>>>>> c3b8013e132ade73651a514507222870cb67dfea
     #pipeline_supervised.__test2_sup__(5)
 

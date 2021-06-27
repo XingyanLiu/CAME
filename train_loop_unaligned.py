@@ -34,8 +34,10 @@ pipeline.seed_everything()
 # datadir = Path('D:/SQL/datasets')
 # dir_gmap = Path('D:/lxy/resources/exported_gene_matches')
 
+
 datadir = Path('datasets')
-dir_gmap = Path('resources/mart_exports/exported_gene_matches')
+dir_gmap = Path('./exported_gene_matches')
+
 
 RESDIR = Path('./results')
 
@@ -51,9 +53,11 @@ params_lossfunc = CAME.get_loss_params()
 
 only_1v1homo = False
 use_scnets = True
-n_epochs = 400
+
+n_epochs = 200
 n_pass = 100
-batch_size = 32
+batch_size = 2048
+
 
 resdir0 = RESDIR / 'minibatch' / f'batch_size-{batch_size}'
 

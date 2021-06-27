@@ -1142,7 +1142,17 @@ def nx_multipartite_graph(*node_layers,
                           edges=None,
                           subset_key='subset', **attrs):
     """
+<<<<<<< HEAD
+<<<<<<< HEAD
     === Example ===
+=======
+    
+    
+    === Example ====
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
+=======
+    === Example ===
+>>>>>>> c3b8013e132ade73651a514507222870cb67dfea
     >>> g = nx_multipartite_graph([0, 1], [2, 3, 4, 5], [6, 7, 8], )
     >>> pos = nx.multipartite_layout(g, subset_key=subset_key, )
     >>> nx.draw(g, pos, with_labels=True, )
