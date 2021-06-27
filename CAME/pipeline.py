@@ -38,9 +38,15 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
+<<<<<<< HEAD
 #from .utils.train_minibatch import prepare4train, Trainer, seed_everything
 from .utils.train import prepare4train, Trainer, seed_everything
 from .utils.train_minibatch import Batch_Trainer
+=======
+from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
+#from .utils._train_multilabel import prepare4train, Trainer, seed_everything
+
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
 PARAMS_LOSS = get_loss_params()
@@ -279,6 +285,7 @@ def main_for_unaligned(
 
     ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
+<<<<<<< HEAD
     if batch_size is not None:
         trainer = Batch_Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
         trainer.train_minibatch(
@@ -286,6 +293,14 @@ def main_for_unaligned(
             params_lossfunc=params_lossfunc,
             batchsize=batch_size,
             n_pass=n_pass, )
+=======
+    trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
+    if batch_size is not None:
+        trainer.train_minibatch(n_epochs=n_epochs,
+                      params_lossfunc=params_lossfunc,
+                      batchsize=batch_size,
+                      n_pass=n_pass, )
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
     else:
         trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
         trainer.train(n_epochs=n_epochs,
@@ -319,7 +334,11 @@ def main_for_unaligned(
     # # adding labels, predicted probabilities
     # #    adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1], categories=classes)
     # #    adata2.obs['predicted'] = pd.Categorical(obs['predicted'][obs_ids2], categories=classes)
+<<<<<<< HEAD
     # #    pp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
+=======
+    # #    utp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
     if plot_results:
         labels_cat = obs[keys[0]] if key_class2 != 'clust_lbs' else obs['celltype']
         cl_preds = obs['predicted']
@@ -328,7 +347,11 @@ def main_for_unaligned(
 
         lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
         lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
+<<<<<<< HEAD
         pl.plot_confus_multi_mats(
+=======
+        uplt.plot_confus_multi_mats(
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
             lblist_y,
             lblist_x,
             classes_on=classes,
@@ -347,7 +370,11 @@ def main_for_unaligned(
         df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
         lbs = df_lbs[name_label][indices]
 
+<<<<<<< HEAD
         _ = pl.heatmap_probas(
+=======
+        _ = uplt.heatmap_probas(
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
             df_data.T, lbs, name_label='true label',
             figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
         )
@@ -401,6 +428,10 @@ def gather_came_results(
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
     dpair.save_init(resdir / 'datapair_init.pickle')
+<<<<<<< HEAD
+=======
+    # save_pickle(dpair, resdir / 'dpair.pickle')
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
 
     # hidden states are stored in sc.AnnData to facilitated downstream analysis
     h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
@@ -509,11 +540,18 @@ def preprocess_unaligned(
         nneigh=nneigh_scnet,
     )
     # NOTE:
+<<<<<<< HEAD
     # by default, the original adatas will not be changed
     # using the median total-counts as the scale factor \
     # may perform better than fixed number
     adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
     adata2 = pp.quick_preprocess(adatas[1], **params_preproc)
+=======
+    # bu default, the original adatas are not changed
+    # using the median total-counts as the scale factor (better than fixed number)
+    adata1 = utp.quick_preprocess(adatas[0], **params_preproc)
+    adata2 = utp.quick_preprocess(adatas[1], **params_preproc)
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
 
     # the single-cell network
     if use_scnets:
@@ -633,7 +671,11 @@ def __test2__(n_epochs: int = 5, batch_size=None):
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
         params_model=dict(residual=False),
+<<<<<<< HEAD
         batch_size=batch_size,
+=======
+        batch_size=None,
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
     )
 
     del _

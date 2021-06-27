@@ -18,12 +18,25 @@ from .utils.base import (
         )
 from .utils import preprocess as pp
 from .utils import plot as pl
+<<<<<<< HEAD
 from .utils import analyze as ana
 from .utils.train import prepare4train, Trainer, SUBDIR_MODEL
 from .utils.evaluation import accuracy
 from .utils.analyze import (
         load_dpair_and_model,
         weight_linked_vars,
+=======
+from .utils.train import prepare4train, Trainer, SUBDIR_MODEL
+from .utils.evaluation import (
+        as_probabilities, 
+        predict_from_logits, 
+        predict, 
+        accuracy
+        )                       
+from .utils.analyze import (
+        load_dpair_and_model,
+        weight_linked_vars, 
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
         make_abstracted_graph,
         )
 from .model import (

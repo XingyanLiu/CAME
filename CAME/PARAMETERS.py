@@ -39,6 +39,10 @@ _params_model = dict(
     norm='right',
     dropout_feat=0.0,  # no dropout for cell input features
     dropout=0.2,
+<<<<<<< HEAD
+=======
+#    use_self_loop=False,
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
     negative_slope=0.05,
     layernorm_ntypes=['cell', 'gene'],
     out_bias=True,

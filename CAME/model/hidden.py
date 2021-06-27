@@ -33,6 +33,10 @@ class HiddenRGCN(nn.Module):
                  norm: str = 'right',
                  use_weight: bool = True,
                  dropout: Union[float, int] = 0.,
+<<<<<<< HEAD
+=======
+#                 use_self_loop: bool = False,
+>>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
                  negative_slope: Union[float, int] = 0.2,
                  batchnorm_ntypes: Optional[Sequence[str]] = None,
                  layernorm_ntypes: Optional[Sequence[str]] = None,  # g.ntypes
