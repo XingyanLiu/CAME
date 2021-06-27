@@ -554,7 +554,6 @@ class Trainer(BaseTrainer):
         with torch.no_grad():
             self.model.train()  # semi-supervised learning
             # self.model.eval()
-            output = self.model.forward(
-                feat_dict, g,  # .to(self.device),
-                **other_inputs)
+            output = self.model.forward(feat_dict, g, **other_inputs)
+            output = self.model.get_out_logits(feat_dict, g, **other_inputs)
         return output

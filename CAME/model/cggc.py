@@ -132,6 +132,31 @@ class CGGCNet(nn.Module):
 
         return h_dict
 
+    def get_out_logits(
+            self,
+            feat_dict, g,
+            **kwds):
+        if isinstance(g, List):
+            # TODO: bug g[0] for all layers?
+            h_dict = self.embed_layer(g[0], feat_dict, )
+            h_dict = self.rgcn.forward(g[0], h_dict, **kwds).copy()
+            self.cell_classifier.eval()
+            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict, **kwds)['cell']#The last graph is a graph of batch_size cells and it's connected genes
+        else:
+            if self.residual:
+                h_dict0 = self.embed_layer(g, feat_dict, )
+                h_dict = self.rgcn.forward(g, h_dict0, norm=True, activate=False, **kwds)
+                relu = self.rgcn.leaky_relu
+                h_dict['cell'] = relu(h_dict0['cell'] + h_dict['cell'])
+                h_dict['gene'] = relu(h_dict0['gene'] + h_dict['gene'])
+            else:
+                h_dict = self.embed_layer(g, feat_dict, )
+                h_dict = self.rgcn.forward(g, h_dict, **kwds).copy()
+            self.cell_classifier.eval()
+            h_dict['cell'] = self.cell_classifier.forward(g, h_dict, **kwds)['cell']
+
+        return h_dict
+
     def get_hidden_states(self,
                           feat_dict=None, g=None,
                           i_layer=-1,

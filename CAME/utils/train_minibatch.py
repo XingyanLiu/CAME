@@ -57,7 +57,7 @@ def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
     ----------------------------------------------------------------------
     """
     batch_list = []
-    batch_labels = []
+    # batch_labels = []
     sample_size = len(train_idx) + len(test_idx)
     if shuffle:
         all_idx = torch.randperm(sample_size)
@@ -69,7 +69,7 @@ def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
             batch_list.append(all_idx)
 
         else:
-            batch_num = int(len(all_idx) / batchsize) + 1
+            batch_num = (len(all_idx) // batchsize) + min(1, len(all_idx) % batchsize)
             for i in range(batch_num - 1):
                 batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
             batch_list.append(all_idx[batchsize * (batch_num - 1):])
@@ -84,7 +84,7 @@ def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
             batch_num = int(len(all_idx) / batchsize) + 1
             for i in range(batch_num - 1):
                 batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
-                batch_labels.append(labels[batchsize * i: batchsize * (i + 1)])
+                # batch_labels.append(labels[batchsize * i: batchsize * (i + 1)])
             batch_list.append(all_idx[batchsize * (batch_num - 1):])
 
     return train_labels, test_labels, batch_list, all_idx
@@ -198,7 +198,9 @@ class BatchTrainer(BaseTrainer):
         self.g.nodes['cell'].data['ids'] = torch.arange(self.g.num_nodes('cell'))  # track the random shuffle
 
         if use_class_weights:
-            class_weights = self.class_weights
+            class_weights = to_device(self.class_weights, device)
+        else:
+            class_weights = None
 
         if not hasattr(self, 'ami_max'):
             self.ami_max = 0
@@ -235,7 +237,7 @@ class BatchTrainer(BaseTrainer):
                 loss = self.model.get_classification_loss(
                     out_cell[batch_train_idx],
                     to_device(out_train_labels, device),
-                    weight=to_device(class_weights, device),
+                    weight=class_weights,
                     **params_lossfunc
                 )
                 self.optimizer.zero_grad()

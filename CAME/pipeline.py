@@ -38,12 +38,7 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-#from .utils.train_minibatch import prepare4train, Trainer, seed_everything
-from .utils.train import prepare4train, Trainer, seed_everything
 from .utils.train_minibatch import BatchTrainer
-from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
-#from .utils._train_multilabel import prepare4train, Trainer, seed_everything
-#from .utils.train_minibatch import prepare4train, Trainer, seed_everything
 from .utils.train import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
