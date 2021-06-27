@@ -17,4 +17,4 @@ __pycache__
 /notebooks/.ipynb_checkpoints
 
 /DATASET_NAMES.py
-/_tmp
+/_tmp*

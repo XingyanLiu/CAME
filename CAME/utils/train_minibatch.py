@@ -38,7 +38,7 @@ def create_blocks(g, output_nodes):
 
 
 def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
-    '''
+    """
     This function create batch idx, i.e. the cells IDs in a batch.
     ----------------------------------------------------------------------
     Parameters
@@ -48,14 +48,14 @@ def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
     batchsize: the number of cells in each batch
     labels: the labels for both Reference cells and Query cells
     ----------------------------------------------------------------------
-    Returns:
+    Returns
     -----------
-    batchlist: the list sores the batch of cell IDs
-    all_idx: the shuffled or non-shuffled index for all cells
     train_labels: the shuffled or non-shuffled labels for all reference cells
     test_labels: the shuffled or non-shuffled labels for all query cells
+    batch_list: the list sores the batch of cell IDs
+    all_idx: the shuffled or non-shuffled index for all cells
     ----------------------------------------------------------------------
-    '''
+    """
     batch_list = []
     batch_labels = []
     sample_size = len(train_idx) + len(test_idx)
@@ -90,7 +90,7 @@ def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
     return train_labels, test_labels, batch_list, all_idx
 
 
-class Batch_Trainer(BaseTrainer):
+class BatchTrainer(BaseTrainer):
     """
 
 
@@ -111,7 +111,7 @@ class Batch_Trainer(BaseTrainer):
                  dir_main=Path('.'),
                  **kwds  # for code compatibility (not raising error)
                  ):
-        super(Batch_Trainer, self).__init__(
+        super(BatchTrainer, self).__init__(
             model,
             feat_dict=feat_dict,
             train_labels=train_labels,
@@ -184,48 +184,58 @@ class Batch_Trainer(BaseTrainer):
                         eps=1e-4,
                         cat_class='cell',
                         batchsize=128,
+                        device=None,
                         **other_inputs):
         """
         Funtcion for minibatch trainging
         """
+        # setting device to train
+        if device is None:
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
         train_idx, test_idx, train_labels, test_labels = self.train_idx, self.test_idx, self.train_labels, self.test_labels
         labels = torch.cat((train_labels, test_labels), 0)
-        self.g.nodes['cell'].data['feat'] = torch.arange(self.g.num_nodes('cell'))  # track the random shuffle
+        self.g.nodes['cell'].data['ids'] = torch.arange(self.g.num_nodes('cell'))  # track the random shuffle
 
         if use_class_weights:
             class_weights = self.class_weights
 
-        if not hasattr(self, 'ami_max'): self.ami_max = 0
+        if not hasattr(self, 'ami_max'):
+            self.ami_max = 0
+
         print("start training".center(50, '='))
         self.model.train()
-        self.model = self.model.to('cuda')
+        self.model = self.model.to(device)
         feat_dict = {}
-        print('create mini-batches')
-        train_labels, test_labels, batch_list, shuffled_idx = create_batch(train_idx=train_idx,
-                                                                           test_idx=test_idx,
-                                                                           batchsize=batchsize,
-                                                                           labels=labels,
-                                                                           shuffle=True)
+        train_labels, test_labels, batch_list, shuffled_idx = create_batch(
+            train_idx=train_idx, test_idx=test_idx, batchsize=batchsize,
+            labels=labels, shuffle=True)
+        shuffled_test_idx = detach2numpy(
+            shuffled_idx[shuffled_idx >= len(train_idx)]
+        ) - len(train_idx)
+        cluster_labels = self.cluster_labels[shuffled_test_idx]
+
         for epoch in range(n_epochs):
             self._cur_epoch += 1
-            all_train_preds = to_device(torch.tensor([]))
-            all_test_preds = to_device(torch.tensor([]))
+            self.optimizer.zero_grad()
+            all_train_preds = to_device(torch.tensor([]), device)
+            all_test_preds = to_device(torch.tensor([]), device)
             t0 = time.time()
             for output_nodes in tqdm.tqdm(batch_list):
                 block = create_blocks(g=self.g, output_nodes=output_nodes)
-                feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['feat'], :]
+                feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['ids'], :]
                 batch_train_idx = output_nodes.clone().detach() < len(train_idx)
                 batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
-                logits = self.model(to_device(feat_dict),
-                                    to_device(block),  # .to(self.device),
+                logits = self.model(to_device(feat_dict, device),
+                                    to_device(block, device),
                                     **other_inputs)
                 out_cell = logits[cat_class]  # .cuda()
                 output_labels = labels[output_nodes]
                 out_train_labels = output_labels[batch_train_idx].clone().detach()
                 loss = self.model.get_classification_loss(
                     out_cell[batch_train_idx],
-                    to_device(out_train_labels),
-                    weight=to_device(class_weights),
+                    to_device(out_train_labels, device),
+                    weight=to_device(class_weights, device),
                     **params_lossfunc
                 )
                 self.optimizer.zero_grad()
@@ -238,20 +248,20 @@ class Batch_Trainer(BaseTrainer):
                 all_train_preds = torch.cat((all_train_preds, y_pred_train), 0)
                 all_test_preds = torch.cat((all_test_preds, y_pred_test), 0)
 
-            ### evaluation (Acc.)
+            # evaluation (Acc.)
+            all_train_preds = all_train_preds.cpu()
+            all_test_preds = all_test_preds.cpu()
             with torch.no_grad():
-                train_acc = accuracy(train_labels.to('cuda'), all_train_preds)
-                test_acc = accuracy(test_labels.to('cuda'), all_test_preds)
-                t1 = time.time()
-                ### F1-scores
+                train_acc = accuracy(train_labels, all_train_preds)
+                test_acc = accuracy(test_labels, all_test_preds)
+                # F1-scores
                 microF1 = get_F1_score(test_labels, all_test_preds, average='micro')
                 macroF1 = get_F1_score(test_labels, all_test_preds, average='macro')
                 weightedF1 = get_F1_score(test_labels, all_test_preds, average='weighted')
 
-                ### unsupervised cluster index
+                # unsupervised cluster index
                 if self.cluster_labels is not None:
-                    shuffled_test_idx = detach2numpy(shuffled_idx[shuffled_idx >= len(train_idx)]) - len(train_idx)
-                    ami = get_AMI(self.cluster_labels[shuffled_test_idx], all_test_preds)
+                    ami = get_AMI(cluster_labels, all_test_preds)
 
                 if self._cur_epoch >= n_pass - 1:
                     self.ami_max = max(self.ami_max, ami)
@@ -265,7 +275,7 @@ class Batch_Trainer(BaseTrainer):
 
                 t1 = time.time()
 
-                ##########[ recording ]###########
+                # recording
                 self._record(dur=t1 - t0,
                              train_loss=loss.item(),
                              train_acc=train_acc,
@@ -286,3 +296,26 @@ class Batch_Trainer(BaseTrainer):
 
                 print(self._cur_log)
             self._cur_epoch_adopted = self._cur_epoch
+
+    def eval_current(self,
+                     feat_dict=None,
+                     g=None,
+                     device=None,
+                     **other_inputs):
+        """ get the current states of the model output
+        """
+        if feat_dict is None:
+            feat_dict = self.feat_dict
+        if g is None:
+            g = self.g
+        if device is None:
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        feat_dict = to_device(feat_dict, device)
+        g = g.to(device)
+        with torch.no_grad():
+            self.model.train()  # semi-supervised learning
+            # self.model.eval()
+            output = self.model.forward(
+                feat_dict, g,  # .to(self.device),
+                **other_inputs)
+        return output

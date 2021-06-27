@@ -17,8 +17,7 @@ except Exception as e:
 
 if __name__ == '__main__':
 
-
     # CAME.__test1__()
-    CAME.__test2__(100, batch_size=1024)
+    CAME.__test2__(3, batch_size=128)
     # pipeline_supervised.__test2_sup__(5)
 

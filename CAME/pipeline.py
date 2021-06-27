@@ -40,7 +40,7 @@ from . import (
 )
 #from .utils.train_minibatch import prepare4train, Trainer, seed_everything
 from .utils.train import prepare4train, Trainer, seed_everything
-from .utils.train_minibatch import Batch_Trainer
+from .utils.train_minibatch import BatchTrainer
 from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
 #from .utils._train_multilabel import prepare4train, Trainer, seed_everything
 #from .utils.train_minibatch import prepare4train, Trainer, seed_everything
@@ -285,7 +285,7 @@ def main_for_unaligned(
     ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
     if batch_size is not None:
-        trainer = Batch_Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
+        trainer = BatchTrainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
         trainer.train_minibatch(
             n_epochs=n_epochs,
             params_lossfunc=params_lossfunc,
