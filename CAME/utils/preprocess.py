@@ -12,7 +12,6 @@ Created on Thu Aug  6 00:21:15 2020
         groups / ...
     * statistics computation
 
-
 """
 
 import os
@@ -22,7 +21,6 @@ import re
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, label_binarize
-
 import scanpy as sc
 
 from scipy import sparse, io
@@ -322,8 +320,12 @@ def merge_adatas(adatas: Union[Mapping[str, sc.AnnData],
     return make_adata(merged_mat, obs=obs, var=genes)
 
 
-def merge_named_matrices(mat_list, gene_lists, dsnames=None, verbose=True,
-                         union=False):
+def merge_named_matrices(
+        mat_list, gene_lists,
+        dsnames=None,
+        verbose=True,
+        union=False
+):
     """
     This function code is copied from `scanorama.merge_datasets`.
 
@@ -331,7 +333,7 @@ def merge_named_matrices(mat_list, gene_lists, dsnames=None, verbose=True,
     ----------
     mat_list:
         a list of cell-by-gene matrices (np.ndarray or sparse.csr_matrix) 
-    gene_list:
+    gene_lists:
         a list of gene-list corresponding to the columns of each matrix in 
         `mat_list`
     
@@ -420,7 +422,7 @@ def align_adata_vars(adata1: sc.AnnData,  # better be raw data
                      df_varmap_1v1: Optional[pd.DataFrame] = None,
                      unify_names=False,
                      #                     merge=False
-                     ) -> List[sc.AnnData]:
+                     ) -> [sc.AnnData]:
     """
     adata1: reference data
     adata2: query data
@@ -436,13 +438,8 @@ def align_adata_vars(adata1: sc.AnnData,  # better be raw data
     adata2 = adata2[:, vars2].copy()
     if unify_names:
         adata2.var_names = list(vars1)
-    #    if merge:
-    #        return adata
-    #    else:
     return adata1, adata2
 
-
-# In[]
 
 def make_dict_from_str(s: str, n2id=True, ) -> dict:
     s = s.split()
@@ -962,10 +959,10 @@ def remove_adata_small_groups(adata: sc.AnnData,
 
 
 def remove_adata_groups(adata: sc.AnnData, key: str,
-                        group_names: Sequence):
+                        group_names: Sequence, copy=True):
     indicators = take_group_labels(adata.obs[key], group_names,
                                    indicate=True, remove=True)
-    return adata[indicators, :].copy()
+    return adata[indicators, :].copy() if copy else adata[indicators, :]
 
 
 def take_adata_groups(adata: sc.AnnData,
@@ -990,7 +987,7 @@ def merge_group_labels(labels: Sequence,
     group_lists: a list of lists of group names to be merged
     
     === TEST ===
-    >>> merge_groups(adata.obs['batch'], [list('AB'), list('EF')]).unique()
+    >>> merge_group_labels(adata.obs['batch'], [list('AB'), list('EF')]).unique()
     """
     if not isinstance(group_lists[0], list):
         ## merge only one set of groups
@@ -1553,7 +1550,8 @@ def group_mean_multiadata(adatas: Sequence[sc.AnnData],
 # In[]
 
 def quick_preprocess(
-        adata, hvgs=None,
+        adata,
+        hvgs=None,
         normalize_data=True,
         target_sum=1e4,
         batch_key=None,

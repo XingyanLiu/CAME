@@ -5,7 +5,7 @@ Created on Fri Aug 28 23:57:02 2020
 @author: Xingyan Liu
 """
 from typing import Union, Sequence, Mapping, Optional
-
+import logging
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -15,6 +15,7 @@ import torch as th
 import dgl
 
 from ..utils import preprocess as utp
+from ..utils.base import save_pickle
 
 
 # In[]
@@ -114,7 +115,7 @@ class DataPair(object):
         self.set_vv_adj(vv_adj, varnames_node)
         self.set_oo_adj(oo_adjs)
         self.set_obs_dfs(*obs_dfs)
-        self.set_var_dfs(*var_dfs)  # TODO!!!
+        # self.set_var_dfs(*var_dfs)  # TODO!!!
         self.set_common_obs_annos(ignore_index=True)
         self.set_vnode_annos(ignore_index=True)
         self.set_ntypes(ntypes)
@@ -124,8 +125,31 @@ class DataPair(object):
         else:
             print('graph has not been made, call `self.make_whole_net()` if needed.')
 
+    def save_init(self, path='datapair_init.pickle'):
+        """
+        save and reload
+        ===============
+        >>> adpair.save_init('datapair_init.pickle')
+        >>> element_dict = load_pickle('datapair_init.pickle')
+        >>> adpair = DataPair(**element_dict)
+        """
+        element_dict = dict(
+            features=self._features,
+            ov_adjs=self._ov_adjs,
+            vv_adj=self._vv_adj,
+            oo_adjs=self._oo_adj,
+            varnames_feat=self._varnames_feat,
+            varnames_node=(self.vnode_names1, self.vnode_names2),
+            obs_dfs=self.obs_dfs,
+            dataset_names=self.dataset_names,
+            ntypes=self.ntypes,
+            etypes=self.etypes,
+        )
+        save_pickle(element_dict, path)
+        logging.info(f"inputs for construction datapair saved into {path}")
+
     # In[]
-    def get_obs_features(self, astensor=True, scale=False,
+    def get_obs_features(self, astensor=True, scale=True,
                          unit_var=True,
                          clip=False, clip_range=(-3, 3.5)):
         feats = self._features
@@ -192,10 +216,10 @@ class DataPair(object):
 
         if set_attr:
             self._labels = labels_cat.codes.copy()
-            self._classes = classes
+            self._classes = classes.copy()
 
         if asint:
-            labels = self.labels
+            labels = self.labels.copy()
             if astensor:
                 labels = th.LongTensor(labels)
             if split:
@@ -498,10 +522,6 @@ class DataPair(object):
             elif obs.shape[0] != n_obs:
                 raise ValueError(f'the number of observations are not matched '
                                  f'expect {n_obs}, got {obs.shape[0]}.')
-            #            else:
-            #                print(f'adding column "{key}"')
-            #                obs[key] = val
-            #            print(f'[*] Setting metadata (annotations) for {n_obs} observations:')
             print(obs.columns)
             return obs
 

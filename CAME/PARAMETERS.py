@@ -9,9 +9,9 @@ Created on Sun Apr 11 22:13:17 2021
 
 * Do NOT change this file directly!
 
->>> params_pre = PARAMETER.preprocess()
->>> params_model = PARAMETER.model()
->>> params_loss = PARAMETER.loss()
+>>> params_pre = PARAMETER.get_preprocess_params()
+>>> params_model = PARAMETER.get_model_params()
+>>> params_loss = PARAMETER.get_loss_params()
 
 """
 import copy
@@ -37,9 +37,8 @@ _params_model = dict(
     h_dim=128,
     num_hidden_layers=2,
     norm='right',
-    dropout_feat=0.0,  # dropout for cell input features
+    dropout_feat=0.0,  # no dropout for cell input features
     dropout=0.2,
-    use_self_loop=False,
     negative_slope=0.05,
     layernorm_ntypes=['cell', 'gene'],
     out_bias=True,
@@ -47,7 +46,7 @@ _params_model = dict(
                    ],
     share_hidden_weights=True,
     attn_out=True,
-    kwdict_outgat=dict(n_heads=8,  # 16, # 16 seems no better
+    kwdict_outgat=dict(n_heads=8,
                        feat_drop=0.01,
                        attn_drop=0.6,
                        negative_slope=0.2,
@@ -56,12 +55,11 @@ _params_model = dict(
                        heads_fuse='mean',
                        ),
     share_layernorm=True,  # ignored if no weights are shared
-    residual=not True,  # performance un-tested
+    residual=False,  # performance un-tested
 )
 
 _params_lossfunc = dict(
     smooth=True, smooth_eps=0.1, smooth_reduction='mean',
-    #        smooth=True, smooth_eps=1e-4, smooth_reduction='sum',
 )
 
 
@@ -86,5 +84,3 @@ def get_model_params(kwdict_outgat={}, **kwds) -> dict:
         params['kwdict_outgat'].update(kwdict_outgat)
     return params
 
-if __name__ == '__main__':
-    pass

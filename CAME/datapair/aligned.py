@@ -5,7 +5,7 @@ Created on Tue Sep 15 10:22:55 2020
 @author: Xingyan Liu
 """
 from typing import Union, Sequence, Mapping, Optional
-
+import logging
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -15,6 +15,7 @@ import torch as th
 import dgl
 
 from ..utils import preprocess as utp
+from ..utils.base import save_pickle
 
 
 # In[]
@@ -116,7 +117,29 @@ class AlignedDataPair(object):
         self.set_etypes(etypes)
         self.make_whole_net(**kwds)
 
-    def get_obs_features(self, astensor=True, scale=False,
+    def save_init(self, path='datapair_init.pickle'):
+        """
+        save and reload
+        ===============
+        >>> adpair.save_init('datapair_init.pickle')
+        >>> element_dict = load_pickle('datapair_init.pickle')
+        >>> adpair = AlignedDataPair(**element_dict)
+        """
+        element_dict = dict(
+            features=self._features,
+            ov_adjs=self._ov_adjs,
+            oo_adjs=self._oo_adj,
+            varnames_feat=self._varnames_feat,
+            varnames_node=self._varnames_node,
+            obs_dfs=self.obs_dfs,
+            dataset_names=self.dataset_names,
+            ntypes=self.ntypes,
+            etypes=self.etypes,
+        )
+        save_pickle(element_dict, path)
+        logging.info(f"inputs for construction (aligned) datapair saved into {path}")
+
+    def get_obs_features(self, astensor=True, scale=True,
                          unit_var=True,
                          clip=False, clip_range=(-3, 3.5)):
         feats = self._features
@@ -519,7 +542,6 @@ def aligned_datapair_from_adatas(
         vars_feat: Sequence,
         vars_as_nodes: Optional[Sequence] = None,
         oo_adjs: Optional[Sequence[sparse.spmatrix]] = None,
-        from_raw: bool = False,
         dataset_names: Sequence[str] = ('reference', 'query'),
         **kwds
 ) -> AlignedDataPair:

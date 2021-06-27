@@ -12,38 +12,35 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
-
 import scanpy as sc
 from scipy import sparse
-from scipy.special import softmax
-
-import networkx as nx
 import torch
 import logging
 
 from . import (
+    pp, pl,
     save_pickle,
+    save_json_dict,
     make_nowtime_tag,
     write_info,
     as_probabilities,
     predict_from_logits,
     subsample_each_group,
+    SUBDIR_MODEL,
 )
 from .PARAMETERS import (
     get_model_params,
     get_loss_params,
     get_preprocess_params
 )
-from . import pp as utp
-from . import pl as uplt
-from .utils import base, evaluation
 from . import (
+    Predictor,
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-#from .utils._train_with_ground_truth import prepare4train, Trainer, seed_everything
-from .utils._train_multilabel import prepare4train, Trainer, seed_everything
-
+#from .utils.train_minibatch import prepare4train, Trainer, seed_everything
+from .utils.train import prepare4train, Trainer, seed_everything
+from .utils.train_minibatch import Batch_Trainer
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
 PARAMS_LOSS = get_loss_params()
@@ -68,19 +65,20 @@ def main_for_aligned(
         params_lossfunc: dict = {},
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
+        batch_size: Optional[int] = None,
         plot_results: bool = True
 ):
     if resdir is None:
-        tag_time = base.make_nowtime_tag()
+        tag_time = make_nowtime_tag()
         tag_data = dataset_names if tag_data is None else tag_data
         resdir = Path(f'{tag_data}-{tag_time}')
     else:
         resdir = Path(resdir)
 
     figdir = resdir / 'figs'
-    utp.check_dirs(figdir)
+    pp.check_dirs(figdir)
     sc.settings.figdir = figdir
-    utp.check_dirs(resdir)
+    pp.check_dirs(resdir)
     # keys for training process
     if key_class2 is None:
         if key_class1 in adatas[1].obs.columns:
@@ -94,7 +92,7 @@ def main_for_aligned(
     keys_compare = [key_class1, key_class2]
 
     if do_normalize:
-        adatas = list(map(lambda a: utp.normalize_default(a, force_return=True), adatas))
+        adatas = list(map(lambda a: pp.normalize_default(a, force_return=True), adatas))
 
     logging.info('Step 1: preparing DataPair object...')
     adpair = aligned_datapair_from_adatas(
@@ -114,14 +112,16 @@ def main_for_aligned(
     n_classes = len(classes)
     params_model = get_model_params(**params_model)
     params_model.update(
+        g_or_canonical_etypes=G.canonical_etypes,
         in_dim_dict={'cell': adpair.n_feats, 'gene': 0},
         out_dim=n_classes,
         layernorm_ntypes=G.ntypes,
     )
+    save_json_dict(params_model, resdir / 'model_params.json')
 
-    # model = None
+    # TODO: save model parameters, json file (whether eval?)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = CGCNet(G, **params_model)
+    model = CGCNet(**params_model)
 
     ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
@@ -169,7 +169,7 @@ def main_for_aligned(
         lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
         lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
         
-        uplt.plot_confus_multi_mats(
+        pl.plot_confus_multi_mats(
             lblist_y,
             lblist_x,
             classes_on=classes,
@@ -189,7 +189,7 @@ def main_for_aligned(
         df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
         lbs = df_lbs[name_label][indices]
     
-        _ = uplt.heatmap_probas(df_data.T, lbs, name_label='true label',
+        _ = pl.heatmap_probas(df_data.T, lbs, name_label='true label',
                                 figsize=(5, 3.),
                                 fp=figdir / f'heatmap_probas.pdf'
                                 )
@@ -214,18 +214,20 @@ def main_for_unaligned(
         params_lossfunc: dict = {},
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
+        plot_results: bool = True,
+        batch_size: Optional[int] = None,
 ):
     if resdir is None:
-        tag_time = base.make_nowtime_tag()
+        tag_time = make_nowtime_tag()
         tag_data = dataset_names if tag_data is None else tag_data
         resdir = Path(f'{tag_data}-{tag_time}')
     else:
         resdir = Path(resdir)
 
     figdir = resdir / 'figs'
-    utp.check_dirs(figdir)
+    pp.check_dirs(figdir)
     sc.settings.figdir = figdir
-    utp.check_dirs(resdir)
+    pp.check_dirs(resdir)
     # keys for training process
     if key_class2 is None:
         if key_class1 in adatas[1].obs.columns:
@@ -240,7 +242,7 @@ def main_for_unaligned(
 
     if do_normalize:
         adatas = list(map(
-            lambda a: utp.normalize_default(a, force_return=True),
+            lambda a: pp.normalize_default(a, force_return=True),
             adatas
         ))
     logging.info('preparing DataPair object...')
@@ -264,25 +266,28 @@ def main_for_unaligned(
     n_classes = len(classes)
     params_model = get_model_params(**params_model)
     params_model.update(
+        g_or_canonical_etypes=G.canonical_etypes,
         in_dim_dict={'cell': dpair.n_feats, 'gene': 0},
         out_dim=n_classes,
         layernorm_ntypes=G.ntypes,
     )
+    save_json_dict(params_model, resdir / 'model_params.json')
 
-    # model = None
+    # TODO: save model parameters, json file (whether eval?)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = CGGCNet(G, **params_model)
+    model = CGGCNet(**params_model)
 
     ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
-    trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
-    batch_train = True
-    if batch_train:
-        trainer.train_minibatch(n_epochs=n_epochs,
-                      params_lossfunc=params_lossfunc,
-                      batchsize=128,
-                      n_pass=n_pass, )
+    if batch_size is not None:
+        trainer = Batch_Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
+        trainer.train_minibatch(
+            n_epochs=n_epochs,
+            params_lossfunc=params_lossfunc,
+            batchsize=batch_size,
+            n_pass=n_pass, )
     else:
+        trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
         trainer.train(n_epochs=n_epochs,
                       params_lossfunc=params_lossfunc,
                       n_pass=n_pass, )
@@ -314,38 +319,38 @@ def main_for_unaligned(
     # # adding labels, predicted probabilities
     # #    adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1], categories=classes)
     # #    adata2.obs['predicted'] = pd.Categorical(obs['predicted'][obs_ids2], categories=classes)
-    # #    utp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
+    # #    pp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
+    if plot_results:
+        labels_cat = obs[keys[0]] if key_class2 != 'clust_lbs' else obs['celltype']
+        cl_preds = obs['predicted']
+        # ============= confusion matrix OR alluvial plot ==============
+        sc.set_figure_params(fontsize=10)
 
-    labels_cat = obs[keys[0]] if key_class2 != 'clust_lbs' else obs['celltype']
-    cl_preds = obs['predicted']
-    # ============= confusion matrix OR alluvial plot ==============
-    sc.set_figure_params(fontsize=10)
+        lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
+        lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
+        pl.plot_confus_multi_mats(
+            lblist_y,
+            lblist_x,
+            classes_on=classes,
+            fname=figdir / f'confusion_matrix(acc{test_acc:.1%}).png',
+        )
+        # ============== heatmap of predicted probabilities ==============
+        name_label = 'celltype'
+        cols_anno = ['celltype', 'predicted'][:]
 
-    lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
-    lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
-    uplt.plot_confus_multi_mats(
-        lblist_y,
-        lblist_x,
-        classes_on=classes,
-        fname=figdir / f'confusion_matrix(acc{test_acc:.1%}).png',
-    )
-    # ============== heatmap of predicted probabilities ==============
-    name_label = 'celltype'
-    cols_anno = ['celltype', 'predicted'][:]
+        # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
+        df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
 
-    # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
-    df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
+        indices = subsample_each_group(df_lbs['celltype'], n_out=50, )
+        # indices = df_lbs.index
+        df_data = df_probs.loc[indices, :].copy()
+        df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
+        lbs = df_lbs[name_label][indices]
 
-    indices = subsample_each_group(df_lbs['celltype'], n_out=50, )
-    # indices = df_lbs.index
-    df_data = df_probs.loc[indices, :].copy()
-    df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
-    lbs = df_lbs[name_label][indices]
-
-    _ = uplt.heatmap_probas(
-        df_data.T, lbs, name_label='true label',
-        figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
-    )
+        _ = pl.heatmap_probas(
+            df_data.T, lbs, name_label='true label',
+            figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
+        )
     return dpair, trainer, h_dict, ENV_VARs
 
 
@@ -371,9 +376,17 @@ def gather_came_results(
             f'got {checkpoint}'
         )
     out_cell = trainer.eval_current()['cell']
+    out_cell = out_cell.cpu().clone().detach().numpy()
+    pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
+    pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
+    predictor = Predictor(classes=classes).fit(
+            out_cell[dpair.obs_ids1],
+            trainer.train_labels.cpu().clone().detach().numpy(),
+        )
+    predictor.save(resdir / f'predictor.json')
 
     labels_cat = dpair.get_obs_labels(keys, asint=False)
-    probas_all = as_probabilities(out_cell)
+    probas_all = as_probabilities(out_cell, mode='softmax')
     cl_preds = predict_from_logits(probas_all, classes=classes)
     obs = pd.DataFrame(
         {keys[0]: labels_cat,
@@ -387,15 +400,13 @@ def gather_came_results(
     dpair.set_common_obs_annos(obs)
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
-    save_pickle(dpair, resdir / 'dpair.pickle')
+    dpair.save_init(resdir / 'datapair_init.pickle')
 
     # hidden states are stored in sc.AnnData to facilitated downstream analysis
     h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
-    adt = utp.make_adata(h_dict['cell'], obs=dpair.obs, assparse=False)
-    # gadt = utp.make_adata(h_dict['gene'], obs = adpair.var, assparse=False)
 
     # group counts statistics (optinal)
-    gcnt = utp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
+    gcnt = pp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
     logging.info(str(gcnt))
     gcnt.to_csv(resdir / 'group_counts.csv')
     return obs, df_probs, h_dict
@@ -411,7 +422,15 @@ def preprocess_aligned(
         nneigh_clust: int = 20,
         ntop_deg: int = 50,
 ):
-    adatas = utp.align_adata_vars(
+    """
+    Steps:
+    * align variables
+    * preprocessing
+    * candidate genes (HVGs and DEGs)
+    * pre-clustering query data
+    * single-cell network
+    """
+    adatas = pp.align_adata_vars(
         adatas[0], adatas[1], df_varmap_1v1, unify_names=True,
     )
 
@@ -422,21 +441,22 @@ def preprocess_aligned(
         n_pcs=n_pcs,
         nneigh=nneigh_scnet,
     )
-    # NOTE: using the median total-counts as the scale factor (better than fixed number)
-    adata1 = utp.quick_preprocess(adatas[0], **params_preproc)
-    adata2 = utp.quick_preprocess(adatas[1], **params_preproc)
+    # NOTE: using the median total-counts as the scale factor
+    # (may perform better than fixed number)
+    adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
+    adata2 = pp.quick_preprocess(adatas[1], **params_preproc)
 
     # the single-cell network
     if use_scnets:
-        scnets = [utp.get_scnet(adata1), utp.get_scnet(adata2)]
+        scnets = [pp.get_scnet(adata1), pp.get_scnet(adata2)]
     else:
         scnets = None
     # get HVGs
-    hvgs1, hvgs2 = utp.get_hvgs(adata1), utp.get_hvgs(adata2)
+    hvgs1, hvgs2 = pp.get_hvgs(adata1), pp.get_hvgs(adata2)
 
     # cluster labels
     key_clust = 'clust_lbs'
-    clust_lbs2 = utp.get_leiden_labels(
+    clust_lbs2 = pp.get_leiden_labels(
         adata2, force_redo=True,
         nneigh=nneigh_clust,
         neighbors_key='clust',
@@ -445,13 +465,12 @@ def preprocess_aligned(
     )
     adatas[1].obs[key_clust] = clust_lbs2
 
-    #    ntop_deg = 50
     params_deg = dict(n=ntop_deg, force_redo=False,
                       inplace=True, do_normalize=False)
-    ### need to be normalized first
-    degs1 = utp.compute_and_get_DEGs(
+    # adata1&2 have already been normalized before
+    degs1 = pp.compute_and_get_DEGs(
         adata1, key_class, **params_deg)
-    degs2 = utp.compute_and_get_DEGs(
+    degs2 = pp.compute_and_get_DEGs(
         adata2, key_clust, **params_deg)
     ###
     vars_feat = list(set(degs1).union(degs2))
@@ -475,6 +494,13 @@ def preprocess_unaligned(
         nneigh_clust: int = 20,
         ntop_deg: int = 50,
 ):
+    """
+    Steps:
+    * preprocessing
+    * candidate genes (HVGs and DEGs)
+    * pre-clustering query data
+    * single-cell network
+    """
     logging.info('================ preprocessing ===============')
     params_preproc = dict(
         target_sum=None,
@@ -482,21 +508,24 @@ def preprocess_unaligned(
         n_pcs=n_pcs,
         nneigh=nneigh_scnet,
     )
-    # NOTE: using the median total-counts as the scale factor (better than fixed number)
-    adata1 = utp.quick_preprocess(adatas[0], **params_preproc)
-    adata2 = utp.quick_preprocess(adatas[1], **params_preproc)
+    # NOTE:
+    # by default, the original adatas will not be changed
+    # using the median total-counts as the scale factor \
+    # may perform better than fixed number
+    adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
+    adata2 = pp.quick_preprocess(adatas[1], **params_preproc)
 
     # the single-cell network
     if use_scnets:
-        scnets = [utp.get_scnet(adata1), utp.get_scnet(adata2)]
+        scnets = [pp.get_scnet(adata1), pp.get_scnet(adata2)]
     else:
         scnets = None
     # get HVGs
-    hvgs1, hvgs2 = utp.get_hvgs(adata1), utp.get_hvgs(adata2)
+    hvgs1, hvgs2 = pp.get_hvgs(adata1), pp.get_hvgs(adata2)
 
     # cluster labels
     key_clust = 'clust_lbs'
-    clust_lbs2 = utp.get_leiden_labels(
+    clust_lbs2 = pp.get_leiden_labels(
         adata2, force_redo=True,
         nneigh=nneigh_clust,
         neighbors_key='clust',
@@ -507,12 +536,12 @@ def preprocess_unaligned(
 
     params_deg = dict(n=ntop_deg, force_redo=False,
                       inplace=True, do_normalize=False)
-    ### need to be normalized first
-    degs1 = utp.compute_and_get_DEGs(
+    # adata1&2 have already been normalized before
+    degs1 = pp.compute_and_get_DEGs(
         adata1, key_class, **params_deg)
-    degs2 = utp.compute_and_get_DEGs(
+    degs2 = pp.compute_and_get_DEGs(
         adata2, key_clust, **params_deg)
-    ###
+
     vars_use = [degs1, degs2]
     vars_as_nodes = [np.unique(np.hstack([hvgs1, degs1])),
                      np.unique(np.hstack([hvgs2, degs2]))]
@@ -559,7 +588,7 @@ def __test1__(n_epochs: int = 5):
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
-        params_model=dict(residual=True)
+        params_model=dict(residual=False)
     )
 
     del _
@@ -568,7 +597,7 @@ def __test1__(n_epochs: int = 5):
     print('Test passed for ALIGNED!')
 
 
-def __test2__(n_epochs: int = 500):
+def __test2__(n_epochs: int = 5, batch_size=None):
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
     sp1, sp2 = ('human', 'mouse')
@@ -603,7 +632,8 @@ def __test2__(n_epochs: int = 500):
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
-        params_model=dict(residual=True)
+        params_model=dict(residual=False),
+        batch_size=batch_size,
     )
 
     del _

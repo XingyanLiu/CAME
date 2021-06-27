@@ -9,7 +9,7 @@ Created on Sat Feb 20 12:16:32 2021
 """
 
 import os
-
+import logging
 from typing import Sequence, Union, Mapping
 import json
 import pickle
@@ -70,23 +70,23 @@ def write_info(fn, **dicts):
     key words parameter-dicts
     """
     f = open(fn, 'w')
-    print('file name:\n\t', fn, file=f)
+    logging.info('file name:\n\t', fn, file=f)
     for kw, val in dicts.items():
         if isinstance(val, dict):
             dict_str = strline(val.items())
-            print(f'\n>{kw}:\n{dict_str}', file=f)
+            logging.info(f'\n>{kw}:\n{dict_str}', file=f)
         else:
-            print(f'\n>{kw}:\n', val, file=f)
+            logging.info(f'\n>{kw}:\n', val, file=f)
     f.close()
 
 
 def save_json_dict(dct, fname='test_json.json', encoding='utf-8'):
     with open(fname, 'w', encoding=encoding) as jsfile:
         json.dump(dct, jsfile, ensure_ascii=False)
-    print(fname)
+    logging.info(fname)
 
 
-def get_json_dict(fname, encoding='utf-8'):
+def load_json_dict(fname, encoding='utf-8'):
     with open(fname, encoding=encoding) as f:
         dct = json.load(f)
     return dct
@@ -177,7 +177,6 @@ def subsample_single(N,
 
 def subsample_each_group(
         group_labels,
-        #        frac=0.5, n_min=50,
         n_out=50,
         seed=0,
 ):
