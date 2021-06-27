@@ -95,8 +95,8 @@ all_types = list(
     )
 # In[]
 type_rm = all_types[0]
-additional = [['inhibitory neuron', 'excitatory neuron']]
-for type_rm in (additional + []):#all_types):
+additional = [['inhibitory neuron', 'excitatory neuron'], '']
+for type_rm in (additional + all_types):
     resdir = resdir0 / f'rm-{type_rm}'
     figdir = resdir / 'figs'
     sc.settings.figdir = figdir
