@@ -11,6 +11,7 @@ import numpy as np
 import torch
 from torch import Tensor
 import dgl
+import tqdm
 from .train import BaseTrainer, make_class_weights, prepare4train, seed_everything
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
@@ -199,6 +200,7 @@ class Batch_Trainer(BaseTrainer):
         self.model.train()
         self.model = self.model.to('cuda')
         feat_dict = {}
+        print('create mini-batches')
         train_labels, test_labels, batch_list, shuffled_idx = create_batch(train_idx=train_idx,
                                                                            test_idx=test_idx,
                                                                            batchsize=batchsize,
@@ -209,7 +211,7 @@ class Batch_Trainer(BaseTrainer):
             all_train_preds = to_device(torch.tensor([]))
             all_test_preds = to_device(torch.tensor([]))
             t0 = time.time()
-            for output_nodes in batch_list:
+            for output_nodes in tqdm.tqdm(batch_list):
                 block = create_blocks(g=self.g, output_nodes=output_nodes)
                 feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['feat'], :]
                 batch_train_idx = output_nodes.clone().detach() < len(train_idx)

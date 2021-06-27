@@ -638,7 +638,7 @@ def __test2__(n_epochs: int = 5, batch_size=None):
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
         params_model=dict(residual=False),
-        batch_size=None,
+        batch_size=batch_size,
     )
 
     del _
