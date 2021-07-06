@@ -457,6 +457,7 @@ class Trainer(BaseTrainer):
 
         for epoch in range(n_epochs):
             self._cur_epoch += 1
+
             self.optimizer.zero_grad()
             t0 = time.time()
             logits = self.model(self.feat_dict,

@@ -37,7 +37,8 @@ def create_blocks(g, output_nodes):
     return block
 
 
-def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
+def create_batch(sample_size=None, train_idx=None, test_idx=None, batchsize=None, labels=None, shuffle=True,
+                 label=True):
     """
     This function create batch idx, i.e. the cells IDs in a batch.
     ----------------------------------------------------------------------
@@ -56,38 +57,64 @@ def create_batch(train_idx, test_idx, batchsize, labels, shuffle=True):
     all_idx: the shuffled or non-shuffled index for all cells
     ----------------------------------------------------------------------
     """
-    batch_list = []
-    batch_labels = []
-    sample_size = len(train_idx) + len(test_idx)
-    if shuffle:
-        all_idx = torch.randperm(sample_size)
-        shuffled_labels = labels[all_idx]
-        train_labels = shuffled_labels[all_idx < len(train_idx)].clone().detach()
-        test_labels = shuffled_labels[all_idx >= len(train_idx)].clone().detach()
+    if label:
+        batch_list = []
+        batch_labels = []
+        sample_size = len(train_idx) + len(test_idx)
+        if shuffle:
+            all_idx = torch.randperm(sample_size)
+            shuffled_labels = labels[all_idx]
+            train_labels = shuffled_labels[all_idx < len(train_idx)].clone().detach()
+            test_labels = shuffled_labels[all_idx >= len(train_idx)].clone().detach()
 
-        if batchsize >= sample_size:
-            batch_list.append(all_idx)
+            if batchsize >= sample_size:
+                batch_list.append(all_idx)
+
+            else:
+                batch_num = int(len(all_idx) / batchsize) + 1
+                for i in range(batch_num - 1):
+                    batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
+                batch_list.append(all_idx[batchsize * (batch_num - 1):])
 
         else:
-            batch_num = int(len(all_idx) / batchsize) + 1
-            for i in range(batch_num - 1):
-                batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
-            batch_list.append(all_idx[batchsize * (batch_num - 1):])
+            train_labels = labels[train_idx].clone().detach()
+            test_labels = labels[test_idx].clone().detach()
+            all_idx = torch.cat((train_idx, test_idx), 0)
+            if batchsize >= sample_size:
+                batch_list.append(all_idx)
+            else:
+                batch_num = int(len(all_idx) / batchsize) + 1
+                for i in range(batch_num - 1):
+                    batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
+                    batch_labels.append(labels[batchsize * i: batchsize * (i + 1)])
+                batch_list.append(all_idx[batchsize * (batch_num - 1):])
+
+        return train_labels, test_labels, batch_list, all_idx
 
     else:
-        train_labels = labels[train_idx].clone().detach()
-        test_labels = labels[test_idx].clone().detach()
-        all_idx = torch.cat((train_idx, test_idx), 0)
-        if batchsize >= sample_size:
-            batch_list.append(all_idx)
-        else:
-            batch_num = int(len(all_idx) / batchsize) + 1
-            for i in range(batch_num - 1):
-                batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
-                batch_labels.append(labels[batchsize * i: batchsize * (i + 1)])
-            batch_list.append(all_idx[batchsize * (batch_num - 1):])
+        batch_list = []
+        if shuffle:
+            all_idx = torch.randperm(sample_size)
 
-    return train_labels, test_labels, batch_list, all_idx
+            if batchsize >= sample_size:
+                batch_list.append(all_idx)
+            else:
+                batch_num = int(len(all_idx) / batchsize) + 1
+                for i in range(batch_num - 1):
+                    batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
+                batch_list.append(all_idx[batchsize * (batch_num - 1):])
+
+        else:
+            all_idx = torch.arange(sample_size)
+            if batchsize >= sample_size:
+                batch_list.append(all_idx)
+            else:
+                batch_num = int(len(all_idx) / batchsize) + 1
+                for i in range(batch_num - 1):
+                    batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
+                batch_list.append(all_idx[batchsize * (batch_num - 1):])
+
+        return batch_list, all_idx
 
 
 class BatchTrainer(BaseTrainer):
@@ -214,6 +241,10 @@ class BatchTrainer(BaseTrainer):
             shuffled_idx[shuffled_idx >= len(train_idx)]
         ) - len(train_idx)
         cluster_labels = self.cluster_labels[shuffled_test_idx]
+        blocks = []
+        for output_nodes in tqdm.tqdm(batch_list):
+            block = create_blocks(g=self.g, output_nodes=output_nodes)
+            blocks.append(block)
 
         for epoch in range(n_epochs):
             self._cur_epoch += 1
@@ -221,8 +252,10 @@ class BatchTrainer(BaseTrainer):
             all_train_preds = to_device(torch.tensor([]), device)
             all_test_preds = to_device(torch.tensor([]), device)
             t0 = time.time()
+            batch_rank = 0
             for output_nodes in tqdm.tqdm(batch_list):
-                block = create_blocks(g=self.g, output_nodes=output_nodes)
+                block = blocks[batch_rank]
+                batch_rank += 1
                 feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['ids'], :]
                 batch_train_idx = output_nodes.clone().detach() < len(train_idx)
                 batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
@@ -304,6 +337,7 @@ class BatchTrainer(BaseTrainer):
                      **other_inputs):
         """ get the current states of the model output
         """
+        print('eval_current')
         if feat_dict is None:
             feat_dict = self.feat_dict
         if g is None:
@@ -318,4 +352,40 @@ class BatchTrainer(BaseTrainer):
             output = self.model.forward(
                 feat_dict, g,  # .to(self.device),
                 **other_inputs)
+        return output
+
+    def eval_current_batch(self,
+                           feat_dict=None,
+                           g=None,
+                           device=None,
+                           batch_size=None,
+                           **other_inputs):
+        """ get the current states of the model output
+        """
+        print('eval_current')
+        if g is None:
+            g = self.g
+        if device is None:
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        # feat_dict = to_device(feat_dict, device)
+        # g = g.to(device)
+        output = {}
+        feat_dict = {}
+        batch_list, all_idx = create_batch(sample_size=self.feat_dict['cell'].shape[0], batchsize=batch_size,
+                                           label=False)
+        flag = 0
+        for output_nodes in tqdm.tqdm(batch_list):
+            with torch.no_grad():
+                self.model.train()  # semi-supervised learning
+                # self.model.eval()
+                block = create_blocks(g=self.g, output_nodes=output_nodes)
+                feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['ids'], :]
+                output1 = self.model.forward(to_device(feat_dict, device),
+                                             to_device(block, device),
+                                             **other_inputs)
+                if flag == 0:
+                    output['cell'] = output1['cell']
+                    flag += 1
+                else:
+                    output['cell'] = torch.cat((output['cell'], output1['cell']), dim=0)
         return output

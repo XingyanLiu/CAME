@@ -30,9 +30,8 @@ def detach2numpy(x):
 def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor], dgl.DGLGraph],
               device='cuda'):
     if not torch.cuda.is_available():
-        if 'cuda' in device:
-            logging.warning("`to_device(x)`: CUDA is not available")
         device = 'cpu'
+        logging.warning("`to_device(x)`: CUDA is not available")
     if isinstance(x, th.Tensor):
         return x.to(device)
     elif isinstance(x, List) and isinstance(x[0], th.Tensor):

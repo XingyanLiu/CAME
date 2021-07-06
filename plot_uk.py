@@ -47,12 +47,27 @@ def plot_uk_results(
     df_logits2 = pd.read_csv(resdir / 'df_logits2.csv', index_col=0)
     
     predictor = CAME.Predictor.load(resdir / 'predictor.json')
-
+<<<<<<< HEAD
+    # predictor.save(resdir / 'predictor-0.json') #backup
+=======
     predictor.save(resdir / 'predictor-0.json') #backup
-
+>>>>>>> c3b8013e132ade73651a514507222870cb67dfea
+    
     obs = pd.read_csv(resdir / 'obs.csv', index_col=0)
 
     ########################################
+<<<<<<< HEAD
+    # dpair, model = CAME.load_dpair_and_model(resdir)
+    # labels, classes = dpair.get_obs_labels(
+    #     "cell_ontology_class", add_unknown_force=False)
+    # classes = df_logits2.columns
+    # predictor = CAME.Predictor(classes=classes)
+    # predictor.fit(
+    #     pd.read_csv(resdir / 'df_logits1.csv', index_col=0).values,
+    #     labels[dpair.obs_ids1],
+    # )
+    # predictor.save(resdir / 'predictor.json')
+=======
     dpair, model = CAME.load_dpair_and_model(resdir)
     labels, classes = dpair.get_obs_labels(
         "cell_ontology_class", add_unknown_force=False)
@@ -63,6 +78,7 @@ def plot_uk_results(
         labels[dpair.obs_ids1],
     )
     predictor.save(resdir / 'predictor.json')
+>>>>>>> c3b8013e132ade73651a514507222870cb67dfea
     # ########################################
 
     dsn2 = obs['dataset'].iloc[-1]
@@ -125,6 +141,15 @@ def plot_all(dirname,
 
 dirname = Path("../_temp/('Baron_human', 'Baron_mouse')-(06-20 19.49.07)")
 dirname0 = Path("_case_res")
+<<<<<<< HEAD
+dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-23 14.37.55)"
+dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-23 14.37.55)"
+dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-24 09.57.28)"
+dirname = dirname0 / "uk-('Lake_2018', 'Tosches_turtle')(06-24 10.31.44)"
+# dirname = dirname0 / "uk-('Lake_2018', 'Tosches_turtle')(06-23 16.25.15)"
+subdirs = os.listdir(dirname)
+plot_all(dirname, 1e-3, 'sigmoid', trans_mode=3)
+=======
 dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-23 11.45.53)"
 dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-23 14.37.55)"
 dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-24 09.57.28)"
@@ -132,6 +157,7 @@ dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-24 09.57.28)"
 # dirname = dirname0 / "uk-('Lake_2018', 'Tosches_turtle')(06-23 16.25.15)"
 subdirs = os.listdir(dirname)
 plot_all(dirname, 5e-3, 'sigmoid', trans_mode=3)
+>>>>>>> c3b8013e132ade73651a514507222870cb67dfea
 
 
 

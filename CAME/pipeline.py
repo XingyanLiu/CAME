@@ -315,6 +315,7 @@ def main_for_unaligned(
         trainer,
         classes=classes,
         keys=keys,
+        batch_size=batch_size,
         keys_compare=keys_compare,
         resdir=resdir,
         checkpoint='best'
@@ -364,6 +365,7 @@ def gather_came_results(
         trainer,
         classes: Sequence,
         keys,
+        batch_size,
         keys_compare,
         resdir: Union[str, Path],
         checkpoint: Union[int, str] = 'best',
@@ -380,7 +382,11 @@ def gather_came_results(
             f'`checkpoint` should be either str ("best" or "last") or int, '
             f'got {checkpoint}'
         )
-    out_cell = trainer.eval_current()['cell']
+    if not batch_size: 
+        out_cell = trainer.eval_current()['cell']
+    else:
+        out_cell = trainer.eval_current_batch(batch_size=batch_size)['cell']
+        
     out_cell = out_cell.cpu().clone().detach().numpy()
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
     pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
@@ -638,7 +644,7 @@ def __test2__(n_epochs: int = 5, batch_size=None):
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
         params_model=dict(residual=False),
-        batch_size=batch_size,
+        batch_size=None,
     )
 
     del _
