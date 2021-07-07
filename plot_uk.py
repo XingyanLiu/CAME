@@ -129,7 +129,7 @@ dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-23 11.45.53)"
 dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-23 14.37.55)"
 dirname = dirname0 / "uk-('Lake_2018', 'Tasic18')(06-24 09.57.28)"
 # dirname = dirname0 / "uk-('Lake_2018', 'Tosches_turtle')(06-24 10.31.44)"
-# dirname = dirname0 / "uk-('Lake_2018', 'Tosches_turtle')(06-23 16.25.15)"
+dirname = dirname0 / "uk-('Lake_2018', 'Tosches_turtle')(06-28 01.13.23)"
 subdirs = os.listdir(dirname)
 plot_all(dirname, 5e-3, 'sigmoid', trans_mode=3)
 

@@ -66,7 +66,8 @@ def main_for_aligned(
         check_umap: bool = False,  # TODO
         n_pass: int = 100,
         batch_size: Optional[int] = None,
-        plot_results: bool = True
+        plot_results: bool = True,
+        norm_target_sum=1e4,
 ):
     if resdir is None:
         tag_time = make_nowtime_tag()
@@ -92,7 +93,10 @@ def main_for_aligned(
     keys_compare = [key_class1, key_class2]
 
     if do_normalize:
-        adatas = list(map(lambda a: pp.normalize_default(a, force_return=True), adatas))
+        adatas = list(map(
+            lambda a: pp.normalize_default(
+                a, target_sum=norm_target_sum, force_return=True), 
+            adatas))
 
     logging.info('Step 1: preparing DataPair object...')
     adpair = aligned_datapair_from_adatas(
