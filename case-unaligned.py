@@ -37,7 +37,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse0'),    
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[4]  # [::-1]
+dsnames = DATASET_PAIRS[2]  # [::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -140,6 +140,14 @@ if load_other_ckpt:
 # out_cell = trainer.eval_current()['cell']
 # probas_all = CAME.as_probabilities(out_cell)
 # df_probs = pd.DataFrame(probas_all, columns = trainer.classes)
+# In[]
+''' trainer '''
+# trainer.plot_class_accs()
+# plt.figure(figsize=(3, 4))
+# trainer.plot_class_accs(fp=figdir / 'clf_acc.pdf')
+# trainer.plot_class_accs(fp=figdir / 'clf_acc.svg')
+# trainer.plot_cluster_index(fp=figdir / 'cluster_index_.svg')
+# trainer.plot_cluster_index(fp=figdir / 'cluster_index_.svg')
 
 # In[]
 ''' ======================= further analysis =======================
