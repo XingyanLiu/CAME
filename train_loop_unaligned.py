@@ -35,9 +35,10 @@ pipeline.seed_everything()
 # dir_gmap = Path('D:/lxy/resources/exported_gene_matches')
 
 
-datadir = Path('datasets')
-dir_gmap = Path('./exported_gene_matches')
-
+#datadir = Path('datasets')
+#dir_gmap = Path('./exported_gene_matches')
+datadir = Path('D:/Fifth paper/datasets')
+dir_gmap = Path('D:/Fifth paper/datasets/formal/exported_gene_matches')
 
 RESDIR = Path('./results')
 
@@ -54,9 +55,9 @@ params_lossfunc = CAME.get_loss_params()
 only_1v1homo = False
 use_scnets = True
 
-n_epochs = 200
-n_pass = 100
-batch_size = 2048
+n_epochs = 400
+n_pass = 5
+batch_size = 8192
 
 
 resdir0 = RESDIR / 'minibatch' / f'batch_size-{batch_size}'
@@ -172,7 +173,7 @@ def record_from_logdf(
     return dct
 
 
-dir_restb = resdir
+dir_restb = resdir0
 baseon = 'AMI'
 nepoch_pass = n_pass # 100
 
