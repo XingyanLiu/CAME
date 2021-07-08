@@ -27,21 +27,6 @@ from .plot import plot_records_for_trainer
 SUBDIR_MODEL = '_models'
 
 
-'''
-def seach_connected_cell_gene_ID(cell_ID, gene_ID, g):
-    cell_conne_with_gene = torch.unique(g.in_edges(gene_ID, etype='express')[0])
-    cell_conne_with_cell = torch.unique(g.in_edges(cell_ID, etype='similar_to')[0])
-    all_cell_ID = torch.cat((cell_ID, cell_conne_with_gene, cell_conne_with_cell), axis=0)
-    all_cell_ID = torch.unique(all_cell_ID)
-    
-    gene_connce_with_gene = torch.unique(g.in_edges(gene_ID, etype='homolog_with')[0])
-    gene_connce_with_cell = torch.unique(g.in_edges(cell_ID, etype='expressed_by')[0])
-    all_gene_ID = torch.cat((gene_connce_with_gene, gene_connce_with_cell), axis=0)
-    all_gene_ID = torch.unique(all_gene_ID)
-    
-    return all_cell_ID, all_gene_ID
-'''
-
 def seed_everything(seed=123):
     random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
@@ -457,6 +442,7 @@ class Trainer(BaseTrainer):
 
         for epoch in range(n_epochs):
             self._cur_epoch += 1
+
             self.optimizer.zero_grad()
             t0 = time.time()
             logits = self.model(self.feat_dict,
