@@ -174,6 +174,7 @@ def plot_contingency_mat(
         order_rows: bool = True,
         order_cols: bool = False,
         ax=None,
+        figsize: tuple = (4, 3),
         save: Union[Path, str, None] = None,
         **kwds
 ):
@@ -185,7 +186,7 @@ def plot_contingency_mat(
         from .analyze import arrange_contingency_mat
         contmat = arrange_contingency_mat(contmat)
 
-    ax = heatmap(contmat, figsize=(4, 3), ax=ax)
+    ax = heatmap(contmat, figsize=figsize, ax=ax, save=save)
 
     return ax, contmat
 
