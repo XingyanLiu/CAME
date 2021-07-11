@@ -248,9 +248,9 @@ def make_adata(mat,
         mat = sparse.csr_matrix(mat)
     adata = sc.AnnData(mat)
     if isinstance(obs, pd.DataFrame):
-        adata.obs_names = obs.index.values
+        adata.obs_names = obs.index.values.astype(str)
     if isinstance(var, pd.DataFrame):
-        adata.var_names = var.index.values
+        adata.var_names = var.index.values.astype(str)
     if obs is not None:
         add_obs_annos(adata, obs, copy=False, ignore_index=ignore_index)
     if var is not None:

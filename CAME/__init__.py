@@ -34,6 +34,7 @@ from .utils.analyze import (
         )
 from .model import (
         Predictor,
+        detach2numpy,
         as_probabilities,
         predict_from_logits,
         predict,

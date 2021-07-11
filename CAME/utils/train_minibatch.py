@@ -121,7 +121,7 @@ def create_batch(
                     batch_list.append(all_idx[batchsize * i: batchsize * (i + 1)])
                 batch_list.append(all_idx[batchsize * (batch_num - 1):])
 
-        return batch_list, all_idx
+        return batch_list, all_idx, None, None
 
 
 class BatchTrainer(BaseTrainer):
@@ -380,8 +380,10 @@ class BatchTrainer(BaseTrainer):
         # g = g.to(device)
         output = {}
         feat_dict = {}
-        batch_list, all_idx = create_batch(sample_size=self.feat_dict['cell'].shape[0], batchsize=batch_size,
-                                           label=False)
+        batch_list, all_idx, _, _ = create_batch(
+            sample_size=self.feat_dict['cell'].shape[0],
+            batchsize=batch_size,
+            shuffle=False, label=False)
         flag = 0
         for output_nodes in tqdm.tqdm(batch_list):
             with torch.no_grad():

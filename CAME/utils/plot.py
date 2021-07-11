@@ -171,15 +171,22 @@ def plot_contingency_mat(
         y_true, y_pred,
         norm_axis=1,
         arrange: bool = True,
+        order_rows: bool = True,
+        order_cols: bool = False,
+        ax=None,
+        save: Union[Path, str, None] = None,
         **kwds
 ):
     from .analyze import wrapper_contingency_mat
     contmat = wrapper_contingency_mat(
-        y_true, y_pred, normalize_axis=norm_axis, **kwds)
+        y_true, y_pred, normalize_axis=norm_axis,
+        order_rows=order_rows, order_cols=order_cols, **kwds)
     if arrange:
         from .analyze import arrange_contingency_mat
         contmat = arrange_contingency_mat(contmat)
-    ax = heatmap(contmat, figsize=(4, 3))
+
+    ax = heatmap(contmat, figsize=(4, 3), ax=ax)
+
     return ax, contmat
 
 
@@ -354,12 +361,12 @@ def heatmap(df_hmap: pd.DataFrame,
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
     sns.heatmap(df_hmap,
-                #                yticklabels=False,
+                # yticklabels=False,
                 cbar=cbar,
                 cbar_kws=cbar_kws,
                 ax=ax,
                 cmap=cmap,
-                #            col_colors = cl_color_match,
+                # col_colors = cl_color_match,
                 **kwds)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)

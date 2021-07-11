@@ -112,7 +112,7 @@ came_inputs, (adata1, adata2) = pipeline.preprocess_unaligned(
     use_scnets=True,
 )
 
-dpair, trainer, h_dict, ENV_VARs = pipeline.main_for_unaligned(
+dpair, trainer, h_dict, predictor, ENV_VARs = pipeline.main_for_unaligned(
     **came_inputs,
     df_varmap=df_varmap,
     df_varmap_1v1=df_varmap_1v1,
@@ -128,7 +128,7 @@ dpair, trainer, h_dict, ENV_VARs = pipeline.main_for_unaligned(
 )
 load_other_ckpt = False
 if load_other_ckpt:
-    obs, df_probs, h_dict = pipeline.gather_came_results(
+    obs, df_probs, h_dict, predictor = pipeline.gather_came_results(
             dpair,
             trainer,
             classes=ENV_VARs['classes'],

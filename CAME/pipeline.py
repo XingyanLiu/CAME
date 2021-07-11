@@ -153,7 +153,7 @@ def main_for_aligned(
     out_cell = trainer.eval_current()['cell']
     obs_ids1 = adpair.get_obs_ids(0, False)
     obs_ids2 = adpair.get_obs_ids(1, False)
-    obs, df_probs, h_dict = gather_came_results(
+    obs, df_probs, h_dict, predictor = gather_came_results(
         adpair,
         trainer,
         classes=classes,
@@ -197,7 +197,7 @@ def main_for_aligned(
                                 figsize=(5, 3.),
                                 fp=figdir / f'heatmap_probas.pdf'
                                 )
-    return adpair, trainer, h_dict, ENV_VARs
+    return adpair, trainer, h_dict, predictor, ENV_VARs
 
 
 def main_for_unaligned(
@@ -309,15 +309,15 @@ def main_for_unaligned(
     # ======================== Gather results ======================
     obs_ids1 = dpair.get_obs_ids(0, False)
     obs_ids2 = dpair.get_obs_ids(1, False)
-    obs, df_probs, h_dict = gather_came_results(
+    obs, df_probs, h_dict, predictor = gather_came_results(
         dpair,
         trainer,
         classes=classes,
         keys=keys,
-        batch_size=batch_size,
         keys_compare=keys_compare,
         resdir=resdir,
-        checkpoint='best'
+        checkpoint='best',
+        batch_size=batch_size,
     )
     test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
@@ -356,7 +356,7 @@ def main_for_unaligned(
             df_data.T, lbs, name_label='true label',
             figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
         )
-    return dpair, trainer, h_dict, ENV_VARs
+    return dpair, trainer, h_dict, predictor, ENV_VARs
 
 
 def gather_came_results(
@@ -420,7 +420,7 @@ def gather_came_results(
     gcnt = pp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
     logging.info(str(gcnt))
     gcnt.to_csv(resdir / 'group_counts.csv')
-    return obs, df_probs, h_dict
+    return obs, df_probs, h_dict, predictor
 
 
 def preprocess_aligned(
