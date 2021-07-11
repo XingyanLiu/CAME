@@ -364,10 +364,10 @@ def gather_came_results(
         trainer,
         classes: Sequence,
         keys,
-        batch_size,
         keys_compare,
         resdir: Union[str, Path],
         checkpoint: Union[int, str] = 'best',
+        batch_size: Optional[int] = None,
 ):
     resdir = Path(resdir)
     if isinstance(checkpoint, int):
