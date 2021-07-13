@@ -181,12 +181,12 @@ def plot_contingency_mat(
     from .analyze import wrapper_contingency_mat
     contmat = wrapper_contingency_mat(
         y_true, y_pred, normalize_axis=norm_axis,
-        order_rows=order_rows, order_cols=order_cols, **kwds)
+        order_rows=order_rows, order_cols=order_cols, )
     if arrange:
         from .analyze import arrange_contingency_mat
         contmat = arrange_contingency_mat(contmat)
 
-    ax = heatmap(contmat, figsize=figsize, ax=ax, fp=fp)
+    ax = heatmap(contmat, figsize=figsize, ax=ax, fp=fp, **kwds)
 
     return ax, contmat
 
