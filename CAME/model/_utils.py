@@ -8,7 +8,6 @@
 from typing import Union, Sequence, Optional, Mapping, Any, List
 import logging
 import torch as th
-import torch.cuda
 import torch.nn as nn
 import dgl
 import tqdm
@@ -30,7 +29,7 @@ def detach2numpy(x):
 
 def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor], dgl.DGLGraph],
               device='cuda'):
-    if not torch.cuda.is_available():
+    if not th.cuda.is_available():
         if 'cuda' in str(device):
             logging.warning("`to_device(x)`: CUDA is not available")
         device = 'cpu'
@@ -42,6 +41,8 @@ def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor], dgl.
         return {k: v.to(device) for k, v in x.items()}
     elif isinstance(x, dgl.DGLGraph):
         return [x.to(device)]
+    else:
+        raise NotImplementedError('Unresolved input type')
 
 
 def concat_tensor_dicts(dicts: Sequence[Mapping], dim=0):
@@ -50,7 +51,7 @@ def concat_tensor_dicts(dicts: Sequence[Mapping], dim=0):
         keys.update(d.keys())
     result = {}
     for _key in list(keys):
-        result[_key] = torch.cat([d[_key] for d in dicts], dim=dim)
+        result[_key] = th.cat([d[_key] for d in dicts], dim=dim)
     return result
 
 
@@ -153,6 +154,7 @@ def get_model_outputs(
     feat_dict: dict of feature matrices
     g: graph or a list or graph (blocks)
     batch_size: int or None
+    device:
     other_inputs: other inputs for model.forward function
 
     Returns
@@ -164,7 +166,7 @@ def get_model_outputs(
         if device is not None:
             feat_dict = to_device(feat_dict, device)
             g = g.to(device)
-        with torch.no_grad():
+        with th.no_grad():
             model.train()  # semi-supervised learning
             outputs = model.forward(feat_dict, g, **other_inputs)
             # outputs = self.model.get_out_logits(feat_dict, g, **other_inputs)
@@ -172,10 +174,10 @@ def get_model_outputs(
     else:
         batch_list, all_idx, _, _ = create_batch(
             sample_size=feat_dict['cell'].shape[0],
-            batch_size=batch_size, shuffle=False, label=False)
-
+            batch_size=batch_size, shuffle=False, label=False
+        )
         batch_output_list = []
-        with torch.no_grad():
+        with th.no_grad():
             for output_nodes in tqdm.tqdm(batch_list):
                 model.train()  # semi-supervised learning
                 block = create_blocks(g=g, output_nodes=output_nodes)
@@ -186,7 +188,6 @@ def get_model_outputs(
                     _feat_dict = to_device(_feat_dict, device),
                     block = to_device(block, device),
                 _out = model.forward(_feat_dict, block, **other_inputs)
-
                 batch_output_list.append(_out)
                 # cell_tensor_list.append(_out['cell'])
         # outputs = {'cell': torch.cat(batch_output_list, dim=0)}

@@ -183,6 +183,7 @@ def plot_contingency_mat(
         y_true, y_pred, normalize_axis=norm_axis,
         order_rows=order_rows, order_cols=order_cols, )
     if arrange:
+        # align column- and row- names as possible
         from .analyze import arrange_contingency_mat
         contmat = arrange_contingency_mat(contmat)
 
@@ -193,7 +194,10 @@ def plot_contingency_mat(
 
 def plot_confus_mat(y_true, y_pred, classes_on=None,
                     normalize='true',
-                    linewidths=0.02, linecolor='grey', **kw):
+                    linewidths=0.02, linecolor='grey',
+                    figsize: tuple = (4, 3),
+                    ax=None, fp=None,
+                    **kwargs):
     """ by default, normalized by row (true classes)
     """
     if classes_on is None:
@@ -201,9 +205,14 @@ def plot_confus_mat(y_true, y_pred, classes_on=None,
 
     mat = metrics.confusion_matrix(y_true, y_pred, labels=classes_on,
                                    normalize=normalize)
-
-    return sns.heatmap(mat, linewidths=linewidths, linecolor=linecolor,
-                       xticklabels=classes_on, yticklabels=classes_on, **kw)
+    # return sns.heatmap(mat, linewidths=linewidths, linecolor=linecolor,
+    #                    xticklabels=classes_on, yticklabels=classes_on,
+    #                    **kwargs)
+    mat = pd.DataFrame(data=mat, index=classes_on, columns=classes_on)
+    ax = heatmap(mat, figsize=figsize, ax=ax, fp=fp,
+                 linewidths=linewidths, linecolor=linecolor,
+                 **kwargs)
+    return ax, mat
 
 
 def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
@@ -270,9 +279,6 @@ def plot_records_for_trainer(
     line_list = [getattr(trainer, nm)[start: end] for nm in record_names]
 
     return plot_line_list(line_list, lbs=lbs, tt=tt, fp=fp, **kwds)
-
-
-# In[]
 
 
 def venn_plot(sets, set_labels=None, regular=False,
