@@ -172,33 +172,26 @@ def main_for_aligned(
         cl_preds = obs['predicted']
         sc.set_figure_params(fontsize=10)
     
-        lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
-        lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
-        
-        pl.plot_confus_multi_mats(
-            lblist_y,
-            lblist_x,
-            classes_on=classes,
-            fname=figdir / f'confusion_matrix(acc{test_acc:.1%}).png',
+        # confusion matrix OR alluvial plot
+        sc.set_figure_params(fontsize=10)
+        ax, contmat = pl.plot_contingency_mat(
+            labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
+            fp=figdir / f'contingency_matrix(acc{test_acc:.1%}).png',
         )
-    
-        # ============== heatmap of predicted probabilities ==============
-        name_label = 'celltype'
-        cols_anno = ['celltype', 'predicted'][:]
-    
-        # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
-        df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
-    
-        indices = subsample_each_group(df_lbs['celltype'], n_out=50, )
-        # indices = df_lbs.index
-        df_data = df_probs.loc[indices, :].copy()
-        df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
-        lbs = df_lbs[name_label][indices]
-    
-        _ = pl.heatmap_probas(df_data.T, lbs, name_label='true label',
-                                figsize=(5, 3.),
-                                fp=figdir / f'heatmap_probas.pdf'
-                                )
+        pl.plot_confus_mat(
+            labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
+            fp=figdir / f'contingency_matrix-train.png',
+        )
+
+        # heatmap of predicted probabilities
+        gs = pl.wrapper_heatmap_scores(
+            df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
+            col_label='celltype', col_pred='predicted',
+            n_subsample=50,
+            cmap_heat='magma_r', #if prob_func == 'softmax' else 'RdBu_r'
+            fp=figdir / f'heatmap_probas.pdf'
+        )
+
     return adpair, trainer, h_dict, predictor, ENV_VARs
 
 
