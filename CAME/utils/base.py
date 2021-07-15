@@ -59,7 +59,7 @@ def load_pickle(fp):
 
 def check_dirs(path):
     if os.path.exists(path):
-        print('already exsists:\n\t%s' % path)
+        print('already exists:\n\t%s' % path)
     else:
         os.makedirs(path)
         print('a new directory made:\n\t%s' % path)
@@ -74,9 +74,9 @@ def write_info(fn, **dicts):
     for kw, val in dicts.items():
         if isinstance(val, dict):
             dict_str = strline(val.items())
-            logging.info(f'\n>{kw}:\n{dict_str}', file=f)
+            print(f'\n>{kw}:\n{dict_str}', file=f)
         else:
-            logging.info(f'\n>{kw}:\n', val, file=f)
+            print(f'\n>{kw}:\n', val, file=f)
     f.close()
 
 
@@ -90,9 +90,6 @@ def load_json_dict(fname, encoding='utf-8'):
     with open(fname, encoding=encoding) as f:
         dct = json.load(f)
     return dct
-
-
-# In[]
 
 
 def make_nowtime_tag(nowtime=None, brackets=True):
