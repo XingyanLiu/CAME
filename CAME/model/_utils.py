@@ -8,6 +8,7 @@
 from typing import Union, Sequence, Optional, Mapping, Any, List
 import logging
 import torch as th
+from torch import Tensor
 import torch.nn as nn
 import dgl
 import tqdm
@@ -18,7 +19,7 @@ from ._minibatch import create_blocks, create_batch
 
 
 def detach2numpy(x):
-    if isinstance(x, th.Tensor):
+    if isinstance(x, Tensor):
         x = x.cpu().clone().detach().numpy()
     elif isinstance(x, Mapping):
         x = {k: detach2numpy(v) for k, v in x.items()}
@@ -27,15 +28,16 @@ def detach2numpy(x):
     return x
 
 
-def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor], dgl.DGLGraph],
-              device='cuda'):
+def to_device(
+        x: Union[Tensor, List[Tensor], Mapping[Any, Tensor], dgl.DGLGraph],
+        device='cuda'):
     if not th.cuda.is_available():
         if 'cuda' in str(device):
             logging.warning("`to_device(x)`: CUDA is not available")
         device = 'cpu'
-    if isinstance(x, th.Tensor):
+    if isinstance(x, Tensor):
         return x.to(device)
-    elif isinstance(x, List) and isinstance(x[0], th.Tensor):
+    elif isinstance(x, List) and isinstance(x[0], Tensor):
         return [xx.to(device) for xx in x]
     elif isinstance(x, Mapping):
         return {k: v.to(device) for k, v in x.items()}
@@ -72,14 +74,14 @@ def onehot_encode(
     x_onehot = binarizer.fit_transform(x)
     logging.info("classes = %s", binarizer.classes)
     if astensor:
-        return th.Tensor(x_onehot)
+        return Tensor(x_onehot)
     else:
         return x_onehot
 
 
 def get_all_hidden_states(
         model: Union[CGGCNet, CGCNet, nn.Module],
-        feat_dict: Mapping[Any, th.Tensor],
+        feat_dict: Mapping[Any, Tensor],
         g: dgl.DGLGraph,
         detach2np: bool = True,
 ):
@@ -161,6 +163,8 @@ def get_model_outputs(
     -------
     model outputs (if mode == 'minibatch', will be merged by batch)
     """
+    if device is not None:
+        model.to(device)
 
     if batch_size is None:
         if device is not None:
@@ -185,12 +189,12 @@ def get_model_outputs(
                     'cell': feat_dict['cell'][block.nodes['cell'].data['ids'], :]
                 }
                 if device is not None:
-                    _feat_dict = to_device(_feat_dict, device),
-                    block = to_device(block, device),
+                    _feat_dict = to_device(_feat_dict, device)
+                    block = to_device(block, device)
+                print('DEBUG', _feat_dict, block,)
+                print(other_inputs)
                 _out = model.forward(_feat_dict, block, **other_inputs)
                 batch_output_list.append(_out)
-                # cell_tensor_list.append(_out['cell'])
-        # outputs = {'cell': torch.cat(batch_output_list, dim=0)}
         outputs = concat_tensor_dicts(batch_output_list)
 
     return outputs

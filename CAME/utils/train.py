@@ -667,7 +667,9 @@ class Trainer(BaseTrainer):
             g = self.g
         from ..model import get_model_outputs
         outputs = get_model_outputs(
-            self.model, feat_dict, g, batch_size=batch_size, **other_inputs
+            self.model, feat_dict, g, batch_size=batch_size, 
+            device=self.device,
+            **other_inputs
         )
         return outputs
 
