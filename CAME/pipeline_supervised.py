@@ -41,7 +41,7 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-from .utils.train_for_both import prepare4train, Trainer, seed_everything
+from .utils._train_for_both import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
@@ -151,7 +151,7 @@ def main_for_unaligned(
     ''' ======================== Gather results ======================
     '''
     obs_ids1, obs_ids2 = dpair.get_obs_ids(0, False), dpair.get_obs_ids(1, False)
-    out_cell = trainer.eval_current()['cell']
+    out_cell = trainer.get_current_outputs()['cell']
     out_cell1 = out_cell[:, : n_classes1]
     out_cell2 = out_cell[:, n_classes1:]
 

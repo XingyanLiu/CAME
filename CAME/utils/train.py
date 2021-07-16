@@ -15,13 +15,15 @@ from pandas import DataFrame, value_counts
 import torch
 from torch import Tensor, LongTensor
 import dgl
+import tqdm
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 
 from ..model import to_device, onehot_encode, multilabel_binary_cross_entropy
 from .base import check_dirs, save_json_dict
-from .evaluation import accuracy, get_AMI, get_F1_score
+from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
+from CAME.model._minibatch import create_batch, create_blocks
 
 
 SUBDIR_MODEL = '_models'
@@ -45,8 +47,7 @@ def make_class_weights(labels, astensor=True, foo=np.sqrt, n_add=0):
 
     counts = value_counts(labels).sort_index()  # sort for alignment
     n_cls = len(counts) + n_add
-    w = counts.apply(lambda x: 1 / foo(x + 1) if x > 0 else 0)  # .tolist() #+ [1 / n_cls]
-    #    w  = np.array(w)
+    w = counts.apply(lambda x: 1 / foo(x + 1) if x > 0 else 0)  
     w = (w / w.sum() * (1 - n_add / n_cls)).values
     w = np.array(list(w) + [1 / n_cls] * int(n_add))
 
@@ -285,7 +286,7 @@ class BaseTrainer(object):
             ckpt_dict, self.dir_model / 'chckpoint_dict.json')
         # load_json_dict(self.dir_model / 'chckpoint_dict.json')
 
-    def eval_current(self, **other_inputs):
+    def get_current_outputs(self, **other_inputs):
         """ get the current states of the model output
         """
         raise NotImplementedError
@@ -525,21 +526,151 @@ class Trainer(BaseTrainer):
         self._cur_epoch_adopted = self._cur_epoch
         self.save_checkpoint_record()
 
-    def eval_current(self,
-                     feat_dict=None,
-                     g=None,
-                     **other_inputs):
+    def train_minibatch(self, n_epochs=100,
+                        use_class_weights=True,
+                        params_lossfunc={},
+                        n_pass=100,
+                        eps=1e-4,
+                        cat_class='cell',
+                        batch_size=128,
+                        device=None,
+                        **other_inputs):
+        """
+        Funtcion for minibatch trainging
+        """
+        # setting device to train
+        if device is None:
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+        train_idx, test_idx, train_labels, test_labels = self.train_idx, self.test_idx, self.train_labels, self.test_labels
+        labels = torch.cat((train_labels, test_labels), 0)
+        self.g.nodes['cell'].data['ids'] = torch.arange(self.g.num_nodes('cell'))  # track the random shuffle
+
+        if use_class_weights:
+            class_weights = to_device(self.class_weights, device)
+        else:
+            class_weights = None
+
+        if not hasattr(self, 'ami_max'):
+            self.ami_max = 0
+
+        print("start training".center(50, '='))
+        self.model.train()
+        self.model = self.model.to(device)
+        feat_dict = {}
+        train_labels, test_labels, batch_list, shuffled_idx = create_batch(
+            train_idx=train_idx, test_idx=test_idx, batch_size=batch_size,
+            labels=labels, shuffle=True)
+        shuffled_test_idx = detach2numpy(
+            shuffled_idx[shuffled_idx >= len(train_idx)]
+        ) - len(train_idx)
+        cluster_labels = self.cluster_labels[shuffled_test_idx]
+        blocks = []
+        for output_nodes in tqdm.tqdm(batch_list):
+            block = create_blocks(g=self.g, output_nodes=output_nodes)
+            blocks.append(block)
+
+        for epoch in range(n_epochs):
+            self._cur_epoch += 1
+            self.optimizer.zero_grad()
+            all_train_preds = to_device(torch.tensor([]), device)
+            all_test_preds = to_device(torch.tensor([]), device)
+            t0 = time.time()
+            batch_rank = 0
+            for output_nodes in tqdm.tqdm(batch_list):
+                block = blocks[batch_rank]
+                batch_rank += 1
+                feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['ids'], :]
+                batch_train_idx = output_nodes.clone().detach() < len(train_idx)
+                batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
+                logits = self.model(to_device(feat_dict, device),
+                                    to_device(block, device),
+                                    **other_inputs)
+                out_cell = logits[cat_class]  # .cuda()
+                output_labels = labels[output_nodes]
+                out_train_labels = output_labels[batch_train_idx].clone().detach()
+                loss = self.model.get_classification_loss(
+                    out_cell[batch_train_idx],
+                    to_device(out_train_labels, device),
+                    weight=class_weights,
+                    **params_lossfunc
+                )
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+                _, y_pred = torch.max(out_cell, dim=1)
+                y_pred_train = y_pred[batch_train_idx]
+                y_pred_test = y_pred[batch_test_idx]
+                all_train_preds = torch.cat((all_train_preds, y_pred_train), 0)
+                all_test_preds = torch.cat((all_test_preds, y_pred_test), 0)
+
+            # evaluation (Acc.)
+            all_train_preds = all_train_preds.cpu()
+            all_test_preds = all_test_preds.cpu()
+            with torch.no_grad():
+                train_acc = accuracy(train_labels, all_train_preds)
+                test_acc = accuracy(test_labels, all_test_preds)
+                # F1-scores
+                microF1 = get_F1_score(test_labels, all_test_preds, average='micro')
+                macroF1 = get_F1_score(test_labels, all_test_preds, average='macro')
+                weightedF1 = get_F1_score(test_labels, all_test_preds, average='weighted')
+
+                # unsupervised cluster index
+                if self.cluster_labels is not None:
+                    ami = get_AMI(cluster_labels, all_test_preds)
+
+                if self._cur_epoch >= n_pass - 1:
+                    self.ami_max = max(self.ami_max, ami)
+                    if ami > self.ami_max - eps:
+                        self._cur_epoch_best = self._cur_epoch
+                        self.save_model_weights()
+                        print('[current best] model weights backup')
+                    elif self._cur_epoch % 43 == 0:
+                        self.save_model_weights()
+                        print('model weights backup')
+
+                t1 = time.time()
+
+                # recording
+                self._record(dur=t1 - t0,
+                             train_loss=loss.item(),
+                             train_acc=train_acc,
+                             test_acc=test_acc,
+                             AMI=ami,
+                             microF1=microF1,
+                             macroF1=macroF1,
+                             weightedF1=weightedF1,
+                             )
+
+                dur_avg = np.average(self.dur)
+                test_acc_max = max(self.test_acc)
+                logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test Acc: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
+                self._cur_log = logfmt.format(
+                    self._cur_epoch, train_acc,
+                    test_acc, test_acc_max,
+                    ami, dur_avg)
+
+                print(self._cur_log)
+            self._cur_epoch_adopted = self._cur_epoch
+
+    def get_current_outputs(self,
+                            feat_dict=None,
+                            g=None,
+                            batch_size=None,
+                            **other_inputs):
         """ get the current states of the model output
         """
         if feat_dict is None:
             feat_dict = self.feat_dict
         if g is None:
             g = self.g
-        feat_dict = to_device(feat_dict, self.device)
-        g = g.to(self.device)
-        with torch.no_grad():
-            self.model.train()  # semi-supervised learning
-            # self.model.eval()
-            output = self.model.forward(feat_dict, g, **other_inputs)
-            # output = self.model.get_out_logits(feat_dict, g, **other_inputs)
-        return output
+        from ..model import get_model_outputs
+        outputs = get_model_outputs(
+            self.model, feat_dict, g, batch_size=batch_size, 
+            device=self.device,
+            **other_inputs
+        )
+        return outputs
+
+

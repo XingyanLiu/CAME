@@ -14,10 +14,10 @@ from .base import (
         subsample_each_group,
         )
 from .evaluation import accuracy
-#from .analyze import (
-#        weight_linked_vars, 
-#        make_abstracted_graph,
-#        )
+from .analyze import (
+       weight_linked_vars,
+       make_abstracted_graph,
+       )
 from ._get_example_data import load_example_data
 from .downsample_counts import (
         downsample_total_counts,

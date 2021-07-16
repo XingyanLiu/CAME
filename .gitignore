@@ -2,9 +2,7 @@
 .DS_Store
 .ipynb_checkpoints/
 
-__pycache__/
 __pycache__
-*/__pycache__/
 *.pyc
 
 /_temp/

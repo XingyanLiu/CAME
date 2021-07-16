@@ -172,8 +172,9 @@ class CGGCNet(nn.Module):
             self.train()
             _ = self.forward(feat_dict, g=g, **kwds)
         else:
-            logging.warning('No inputs were given for the forward passing, so the '
-                  'returned are the current hidden states of the model.')
+            logging.warning(
+                'No inputs were given for the forward passing, so the '
+                'returned are the current hidden states of the model.')
 
         h_dict = self.rgcn.hidden_states[i_layer]
         if detach2np:
@@ -189,9 +190,9 @@ class CGGCNet(nn.Module):
             cell-by-gene attention matrix
         """
         # getting subgraph and the hidden states
-        g_sub = g.to('cuda')['gene', 'expressed_by', 'cell']
+        g_sub = g['gene', 'expressed_by', 'cell']
         h_dict = self.get_hidden_states(feat_dict=feat_dict, g=g, detach2np=False)
-        # getting heterogenous attention (convolutional) classifier
+        # getting heterogeneous attention (convolutional) classifier
         HAC = self.cell_classifier.conv.mods['expressed_by']
         feats = (h_dict['gene'], h_dict['cell'])
         HAC.train(False)  # semi-supervised
@@ -256,7 +257,7 @@ class CGGCNet(nn.Module):
         mod_params = {
             "gat": dict(
                 h_dim=self.out_dim,
-                n_heads=8,  # 16, # 16 seems no better
+                n_heads=8,
                 feat_drop=0.01,
                 attn_drop=0.6,
                 negative_slope=0.2,
@@ -288,7 +289,7 @@ class CGGCNet(nn.Module):
             mod_kwdicts=kwdicts,
             bias=self.out_bias,
             activation=None,
-            #                    dropout=self.dropout,
+            # dropout=self.dropout,
             layernorm_ntypes=['cell'] if self.layernorm_ntypes is not None else None
         )
 
@@ -302,3 +303,5 @@ class CGGCNet(nn.Module):
             bias=self.out_bias,  # if False, No bias in the last layer
             self_loop=False,
             layernorm_ntypes=['cell'])
+
+

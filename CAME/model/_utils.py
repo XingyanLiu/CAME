@@ -8,17 +8,18 @@
 from typing import Union, Sequence, Optional, Mapping, Any, List
 import logging
 import torch as th
-import torch.cuda
+from torch import Tensor
 import torch.nn as nn
-import torch.nn.functional as F
 import dgl
+import tqdm
 from sklearn.preprocessing import MultiLabelBinarizer
 from .cggc import CGGCNet
 from .cgc import CGCNet
+from ._minibatch import create_blocks, create_batch
 
 
 def detach2numpy(x):
-    if isinstance(x, th.Tensor):
+    if isinstance(x, Tensor):
         x = x.cpu().clone().detach().numpy()
     elif isinstance(x, Mapping):
         x = {k: detach2numpy(v) for k, v in x.items()}
@@ -27,20 +28,33 @@ def detach2numpy(x):
     return x
 
 
-def to_device(x: Union[th.Tensor, List[th.Tensor], Mapping[Any, th.Tensor], dgl.DGLGraph],
-              device='cuda'):
-    if not torch.cuda.is_available():
-        if 'cuda' in device:
+def to_device(
+        x: Union[Tensor, List[Tensor], Mapping[Any, Tensor], dgl.DGLGraph],
+        device='cuda'):
+    if not th.cuda.is_available():
+        if 'cuda' in str(device):
             logging.warning("`to_device(x)`: CUDA is not available")
         device = 'cpu'
-    if isinstance(x, th.Tensor):
+    if isinstance(x, Tensor):
         return x.to(device)
-    elif isinstance(x, List) and isinstance(x[0], th.Tensor):
+    elif isinstance(x, List) and isinstance(x[0], Tensor):
         return [xx.to(device) for xx in x]
     elif isinstance(x, Mapping):
         return {k: v.to(device) for k, v in x.items()}
     elif isinstance(x, dgl.DGLGraph):
         return [x.to(device)]
+    else:
+        raise NotImplementedError('Unresolved input type')
+
+
+def concat_tensor_dicts(dicts: Sequence[Mapping], dim=0):
+    keys = set()
+    for d in dicts:
+        keys.update(d.keys())
+    result = {}
+    for _key in list(keys):
+        result[_key] = th.cat([d[_key] for d in dicts], dim=dim)
+    return result
 
 
 def onehot_encode(
@@ -60,14 +74,14 @@ def onehot_encode(
     x_onehot = binarizer.fit_transform(x)
     logging.info("classes = %s", binarizer.classes)
     if astensor:
-        return th.Tensor(x_onehot)
+        return Tensor(x_onehot)
     else:
         return x_onehot
 
 
 def get_all_hidden_states(
         model: Union[CGGCNet, CGCNet, nn.Module],
-        feat_dict: Mapping[Any, th.Tensor],
+        feat_dict: Mapping[Any, Tensor],
         g: dgl.DGLGraph,
         detach2np: bool = True,
 ):
@@ -101,7 +115,7 @@ def get_attentions(
     # getting subgraph and the hidden states
     g_sub = g.to('cuda')['gene', 'expressed_by', 'cell']
 
-    # getting heterogenous attention (convolutional) classifier
+    # getting heterogeneous attention (convolutional) classifier
     HAC = model.cell_classifier.conv.mods['expressed_by']
     feats = (h_dict['gene'], h_dict['cell'])
     HAC.train(False)  # semi-supervised
@@ -125,11 +139,12 @@ def get_attentions(
     return attn_mat
 
 
-def gat_model_outputs(
+def get_model_outputs(
         model: nn.Module,
         feat_dict: Mapping,
         g: Union[dgl.DGLGraph, List[dgl.DGLGraph]],
-        mode: str = 'minibatch',
+        batch_size: Optional[int] = None,
+        device=None,
         **other_inputs
 ):
     """
@@ -140,24 +155,47 @@ def gat_model_outputs(
     model: heterogeneous graph-neural-network model
     feat_dict: dict of feature matrices
     g: graph or a list or graph (blocks)
-    mode: should be either 'minibatch' or 'full'
+    batch_size: int or None
+    device:
     other_inputs: other inputs for model.forward function
 
     Returns
     -------
     model outputs (if mode == 'minibatch', will be merged by batch)
     """
-    if mode == 'minibatch':
-        # get batch-list; blocks of graph
-        outputs = []
-        batch_list = [] # TODO
+    if device is not None:
+        model.to(device)
 
-        for output_nodes in batch_list:
-            pass
-        raise NotImplementedError
-    elif mode == 'full':
-        # with torch.no_grad():
-        outputs = model.forward(feat_dict, g, **other_inputs)
+    if batch_size is None:
+        if device is not None:
+            feat_dict = to_device(feat_dict, device)
+            g = g.to(device)
+        with th.no_grad():
+            model.train()  # semi-supervised learning
+            outputs = model.forward(feat_dict, g, **other_inputs)
+            # outputs = self.model.get_out_logits(feat_dict, g, **other_inputs)
+        return outputs
+    else:
+        batch_list, all_idx, _, _ = create_batch(
+            sample_size=feat_dict['cell'].shape[0],
+            batch_size=batch_size, shuffle=False, label=False
+        )
+        batch_output_list = []
+        with th.no_grad():
+            for output_nodes in tqdm.tqdm(batch_list):
+                model.train()  # semi-supervised learning
+                block = create_blocks(g=g, output_nodes=output_nodes)
+                _feat_dict = {
+                    'cell': feat_dict['cell'][block.nodes['cell'].data['ids'], :]
+                }
+                if device is not None:
+                    _feat_dict = to_device(_feat_dict, device)
+                    block = to_device(block, device)
+                print('DEBUG', _feat_dict, block,)
+                print(other_inputs)
+                _out = model.forward(_feat_dict, block, **other_inputs)
+                batch_output_list.append(_out)
+        outputs = concat_tensor_dicts(batch_output_list)
 
     return outputs
 

@@ -268,10 +268,10 @@ class Trainer(BaseTrainer):
             print(self._cur_log)
         self._cur_epoch_adopted = self._cur_epoch
 
-    def eval_current(self,
-                     feat_dict=None,
-                     g=None,
-                     **other_inputs):
+    def get_current_outputs(self,
+                            feat_dict=None,
+                            g=None,
+                            **other_inputs):
         """ get the current states of the model output
         """
         if feat_dict is None:

@@ -206,7 +206,7 @@ ax.figure.show()
 name_label = 'celltype'
 cols_anno = ['celltype', 'predicted'][:]
 
-out_cell = trainer.eval_current()['cell']
+out_cell = trainer.get_current_outputs()['cell']
 
 probas_all = CAME.as_probabilities(out_cell)
 probas_all = CAME.model.detach2numpy(torch.sigmoid(out_cell))

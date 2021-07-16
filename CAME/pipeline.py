@@ -16,10 +16,10 @@ import scanpy as sc
 from scipy import sparse
 import torch
 import logging
-
 from . import (
     pp, pl,
     save_pickle,
+    detach2numpy,
     save_json_dict,
     make_nowtime_tag,
     write_info,
@@ -38,7 +38,6 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-from .utils.train_minibatch import BatchTrainer
 from .utils.train import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
@@ -127,17 +126,20 @@ def main_for_aligned(
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = CGCNet(**params_model)
 
-    ''' Training '''
     params_lossfunc = get_loss_params(**params_lossfunc)
     trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
-    trainer.train(n_epochs=n_epochs,
-                  params_lossfunc=params_lossfunc,
-                  n_pass=n_pass, )
-    trainer.save_model_weights()
-    trainer.load_model_weights()  # 127)
-    # trainer.load_model_weights(trainer._cur_epoch)
-    test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
+    if batch_size is not None:
+        trainer.train_minibatch(
+            n_epochs=n_epochs,
+            params_lossfunc=params_lossfunc,
+            batch_size=batch_size,
+            n_pass=n_pass, )
+    else:
+        trainer.train(n_epochs=n_epochs,
+                      params_lossfunc=params_lossfunc,
+                      n_pass=n_pass, )
+    trainer.save_model_weights()
     # ========================== record results ========================
     trainer.write_train_logs()
 
@@ -150,7 +152,6 @@ def main_for_aligned(
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
 
     # ======================== Gather results ======================
-    out_cell = trainer.eval_current()['cell']
     obs_ids1 = adpair.get_obs_ids(0, False)
     obs_ids2 = adpair.get_obs_ids(1, False)
     obs, df_probs, h_dict, predictor = gather_came_results(
@@ -160,7 +161,8 @@ def main_for_aligned(
         keys=keys,
         keys_compare=keys_compare,
         resdir=resdir,
-        checkpoint='best'
+        checkpoint='best',
+        batch_size=batch_size,
     )
     test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
@@ -170,33 +172,26 @@ def main_for_aligned(
         cl_preds = obs['predicted']
         sc.set_figure_params(fontsize=10)
     
-        lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
-        lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
-        
-        pl.plot_confus_multi_mats(
-            lblist_y,
-            lblist_x,
-            classes_on=classes,
-            fname=figdir / f'confusion_matrix(acc{test_acc:.1%}).png',
+        # confusion matrix OR alluvial plot
+        sc.set_figure_params(fontsize=10)
+        ax, contmat = pl.plot_contingency_mat(
+            labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
+            fp=figdir / f'contingency_matrix(acc{test_acc:.1%}).png',
         )
-    
-        # ============== heatmap of predicted probabilities ==============
-        name_label = 'celltype'
-        cols_anno = ['celltype', 'predicted'][:]
-    
-        # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
-        df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
-    
-        indices = subsample_each_group(df_lbs['celltype'], n_out=50, )
-        # indices = df_lbs.index
-        df_data = df_probs.loc[indices, :].copy()
-        df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
-        lbs = df_lbs[name_label][indices]
-    
-        _ = pl.heatmap_probas(df_data.T, lbs, name_label='true label',
-                                figsize=(5, 3.),
-                                fp=figdir / f'heatmap_probas.pdf'
-                                )
+        pl.plot_confus_mat(
+            labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
+            fp=figdir / f'contingency_matrix-train.png',
+        )
+
+        # heatmap of predicted probabilities
+        gs = pl.wrapper_heatmap_scores(
+            df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
+            col_label='celltype', col_pred='predicted',
+            n_subsample=50,
+            cmap_heat='magma_r', #if prob_func == 'softmax' else 'RdBu_r'
+            fp=figdir / f'heatmap_probas.pdf'
+        )
+
     return adpair, trainer, h_dict, predictor, ENV_VARs
 
 
@@ -281,14 +276,14 @@ def main_for_unaligned(
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = CGGCNet(**params_model)
 
-    ''' Training '''
+    # training
     params_lossfunc = get_loss_params(**params_lossfunc)
+    trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
     if batch_size is not None:
-        trainer = BatchTrainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
         trainer.train_minibatch(
             n_epochs=n_epochs,
             params_lossfunc=params_lossfunc,
-            batchsize=batch_size,
+            batch_size=batch_size,
             n_pass=n_pass, )
     else:
         trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
@@ -321,54 +316,48 @@ def main_for_unaligned(
     )
     test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
-    # # adding labels, predicted probabilities
-    # #    adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1], categories=classes)
-    # #    adata2.obs['predicted'] = pd.Categorical(obs['predicted'][obs_ids2], categories=classes)
-    # #    pp.add_obs_annos(adata2, df_probs.iloc[obs_ids2], ignore_index=True)
     if plot_results:
         labels_cat = obs[keys[0]] if key_class2 != 'clust_lbs' else obs['celltype']
         cl_preds = obs['predicted']
-        # ============= confusion matrix OR alluvial plot ==============
+
+        # confusion matrix OR alluvial plot
         sc.set_figure_params(fontsize=10)
-
-        lblist_y = [labels_cat[obs_ids1], labels_cat[obs_ids2]]
-        lblist_x = [cl_preds[obs_ids1], cl_preds[obs_ids2]]
-        pl.plot_confus_multi_mats(
-            lblist_y,
-            lblist_x,
-            classes_on=classes,
-            fname=figdir / f'confusion_matrix(acc{test_acc:.1%}).png',
+        ax, contmat = pl.plot_contingency_mat(
+            labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
+            fp=figdir / f'contingency_matrix(acc{test_acc:.1%}).png',
         )
-        # ============== heatmap of predicted probabilities ==============
-        name_label = 'celltype'
-        cols_anno = ['celltype', 'predicted'][:]
+        pl.plot_confus_mat(
+            labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
+            fp=figdir / f'contingency_matrix-train.png',
+        )
 
-        # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
-        df_lbs = obs[cols_anno].iloc[obs_ids2].sort_values(cols_anno)
-
-        indices = subsample_each_group(df_lbs['celltype'], n_out=50, )
-        # indices = df_lbs.index
-        df_data = df_probs.loc[indices, :].copy()
-        df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
-        lbs = df_lbs[name_label][indices]
-
-        _ = pl.heatmap_probas(
-            df_data.T, lbs, name_label='true label',
-            figsize=(5, 3.), fp=figdir / f'heatmap_probas.pdf'
+        # heatmap of predicted probabilities
+        gs = pl.wrapper_heatmap_scores(
+            df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
+            col_label='celltype', col_pred='predicted',
+            n_subsample=50,
+            cmap_heat='magma_r', #if prob_func == 'softmax' else 'RdBu_r'
+            fp=figdir / f'heatmap_probas.pdf'
         )
     return dpair, trainer, h_dict, predictor, ENV_VARs
 
 
 def gather_came_results(
         dpair,
-        trainer,
+        trainer: Trainer,
         classes: Sequence,
-        keys,
-        keys_compare,
-        resdir: Union[str, Path],
+        keys: Sequence,
+        keys_compare=None,
+        resdir: Union[str, Path] = '.',
         checkpoint: Union[int, str] = 'best',
         batch_size: Optional[int] = None,
 ):
+    """ Packed function for pipeline as follows:
+    1. load the 'best' model weights
+    2. get the predictions for cells, including probabilities (from logits)
+    3. get and the hidden states for both cells and genes
+    3. make a predictor
+    """
     resdir = Path(resdir)
     if isinstance(checkpoint, int):
         trainer.load_model_weights(checkpoint)
@@ -381,25 +370,21 @@ def gather_came_results(
             f'`checkpoint` should be either str ("best" or "last") or int, '
             f'got {checkpoint}'
         )
-    if batch_size is None:
-        out_cell = trainer.eval_current()['cell']
-    else:
-        out_cell = trainer.eval_current_batch(batch_size=batch_size)['cell']
-        
+    out_cell = trainer.get_current_outputs(batch_size=batch_size)['cell']
+
     out_cell = out_cell.cpu().clone().detach().numpy()
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
     pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
     predictor = Predictor(classes=classes).fit(
             out_cell[dpair.obs_ids1],
-            trainer.train_labels.cpu().clone().detach().numpy(),
+            detach2numpy(trainer.train_labels),
         )
     predictor.save(resdir / f'predictor.json')
 
-    labels_cat = dpair.get_obs_labels(keys, asint=False)
     probas_all = as_probabilities(out_cell, mode='softmax')
     cl_preds = predict_from_logits(probas_all, classes=classes)
     obs = pd.DataFrame(
-        {keys[0]: labels_cat,
+        {keys[0]: dpair.get_obs_labels(keys, asint=False),
          # true labels with `unknown` for unseen classes in query data
          'celltype': dpair.get_obs_anno(keys_compare),  # labels for comparison
          'predicted': cl_preds,
@@ -411,7 +396,6 @@ def gather_came_results(
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
     dpair.save_init(resdir / 'datapair_init.pickle')
-    # save_pickle(dpair, resdir / 'dpair.pickle')
 
     # hidden states are stored in sc.AnnData to facilitated downstream analysis
     h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
@@ -565,7 +549,7 @@ def preprocess_unaligned(
     return dct, (adata1, adata2)
 
 
-def __test1__(n_epochs: int = 5):
+def __test1__(n_epochs: int = 5, batch_size=None):
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
     sp1, sp2 = ('human', 'mouse')
@@ -598,7 +582,8 @@ def __test1__(n_epochs: int = 5):
         resdir=resdir,
         check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
-        params_model=dict(residual=False)
+        params_model=dict(residual=False),
+        batch_size=batch_size
     )
 
     del _
