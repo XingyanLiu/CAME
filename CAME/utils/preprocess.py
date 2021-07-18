@@ -1542,9 +1542,9 @@ def quick_preprocess(
     if hvgs is None:
         sc.pp.highly_variable_genes(
             _adata, batch_key=batch_key, **hvg_kwds)
-        _adata = _adata[:, _adata.var['highly_variable']]
+        _adata = _adata[:, _adata.var['highly_variable']].copy()
     else:
-        _adata = _adata[:, hvgs]
+        _adata = _adata[:, hvgs].copy() # detach form view-data
     # 3: z-score 
     wrapper_scale(_adata, groupby=batch_key)
     #    sc.pp.scale(_adata)
