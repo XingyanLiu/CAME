@@ -13,7 +13,7 @@ Created on Thu Aug  6 00:21:15 2020
     * statistics computation
 
 """
-
+import logging
 import os
 from pathlib import Path
 from typing import Sequence, Union, Mapping, List, Optional  # , Callable
@@ -41,7 +41,7 @@ def dict_has_keys(d: Mapping, *keys):
     dk = d.keys()
     for k in keys:
         if k not in dk:
-            print(f'key {k} is not included in the dict')
+            logging.info(f'key {k} is not included in the dict')
             return False
     return True
 
@@ -65,7 +65,7 @@ def save_named_mtx(adata, dirname, field=None, raw=True, backup_npz=True,
 
     genes = adata.var_names.to_frame(index=False, name='genes')
     barcodes = adata.obs_names.to_frame(index=False, name='barcodes')
-    print(adata.X.data[:5])
+    logging.info(adata.X.data[:5])
     genes.to_csv(gene_file, index=False, header=False)
     barcodes.to_csv(bcd_file, index=False, header=False)
     if backup_npz:
@@ -76,7 +76,7 @@ def save_named_mtx(adata, dirname, field=None, raw=True, backup_npz=True,
 
 
 def save_mtx2df(adata, fname, index=True, header=True, **kwds):
-    print("NOTE: saving the dense matrix might take some time. \
+    logging.warning("NOTE: saving the dense matrix might take some time. \
           if needed, you can consider the function: `funx.saveNamedMtx`\
           to handle a sparse matrix in a efficient way.")
     df = mtx2df(adata)
@@ -1094,47 +1094,23 @@ def _filter_mito(lst):
 
 
 def normalize_default(adata, target_sum=1e4, copy=False, log_only=False,
-                      force_return=False, silence=False):
+                      force_return=False, ):
     if copy:
         adata = adata.copy()
         if not silence:
-            print('A copy of AnnData made!')
+            logging.info('A copy of AnnData made!')
     else:
         if not silence:
-            print('No copy was made, the input AnnData will be changed!')
-    print('normalizing datasets with default settings.')
+            logging.info('No copy was made, the input AnnData will be changed!')
+    logging.info('normalizing datasets with default settings.')
     if not log_only:
         if not silence:
-            print(f'performing total-sum normalization, target_sum={target_sum}...')
+            logging.info(f'performing total-sum normalization, target_sum={target_sum}...')
         sc.pp.normalize_total(adata, target_sum=target_sum)
     else:
         if not silence:
-            print('skipping total-sum normalization')
+            logging.info('skipping total-sum normalization')
     sc.pp.log1p(adata)
-    return adata if copy or force_return else None
-
-
-def normalize_default_rev(adata, target_sum=5e2,  # ignored
-                          copy=False, force_return=False):
-    if copy:
-        adata = adata.copy()
-        print('A copy of AnnData made!')
-    else:
-        print('No copy was made, the input AnnData will be changed!')
-    print('normalizing datasets with default settings (log1p first).')
-    ### x <- log(x + 1)
-    sc.pp.log1p(adata)
-    #    sc.pp.normalize_total(adata, target_sum=target_sum)
-    ### x <- x / log(M) * 5
-    X = adata.X
-    counts_per_cell = np.ravel(X.sum(1)).copy()
-    scale_factor = np.log(counts_per_cell) / 5  # 5 is an empirical number
-    if sparse.issparse(adata.X):
-        from sklearn.utils import sparsefuncs
-        sparsefuncs.inplace_row_scale(X, 1 / scale_factor)
-    else:
-        np.divide(X, scale_factor[:, None], out=X)
-    adata.X = X
     return adata if copy or force_return else None
 
 
@@ -1142,7 +1118,7 @@ def normalize_default_rev0(adata, target_sum=5e2,
                            copy=False, force_return=False):
     if copy:
         adata = adata.copy()
-    print('normalizing datasets with default settings (log1p first).'
+    logging.info('normalizing datasets with default settings (log1p first).'
           f'target_sum = {target_sum:.1f}')
     sc.pp.log1p(adata)  ### x <- log(x + 1)
     sc.pp.normalize_total(adata, target_sum=target_sum)
@@ -1158,13 +1134,10 @@ def zscore(X, with_mean=True, scale=True, ):
     if scale:
         # user R convention (unbiased estimator)
         e_adjust = np.sqrt(X.shape[0] / (X.shape[0] - 1))
-        #        print(e_adjust)
         scaler.scale_ *= e_adjust
     else:
         scaler.scale_ = np.array([1] * X.shape[1])
-    #    print(scaler.mean_[:5], 1 / scaler.scale_[:5], sep='\n')
     X_new = scaler.transform(X)
-    #    print(X_new.max(), X_new.min())
     if isinstance(X, pd.DataFrame):
         X_new = pd.DataFrame(X_new, index=X.index, columns=X.columns)
     return X_new
@@ -1189,16 +1162,14 @@ def group_zscore(X, labels, with_mean=True, scale=True, max_value=None):
     unique_labels = np.unique(labels)
     for lb in unique_labels:
         ind = labels == lb
-        #        print(ind)
         if sum(ind) == 1:
-            print(f'ignoring class {lb} with only one sample.')
+            logging.warning(f'ignoring class {lb} with only one sample.')
             continue
-        #        print(lb)
         X[ind, :] = zscore(X[ind, :], with_mean=with_mean, scale=scale)
 
     if max_value is not None:
         X[X > max_value] = max_value
-        print('... clipping at max_value', max_value)
+        logging.info('... clipping at max_value', max_value)
 
     if isdf:
         X = pd.DataFrame(X, index=index, columns=columns)
@@ -1222,7 +1193,7 @@ def group_zscore_adata(adt, key='counts', groupby='batch', key_new=None,
     """
     labels = adt.obs[groupby]
     if key == 'counts':
-        print('doing z-score scaling on count matrix, transformed into a dense array')
+        logging.info('doing z-score scaling on count matrix, transformed into a dense array')
         if sparse.issparse(adt.X):
             X = adt.X.toarray()
         else:
@@ -1254,7 +1225,7 @@ def wrapper_scale(adata, zero_center=True, max_value=None,
         wrapper_scale(adata, groupby='batch')
     """
     if groupby is not None:
-        print(f'doing within-group scaling, group by [ {groupby} ]')
+        logging.info(f'doing within-group scaling, group by [ {groupby} ]')
         return group_zscore_adata(adata, key='counts',
                                   max_value=max_value,
                                   groupby=groupby,
@@ -1262,7 +1233,7 @@ def wrapper_scale(adata, zero_center=True, max_value=None,
                                   cover=not copy,
                                   **kwds)
     else:
-        print('using the build-in function `sc.pp.scale(..)`')
+        logging.info('using the build-in function `sc.pp.scale(..)`')
         return sc.pp.scale(adata, zero_center=zero_center,
                            max_value=max_value, copy=copy)
 
@@ -1284,7 +1255,6 @@ def normalize_col(X, scale_factor=1, by='sum'):
         is_zero = norms == 0
         scale_factor = np.median(norms[~ is_zero])
     norms = norms / scale_factor
-    #    print(norms.shape)
     # for those rows or columns that summed to 0, just do nothing
     if hasattr(norms, 'A'): norms = norms.A.flatten()
     norms[norms == 0] = 1
@@ -1292,10 +1262,10 @@ def normalize_col(X, scale_factor=1, by='sum'):
     norm_ = 1 / norms
 
     if sparse.isspmatrix(X):
-        print('sparse normalization')
+        logging.info('sparse normalization')
         X_new = X.dot(sparse.diags(norm_))
     else:
-        print('dense normalization')
+        logging.info('dense normalization')
         X_new = X.dot(np.diag(norm_))
 
     if isinstance(X, pd.DataFrame):
@@ -1320,17 +1290,16 @@ def normalize_row(X, scale_factor=1, by='sum'):
         is_zero = norms == 0
         scale_factor = np.median(norms[~ is_zero])
     norms = norms / scale_factor
-    #    print(norms.shape)
     # for those rows or columns that summed to 0, just do nothing
     if hasattr(norms, 'A'): norms = norms.A.flatten()
     norms[norms == 0] = 1
     norm_ = 1 / norms
 
     if sparse.isspmatrix(X):
-        print('sparse normalization')
+        logging.info('sparse normalization')
         X_new = sparse.diags(norm_).dot(X)
     else:
-        print('dense normalization')
+        logging.info('dense normalization')
         X_new = np.diag(norm_).dot(X)
 
     if isinstance(X, pd.DataFrame):
@@ -1353,7 +1322,7 @@ def normalize_max(df, axis=0, **kwds):
         raise ValueError('Data with ALL non-negative values are required '
                          'for "max-normalization"')
     elif vmax == 0:
-        print('Full-zero values.')
+        logging.warning('Full-zero values.')
         return df
 
     if axis is None:
@@ -1366,8 +1335,8 @@ def normalize_max(df, axis=0, **kwds):
 
 def normalize_maxmin(df, axis=0, eps=1e-8, **kwds):
     vmax, vmin = df.max().max(), df.min().min()
-    if (vmax == vmin):
-        print('DataFrame with  constant values, zeros are returned')
+    if vmax == vmin:
+        logging.warning('DataFrame with  constant values, zeros are returned')
         return df - vmin
 
     if axis is None:
@@ -1399,7 +1368,7 @@ def mean_of_nozeros(mat, axis=0):
     mat: np.arrary or scipy.sparse. matrix
     """
     mat = mat.copy()
-    print('making a copy')
+    logging.info('making a copy')
     sums = mat.sum(axis=axis)
     # mat.eliminate_zeros()
     mat[mat > 0] = 1
@@ -1463,24 +1432,25 @@ def group_mean(X, labels,
 def group_mean_dense(
         X, labels, binary=False,
         index_name='group',
-        classes=None, features=None,
-        print_groups=True):
+        classes=None,
+):
     classes = np.unique(labels, ) if classes is None else classes
     if binary:
         X = (X > 0)  # .astype('float')
-        print('Binarized...the results will be the expression proportions.')
+        logging.info('Binarized...the results will be the expression '
+                     'proportions.')
     tmp = pd.DataFrame(X)
     tmp[index_name] = list(labels)
     avgs = tmp.groupby(index_name).mean()
-    print(avgs.shape)
+    # print(avgs.shape)
     return avgs.T  # each column as a group
 
 
 def group_median_dense(
         X, labels, binary=False,
         index_name='group',
-        classes=None, features=None,
-        print_groups=True):
+        classes=None,
+):
     classes = np.unique(labels, ) if classes is None else classes
     if binary:
         X = (X > 0)  # .astype('float')
@@ -1564,10 +1534,10 @@ def quick_preprocess(
     """
     if copy:
         _adata = adata.copy()
-        print('A copy of AnnData made!')
+        logging.info('A copy of AnnData made!')
     else:
         _adata = adata
-        print('No copy was made, the input AnnData will be changed!')
+        logging.info('No copy was made, the input AnnData will be changed!')
     # 1: normalization
     if normalize_data:
         normalize_default(_adata, target_sum=target_sum)
@@ -1684,7 +1654,7 @@ def get_hvgs(adata, force_redo=False, batch_key=None,
     """
     key_hvg = 'highly_variable'
     if force_redo or key_hvg not in adata.var.columns:
-        print(f'performing HVG-selection...\n '
+        logging.info(f'performing HVG-selection...\n '
               '(note that the input adata should have already been normalized '
               'and log-transformed)')
         sc.pp.highly_variable_genes(
@@ -1695,25 +1665,12 @@ def get_hvgs(adata, force_redo=False, batch_key=None,
     return list(all_vars[is_hvg])
 
 
-# In[]
-
-# def downsample_total_counts(adata, frac=0.5, copy=False, **kwds):
-#    total0 = adata.X.data.sum()
-#    total1 = int(total0 * frac)
-#    print(total0, total1)
-#    return sc.pp.downsample_counts(
-#                adata, total_counts=adata.X.data.sum() * frac, 
-#                copy=copy, **kwds)
-
 def get_marker_info_table(adata, groups=None,
                           key='rank_genes_groups'):
     result = adata.uns[key]
     if groups is None:
         groups = result['names'].dtype.names
-    #    df = pd.DataFrame(
-    #            {group + '_' + key: result[key][group]
-    #            for group in groups for key in ['names', 'logfoldchanges', 'pvals', 'pvals_adj', 'scores']
-    #            })
+
     dfs = []
     cols = ['names', 'logfoldchanges', 'pvals', 'pvals_adj', 'scores']
     for group in groups:
@@ -1825,5 +1782,5 @@ def get_leiden_labels(adata, hvgs=None,
                  key_added=key_added,
                  neighbors_key=neighbors_key)
     lbs = adata.obs[key_added]
-    print(lbs.value_counts())
+    logging.info(lbs.value_counts())
     return lbs
