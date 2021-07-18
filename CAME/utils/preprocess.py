@@ -1097,19 +1097,15 @@ def normalize_default(adata, target_sum=1e4, copy=False, log_only=False,
                       force_return=False, ):
     if copy:
         adata = adata.copy()
-        if not silence:
-            logging.info('A copy of AnnData made!')
+        logging.info('A copy of AnnData made!')
     else:
-        if not silence:
-            logging.info('No copy was made, the input AnnData will be changed!')
+        logging.info('No copy was made, the input AnnData will be changed!')
     logging.info('normalizing datasets with default settings.')
     if not log_only:
-        if not silence:
-            logging.info(f'performing total-sum normalization, target_sum={target_sum}...')
+        logging.info(f'performing total-sum normalization, target_sum={target_sum}...')
         sc.pp.normalize_total(adata, target_sum=target_sum)
     else:
-        if not silence:
-            logging.info('skipping total-sum normalization')
+        logging.info('skipping total-sum normalization')
     sc.pp.log1p(adata)
     return adata if copy or force_return else None
 
