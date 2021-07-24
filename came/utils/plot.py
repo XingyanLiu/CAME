@@ -110,10 +110,7 @@ def diy_cmap_grey_bg(name_fg='RdPu', low=0.15, rm_high=0.01, n=100):
 
 
 # In[]
-
-"""     Visualization of group correspondances on an alluvial plot
-=======================================================================
-"""
+# Visualization of group correspondences on an alluvial plot
 
 
 def _alluvial_dict_from_confusdf(df: pd.DataFrame, vals_ignore=[0, np.nan]):
@@ -162,9 +159,7 @@ def alluvial_plot(confsdf: pd.DataFrame,
 
 
 # In[]
-"""     functions for plotting confusion or contingency matrix
-==================================================================
-"""
+# functions for plotting confusion or contingency matrix
 
 
 def plot_contingency_mat(
@@ -242,8 +237,7 @@ def plot_confus_multi_mats(ytrue_lists, ypred_lists, classes_on=None,
 
 
 # In[]
-""" plot functions (for inspecting training process)
-"""
+# plot functions (for inspecting training process)
 
 
 def plot_line_list(ys, lbs=None,
@@ -287,7 +281,7 @@ def venn_plot(sets, set_labels=None, regular=False,
     sets: iterable
     set_labels: list[str]
     regular: bool, only for sets of strings!
-        wether to regularize the strings in sets 
+        whether to regularize the strings in sets
     """
     from matplotlib_venn import venn2, venn3
     if regular:
@@ -312,9 +306,6 @@ def venn_plot(sets, set_labels=None, regular=False,
     return ax
 
 
-# In[]
-
-
 def heatmap(df_hmap: pd.DataFrame,
             norm_method: Union[None, str] = None,
             norm_axis=1,
@@ -332,10 +323,15 @@ def heatmap(df_hmap: pd.DataFrame,
             yrotation=None,
             **kwds):
     """ wrapper of sns.heatmap()
-    ===================================
-    norm_method: None, 'zs', 'max', 'maxmin'
-    norm_axis: 0 or 1. 0 for column-normalization and 1 for rows.
-    figsize: tuple, (6, 6) by default, ignored if ax is not None.
+
+    Parameters
+    ----------
+    norm_method: {None, 'zs', 'max', 'maxmin'}
+        normalization method
+    norm_axis: 0 or 1
+        0 for column-normalization and 1 for rows.
+    figsize: tuple
+        (6, 6) by default, ignored if ax is not None.
     
     
     """
@@ -531,6 +527,8 @@ def _plot_edges(sids, tids,
                 ax=None,
                 figsize=(4, 4), **kwds_edge):
     """
+    Parameters
+    ----------
     sids: sequence of source ids, of shape (n_edges, )
     tids: sequence of target ids, of shape (n_edges, )
     xy1: x, y coordinates of source node (ids), of shape (n1, 2) or (n1+n2, 2)
@@ -696,8 +694,7 @@ def triple_umaps(adata1, adata2,
 
 
 # In[]
-""" annotate texts for genes of interest
-"""
+# annotate texts for genes of interest
 
 
 def _get_value_index(srs: pd.Series, vals: Sequence, ):
@@ -793,8 +790,7 @@ def plot_distance_lines(
 
 
 # In[]
-""" Visualization of the abstracted graph
-"""
+# Visualization of the abstracted graph
 
 
 def _adjust_xlims(ax, scale=1.):

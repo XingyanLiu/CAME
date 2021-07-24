@@ -22,9 +22,9 @@ import torch
 # ROOT = os.path.dirname(os.path.abspath(__file__))
 # os.chdir(ROOT)
 
-import CAME
-from CAME.pipeline_supervised import preprocess_unaligned, main_for_unaligned
-from CAME import pp, pl
+import came
+from came.pipeline_supervised import preprocess_unaligned, main_for_unaligned
+from came import pp, pl
 
 
 # In[]
@@ -48,7 +48,7 @@ from DATASET_NAMES import Tissues, NAMES_ALL
 for _tiss in Tissues:
     NameDict = NAMES_ALL[_tiss]
     species = list(NameDict.keys())
-    pair_species = CAME.base.make_pairs_from_lists(species, species)
+    pair_species = came.base.make_pairs_from_lists(species, species)
     for _sp1, _sp2 in pair_species:
         if dsn1 in NameDict[_sp1] and dsn2 in NameDict[_sp2]:
             tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
@@ -65,13 +65,13 @@ datadir = datadir0 / 'formal' / tiss
 df_varmap_1v1 = pd.read_csv(dir_gmap / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
 df_varmap = pd.read_csv(dir_gmap / f'gene_matches_{sp1}2{sp2}.csv', )
 
-_time_tag = CAME.make_nowtime_tag()
+_time_tag = came.make_nowtime_tag()
 subdir_res0 = f"{tiss}-{dsnames}{_time_tag}"
 
 resdir = Path('./_case_res') / subdir_res0
 figdir = resdir / 'figs'
 sc.settings.figdir = figdir
-CAME.check_dirs(figdir)
+came.check_dirs(figdir)
 
 key_class = 'cell_ontology_class'
 
@@ -205,7 +205,7 @@ sc.tl.leiden(gadt, resolution=.8, key_added='module')
 sc.pl.umap(gadt, color=['dataset', 'module'], ncols=1, save=f'combined.pdf')
 
 ''' link-weights between homologous gene pairs '''
-df_var_links = CAME.weight_linked_vars(
+df_var_links = came.weight_linked_vars(
     gadt.X, dpair._vv_adj, names=dpair.get_vnode_names(),
     matric='cosine', index_names=dsnames,
 )

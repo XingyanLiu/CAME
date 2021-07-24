@@ -16,8 +16,8 @@ import seaborn as sns
 
 import scanpy as sc
 
-import CAME
-from CAME import pipeline, pp, pl
+import came
+from came import pipeline, pp, pl
 
 
 def plot_uk_results(
@@ -46,7 +46,7 @@ def plot_uk_results(
     # load logits, metadata and predictor
     df_logits2 = pd.read_csv(resdir / 'df_logits2.csv', index_col=0)
     
-    predictor = CAME.Predictor.load(resdir / 'predictor.json')
+    predictor = came.Predictor.load(resdir / 'predictor.json')
     # predictor.save(resdir / 'predictor-0.json') #backup
 
     obs = pd.read_csv(resdir / 'obs.csv', index_col=0)
@@ -82,7 +82,7 @@ def plot_uk_results(
     classes2 = [c for c in contmat.columns if c in df_logits2.columns]
     logging.warning(f"classes2={classes2}")
     df_probas = pd.DataFrame(
-        data=CAME.as_probabilities(df_logits2, mode=prob_func),
+        data=came.as_probabilities(df_logits2, mode=prob_func),
         # data=predictor.predict_pvalues(df_logits2.values),
         columns=df_logits2.columns
     )

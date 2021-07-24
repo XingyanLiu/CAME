@@ -28,8 +28,8 @@ def detach2numpy(x):
 # In[]
 class CGGCNet(nn.Module):
     """
-    cell-gene-gene-cell network
-    =======================
+    cell-gene-gene-cell graph neural network
+
     Graph Convolutional Network for cell-gene Heterogenous graph,
     with edges named as:
         ('cell', 'express', 'gene'):        cg_net,
@@ -37,6 +37,7 @@ class CGGCNet(nn.Module):
         ('gene', 'homolog_with', 'gene'):   gg_net + sparse.eye(n_gnodes),
         ('cell', 'self_loop_cell', 'cell'):      sparse.eye(n_cells),
 
+    Notes:
     * gene embeddings are computed from cells;
     * weight sharing across hidden layers is allowed by setting
         `share_hidden_weights=True`

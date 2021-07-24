@@ -23,8 +23,8 @@ from ..utils.base import save_pickle
 class AlignedDataPair(object):
     """ (pair of dataset2 of the same species)
     
-    Inputs
-    ======
+    Parameters
+    ----------
     
     features: a list or tuple of 2 feature matrices.
         common / aligned feratures, as node-features (for observations).
@@ -34,25 +34,27 @@ class AlignedDataPair(object):
         unaligned features, for making `ov_adj`.
         shape: (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)
     
-    varnames_feat: a name-lists
+    varnames_feat: list-like
         names of variables that will be treated as node-features for observations
         
     varnames_node: a name-lists, or one concatenated name-list.
         names of variables that will be treated as nodes.
         
-    obs_dfs: a list or tuple of 2 `pd.DataFrame`s
+    obs_dfs:
+        a list or tuple of 2 `pd.DataFrame`s
         
     ntypes: dict
     etypes: dict
     
-    **kwds: other key words for constructiong of the HeteroGraph
+    **kwds:
+        other key words for constructiong of the HeteroGraph
     
 
     Attributes
-    ==========
+    ----------
     
-    _features
-    _ov_adjs
+    _features:
+    _ov_adjs:
     
     Nets:
         vv_adj: var-var adjacent matrix (e.g. gene-gene adjacent matrix)
@@ -67,16 +69,16 @@ class AlignedDataPair(object):
     dataset_names
     
     
-    Example
-    =======
+    Examples
+    --------
 
-    DataPair([features1, features2], 
-             [ov_adj1, ov_adj2],
-             varnames_feat = vars_feat,
-             varnames_node = vars_node,
-             obs_dfs = [obs1, obs2],
-             dataset_names=dataset_names,
-             )
+    >>> DataPair([features1, features2],
+    ...          [ov_adj1, ov_adj2],
+    ...          varnames_feat = vars_feat,
+    ...          varnames_node = vars_node,
+    ...          obs_dfs = [obs1, obs2],
+    ...          dataset_names=dataset_names,
+    ...          )
     """
     KEY_DATASET = 'dataset'
     KEY_VARNAME = 'name'
@@ -119,8 +121,10 @@ class AlignedDataPair(object):
 
     def save_init(self, path='datapair_init.pickle'):
         """
-        save and reload
-        ===============
+        save object for reloading
+
+        Examples
+        --------
         >>> adpair.save_init('datapair_init.pickle')
         >>> element_dict = load_pickle('datapair_init.pickle')
         >>> adpair = AlignedDataPair(**element_dict)
@@ -546,31 +550,34 @@ def aligned_datapair_from_adatas(
         **kwds
 ) -> AlignedDataPair:
     """
-    inputs
-    -------
+    Parameters
+    ----------
     
-    adatas: a list or tuple of 2 sc.AnnData object.
+    adatas:
+        a list or tuple of 2 sc.AnnData object.
     
     vars_feat: a sequence of variable names
         a name-list of variables that will be used as (cell) node features.
         for example, names of differentail expressed genes, highly variable features.
     
-    vars_as_node: a sequence of variable names, optional.
+    vars_as_nodes: a sequence of variable names, optional.
         a name-list of variables that will be taken as nodes in the graph
         for model training.
         if None (not provided), it will be the same as `vars_feat`
     
-    oo_adjs: a sequence of (sparse) adjacent matrices of observations.
+    oo_adjs:
+        a sequence of (sparse) adjacent matrices of observations.
         for example, the single-cell network within each dataset.
-        
-    from_raw: bool
-    
-    Example
-    -------
-    datapair_from_adatas([adata1, adata2],
-                         vars_feat,
-                         from_raw = False,
-                         dataset_names = ['reference', 'query'])
+
+    dataset_names:
+        dataset names, for example, ('ref', 'que')
+
+    Examples
+    --------
+    >>> datapair_from_adatas([adata1, adata2],
+    ...                      vars_feat,
+    ...                      from_raw = False,
+    ...                      dataset_names = ['reference', 'query'])
     """
     adata1, adata2 = adatas
     adata_raw1 = adata1.raw.to_adata() if adata1.raw is not None else adata1

@@ -125,8 +125,10 @@ class DataPair(object):
 
     def save_init(self, path='datapair_init.pickle'):
         """
-        save and reload
-        ===============
+        save object for reloading
+
+        Examples
+        --------
         >>> adpair.save_init('datapair_init.pickle')
         >>> element_dict = load_pickle('datapair_init.pickle')
         >>> adpair = DataPair(**element_dict)
@@ -357,9 +359,6 @@ class DataPair(object):
     def obs_ids(self, ):
         return self.get_obs_ids(None, False)
 
-    # In[]
-    ### 'make_xxx' functions        
-
     def make_ov_adj(self, link2ord=False):
         """ observation-variable bipartite network
         """
@@ -408,8 +407,6 @@ class DataPair(object):
         )
         self.summary_graph()
 
-    # In[]
-    ### `set_xxx` functions
     def set_dataset_names(self, dataset_names: Sequence[str]):
 
         if len(dataset_names) == 2:
@@ -612,9 +609,7 @@ class DataPair(object):
 
 
 # In[]
-"""     functions for `DataPair` object construction from `sc.AnnData`
-===============================================================================
-"""
+# functions for `DataPair` object construction from `sc.AnnData`
 
 
 def _check_sparse_toarray(mat):
@@ -644,8 +639,8 @@ def datapair_from_adatas(
         **kwds
 ) -> DataPair:
     """
-    inputs
-    -------
+    Parameters
+    ----------
 
     adatas: a list or tuple of 2 sc.AnnData object.
     
@@ -662,12 +657,12 @@ def datapair_from_adatas(
     
     oo_adjs: a sequence of (sparse) adjacent matrices of observations.
     
-    Example
-    -------
-    datapair_from_adatas([adata1, adata2],
-                         vars_use = [hvgs1, hvgs2],
-                         df_varmap = homo_gene_matches,
-                         dataset_names = ['reference', 'query'])
+    Examples
+    --------
+    >>> datapair_from_adatas([adata1, adata2],
+    ...                      vars_use = [hvgs1, hvgs2],
+    ...                      df_varmap = homo_gene_matches,
+    ...                      dataset_names = ['reference', 'query'])
     """
     adata1, adata2 = adatas
     adata_raw1 = adata1.raw.to_adata() if adata1.raw is not None else adata1
@@ -746,4 +741,3 @@ def datapair_from_adatas(
                     dataset_names=dataset_names,
                     **kwds)
 
-# In[]

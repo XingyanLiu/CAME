@@ -20,8 +20,8 @@ from scipy.special import softmax
 import networkx as nx
 import torch
 
-import CAME
-from CAME import pipeline, pp, pl
+import came
+from came import pipeline, pp, pl
 
 # In[]
 DATASET_PAIRS = [
@@ -45,7 +45,7 @@ from DATASET_NAMES import Tissues, NAMES_ALL
 for _tiss in Tissues:
     NameDict = NAMES_ALL[_tiss]
     species = list(NameDict.keys())
-    pair_species = CAME.base.make_pairs_from_lists(species, species)
+    pair_species = came.base.make_pairs_from_lists(species, species)
     for _sp1, _sp2 in pair_species:
         if dsn1 in NameDict[_sp1] and dsn2 in NameDict[_sp2] + ['testis_mouse0']:
             tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
@@ -65,13 +65,13 @@ dir_formal = datadir / 'formal' / tiss
 df_varmap_1v1 = pd.read_csv(dir_gmap / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
 df_varmap = pd.read_csv(dir_gmap / f'gene_matches_{sp1}2{sp2}.csv', )
 
-_time_tag = CAME.make_nowtime_tag()
+_time_tag = came.make_nowtime_tag()
 subdir_res0 = f"{tiss}-{dsnames}{_time_tag}"
 
 resdir = Path('./_case_res') / subdir_res0
 figdir = resdir / 'figs'
 sc.settings.figdir = figdir
-CAME.check_dirs(figdir)
+came.check_dirs(figdir)
 
 # In[]
 ''' loading data
@@ -208,8 +208,8 @@ cols_anno = ['celltype', 'predicted'][:]
 
 out_cell = trainer.get_current_outputs()['cell']
 
-probas_all = CAME.as_probabilities(out_cell)
-probas_all = CAME.model.detach2numpy(torch.sigmoid(out_cell))
+probas_all = came.as_probabilities(out_cell)
+probas_all = came.model.detach2numpy(torch.sigmoid(out_cell))
 #probas_all = np.apply_along_axis(lambda x: x / x.sum(), 1, probas_all,)
 df_probs = pd.DataFrame(probas_all, columns=classes)
 
@@ -217,7 +217,7 @@ for i, _obs_ids in enumerate([obs_ids1, obs_ids2]):
     # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
     df_lbs = obs[cols_anno].iloc[_obs_ids].sort_values(cols_anno)
     
-    indices = CAME.subsample_each_group(df_lbs['celltype'], n_out=50, )
+    indices = came.subsample_each_group(df_lbs['celltype'], n_out=50, )
     # indices = df_lbs.index
     df_data = df_probs.loc[indices, :].copy()
     df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
@@ -241,7 +241,7 @@ sc.tl.leiden(gadt, resolution=.8, key_added='module')
 sc.pl.umap(gadt, color=['dataset', 'module'], ncols=1)
 
 ''' link-weights between homologous gene pairs '''
-df_var_links = CAME.weight_linked_vars(
+df_var_links = came.weight_linked_vars(
     gadt.X, dpair._vv_adj, names=dpair.get_vnode_names(),
     matric='cosine', index_names=dsnames,
 )
@@ -300,7 +300,7 @@ sc.pl.umap(gadt2, color=ctypes2,
 ''' gene annotation on UMAP (top DEGs)
 '''
 fdir_gmap = resdir / 'gene_umap'
-CAME.check_dirs(fdir_gmap)
+came.check_dirs(fdir_gmap)
 
 adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1],
                                         categories=classes)
@@ -343,7 +343,7 @@ obs_labels1, obs_labels2 = adt.obs['celltype'][dpair.obs_ids1], \
                            adt.obs['celltype'][dpair.obs_ids2]
 var_labels1, var_labels2 = gadt1.obs[groupby_var], gadt2.obs[groupby_var]
 
-g = CAME.make_abstracted_graph(
+g = came.make_abstracted_graph(
     obs_labels1, obs_labels2,
     var_labels1, var_labels2,
     avg_expr1, avg_expr2,

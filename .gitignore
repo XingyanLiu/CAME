@@ -8,8 +8,8 @@ __pycache__
 /_temp/
 /_case_res/
 
-/CAME/sample_data/
-!/CAME/sample_data.rar
+/came/sample_data/
+!/came/sample_data.rar
 
 /notebooks/_tmp*
 /notebooks/.ipynb_checkpoints

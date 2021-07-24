@@ -21,9 +21,9 @@ import torch
 
 sys.path.append('.')
 
-import CAME
-from CAME.utils.base import make_pairs_from_lists
-from CAME import pipeline, pp, pl
+import came
+from came.utils.base import make_pairs_from_lists
+from came import pipeline, pp, pl
 
 from DATASET_NAMES import NAMES_ALL, Tissues
 pipeline.seed_everything()
@@ -56,8 +56,8 @@ def foo_rmv(args):
 
 # In[]
 # for parameter...
-params_model = CAME.get_model_params()
-params_lossfunc = CAME.get_loss_params()
+params_model = came.get_model_params()
+params_lossfunc = came.get_loss_params()
 
 only_1v1homo = False
 use_scnets = True

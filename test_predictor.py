@@ -5,7 +5,7 @@
 @File: test_predictor.py
 @Project: CAME
 """
-import CAME
+import came
 import logging
 
 
@@ -15,4 +15,4 @@ if __name__ == '__main__':
         format='%(asctime)s %(filename)s-%(lineno)d-%(funcName)s(): '
                '%(levelname)s\n %(message)s')
 
-    CAME.model._predict.__test__()
+    came.model._predict.__test__()

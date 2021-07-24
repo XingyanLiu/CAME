@@ -22,8 +22,8 @@ from scipy.special import softmax
 import networkx as nx
 import torch
 
-import CAME
-from CAME import pipeline, pp, pl
+import came
+from came import pipeline, pp, pl
 
 # In[]
 DATASET_PAIRS = [
@@ -47,7 +47,7 @@ from DATASET_NAMES import Tissues, NAMES_ALL
 for _tiss in Tissues:
     NameDict = NAMES_ALL[_tiss]
     species = list(NameDict.keys())
-    pair_species = CAME.base.make_pairs_from_lists(species, species)
+    pair_species = came.base.make_pairs_from_lists(species, species)
     for _sp1, _sp2 in pair_species:
         if dsn1 in NameDict[_sp1] and dsn2 in NameDict[_sp2] + ['testis_mouse0']:
             tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
@@ -67,7 +67,7 @@ dir_formal = datadir / 'formal' / tiss
 df_varmap_1v1 = pd.read_csv(dir_gmap / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
 df_varmap = pd.read_csv(dir_gmap / f'gene_matches_{sp1}2{sp2}.csv', )
 
-_time_tag = CAME.make_nowtime_tag()
+_time_tag = came.make_nowtime_tag()
 resdir0 = Path('./_case_res') / f"uk-{dsnames}{_time_tag}"
 
 # In[]
@@ -100,7 +100,7 @@ for type_rm in (additional + all_types):
     resdir = resdir0 / f'rm-{type_rm}'
     figdir = resdir / 'figs'
     sc.settings.figdir = figdir
-    CAME.check_dirs(figdir)
+    came.check_dirs(figdir)
 
     # remove known-ref-type
     if type_rm == '':

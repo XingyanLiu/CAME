@@ -23,7 +23,7 @@ from ..model import to_device, onehot_encode, multilabel_binary_cross_entropy
 from .base import check_dirs, save_json_dict
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
-from CAME.model._minibatch import create_batch, create_blocks
+from came.model._minibatch import create_batch, create_blocks
 
 
 SUBDIR_MODEL = '_models'
@@ -407,7 +407,6 @@ class Trainer(BaseTrainer):
     # In[]
     def train(self, n_epochs=350,
               use_class_weights=True,
-              print_info=True,  # not used
               params_lossfunc={},
               n_pass=100,
               eps=1e-4,
@@ -415,11 +414,32 @@ class Trainer(BaseTrainer):
               device=None,
               backup_stride=43,
               **other_inputs):
-        """
-                Main function for model training
-        ================================================
-        
-        other_inputs: other inputs for `model.forward()`
+        """ Main function for model training
+
+        Parameters
+        ----------
+        n_epochs: int
+            The total number of epochs to train the model
+        use_class_weights: bool
+            whether to use the class-weights, useful for unbalanced
+            sample numbers for each class
+        params_lossfunc: dict
+            parameters for loss-functions
+        n_pass: int
+            The number of epochs to be skipped (not backup model checkpoint)
+        eps:
+            tolerance for cluster-index
+        cat_class: str
+            node type for classification
+        device: {'cpu', 'gpu', None}
+        backup_stride: int
+            saving checkpoint after `backup_stride` epochs
+        other_inputs:
+            other inputs for `model.forward()`
+
+        Returns
+        -------
+
         """
         # setting device to train
         if device is None:

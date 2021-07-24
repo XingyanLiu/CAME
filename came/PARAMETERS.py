@@ -4,11 +4,14 @@ Created on Sun Apr 11 22:13:17 2021
 
 @author: Xingyan Liu
 
-=================================
-    Parameter Settings
+Parameter Settings
 
+Notes
+-----
 * Do NOT change this file directly!
 
+Examples
+--------
 >>> params_pre = PARAMETER.get_preprocess_params()
 >>> params_model = PARAMETER.get_model_params()
 >>> params_loss = PARAMETER.get_loss_params()

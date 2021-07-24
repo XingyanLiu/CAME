@@ -30,11 +30,11 @@ def detach2numpy(x):
 # In[]
 class CGCNet(CGGCNet):
     """
-    cell-gene-cell network
-    =======================
+    cell-gene-cell graph network
+
     (used when features are 1-to-1 aligned)
 
-    Graph Convolutional Network for cell-gene Heterogenous graph,
+    Graph Convolutional Network for cell-gene Heterogeneous graph,
     with edges named as:
         ('cell', 'express', 'gene'):        cg_net,
         ('gene', 'expressed_by', 'cell'):   cg_net.T,
@@ -42,7 +42,7 @@ class CGCNet(CGGCNet):
 
     * gene embeddings are computed from cells;
     * weight sharing across hidden layers is allowed by setting
-        `share_hidden_weights=True`
+        ``share_hidden_weights=True``
     * attention can be applied on the last layer (`self.cell_classifier`);
     * the graph for the embedding layer and the hidden layers can be different;
     * allow expression values as static edge weights. (but seems not work...)
