@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Aug  6 00:21:15 2020
-
 @author: Xingyan Liu
+
 =============================================
 
     Functions for handling AnnData;
+
     * I/O functions;
-    * preprocessing: 
-        normalization / z-scoring / ...
-        groups / ...
+    * preprocessing
+        - normalization / z-scoring / ...
+        - groups / ...
     * statistics computation
 
 """
@@ -1488,7 +1489,7 @@ def group_mean_adata(adata: sc.AnnData,
     if sparse.issparse(X):
         return group_mean(X, labels, binary=binary, features=features)
     else:
-        return group_mean_dense(X, labels, binary=binary, features=features)
+        return group_mean_dense(X, labels, binary=binary, )
 
 
 def group_mean_multiadata(adatas: Sequence[sc.AnnData],
