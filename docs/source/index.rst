@@ -6,16 +6,19 @@
 Welcome to CAME's documentation!
 ================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: API
+.. image:: _static/rrgcn_structure0.png
 
-   CAME.rst
+.. toctree::
+   :maxdepth: 1
+
+   installation
+   tutorials
+   api
+   citation
 
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

@@ -12,6 +12,7 @@
 #
 import os
 import sys
+from datetime import datetime
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath(f'{os.path.dirname(__file__)}/../..'))
 
@@ -19,7 +20,8 @@ sys.path.insert(0, os.path.abspath(f'{os.path.dirname(__file__)}/../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'CAME'
-copyright = '2021, Academy of Mathematics and Systems Science, CAS'
+_copyright = 'Academy of Mathematics and Systems Science, CAS'
+copyright = f'{datetime.now():%Y}, {_copyright}.'
 author = 'Xingyan Liu'
 
 
@@ -30,6 +32,7 @@ author = 'Xingyan Liu'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',  # different doc-styles (Google, Numpy)
     'sphinx.ext.doctest',  
     'sphinx.ext.intersphinx',
@@ -40,12 +43,13 @@ extensions = [
 ]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+autosummary_generate = True
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'PARAMETERS'
+    '*PARAMETERS.py'
 ]
 
 
