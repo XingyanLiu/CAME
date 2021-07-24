@@ -7,7 +7,7 @@ Created on Thu Aug  6 00:21:15 2020
 
     Functions for handling AnnData;
 
-    * I/O functions;
+    * I/O functions
     * preprocessing
         - normalization / z-scoring / ...
         - groups / ...
@@ -48,9 +48,7 @@ def dict_has_keys(d: Mapping, *keys):
 
 
 # In[]
-""" I/O functions
-    handling AnnData object(s)
-"""
+# I/O functions (handling AnnData object(s))
 
 
 def save_named_mtx(adata, dirname, field=None, raw=True, backup_npz=True,
@@ -134,14 +132,14 @@ def adata_from_raw(dirname, backup_npz=True, name_mtx='matrix',
                    dtype='float32', **kw):
     """
     read matrix and annotated names from directory `dirname`
-    --- Example ---
+
     |-dirname
         |-matrix.npz
         |-genes.tsv
         |-barcodes.tsv (or meta_cell.tsv)
-    ==========================================
+
     Alternative (for load mtx file):
-        `adata = sc.read_10x_mtx(dirname, )`
+        >>> adata = sc.read_10x_mtx(dirname)
         
     """
     fn_mat_npz = f'{name_mtx}.npz'

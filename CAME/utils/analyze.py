@@ -3,6 +3,7 @@
 Created on Tue Nov  3 13:14:05 2020
 
 @author: Xingyan Liu
+
 ====================================================
 
 Functions for downstream biological analysis
@@ -101,7 +102,7 @@ def weight_linked_vars(
         X: np.ndarray,
         adj: sparse.spmatrix,
         names: Optional[Sequence] = None,
-        metric='cosine',  # only1v1=False,
+        metric='cosine',
         func_dist2weight: Optional[Callable] = None,
         sigma: Optional[float] = None,
         return_df=True,
@@ -110,6 +111,9 @@ def weight_linked_vars(
         **kwds):
     """ correlations (consine distances) of each linked (homologous) pairs
     of variables.
+
+    Parameters
+    ----------
     X: 
         np.ndarray;
         feature matrix of shape (N, M), where N is the number of sample and M is
@@ -120,7 +124,7 @@ def weight_linked_vars(
         a sequence of names;
         names for rows of `X`, of shape (N,)
     
-    returns
+    Returns
     -------
     pd.DataFrame with columns:
         (name1, name2), distance, weight
@@ -218,18 +222,6 @@ def compute_group_eigens(X, labels, groups=None, whiten=False, **kwds):
     return eigen_df, memberships
 
 
-# In[]
-# """     KNN-searching for each dataset separately, and conbined with homo-links
-# """
-# def independ_neighbors(
-#        adata,
-#        split_by='dataset',
-#        n_neighbors=8, metric='cosine',
-#        use_rep='X',
-#        exact=True,
-#        adjust=2,
-#        key_added = None):
-
 def jointly_extract_modules(
         adata,
         resolution=0.8,
@@ -239,11 +231,7 @@ def jointly_extract_modules(
         **kwds):
     pass
 
-
-# In[]
-"""     module extraction     
-==================================
-"""
+# =================[ module extraction ]=================
 
 
 def _filter_for_abstract(
@@ -566,9 +554,12 @@ def nx_to_dfs(
         source="source", target="target",
         **kwds):
     """
-    outputs:
+    Returns
+    -------
         edgedf, nodedf
-    example:
+
+    Examples
+    --------
     >>> edgedf, nodedf = nx_to_dfs(g)
     """
     if isinstance(nodelist, str):
@@ -638,7 +629,8 @@ def set_adata_obsm(adata, X_h, key_add='X_h', copy=False):
     key_add: which key will be added to adata.obsm
         probably be 'X_umap', 'X_h', 'X_pca', etc.
         
-    Example:
+    Examples
+    --------
     >>> set_adata_obsm(adata, h_cell, 'X_h')
     >>> sc.pp.neighbors(adata, metric='cosine', n_neighbors=15, use_rep='X_h')
     >>> sc.tl.umap(adata)
@@ -665,12 +657,6 @@ def get_adata_neighbors(adata, key: Union[str, None] = None):
         key_conn = f'{key}_' + key_conn
 
     return adata.obsp[key_dist], adata.obsp[key_conn]
-
-
-# In[]
-"""     abstracted graph
-===================================
-"""
 
 
 def write_graph_cyjs(g, fp='tmp.ctjs', return_dct=False, attrs=None, **kwds):
@@ -705,6 +691,8 @@ def make_abstracted_graph(
         vargroup_filtered='filtered',
         **kwds):
     """
+    Parameters
+    ----------
     obs_labels1, obs_labels2,
     
     var_labels1, var_labels2,
@@ -826,6 +814,8 @@ def abstract_vv_edges(
         tag_var2: str = '',
 ):
     """
+    Parameters
+    ----------
     df_links: pd.DataFrame, shape=(n_edges, *)
         If `keys_edge` is provided, it should be a tuple of 2 column-names
         in df_links.columns, indicating the edge columns. 
@@ -880,6 +870,8 @@ def aggregate_links(
         keys_link: Union[None, Sequence[str]] = None,
 ):
     """
+    Parameters
+    ----------
     df_links: pd.DataFrame, shape=(n_edges, *)
         If `keys_edge` is provided, it should be a tuple of 2 column-names
         in df_links.columns, indicating the edge columns. 
@@ -888,15 +880,16 @@ def aggregate_links(
         This can also be output form ResultsAnalyzer.weight_linked_vars(), 
         or the stored attribute `ResultsAnalyzer.var_link_weights`
     
-    keys_edge: If `keys_edge` is provided, it should be a tuple of 2 column-names
-        in df_links.columns, indicating the edge columns.
-        
     labels1, labels2:
         grouping labels for the rows and columns, respectively.
         
     norm_sizes:
         if provided, should be a pair of pd.Series, dict, Mapping, list
         it can be also set as 'auto', which means decide sizes by the group-labels.
+    keys_link: str ('weight' by default)
+        If `keys_edge` is provided, it should be a tuple of 2 column-names
+        in df_links.columns, indicating the edge columns.
+
     """
     rnames0 = labels1.keys()
     cnames0 = labels2.keys()
@@ -939,10 +932,14 @@ def weight_normalize_by_size(adj, sizes1, sizes2,
                              norm_func=max,  # denominator
                              global_adjust=False):
     """
-    adj: pd.DataFrame, shape = (n1, n2)
+    Parameters
+    ----------
+    adj: pd.DataFrame
+        adjacent matrix of shape (n1, n2)
     sizes1, sizes2: pd.Series, dict, Mapping, list-like
         shape = (n1,) and (n2,)
-    global_adjust: bool; whether to perform a global adjustment after 
+    global_adjust: bool
+        whether to perform a global adjustment after
         size-normalization.
     """
     if not isinstance(adj, pd.DataFrame): adj = pd.DataFrame(adj)
@@ -974,6 +971,8 @@ def abstract_ov_edges(
         global_adjust: bool = False,
         return_full_adj=False):
     """
+    Parameters
+    ----------
     avg_expr: pd.DataFrame; each column represent the average expressoions 
         for each observation group, and each row as a variable.
     norm_method: one of {None, 'zs', 'maxmin', 'max'}
@@ -1067,12 +1066,14 @@ def abstract_nodes(labels,  # df, groupby,
     Taking each of the groups in `labels` as an abstracted node, and making a 
     list of node attributes for further input to `networkx.Graph.add_nodes_from()`
     
-    ==== inputs ====
+    Parameters
+    ----------
     key_identity: key name for the unique identifier for each abstracted node.
     key_orig: key name for the original (group) name for each abstracted node.
     **kwds: ignored currently
     
-    === Example ====
+    Examples
+    --------
     >>> df_nodes = abstract_nodes(df, groupby='module')
     >>> g = nx.Graph()
     >>> g.add_nodes_from(node_attrs, 'node name')
@@ -1100,7 +1101,8 @@ def make_nx_input_from_df(
         key_id: Union[None, str, list] = None,
         **attrs):
     """
-    
+    Parameters
+    ----------
     df: pd.DataFrame with each column containing node attributes
         
     key_id: 
@@ -1111,12 +1113,14 @@ def make_nx_input_from_df(
         other common attributes for this batch of nodes
     
     
-    === return ===
+    Returns
+    -------
     A list of tuples, with each tuple formed like `(node, attrdict)` when 
     `len(key_id) == 1` or `(u, v, attrdict)` when `len(key_id) == 2` 
         
         
-    === Example ====
+    Examples
+    --------
     >>> node_attrs = make_nx_input_from_df(df, **attrs)
     >>> g = nx.Graph()
     >>> g.add_nodes_from(node_attrs)
@@ -1142,17 +1146,9 @@ def nx_multipartite_graph(*node_layers,
                           edges=None,
                           subset_key='subset', **attrs):
     """
-<<<<<<< HEAD
-<<<<<<< HEAD
-    === Example ===
-=======
-    
-    
-    === Example ====
->>>>>>> a134583a48bd7a3b167f9a28c4a6b1e7e590a8ce
-=======
-    === Example ===
->>>>>>> c3b8013e132ade73651a514507222870cb67dfea
+
+    Examples
+    --------
     >>> g = nx_multipartite_graph([0, 1], [2, 3, 4, 5], [6, 7, 8], )
     >>> pos = nx.multipartite_layout(g, subset_key=subset_key, )
     >>> nx.draw(g, pos, with_labels=True, )

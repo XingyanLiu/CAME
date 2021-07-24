@@ -23,8 +23,8 @@ from ..utils.base import save_pickle
 class DataPair(object):
     """
     
-    Inputs
-    ======
+    Parameters
+    ----------
     
     features: a list or tuple of 2 feature matrices.
         common / aligned features, as node-features (for observations).
@@ -52,10 +52,9 @@ class DataPair(object):
     
 
     Attributes
-    ==========
-    
-    _features
-    _ov_adjs
+    ----------
+    _features:
+    _ov_adjs:
     
     Nets:
         vv_adj: var-var adjacent matrix (e.g. gene-gene adjacent matrix)
@@ -68,17 +67,16 @@ class DataPair(object):
     etypes
     
     dataset_names
-    
-    
-    Example
-    =======
-    DataPair([features1, features2], 
-             [ov_adj1, ov_adj2],
-             vv_adj = vv_adj,
-             varnames_node = [vnodes1, vnodes2],
-             obs_dfs = [df1, df2],
-             dataset_names = ['reference', 'query'],
-             )
+
+    Examples
+    --------
+    >>> DataPair([features1, features2],
+    ...          [ov_adj1, ov_adj2],
+    ...          vv_adj = vv_adj,
+    ...          varnames_node = [vnodes1, vnodes2],
+    ...          obs_dfs = [df1, df2],
+    ...          dataset_names = ['reference', 'query'],
+    ...          )
     
     """
     KEY_DATASET = 'dataset'  # '_datapair_name'

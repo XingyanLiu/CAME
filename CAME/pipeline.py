@@ -44,8 +44,7 @@ PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
 PARAMS_LOSS = get_loss_params()
 
-# In[]
-'''============================[ MAIN FUNCTION ]==========================='''
+# In[] Main Functions
 
 
 def main_for_aligned(
