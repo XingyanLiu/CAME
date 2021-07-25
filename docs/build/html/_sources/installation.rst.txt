@@ -4,17 +4,21 @@ Installation
 PyPI
 ~~~~
 
-Install stagewiseNN with PyPI, run::
+Install stagewiseNN with PyPI, run:
 
-    pip install came
+.. code-block:: python
+
+   pip install came
 
 GitHub
 ~~~~~~
 
-Or fetch from GitHub and manually install::
+Or fetch from GitHub and manually install:
 
-    git clone XXX
-    cd CAME
-    python setup.py
+.. code-block:: shell
+
+   git clone XXX
+   cd CAME
+   python setup.py
 
 END

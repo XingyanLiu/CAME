@@ -29,7 +29,7 @@ Pipeline ``came.pipeline.*``
    gather_came_results
 
 Preprocessing ``came.pp.*``
-------------------------
+---------------------------
 
 .. module:: came.utils.preprocess
 .. :currentmodule:: came
