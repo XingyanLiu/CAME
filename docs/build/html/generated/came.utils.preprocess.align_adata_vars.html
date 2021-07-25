@@ -87,17 +87,20 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#preprocessing-came-pp">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="../api.html#preprocessing-functions">Preprocessing functions</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">came.utils.preprocess.align_adata_vars</a></li>
 <li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.normalize_default.html">came.utils.preprocess.normalize_default</a></li>
-<li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.change_names.html">came.utils.preprocess.change_names</a></li>
+<li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.quick_preprocess.html">came.utils.preprocess.quick_preprocess</a></li>
+<li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.group_mean_adata.html">came.utils.preprocess.group_mean_adata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.wrapper_scale.html">came.utils.preprocess.wrapper_scale</a></li>
 </ul>
 </li>
 </ul>
@@ -181,7 +184,8 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.preprocess.align_adata_vars">
 <span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">align_adata_vars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.align_adata_vars" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Align the vaiables of two <code class="docutils literal notranslate"><span class="pre">sc.AnnData</span></code> objects</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>adata1</strong> (<em>AnnData</em>) – reference data</p></li>

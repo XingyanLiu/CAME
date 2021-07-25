@@ -21,26 +21,28 @@ from ..utils.base import save_pickle
 # In[]
 
 class AlignedDataPair(object):
-    """ (pair of dataset2 of the same species)
+    """ paired datasets with the aligned features
     
     Parameters
     ----------
     
-    features: a list or tuple of 2 feature matrices.
+    features: list or tuple
+        a list or tuple of 2 feature matrices.
         common / aligned feratures, as node-features (for observations).
-        shape: (n_obs1, n_features) and (n_obs2, n_features)
+        of shape (n_obs1, n_features) and (n_obs2, n_features)
         
-    ov_adjs: a list or tuple of 2 (sparse) feature matrices.
+    ov_adjs: list or tuple
+        a list or tuple of 2 (sparse) feature matrices.
         unaligned features, for making `ov_adj`.
-        shape: (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)
+        of shape (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)
     
-    varnames_feat: list-like
+    varnames_feat: list or tuple
         names of variables that will be treated as node-features for observations
         
     varnames_node: a name-lists, or one concatenated name-list.
         names of variables that will be treated as nodes.
         
-    obs_dfs:
+    obs_dfs: list or tuple
         a list or tuple of 2 `pd.DataFrame`s
         
     ntypes: dict
@@ -55,17 +57,17 @@ class AlignedDataPair(object):
     
     _features:
     _ov_adjs:
-    
-    Nets:
-        vv_adj: var-var adjacent matrix (e.g. gene-gene adjacent matrix)
-        ov_adj: combined observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)
-        G: dgl.Heterograph
-    
-    n_obs, n_obs1, n_obs2
-    n_vnodes, n_vnodes1, n_vnodes2
+    vv_adj: var-var adjacent matrix (e.g. gene-gene adjacent matrix)
+    ov_adj: combined observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)
+    G: dgl.Heterograph
+    n_obs
+    n_obs1
+    n_obs2
+    n_vnodes
+    n_vnodes1
+    n_vnodes2
     ntypes
     etypes
-    
     dataset_names
     
     
@@ -79,6 +81,7 @@ class AlignedDataPair(object):
     ...          obs_dfs = [obs1, obs2],
     ...          dataset_names=dataset_names,
     ...          )
+
     """
     KEY_DATASET = 'dataset'
     KEY_VARNAME = 'name'
@@ -550,6 +553,8 @@ def aligned_datapair_from_adatas(
         **kwds
 ) -> AlignedDataPair:
     """
+    Build ``AlignedDataPair`` object from a pair of adatas
+
     Parameters
     ----------
     
@@ -572,12 +577,19 @@ def aligned_datapair_from_adatas(
     dataset_names:
         dataset names, for example, ('ref', 'que')
 
+    Returns
+    -------
+    dpair: AlignedDataPair
+
+
     Examples
     --------
-    >>> datapair_from_adatas([adata1, adata2],
-    ...                      vars_feat,
-    ...                      from_raw = False,
-    ...                      dataset_names = ['reference', 'query'])
+    >>> dpair = datapair_from_adatas(
+    ...     [adata1, adata2],
+    ...     vars_feat,
+    ...     dataset_names = ['reference', 'query']
+    ...     )
+
     """
     adata1, adata2 = adatas
     adata_raw1 = adata1.raw.to_adata() if adata1.raw is not None else adata1

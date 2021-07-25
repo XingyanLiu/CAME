@@ -6,13 +6,15 @@ API Reference
 =============
 
 
-Import CAME::
+Import CAME:
+
+.. code:: ipython3
 
     import came
 
 
-Pipeline
---------
+Pipeline ``came.pipeline.*``
+----------------------------
 
 .. module:: came.pipeline
 .. :currentmodule:: came
@@ -40,8 +42,10 @@ Preprocessing functions
 
    align_adata_vars
    normalize_default
-   change_names
+   quick_preprocess
+   quick_pre_vis
    group_mean_adata
+   wrapper_scale
 
 
 DataPair and AlignedDataPair

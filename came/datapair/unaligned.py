@@ -21,51 +21,57 @@ from ..utils.base import save_pickle
 # In[]
 
 class DataPair(object):
-    """
+    """ paired datasets with the un-aligned features
     
     Parameters
     ----------
     
-    features: a list or tuple of 2 feature matrices.
+    features: list or tuple
+        a list or tuple of 2 feature matrices.
         common / aligned features, as node-features (for observations).
         shape: (n_obs1, n_features) and (n_obs2, n_features)
         
-    ov_adjs: a list or tuple of 2 (sparse) feature matrices.
+    ov_adjs: list or tuple
+        a list or tuple of 2 (sparse) feature matrices.
         unaligned features, for making `ov_adj`.
-        shape: (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)
+        of shape (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)
                 
     vv_adj: scipy.sparse COO matrix.
         adjacent matrix between variables from these 2 datasets. 
         (e.g. gene-gene adjacent matrix)
-        shape: (n_vnodes, n_vnodes), where `n_vnodes = n_vnodes1 + n_vnodes2` 
+        of shape (n_vnodes, n_vnodes), where `n_vnodes = n_vnodes1 + n_vnodes2`
         is the total number of variable-nodes.
         
-    varnames_node: a list or tuple of 2 name-lists, or one concatenated name-list.
+    varnames_node: list or tuple
+        a list or tuple of 2 name-lists, or one concatenated name-list.
         lengths should be `n_vnodes1` and `v_nodes2`.
         
-    obs_dfs: a list or tuple of 2 `pd.DataFrame`s
-        
+    obs_dfs: list or tuple
+        a list or tuple of 2 `pd.DataFrame`s
     ntypes: dict
     etypes: dict
     
-    **kwds: other key words for constructiong of the HeteroGraph
+    **kwds:
+        other key words for constructiong of the HeteroGraph
     
 
     Attributes
     ----------
     _features:
     _ov_adjs:
-    
-    Nets:
-        vv_adj: var-var adjacent matrix (e.g. gene-gene adjacent matrix)
-        ov_adj: observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)
-        G: dgl.Heterograph
-    
-    n_obs, n_obs1, n_obs2
-    n_vnodes, n_vnodes1, n_vnodes2
+    vv_adj:
+        var-var adjacent matrix (e.g. gene-gene adjacent matrix)
+    ov_adj:
+        observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)
+    G: dgl.Heterograph
+    n_obs
+    n_obs1
+    n_obs2
+    n_vnodes
+    n_vnodes1
+    n_vnodes2
     ntypes
     etypes
-    
     dataset_names
 
     Examples
@@ -639,15 +645,20 @@ def datapair_from_adatas(
         **kwds
 ) -> DataPair:
     """
+    Build ``DataPair`` object from a pair of adatas
+
     Parameters
     ----------
 
-    adatas: a list or tuple of 2 sc.AnnData object.
+    adatas: list or tuple
+        a list or tuple of 2 sc.AnnData object.
     
-    vars_use: a list or tuple of 2 variable name-lists.
+    vars_use: list or tuple
+        a list or tuple of 2 variable name-lists.
         for example, differentail expressed genes, highly variable features.
     
-    df_varmap: pd.DataFrame with 2 columns.
+    df_varmap: pd.DataFrame
+        pd.DataFrame with 2 columns.
         relationships between features in 2 datasets, for making the 
         adjacent matrix (`vv_adj`) between variables from these 2 datasets. 
     
@@ -655,14 +666,35 @@ def datapair_from_adatas(
         dataframe containing only 1-to-1 correspondance between features
         in 2 datasets, if not provided, it will be inferred from `df_varmap`
     
-    oo_adjs: a sequence of (sparse) adjacent matrices of observations.
+    oo_adjs:
+        a sequence of (sparse) adjacent matrices of observations.
+
+    vars_as_nodes: list or tuple of 2
+        variables to be taken as the graph nodes
+
+    union_node_feats: bool or 'auto'
+        whether to take the union of the variable-nodes
+
+    dataset_names: list or tuple of 2
+        names to discriminate data source, e.g. ('reference', 'query')
+
+    with_single_vnodes: bool
+        whether to include the varibales (node) that are ocurred in only one of
+        the datasets
+
+    Returns
+    -------
+    dpair: DataPair
     
     Examples
     --------
-    >>> datapair_from_adatas([adata1, adata2],
-    ...                      vars_use = [hvgs1, hvgs2],
-    ...                      df_varmap = homo_gene_matches,
-    ...                      dataset_names = ['reference', 'query'])
+    >>> dpair = datapair_from_adatas(
+    ...     [adata1, adata2],
+    ...     vars_use = [hvgs1, hvgs2],
+    ...     df_varmap = homo_gene_matches,
+    ...     dataset_names = ['reference', 'query']
+    ...     )
+
     """
     adata1, adata2 = adatas
     adata_raw1 = adata1.raw.to_adata() if adata1.raw is not None else adata1

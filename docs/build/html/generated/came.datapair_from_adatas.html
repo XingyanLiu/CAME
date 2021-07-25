@@ -87,11 +87,12 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#preprocessing-came-pp">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-0">DataPair and AlignedDataPair</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="came.aligned_datapair_from_adatas.html">came.aligned_datapair_from_adatas</a></li>
@@ -178,24 +179,40 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="came.datapair_from_adatas">
 <span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">datapair_from_adatas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">anndata._core.anndata.AnnData</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_use</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_varmap</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_varmap_1v1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">scipy.sparse.base.spmatrix</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_as_nodes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">union_node_feats</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_single_vnodes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.datapair.unaligned.DataPair"><span class="pre">came.datapair.unaligned.DataPair</span></a></span></span><a class="headerlink" href="#came.datapair_from_adatas" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">DataPair</span></code> object from a pair of adatas</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adatas</strong> (<em>a list</em><em> or </em><em>tuple of 2 sc.AnnData object.</em>) – </p></li>
-<li><p><strong>vars_use</strong> (<em>a list</em><em> or </em><em>tuple of 2 variable name-lists.</em>) – for example, differentail expressed genes, highly variable features.</p></li>
-<li><p><strong>df_varmap</strong> (<em>pd.DataFrame with 2 columns.</em>) – relationships between features in 2 datasets, for making the
+<li><p><strong>adatas</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 sc.AnnData object.</p></li>
+<li><p><strong>vars_use</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 variable name-lists.
+for example, differentail expressed genes, highly variable features.</p></li>
+<li><p><strong>df_varmap</strong> (<em>pd.DataFrame</em>) – pd.DataFrame with 2 columns.
+relationships between features in 2 datasets, for making the
 adjacent matrix (<cite>vv_adj</cite>) between variables from these 2 datasets.</p></li>
 <li><p><strong>df_varmap_1v1</strong> (<em>None</em><em>, </em><em>pd.DataFrame; optional.</em>) – dataframe containing only 1-to-1 correspondance between features
 in 2 datasets, if not provided, it will be inferred from <cite>df_varmap</cite></p></li>
-<li><p><strong>oo_adjs</strong> (<em>a sequence of</em><em> (</em><em>sparse</em><em>) </em><em>adjacent matrices of observations.</em>) – </p></li>
+<li><p><strong>oo_adjs</strong> – a sequence of (sparse) adjacent matrices of observations.</p></li>
+<li><p><strong>vars_as_nodes</strong> (<em>list</em><em> or </em><em>tuple of 2</em>) – variables to be taken as the graph nodes</p></li>
+<li><p><strong>union_node_feats</strong> (<em>bool</em><em> or </em><em>'auto'</em>) – whether to take the union of the variable-nodes</p></li>
+<li><p><strong>dataset_names</strong> (<em>list</em><em> or </em><em>tuple of 2</em>) – names to discriminate data source, e.g. (‘reference’, ‘query’)</p></li>
+<li><p><strong>with_single_vnodes</strong> (<em>bool</em>) – whether to include the varibales (node) that are ocurred in only one of
+the datasets</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dpair</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.DataPair">DataPair</a></p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">datapair_from_adatas</span><span class="p">([</span><span class="n">adata1</span><span class="p">,</span> <span class="n">adata2</span><span class="p">],</span>
-<span class="gp">... </span>                     <span class="n">vars_use</span> <span class="o">=</span> <span class="p">[</span><span class="n">hvgs1</span><span class="p">,</span> <span class="n">hvgs2</span><span class="p">],</span>
-<span class="gp">... </span>                     <span class="n">df_varmap</span> <span class="o">=</span> <span class="n">homo_gene_matches</span><span class="p">,</span>
-<span class="gp">... </span>                     <span class="n">dataset_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">,</span> <span class="s1">&#39;query&#39;</span><span class="p">])</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dpair</span> <span class="o">=</span> <span class="n">datapair_from_adatas</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">adata1</span><span class="p">,</span> <span class="n">adata2</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">vars_use</span> <span class="o">=</span> <span class="p">[</span><span class="n">hvgs1</span><span class="p">,</span> <span class="n">hvgs2</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">df_varmap</span> <span class="o">=</span> <span class="n">homo_gene_matches</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">dataset_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">,</span> <span class="s1">&#39;query&#39;</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

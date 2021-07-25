@@ -415,14 +415,34 @@ def preprocess_aligned(
         nneigh_scnet: int = 5,
         nneigh_clust: int = 20,
         ntop_deg: int = 50,
+        key_clust: str = 'clust_lbs'
 ):
     """
-    Steps:
-    * align variables
-    * preprocessing
-    * candidate genes (HVGs and DEGs)
-    * pre-clustering query data
-    * single-cell network
+    Packed function for process adatas with aligned features
+    (i.e. one-to-one correspondence).
+
+    Processing Steps:
+        * align variables
+        * preprocessing
+        * candidate genes (HVGs and DEGs)
+        * pre-clustering query data
+        * single-cell network
+
+    Parameters
+    ----------
+    adatas:
+    key_class
+    df_varmap_1v1
+    use_scnets
+    n_pcs
+    nneigh_scnet
+    nneigh_clust
+    ntop_deg
+    key_clust
+
+    Returns
+    -------
+
     """
     adatas = pp.align_adata_vars(
         adatas[0], adatas[1], df_varmap_1v1, unify_names=True,
@@ -449,7 +469,6 @@ def preprocess_aligned(
     hvgs1, hvgs2 = pp.get_hvgs(adata1), pp.get_hvgs(adata2)
 
     # cluster labels
-    key_clust = 'clust_lbs'
     clust_lbs2 = pp.get_leiden_labels(
         adata2, force_redo=True,
         nneigh=nneigh_clust,
@@ -487,13 +506,32 @@ def preprocess_unaligned(
         nneigh_scnet: int = 5,
         nneigh_clust: int = 20,
         ntop_deg: int = 50,
+        key_clust: str = 'clust_lbs'
 ):
     """
-    Steps:
-    * preprocessing
-    * candidate genes (HVGs and DEGs)
-    * pre-clustering query data
-    * single-cell network
+    Packed function for process adatas with un-aligned features.
+    (i.e. some of them could be one-to-many or many-to-one correspondence)
+
+    Processing Steps:
+        * preprocessing
+        * candidate genes (HVGs and DEGs)
+        * pre-clustering query data
+        * single-cell network
+
+    Parameters
+    ----------
+    adatas
+    key_class
+    use_scnets
+    n_pcs
+    nneigh_scnet
+    nneigh_clust
+    ntop_deg
+    key_clust
+
+    Returns
+    -------
+
     """
     logging.info('================ preprocessing ===============')
     params_preproc = dict(
@@ -517,7 +555,6 @@ def preprocess_unaligned(
     hvgs1, hvgs2 = pp.get_hvgs(adata1), pp.get_hvgs(adata2)
 
     # cluster labels
-    key_clust = 'clust_lbs'
     clust_lbs2 = pp.get_leiden_labels(
         adata2, force_redo=True,
         nneigh=nneigh_clust,

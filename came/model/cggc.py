@@ -32,15 +32,17 @@ class CGGCNet(nn.Module):
 
     Graph Convolutional Network for cell-gene Heterogenous graph,
     with edges named as:
-        ('cell', 'express', 'gene'):        cg_net,
-        ('gene', 'expressed_by', 'cell'):   cg_net.T,
-        ('gene', 'homolog_with', 'gene'):   gg_net + sparse.eye(n_gnodes),
-        ('cell', 'self_loop_cell', 'cell'):      sparse.eye(n_cells),
 
-    Notes:
+    * ('cell', 'express', 'gene'):        cg_net,
+    * ('gene', 'expressed_by', 'cell'):   cg_net.T,
+    * ('gene', 'homolog_with', 'gene'):   gg_net + sparse.eye(n_gnodes),
+    * ('cell', 'self_loop_cell', 'cell'):      sparse.eye(n_cells),
+
+    Notes
+    -----
     * gene embeddings are computed from cells;
     * weight sharing across hidden layers is allowed by setting
-        `share_hidden_weights=True`
+        ``share_hidden_weights=True``
     * attention can be applied on the last layer (`self.cell_classifier`);
     * the graph for the embedding layer and the hidden layers can be different;
     * allow expression values as static edge weights. (but seems not work...)

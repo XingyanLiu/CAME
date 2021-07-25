@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>came.utils.preprocess.normalize_default &mdash; CAME  documentation</title>
+  <title>came.utils.preprocess.wrapper_scale &mdash; CAME  documentation</title>
   
 
   
@@ -41,8 +41,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="came.utils.preprocess.quick_preprocess" href="came.utils.preprocess.quick_preprocess.html" />
-    <link rel="prev" title="came.utils.preprocess.align_adata_vars" href="came.utils.preprocess.align_adata_vars.html" /> 
+    <link rel="next" title="came.aligned_datapair_from_adatas" href="came.aligned_datapair_from_adatas.html" />
+    <link rel="prev" title="came.utils.preprocess.group_mean_adata" href="came.utils.preprocess.group_mean_adata.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -96,11 +96,11 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#preprocessing-came-pp">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="../api.html#preprocessing-functions">Preprocessing functions</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.align_adata_vars.html">came.utils.preprocess.align_adata_vars</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">came.utils.preprocess.normalize_default</a></li>
+<li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.normalize_default.html">came.utils.preprocess.normalize_default</a></li>
 <li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.quick_preprocess.html">came.utils.preprocess.quick_preprocess</a></li>
 <li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.group_mean_adata.html">came.utils.preprocess.group_mean_adata</a></li>
-<li class="toctree-l4"><a class="reference internal" href="came.utils.preprocess.wrapper_scale.html">came.utils.preprocess.wrapper_scale</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">came.utils.preprocess.wrapper_scale</a></li>
 </ul>
 </li>
 </ul>
@@ -160,13 +160,13 @@
         
           <li><a href="../api.html">API Reference</a> &raquo;</li>
         
-      <li>came.utils.preprocess.normalize_default</li>
+      <li>came.utils.preprocess.wrapper_scale</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/generated/came.utils.preprocess.normalize_default.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/generated/came.utils.preprocess.wrapper_scale.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -179,12 +179,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="came-utils-preprocess-normalize-default">
-<h1>came.utils.preprocess.normalize_default<a class="headerlink" href="#came-utils-preprocess-normalize-default" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="came-utils-preprocess-wrapper-scale">
+<h1>came.utils.preprocess.wrapper_scale<a class="headerlink" href="#came-utils-preprocess-wrapper-scale" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="came.utils.preprocess.normalize_default">
-<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">normalize_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_return</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.normalize_default" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="came.utils.preprocess.wrapper_scale">
+<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">wrapper_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupby</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.wrapper_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper function for centering and scaling data matrix <cite>X</cite> in sc.AnnData,
+extended for within-batch processing.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">wrapper_scale</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s1">&#39;batch&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 </div>
 
@@ -194,8 +200,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="came.utils.preprocess.quick_preprocess.html" class="btn btn-neutral float-right" title="came.utils.preprocess.quick_preprocess" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="came.utils.preprocess.align_adata_vars.html" class="btn btn-neutral float-left" title="came.utils.preprocess.align_adata_vars" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="came.aligned_datapair_from_adatas.html" class="btn btn-neutral float-right" title="came.aligned_datapair_from_adatas" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="came.utils.preprocess.group_mean_adata.html" class="btn btn-neutral float-left" title="came.utils.preprocess.group_mean_adata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

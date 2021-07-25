@@ -3,12 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to CAME's documentation!
-================================
+CAME
+====
+
+CAME is a tool for Cell-type Annotation and Module Extraction.
 
 .. image:: _static/rrgcn_structure0.png
 
 .. toctree::
+   :caption: Contents
    :maxdepth: 1
 
    installation

@@ -430,7 +430,8 @@ def align_adata_vars(adata1: sc.AnnData,  # better be raw data
                      df_varmap_1v1: Optional[pd.DataFrame] = None,
                      unify_names=False,
                      ) -> [sc.AnnData, sc.AnnData]:
-    """
+    """ Align the vaiables of two ``sc.AnnData`` objects
+
     Parameters
     ----------
     adata1: AnnData
@@ -1241,7 +1242,8 @@ def group_zscore_adata(adt, key='counts', groupby='batch', key_new=None,
                        max_value=None,
                        with_mean=True,
                        cover=True, **kwds):
-    """
+    """Calculate z-scores for each group of adata
+
     Parameters
     ----------
     adt: AnnData
@@ -1281,7 +1283,7 @@ def wrapper_scale(adata, zero_center=True, max_value=None,
                   groupby=None, copy=False, **kwds):
     """
     Wrapper function for centering and scaling data matrix `X` in sc.AnnData,
-    extended for within-batch cprocessing.
+    extended for within-batch processing.
     
     Examples
     --------
@@ -1565,16 +1567,24 @@ def group_median_dense(
 
 def group_mean_adata(adata: sc.AnnData,
                      groupby: str,
-                     features=None, binary=False, use_raw=False):
-    """
+                     features: Sequence = None,
+                     binary: bool = False,
+                     use_raw: bool = False):
+    """Compute averaged feature-values for each group
+
     Parameters
     ----------
     adata: AnnData
-    groupby:
+    groupby: str
         a column name in adata.obs
     features:
         a subset of names in adata.var_names (or adata.raw.var_names)
-    
+    binary: bool
+        if True, the results will turn to be the non-zeor proportions for
+        all (or the given) features
+    use_raw: bool
+        whether to access adata.raw to compute the averages.
+
     Returns
     -------
     a pd.DataFrame with features as index and groups as columns
@@ -1636,7 +1646,11 @@ def quick_preprocess(
         copy=True,
         **hvg_kwds):
     """
-    if `normalize_data` is True, an adata with RAW counts is requered!
+    quick preprocess of the raw data
+
+    Notes
+    -----
+    if `normalize_data` is True, an adata with RAW counts is required!
     """
     if copy:
         _adata = adata.copy()
@@ -1746,7 +1760,8 @@ def get_scnet(adata):
 def get_hvgs(adata, force_redo=False, batch_key=None,
              n_top_genes=2000,
              **hvg_kwds):
-    """ if `force_redo` is True, data should be normalized and log-transformed.
+    """ packed function for computing and get HVGs from ``sc.AnnData`` object.
+    if `force_redo` is True, data should be normalized and log-transformed.
     
     Parameters
     ----------
@@ -1845,7 +1860,7 @@ def compute_and_get_DEGs(adata: sc.AnnData,
                          do_normalize=False,
                          method='t-test',
                          **kwds):
-    """
+    """ Compute and get DEGs from ``sc.AnnData`` object
     
     By default, assume that the counts in adata has been normalized.
     If `force_redo`: re-compute DEGs and the original DEGs in adata will be ignored

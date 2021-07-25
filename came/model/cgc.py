@@ -40,6 +40,8 @@ class CGCNet(CGGCNet):
         ('gene', 'expressed_by', 'cell'):   cg_net.T,
         ('cell', 'self_loop_cell', 'cell'): sparse.eye(n_cells),
 
+    Notes
+    -----
     * gene embeddings are computed from cells;
     * weight sharing across hidden layers is allowed by setting
         ``share_hidden_weights=True``

@@ -87,11 +87,12 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.main_for_aligned.html">came.pipeline.main_for_aligned</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.main_for_unaligned.html">came.pipeline.main_for_unaligned</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.preprocess_aligned.html">came.pipeline.preprocess_aligned</a></li>
@@ -178,12 +179,32 @@
 <h1>came.pipeline.preprocess_unaligned<a class="headerlink" href="#came-pipeline-preprocess-unaligned" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.pipeline.preprocess_unaligned">
-<span class="sig-prename descclassname"><span class="pre">came.pipeline.</span></span><span class="sig-name descname"><span class="pre">preprocess_unaligned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_class</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_scnets</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pcs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nneigh_scnet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nneigh_clust</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntop_deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.pipeline.preprocess_unaligned" title="Permalink to this definition">¶</a></dt>
-<dd><p>Steps:
-* preprocessing
-* candidate genes (HVGs and DEGs)
-* pre-clustering query data
-* single-cell network</p>
+<span class="sig-prename descclassname"><span class="pre">came.pipeline.</span></span><span class="sig-name descname"><span class="pre">preprocess_unaligned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_class</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_scnets</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pcs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nneigh_scnet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nneigh_clust</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntop_deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_clust</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'clust_lbs'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.pipeline.preprocess_unaligned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Packed function for process adatas with un-aligned features.
+(i.e. some of them could be one-to-many or many-to-one correspondence)</p>
+<dl class="simple">
+<dt>Processing Steps:</dt><dd><ul class="simple">
+<li><p>preprocessing</p></li>
+<li><p>candidate genes (HVGs and DEGs)</p></li>
+<li><p>pre-clustering query data</p></li>
+<li><p>single-cell network</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adatas</strong> – </p></li>
+<li><p><strong>key_class</strong> – </p></li>
+<li><p><strong>use_scnets</strong> – </p></li>
+<li><p><strong>n_pcs</strong> – </p></li>
+<li><p><strong>nneigh_scnet</strong> – </p></li>
+<li><p><strong>nneigh_clust</strong> – </p></li>
+<li><p><strong>ntop_deg</strong> – </p></li>
+<li><p><strong>key_clust</strong> – </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

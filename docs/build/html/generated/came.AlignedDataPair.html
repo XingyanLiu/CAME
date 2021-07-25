@@ -87,11 +87,12 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#preprocessing-came-pp">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-0">DataPair and AlignedDataPair</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="came.aligned_datapair_from_adatas.html">came.aligned_datapair_from_adatas</a></li>
@@ -178,17 +179,19 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="came.AlignedDataPair">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">AlignedDataPair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">scipy.sparse.base.spmatrix</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ov_adjs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">scipy.sparse.base.spmatrix</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">scipy.sparse.base.spmatrix</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_feat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_dfs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_dfs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{'o':</span> <span class="pre">'cell',</span> <span class="pre">'v':</span> <span class="pre">'gene'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etypes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{'oo':</span> <span class="pre">'similar_to',</span> <span class="pre">'ov':</span> <span class="pre">'express',</span> <span class="pre">'vo':</span> <span class="pre">'expressed_by'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_graph</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.AlignedDataPair" title="Permalink to this definition">¶</a></dt>
-<dd><p>(pair of dataset2 of the same species)</p>
+<dd><p>paired datasets with the aligned features</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>features</strong> (<em>a list</em><em> or </em><em>tuple of 2 feature matrices.</em>) – common / aligned feratures, as node-features (for observations).
-shape: (n_obs1, n_features) and (n_obs2, n_features)</p></li>
-<li><p><strong>ov_adjs</strong> (<em>a list</em><em> or </em><em>tuple of 2</em><em> (</em><em>sparse</em><em>) </em><em>feature matrices.</em>) – unaligned features, for making <cite>ov_adj</cite>.
-shape: (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)</p></li>
-<li><p><strong>varnames_feat</strong> (<em>list-like</em>) – names of variables that will be treated as node-features for observations</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 feature matrices.
+common / aligned feratures, as node-features (for observations).
+of shape (n_obs1, n_features) and (n_obs2, n_features)</p></li>
+<li><p><strong>ov_adjs</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 (sparse) feature matrices.
+unaligned features, for making <cite>ov_adj</cite>.
+of shape (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)</p></li>
+<li><p><strong>varnames_feat</strong> (<em>list</em><em> or </em><em>tuple</em>) – names of variables that will be treated as node-features for observations</p></li>
 <li><p><strong>varnames_node</strong> (<em>a name-lists</em><em>, or </em><em>one concatenated name-list.</em>) – names of variables that will be treated as nodes.</p></li>
-<li><p><strong>obs_dfs</strong> – a list or tuple of 2 <a href="#id1"><span class="problematic" id="id2">`</span></a>pd.DataFrame`s</p></li>
+<li><p><strong>obs_dfs</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 <a href="#id1"><span class="problematic" id="id2">`</span></a>pd.DataFrame`s</p></li>
 <li><p><strong>ntypes</strong> (<em>dict</em>) – </p></li>
 <li><p><strong>etypes</strong> (<em>dict</em>) – </p></li>
 <li><p><strong>**kwds</strong> – other key words for constructiong of the HeteroGraph</p></li>
@@ -206,21 +209,63 @@ shape: (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)</p></li>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="came.AlignedDataPair.Nets">
-<span class="sig-name descname"><span class="pre">Nets</span></span><a class="headerlink" href="#came.AlignedDataPair.Nets" title="Permalink to this definition">¶</a></dt>
-<dd><p>vv_adj: var-var adjacent matrix (e.g. gene-gene adjacent matrix)
-ov_adj: combined observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)
-G: dgl.Heterograph</p>
+<dt class="sig sig-object py" id="came.AlignedDataPair.vv_adj">
+<span class="sig-name descname"><span class="pre">vv_adj</span></span><a class="headerlink" href="#came.AlignedDataPair.vv_adj" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>var-var adjacent matrix (e.g. gene-gene adjacent matrix)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">n_obs,</span> <span class="pre">n_obs1,</span> <span class="pre">n_obs2</span></span></dt>
+<dt class="sig sig-object py" id="came.AlignedDataPair.ov_adj">
+<span class="sig-name descname"><span class="pre">ov_adj</span></span><a class="headerlink" href="#came.AlignedDataPair.ov_adj" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>combined observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.G">
+<span class="sig-name descname"><span class="pre">G</span></span><a class="headerlink" href="#came.AlignedDataPair.G" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dgl.Heterograph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_obs">
+<span class="sig-name descname"><span class="pre">n_obs</span></span><a class="headerlink" href="#came.AlignedDataPair.n_obs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">n_vnodes,</span> <span class="pre">n_vnodes1,</span> <span class="pre">n_vnodes2</span></span></dt>
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_obs1">
+<span class="sig-name descname"><span class="pre">n_obs1</span></span><a class="headerlink" href="#came.AlignedDataPair.n_obs1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_obs2">
+<span class="sig-name descname"><span class="pre">n_obs2</span></span><a class="headerlink" href="#came.AlignedDataPair.n_obs2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_vnodes">
+<span class="sig-name descname"><span class="pre">n_vnodes</span></span><a class="headerlink" href="#came.AlignedDataPair.n_vnodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_vnodes1">
+<span class="sig-name descname"><span class="pre">n_vnodes1</span></span><a class="headerlink" href="#came.AlignedDataPair.n_vnodes1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_vnodes2">
+<span class="sig-name descname"><span class="pre">n_vnodes2</span></span><a class="headerlink" href="#came.AlignedDataPair.n_vnodes2" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
