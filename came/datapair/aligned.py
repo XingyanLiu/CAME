@@ -30,24 +30,23 @@ class AlignedDataPair(object):
         a list or tuple of 2 feature matrices.
         common / aligned feratures, as node-features (for observations).
         of shape (n_obs1, n_features) and (n_obs2, n_features)
-        
+
     ov_adjs: list or tuple
         a list or tuple of 2 (sparse) feature matrices.
         unaligned features, for making `ov_adj`.
         of shape (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)
-    
+
     varnames_feat: list or tuple
         names of variables that will be treated as node-features for observations
-        
-    varnames_node: a name-lists, or one concatenated name-list.
+
+    varnames_node: list or tuple
         names of variables that will be treated as nodes.
-        
+
     obs_dfs: list or tuple
-        a list or tuple of 2 `pd.DataFrame`s
-        
+        a list or tuple of 2 DataFrame s
+
     ntypes: dict
     etypes: dict
-    
     **kwds:
         other key words for constructiong of the HeteroGraph
     

@@ -29,34 +29,33 @@ class DataPair(object):
     features: list or tuple
         a list or tuple of 2 feature matrices.
         common / aligned features, as node-features (for observations).
-        shape: (n_obs1, n_features) and (n_obs2, n_features)
-        
+        of shape (n_obs1, n_features) and (n_obs2, n_features)
+
     ov_adjs: list or tuple
         a list or tuple of 2 (sparse) feature matrices.
         unaligned features, for making `ov_adj`.
         of shape (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)
-                
-    vv_adj: scipy.sparse COO matrix.
+
+    vv_adj: scipy.sparse.spmatrix
         adjacent matrix between variables from these 2 datasets. 
-        (e.g. gene-gene adjacent matrix)
-        of shape (n_vnodes, n_vnodes), where `n_vnodes = n_vnodes1 + n_vnodes2`
-        is the total number of variable-nodes.
-        
+        (e.g. gene-gene adjacent matrix) of shape (n_vnodes, n_vnodes),
+        where n_vnodes (= n_vnodes1 + n_vnodes2) is the total number of
+        variable-nodes.
+
     varnames_node: list or tuple
         a list or tuple of 2 name-lists, or one concatenated name-list.
         lengths should be `n_vnodes1` and `v_nodes2`.
-        
     obs_dfs: list or tuple
-        a list or tuple of 2 `pd.DataFrame`s
+        a list or tuple of 2 DataFrame s
     ntypes: dict
     etypes: dict
-    
     **kwds:
         other key words for constructiong of the HeteroGraph
     
 
     Attributes
     ----------
+
     _features:
     _ov_adjs:
     vv_adj:
@@ -76,6 +75,7 @@ class DataPair(object):
 
     Examples
     --------
+
     >>> DataPair([features1, features2],
     ...          [ov_adj1, ov_adj2],
     ...          vv_adj = vv_adj,
