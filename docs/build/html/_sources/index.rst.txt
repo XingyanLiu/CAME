@@ -6,9 +6,12 @@
 CAME
 ====
 
-CAME is a tool for Cell-type Annotation and Module Extraction.
+CAME is a tool for Cell-type Annotation and Module Extraction,
+based on a heterogeneous graph neural network.
+
 
 .. image:: _static/rrgcn_structure0.png
+   :width: 500px
 
 .. toctree::
    :caption: Contents
@@ -18,6 +21,23 @@ CAME is a tool for Cell-type Annotation and Module Extraction.
    tutorials
    api
    citation
+
+
+
+Contribute
+----------
+
+- Issue Tracker: https://github.com/XingyanLiu/CAME/issues
+- Source Code: https://github.com/XingyanLiu/CAME
+
+Support
+-------
+
+If you are having issues, please let us know.
+We have a mailing list located at:
+
+* xingyan@amss.ac.cn
+* 544568643@qq.com
 
 
 Indices and tables
