@@ -183,7 +183,7 @@
 <h1>came.utils.preprocess.align_adata_vars<a class="headerlink" href="#came-utils-preprocess-align-adata-vars" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.preprocess.align_adata_vars">
-<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">align_adata_vars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.align_adata_vars" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">align_adata_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adata2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_varmap_1v1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unify_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.align_adata_vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Align the vaiables of two <code class="docutils literal notranslate"><span class="pre">sc.AnnData</span></code> objects</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -191,6 +191,9 @@
 <li><p><strong>adata1</strong> (<em>AnnData</em>) – reference data</p></li>
 <li><p><strong>adata2</strong> (<em>AnnData</em>) – query data</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>[&lt;class ‘anndata._core.anndata.AnnData’&gt;, &lt;class ‘anndata._core.anndata.AnnData’&gt;]</p>
 </dd>
 </dl>
 </dd></dl>
