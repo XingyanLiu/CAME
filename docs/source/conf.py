@@ -42,6 +42,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.githubpages',  # enable github-pages
     'sphinx_autodoc_typehints',  # needs to be after napoleon
+    "nbsphinx",  # notebooks
 ]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
