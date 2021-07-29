@@ -64,6 +64,7 @@ def _int_to_cat_strings(lst):
 def load_dpair_and_model(
         dirname: Union[str, Path],
         subdir_model: str = '_models',
+        ckpt: Union[int, str, None] = None,
 ):
     import torch
     dirname = Path(dirname)
@@ -84,10 +85,12 @@ def load_dpair_and_model(
                 pd.read_csv(dirname / 'obs.csv', index_col=0),
                 ignore_index=True
                 )
-
-    ckpt = load_json_dict(
-        model_dir / 'chckpoint_dict.json'
-    )['recommended']
+    if ckpt is None:
+        ckpt_file = model_dir / 'chckpoint_dict.json'
+        if ckpt_file.exists():
+            ckpt = load_json_dict(ckpt_file)['recommended']
+        else:
+            pass
     model.load_state_dict(
         torch.load(model_dir / f'weights_epoch{ckpt}.pt')
     )

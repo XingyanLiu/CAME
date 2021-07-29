@@ -17,9 +17,6 @@ from .utils import plot as pl
 from .utils import analyze as ana
 from .utils.train import prepare4train, Trainer, SUBDIR_MODEL
 from .utils.evaluation import accuracy
-from .utils.analyze import (
-        load_dpair_and_model,
-        weight_linked_vars,)
 from .utils import analyze as ana
 from .utils.train import prepare4train, Trainer, SUBDIR_MODEL
 from .utils.evaluation import accuracy
