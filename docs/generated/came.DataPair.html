@@ -342,7 +342,7 @@ lengths should be <cite>n_vnodes1</cite> and <cite>v_nodes2</cite>.</p></li>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_ids</span></code>([which, astensor])</p></td>
-<td><p>get node indices for obs-nodes (samples), choices are:</p></td>
+<td><p>get node indices for obs-nodes (samples) choices are:     1. all the node ids (by <cite>which=None</cite>)     2. only the ids of the “reference” data (by <cite>which=0</cite>)     3. only the ids of the “query” data (by <cite>which=1</cite>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_labels</span></code>(keys[, astensor, train_use, …])</p></td>
 <td><p>make labels for model training</p></td>
@@ -441,6 +441,12 @@ lengths should be <cite>n_vnodes1</cite> and <cite>v_nodes2</cite>.</p></li>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids2</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var_ids1</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var_ids2</span></code></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vnode_names1</span></code></p></td>

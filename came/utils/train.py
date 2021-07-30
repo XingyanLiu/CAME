@@ -283,8 +283,8 @@ class BaseTrainer(object):
             'others': all_ckpts
         }
         save_json_dict(
-            ckpt_dict, self.dir_model / 'chckpoint_dict.json')
-        # load_json_dict(self.dir_model / 'chckpoint_dict.json')
+            ckpt_dict, self.dir_model / 'checkpoint_dict.json')
+        # load_json_dict(self.dir_model / 'checkpoint_dict.json')
 
     def get_current_outputs(self, **other_inputs):
         """ get the current states of the model output
@@ -412,7 +412,7 @@ class Trainer(BaseTrainer):
               eps=1e-4,
               cat_class='cell',
               device=None,
-              backup_stride=43,
+              backup_stride: int = 43,
               **other_inputs):
         """ Main function for model training
 
@@ -554,9 +554,10 @@ class Trainer(BaseTrainer):
                         cat_class='cell',
                         batch_size=128,
                         device=None,
+                        backup_stride: int = 43,
                         **other_inputs):
         """
-        Funtcion for minibatch trainging
+        Function for training on mini-batches
         """
         # setting device to train
         if device is None:
@@ -575,8 +576,8 @@ class Trainer(BaseTrainer):
             self.ami_max = 0
 
         print("start training".center(50, '='))
-        self.model.train()
-        self.model = self.model.to(device)
+        model = self.model.to(device)
+        model.train()
         feat_dict = {}
         train_labels, test_labels, batch_list, shuffled_idx = create_batch(
             train_idx=train_idx, test_idx=test_idx, batch_size=batch_size,
@@ -603,13 +604,13 @@ class Trainer(BaseTrainer):
                 feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['ids'], :]
                 batch_train_idx = output_nodes.clone().detach() < len(train_idx)
                 batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
-                logits = self.model(to_device(feat_dict, device),
-                                    to_device(block, device),
-                                    **other_inputs)
+                logits = model(to_device(feat_dict, device),
+                               to_device(block, device),
+                               **other_inputs)
                 out_cell = logits[cat_class]  # .cuda()
                 output_labels = labels[output_nodes]
                 out_train_labels = output_labels[batch_train_idx].clone().detach()
-                loss = self.model.get_classification_loss(
+                loss = model.get_classification_loss(
                     out_cell[batch_train_idx],
                     to_device(out_train_labels, device),
                     weight=class_weights,
@@ -646,7 +647,7 @@ class Trainer(BaseTrainer):
                         self._cur_epoch_best = self._cur_epoch
                         self.save_model_weights()
                         print('[current best] model weights backup')
-                    elif self._cur_epoch % 43 == 0:
+                    elif self._cur_epoch % backup_stride == 0:
                         self.save_model_weights()
                         print('model weights backup')
 

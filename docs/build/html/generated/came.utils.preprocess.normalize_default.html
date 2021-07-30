@@ -209,7 +209,28 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.preprocess.normalize_default">
 <span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">normalize_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_return</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.normalize_default" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Normalizing datasets with default settings (total-counts normalization
+followed by log(x+1) transform).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code>) – <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object</p></li>
+<li><p><strong>target_sum</strong> – scale factor of total-count normalization</p></li>
+<li><p><strong>copy</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to copy the dataset</p></li>
+<li><p><strong>log_only</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to skip the “total-counts normalization” and only perform
+log(x+1) transform</p></li>
+<li><p><strong>force_return</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to return the data, even if changes are made for the
+original object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">AnnData</span></code> or None</p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 

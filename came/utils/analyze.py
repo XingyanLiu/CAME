@@ -86,15 +86,26 @@ def load_dpair_and_model(
                 ignore_index=True
                 )
     if ckpt is None:
-        ckpt_file = model_dir / 'chckpoint_dict.json'
-        if ckpt_file.exists():
-            ckpt = load_json_dict(ckpt_file)['recommended']
-        else:
-            pass
+        ckpt = _infer_ckpt(model_dir)
     model.load_state_dict(
         torch.load(model_dir / f'weights_epoch{ckpt}.pt')
     )
     return dpair, model
+
+
+def _infer_ckpt(dirname) -> int:
+    """ infer the proper checkpoint """
+    # ckpt_file = model_dir / 'checkpoint_dict.json'
+    fnames = [_f for _f in os.listdir(dirname) if _f.endswith('_dict.json')]
+    if len(fnames) > 0:
+        ckpt_file = dirname / fnames[0]
+        ckpt = load_json_dict(ckpt_file)['recommended']
+
+    else:
+        from .train import get_checkpoint_list
+        all_ckpts = get_checkpoint_list(dirname)
+        ckpt = sorted(all_ckpts)[-1]
+    return ckpt
 
 
 # In[]
@@ -108,17 +119,15 @@ def weight_linked_vars(
         metric='cosine',
         func_dist2weight: Optional[Callable] = None,
         sigma: Optional[float] = None,
-        return_df=True,
-        sort=True,
+        sort: bool = True,
         index_names=(0, 1),
         **kwds):
-    """ correlations (consine distances) of each linked (homologous) pairs
+    """ correlations (or consine distances) of each linked (homologous) pairs
     of variables.
 
     Parameters
     ----------
-    X: 
-        np.ndarray;
+    X: np.ndarray
         feature matrix of shape (N, M), where N is the number of sample and M is
         the feature dimensionality.
     adj: 
@@ -158,10 +167,10 @@ def weight_linked_vars(
     df = pd.DataFrame({'distance': dists, 'weight': weights, },
                       index=index)
     if sort:
-        print('sorting links by weights')
+        logging.info('sorting links by weights')
         df.sort_values(by='weight', ascending=False, inplace=True)
 
-    return df if return_df else None
+    return df
 
 
 # In[]

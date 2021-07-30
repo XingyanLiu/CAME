@@ -281,9 +281,10 @@ class DataPair(object):
 
     #        return self.get_obs_anno(self.KEY_DATASET)
 
-    def get_obs_ids(self, which=0, astensor=True, ):
+    def get_obs_ids(self, which: Optional[int] = 0, astensor=True, ):
         """
-        get node indices for obs-nodes (samples), choices are:
+        get node indices for obs-nodes (samples)
+        choices are:
             1. all the node ids (by `which=None`)
             2. only the ids of the "reference" data (by `which=0`)
             3. only the ids of the "query" data (by `which=1`)
@@ -352,6 +353,14 @@ class DataPair(object):
     @property
     def vnode_names2(self, ):
         return self._var_id2name[self.n_vnodes1:].tolist()
+
+    @property
+    def var_ids1(self, ):
+        return self.get_vnode_ids(0, False)
+
+    @property
+    def var_ids2(self, ):
+        return self.get_vnode_ids(1, False)
 
     @property
     def obs_ids1(self, ):

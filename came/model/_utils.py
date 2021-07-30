@@ -7,6 +7,7 @@
 
 from typing import Union, Sequence, Optional, Mapping, Any, List
 import logging
+from scipy import sparse
 import torch as th
 from torch import Tensor
 import torch.nn as nn
@@ -101,9 +102,13 @@ def get_attentions(
         g: dgl.DGLGraph,
         fuse='mean',
         from_scratch: bool = True,
-):
+) -> sparse.spmatrix:
     """
-    output:
+    compute cell-by-gene attention matrix from model
+
+    Returns
+    -------
+    sparse.spmatrix
         cell-by-gene attention matrix (sparse)
     """
     if from_scratch:
@@ -113,7 +118,7 @@ def get_attentions(
         h_dict = feat_dict
 
     # getting subgraph and the hidden states
-    g_sub = g.to('cuda')['gene', 'expressed_by', 'cell']
+    g_sub = g['gene', 'expressed_by', 'cell']
 
     # getting heterogeneous attention (convolutional) classifier
     HAC = model.cell_classifier.conv.mods['expressed_by']
@@ -132,7 +137,6 @@ def get_attentions(
     attn = detach2numpy(attn).flatten()
     ig, ic = list(map(detach2numpy, g_sub.edges()))
     n_vnodes, n_obs = g.num_nodes('gene'), g.num_nodes('cell')
-    from scipy import sparse
     attn_mat = sparse.coo_matrix(
         (attn, (ig, ic)), shape=(n_vnodes, n_obs)).tocsc().T
 
@@ -141,7 +145,7 @@ def get_attentions(
 
 def get_model_outputs(
         model: nn.Module,
-        feat_dict: Mapping,
+        feat_dict: Mapping[Any, Tensor],
         g: Union[dgl.DGLGraph, List[dgl.DGLGraph]],
         batch_size: Optional[int] = None,
         device=None,
@@ -152,16 +156,23 @@ def get_model_outputs(
 
     Parameters
     ----------
-    model: heterogeneous graph-neural-network model
-    feat_dict: dict of feature matrices
-    g: graph or a list or graph (blocks)
+    model:
+        heterogeneous graph-neural-network model
+    feat_dict:
+        dict of feature matrices (Tensors)
+    g:
+        graph or a list or graph (blocks)
     batch_size: int or None
-    device:
-    other_inputs: other inputs for model.forward function
+        the batch-size
+    device: {'cpu', 'gpu', None}
+    other_inputs:
+        other inputs for model.forward function
 
     Returns
     -------
-    model outputs (if mode == 'minibatch', will be merged by batch)
+    Tensor or a dict of Tensor
+    depends on the model, if batch_size is not None, results will be
+    merged by batch.
     """
     if device is not None:
         model.to(device)
@@ -191,8 +202,8 @@ def get_model_outputs(
                 if device is not None:
                     _feat_dict = to_device(_feat_dict, device)
                     block = to_device(block, device)
-                print('DEBUG', _feat_dict, block,)
-                print(other_inputs)
+                # print('DEBUG', _feat_dict, block,)
+                # print(other_inputs)
                 _out = model.forward(_feat_dict, block, **other_inputs)
                 batch_output_list.append(_out)
         outputs = concat_tensor_dicts(batch_output_list)

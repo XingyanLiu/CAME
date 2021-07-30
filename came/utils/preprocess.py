@@ -1151,8 +1151,34 @@ def _filter_mito(lst):
 #    normalize / z-score grouped by ...
 
 
-def normalize_default(adata, target_sum=1e4, copy=False, log_only=False,
-                      force_return=False, ):
+def normalize_default(adata: sc.AnnData,
+                      target_sum=1e4,
+                      copy: bool = False,
+                      log_only: bool = False,
+                      force_return: bool = False, ):
+    """ Normalizing datasets with default settings (total-counts normalization
+    followed by log(x+1) transform).
+
+    Parameters
+    ----------
+    adata
+        ``AnnData`` object
+    target_sum
+        scale factor of total-count normalization
+    copy
+        whether to copy the dataset
+    log_only
+        whether to skip the "total-counts normalization" and only perform
+        log(x+1) transform
+    force_return
+        whether to return the data, even if changes are made for the
+        original object
+
+    Returns
+    -------
+    ``AnnData`` or None
+
+    """
     if copy:
         adata = adata.copy()
         logging.info('A copy of AnnData made!')
@@ -1196,17 +1222,21 @@ def zscore(X, with_mean=True, scale=True, ):
     return X_new
 
 
-def group_zscore(X, labels, with_mean=True, scale=True, max_value=None):
+def group_zscore(X: Union[np.ndarray, pd.DataFrame],
+                 labels: Union[Sequence, np.ndarray],
+                 with_mean: bool = True,
+                 scale: bool = True,
+                 max_value: float = None):
     """
     For each column of X, do within-group centering (z-scoring)
 
     Parameters
     ----------
-    X: np.ndarray
+    X: np.ndarray or pd.DataFrame
         A matrix of shape (n_samples, n_features), each row of X is an
         observation, wile each column is a feature
     labels: np.ndarray
-        the group labels
+        the group labels, of shape (n_samples,)
     with_mean: boolean, True by default
         If True, center the data before scaling, and X shoud be a dense matrix.
     scale: bool
@@ -1214,6 +1244,10 @@ def group_zscore(X, labels, with_mean=True, scale=True, max_value=None):
     max_value: float
         if given, the absolute values of the result matrix will be
         clipped at this value.
+
+    Returns
+    -------
+    the scaled data matrix
     """
     isdf = False
     if isinstance(X, pd.DataFrame):
@@ -1238,21 +1272,32 @@ def group_zscore(X, labels, with_mean=True, scale=True, max_value=None):
     return X
 
 
-def group_zscore_adata(adt, key='counts', groupby='batch', key_new=None,
-                       max_value=None,
-                       with_mean=True,
-                       cover=True, **kwds):
-    """Calculate z-scores for each group of adata
+def group_zscore_adata(adt: sc.AnnData,
+                       groupby: str = 'batch',
+                       key: str = 'counts',
+                       key_new: str = None,
+                       max_value: float = None,
+                       with_mean: bool = True,
+                       cover: bool = True,
+                       **kwds):
+    """Calculate z-scores for each group of observations in an ``AnnData`` object
 
     Parameters
     ----------
     adt: AnnData
-    key: str, {'X_pca', 'count'}
-        can be a key from adt.obsm, e.g. `key='X_pca'`
-        If key == 'counts', then do scaling on `adt.X` 
-        and cover the old count matrix, ignoring the `cover` parameter
     groupby: str
         A key from adt.obs, from which the labels are take
+    key: str, {'X_pca', 'count'}
+        can be a key from adt.obsm, e.g. `key='X_pca'`
+        If key == 'counts', then do scaling on `adt.X`
+        and cover the old count matrix, ignoring the `cover` parameter
+    key_new: str
+        used when ``key != 'counts'``
+    with_mean: boolean, True by default
+        If True, center the data before scaling, and X shoud be a dense matrix.
+    max_value: float
+        if given, the absolute values of the result matrix will be
+        clipped at this value.
     cover: bool
         whether to cover the old X with the scored X
     """
@@ -1273,7 +1318,7 @@ def group_zscore_adata(adt, key='counts', groupby='batch', key_new=None,
         else:
             key_new = key + '_new' if key_new is None else key_new
         adt.obsm[key_new] = group_zscore(
-            adt.obsm[key], labels, \
+            adt.obsm[key], labels,
             with_mean=with_mean, max_value=None, **kwds)
 
     return adt if not cover else None
@@ -1291,9 +1336,10 @@ def wrapper_scale(adata, zero_center=True, max_value=None,
     """
     if groupby is not None:
         logging.info(f'doing within-group scaling, group by [ {groupby} ]')
-        return group_zscore_adata(adata, key='counts',
+        return group_zscore_adata(adata,
                                   max_value=max_value,
                                   groupby=groupby,
+                                  key='counts',
                                   with_mean=zero_center,
                                   cover=not copy,
                                   **kwds)

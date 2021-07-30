@@ -1,4 +1,4 @@
-came.DataPair
+﻿came.DataPair
 =============
 
 .. currentmodule:: came
@@ -58,6 +58,8 @@ came.DataPair
       ~DataPair.obs_ids
       ~DataPair.obs_ids1
       ~DataPair.obs_ids2
+      ~DataPair.var_ids1
+      ~DataPair.var_ids2
       ~DataPair.vnode_names1
       ~DataPair.vnode_names2
    
