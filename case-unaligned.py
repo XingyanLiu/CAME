@@ -138,7 +138,7 @@ if load_other_ckpt:
             checkpoint='last',
     )
 # out_cell = trainer.eval_current()['cell']
-# probas_all = CAME.as_probabilities(out_cell)
+# probas_all = came.as_probabilities(out_cell)
 # df_probs = pd.DataFrame(probas_all, columns = trainer.classes)
 # In[]
 ''' trainer '''
@@ -166,7 +166,7 @@ gadt.write(resdir / 'adt_hidden_gene.h5ad')
 
 # In[]
 '''======================= cell embeddings ======================='''
-# from CAME_v0.utils.plot_pub import plot_pure_umap
+# from came_v0.utils.plot_pub import plot_pure_umap
 
 sc.set_figure_params(dpi_save=200)
 
