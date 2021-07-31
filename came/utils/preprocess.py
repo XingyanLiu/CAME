@@ -15,7 +15,7 @@ Functions for handling AnnData:
 import logging
 import os
 from pathlib import Path
-from typing import Sequence, Union, Mapping, List, Optional  # , Callable
+from typing import Sequence, Union, Mapping, List, Optional , Callable
 import re
 import numpy as np
 import pandas as pd
@@ -228,12 +228,12 @@ def add_var_annos(adata: sc.AnnData,
     return adata if copy else None
 
 
-def make_adata(mat,
+def make_adata(mat: Union[np.ndarray, sparse.spmatrix],
                obs: Union[Mapping, pd.DataFrame, None] = None,
                var: Union[Mapping, pd.DataFrame, None] = None,
-               fn=None,
-               ignore_index=False,
-               assparse=True,
+               fn: Union[Path, str] = None,
+               ignore_index: bool = True,
+               assparse: bool = True,
                ):
     """ An alternative way to construct AnnData (BUG fixed).
     Something might go wrong when saving the AnnData object constructed 
@@ -265,9 +265,9 @@ def merge_metas(adatas, obs_keys):
 def merge_adatas(
         adatas: Union[Mapping[str, sc.AnnData], Sequence[sc.AnnData]],
         union: bool = True,
-        obs_keys=None,
-        dsnames=None,
-        key_dsname=None
+        obs_keys: Optional[Sequence] = None,
+        dsnames: Optional[Sequence] = None,
+        key_dsname: str = None
 ) -> sc.AnnData:
     """ a new adata will be created, use the raw matrix
 
@@ -288,7 +288,7 @@ def merge_adatas(
 
     Returns
     -------
-    adata_merged: AnnData
+    adata_merged: ``AnnData``
 
     """
     if isinstance(adatas, Mapping):
@@ -329,12 +329,13 @@ def merge_adatas(
 
 
 def merge_named_matrices(
-        mat_list, gene_lists,
-        dsnames=None,
-        verbose=True,
-        union=False
+        mat_list: Sequence[Union[np.ndarray, sparse.csr_matrix]],
+        gene_lists: Sequence[Sequence],
+        dsnames: Sequence = None,
+        union: bool = False,
+        verbose: bool = True,
 ):
-    """
+    """ merge matrices and align their columns
     This function code is copied from `scanorama.merge_datasets`.
 
     Parameters
@@ -344,7 +345,12 @@ def merge_named_matrices(
     gene_lists:
         a list of gene-list corresponding to the columns of each matrix in 
         `mat_list`
-    
+    dsnames:
+        names for these datasets, if None, use numbers ranging from
+        0 to (n_datasets-1)
+    union: bool
+        whether to take union of the features from all the matrices
+
     Returns
     -------
     mat_list:
@@ -352,7 +358,7 @@ def merge_named_matrices(
         columns.
     ret_genes:
         a gene list shared by all the mat_list
-    
+
     """
     import sys
     if union:
@@ -371,7 +377,7 @@ def merge_named_matrices(
             keep_genes |= set(gene_list)
         else:
             keep_genes &= set(gene_list)
-        if not union and not dsnames is None and verbose:
+        if not union and (dsnames is not None) and verbose:
             print('After {}: {} genes'.format(dsnames[idx], len(keep_genes)))
         if len(keep_genes) == 0:
             print('Error: No genes found in all datasets, exiting...')
@@ -428,7 +434,7 @@ def all_vars_of_adata(adata):
 def align_adata_vars(adata1: sc.AnnData,  # better be raw data
                      adata2: sc.AnnData,
                      df_varmap_1v1: Optional[pd.DataFrame] = None,
-                     unify_names=False,
+                     unify_names: bool = False,
                      ) -> [sc.AnnData, sc.AnnData]:
     """ Align the vaiables of two ``sc.AnnData`` objects
 
@@ -438,6 +444,12 @@ def align_adata_vars(adata1: sc.AnnData,  # better be raw data
         reference data
     adata2: AnnData
         query data
+    df_varmap_1v1:
+        a 2-column DataFrame containing one-to-one mapping between
+        variables in ``adata1`` and ``adata2``
+    unify_names:
+        whether to change the variable-names in ``adata2`` to match the
+        ``adata1.var_names``
     """
     vars_all1, vars_all2 = list(map(all_vars_of_adata, [adata1, adata2]))
     if df_varmap_1v1 is None:
@@ -474,14 +486,18 @@ def regu_gname(gname, pattern='^X[0-9]{2,3}'):
     return gname
 
 
-def change_names(gnames, foo_change=regu_gname, **kwargs):
+def change_names(names: Sequence,
+                 foo_change: Callable,
+                 **kwargs):
     """
     Parameters
     ----------
+    names
+        a list of names to be modified
     foo_change: function to map a name-string to a new one
     **kwargs: other kwargs for foo_change
     """
-    return list(map(foo_change, gnames, **kwargs))
+    return list(map(foo_change, names, **kwargs))
 
 
 def get_homologues(df_match: pd.DataFrame,
@@ -626,21 +642,23 @@ def make_bipartite_adj(df_map: pd.DataFrame,
                        nodes1=None, nodes2=None,
                        key_data=None,
                        with_singleton=True,
-                       symmetric=True):
+                       symmetric: bool = True):
     """
     Parameters
     ----------
     df_map: pd.DataFrame with 2 columns.
         each row represent an edge between 2 nodes from the left and right 
         group of nodes of the bipartite-graph.
-    nodes1, nodes2: list-like;
+    nodes1, nodes2: list-like
         node name-list representing left and right nodes, respectively.
-    key_data: str or None;
+    key_data: str or None
         if provided, should be a name in df.columns, where the values will be
         taken as the weights of the adjacent matrix.
-    with_singleton: whether allow nodes without any neighbors. (default: True)
+    with_singleton:
+        whether allow nodes without any neighbors. (default: True)
         if nodes1 and nodes2 are not provided, this parameter makes no difference.
-    
+    symmetric
+        whether make it symmetric, i.e. X += X.T
     """
     nodes1 = list(set(df_map.iloc[:, 0])) if nodes1 is None else nodes1
     nodes2 = list(set(df_map.iloc[:, 1])) if nodes2 is None else nodes2
@@ -653,8 +671,8 @@ def make_bipartite_adj(df_map: pd.DataFrame,
         data = np.ones(df_map.shape[0], dtype=int)
     else:
         data = df_map[key_data].values
-    ### sparse adjacent matrix construction:
-    ### ids representing nodes from left-nodes (ii) and right-nodes (jj)
+    # sparse adjacent matrix construction:
+    # ids representing nodes from left-nodes (ii) and right-nodes (jj)
     ii = change_names(df_map.iloc[:, 0], lambda x: name2i_dicts[0][x])
     jj = change_names(df_map.iloc[:, 1], lambda x: name2i_dicts[1][x])
     bi_adj = sparse.coo_matrix(
@@ -705,7 +723,7 @@ def pivot_to_sparse(rows: Sequence, cols: Sequence,
 
     Notes
     -----
-        * `rows` and `cols` hould be of the same length!
+        * `rows` and `cols` should be of the same length!
 
     """
 
@@ -721,10 +739,10 @@ def pivot_to_sparse(rows: Sequence, cols: Sequence,
         data = np.ones_like(rows, dtype=float)
     # make sure that all of the row or column names are in the provided names
     if rownames is not None or colnames is not None:
-        #        r_kept, c_kept = np.ones_like(rows).astype(bool), np.ones_like(rows).astype(bool)
+        # r_kept, c_kept = np.ones_like(rows).astype(bool), np.ones_like(rows).astype(bool)
         if rownames is not None:
             tmp = set(rownames)
-            r_kept = list(map(lambda x: x in tmp, rows))  # [r in rownames for r in rows]
+            r_kept = list(map(lambda x: x in tmp, rows))
             print(sum(r_kept))
         else:
             r_kept = np.ones_like(rows).astype(bool)
@@ -770,7 +788,8 @@ def agg_group_edges(adj, labels1, labels2=None,
     
     Returns
     -------
-    group_conn: summation of connected edges between given groups
+    group_conn
+        summation of connected edges between given groups
     """
     #    if sparse.issparse(adj):
     adj = sparse.csc_matrix(adj)
@@ -790,7 +809,6 @@ def agg_group_edges(adj, labels1, labels2=None,
         print('grouping elements (edges)')
         print('shape of the one-hot-labels:', lb1hot1.shape, lb1hot2.shape)
     group_conn = lb1hot1.T.dot(adj).dot(lb1hot2)
-    #    print(group_conn.shape)
     if asdf:
         group_conn = pd.DataFrame(group_conn.toarray(),
                                   index=groups1, columns=groups2)
@@ -1029,14 +1047,14 @@ def merge_group_labels(labels: Sequence,
     >>> merge_group_labels(adata.obs['batch'], [['a', 'b'], ['c', 'd']]).unique()
     """
     if not isinstance(group_lists[0], list):
-        ## merge only one set of groups
+        # merge only one set of groups
         groups = group_lists  # list(map(str, group_lists))
         new_name = '_'.join(groups)
         labels = change_names(labels, lambda x: new_name if x in groups else x)
         print('groups are merged into a new single group: ', new_name)
         return labels
     else:
-        ## merge multiple sets of groups
+        # merge multiple sets of groups
         for groups in group_lists:
             labels = merge_group_labels(labels, groups)
 
@@ -1543,12 +1561,14 @@ def group_value_counts(df, count_on, group_by, split=True, **kwds):
     return vcnt
 
 
-def group_mean(X, labels,
+def group_mean(X: Union[np.ndarray, sparse.spmatrix],
+               labels: Sequence,
                binary=False, classes=None, features=None,
                print_groups=True):
     """
     This function may work with more efficiency than `df.groupby().mean()` 
-    when handling sparse matrix. (obviously~)
+    when handling sparse matrix.
+
     Parameters
     ----------
     X: np.ndarray or sparse.spmatrix
@@ -1592,23 +1612,20 @@ def group_mean_dense(
     tmp[index_name] = list(labels)
     avgs = tmp.groupby(index_name).mean()
     # print(avgs.shape)
-    return avgs.T  # each column as a group
+    return avgs.T[classes]  # each column as a group
 
 
 def group_median_dense(
-        X, labels, binary=False,
+        X, labels,
         index_name='group',
         classes=None,
 ):
     classes = np.unique(labels, ) if classes is None else classes
-    if binary:
-        X = (X > 0)  # .astype('float')
-        print('Binarized...the results will be the expression proportions.')
     tmp = pd.DataFrame(X)
     tmp[index_name] = list(labels)
     avgs = tmp.groupby(index_name).median()
-    print(avgs.shape)
-    return avgs.T  # each column as a group
+    # print(avgs.shape)
+    return avgs.T[classes]  # each column as a group
 
 
 def group_mean_adata(adata: sc.AnnData,
@@ -1788,11 +1805,16 @@ def quick_pre_clust(
     return _adata
 
 
-def get_scnet(adata):
+def get_scnet(adata: sc.AnnData):
     """ Extract the pre-computed single-cell KNN network
 
     If the adata has not been preprocessed, please run 
     `adata_processed = quick_preprocess(adata, **kwds)` first.
+
+    Parameters
+    ----------
+    adata
+        the data object
     """
     key0 = 'neighbors'
     key = 'connectivities'
@@ -1874,7 +1896,7 @@ def top_markers_from_df(marker_df, n=5, groups=None, unique=True, ):
 
     Returns
     -------
-    a flattened marker list
+    A dataframe (``union=False``) or a flattened marker list (``union=True``)
     """
     groups = marker_df.columns if groups is None else groups
     top = marker_df[groups].iloc[: n]
@@ -1912,16 +1934,17 @@ def compute_and_get_DEGs(adata: sc.AnnData,
     If `force_redo`: re-compute DEGs and the original DEGs in adata will be ignored
     """
     if not inplace:
-        print('making a copy')
+        logging.info('making a copy')
         adata = adata.copy()
 
     if force_redo or key_added not in adata.uns.keys():
-        print(f'computing differentially expressed genes using {method}')
+        logging.info(f'computing differentially expressed genes using {method}')
         if do_normalize:
-            normalize_default(adata, target_sum=1e4, silence=not inplace)
+            normalize_default(adata, target_sum=1e4, )
         else:
-            print('computing differential expression analysis using default settings,\n',
-                  '(assume that the expressioin values are already normalized)')
+            logging.info(
+                'computing differential expression genes using default settings'
+                '(assume that the expression values are already normalized)')
         if True:  # TODO: singletons will raise error
             adata = remove_adata_small_groups(adata, key=groupby, min_samples=1)
         sc.tl.rank_genes_groups(adata, groupby=groupby,

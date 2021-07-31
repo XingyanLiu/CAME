@@ -61,11 +61,10 @@ def main_for_aligned(
         tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
         params_model: dict = {},
         params_lossfunc: dict = {},
-        check_umap: bool = False,  # TODO
         n_pass: int = 100,
         batch_size: Optional[int] = None,
         plot_results: bool = True,
-        norm_target_sum=1e4,
+        norm_target_sum: Optional[float] = 1e4,
 ):
     if resdir is None:
         tag_time = make_nowtime_tag()
@@ -422,6 +421,7 @@ def preprocess_aligned(
     (i.e. one-to-one correspondence).
 
     Processing Steps:
+
         * align variables
         * preprocessing
         * candidate genes (HVGs and DEGs)
@@ -513,6 +513,7 @@ def preprocess_unaligned(
     (i.e. some of them could be one-to-many or many-to-one correspondence)
 
     Processing Steps:
+
         * preprocessing
         * candidate genes (HVGs and DEGs)
         * pre-clustering query data

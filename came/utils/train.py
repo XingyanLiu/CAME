@@ -30,6 +30,7 @@ SUBDIR_MODEL = '_models'
 
 
 def seed_everything(seed=123):
+    """ not works well """
     random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
     np.random.seed(seed)
@@ -206,13 +207,18 @@ class BaseTrainer(object):
         )
 
     def set_train_params(self,
-                         lr=1e-3,
-                         l2norm=1e-2,  # 1e-2 is tested for all datasets
+                         lr: float = 1e-3,
+                         l2norm: float = 1e-2,
                          ):
         """
-        setting parameters for:
-            lr: learning rate
-            l2norm: `weight_decay`
+        setting parameters for model training
+
+        Parameters
+        ----------
+        lr: float (default=1e-3)
+            learning rate
+        l2norm:
+            the ``weight_decay``, 1e-2 is tested for all datasets
         """
         self.lr = lr
         self.l2norm = l2norm
@@ -377,15 +383,6 @@ class Trainer(BaseTrainer):
             tt='test accuracy and cluster index',
             fp=fp)
 
-    def plot_class_accs(self, start=0, end=None, fp=None):
-        plot_records_for_trainer(
-            self,
-            record_names=['train_acc', 'test_acc'],
-            start=start, end=end,
-            lbs=['training acc', 'testing acc'],
-            tt='classification accuracy',
-            fp=fp)
-
     def plot_class_losses(self, start=0, end=None, fp=None):
         plot_records_for_trainer(
             self,
@@ -414,7 +411,7 @@ class Trainer(BaseTrainer):
               device=None,
               backup_stride: int = 43,
               **other_inputs):
-        """ Main function for model training
+        """ Main function for model training (whole-graph based)
 
         Parameters
         ----------
@@ -439,7 +436,7 @@ class Trainer(BaseTrainer):
 
         Returns
         -------
-
+        None
         """
         # setting device to train
         if device is None:
@@ -556,8 +553,7 @@ class Trainer(BaseTrainer):
                         device=None,
                         backup_stride: int = 43,
                         **other_inputs):
-        """
-        Function for training on mini-batches
+        """ Main function for model training (based on mini-batches)
         """
         # setting device to train
         if device is None:
