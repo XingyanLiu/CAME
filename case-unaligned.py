@@ -51,6 +51,10 @@ for _tiss in Tissues:
             tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
             break
 
+# temp: SPG subtypes
+dsn1 = 'spg---' + dsn1
+dsn2 = 'spg---' + dsn2
+
 print(f'Tissue:\t{tiss}', f'ref: {sp1}\t{dsn1}', f'que: {sp2}\t{dsn2}',
       sep='\n')
 
@@ -85,7 +89,7 @@ adatas = [adata_raw1, adata_raw2]
 
 # In[]
 # temp: remove known-ref-type
-if True:
+if False:
     rm_groups = ['inhibitory neuron', 'excitatory neuron']
     adata_raw1 = pp.remove_adata_groups(adata_raw1, key_class1, rm_groups, copy=False)
     adatas = [adata_raw1, adata_raw2]
@@ -106,10 +110,13 @@ sc.pp.filter_genes(adata_raw2, min_cells=3)
 # In[]
 ''' default pipeline of CAME
 '''
+node_source = 'deg' if 'spg' in dsn1 else 'deg,hvg'
+
 came_inputs, (adata1, adata2) = pipeline.preprocess_unaligned(
     adatas,
     key_class=key_class1,
     use_scnets=True,
+    node_source=node_source,
 )
 
 dpair, trainer, h_dict, predictor, ENV_VARs = pipeline.main_for_unaligned(

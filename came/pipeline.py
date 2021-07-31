@@ -506,7 +506,8 @@ def preprocess_unaligned(
         nneigh_scnet: int = 5,
         nneigh_clust: int = 20,
         ntop_deg: int = 50,
-        key_clust: str = 'clust_lbs'
+        key_clust: str = 'clust_lbs',
+        node_source: str = 'hvg,deg',
 ):
     """
     Packed function for process adatas with un-aligned features.
@@ -574,8 +575,14 @@ def preprocess_unaligned(
         adata2, key_clust, **params_deg)
 
     vars_use = [degs1, degs2]
-    vars_as_nodes = [np.unique(np.hstack([hvgs1, degs1])),
-                     np.unique(np.hstack([hvgs2, degs2]))]
+    node_source = node_source.lower()
+    if 'hvg' in node_source and 'deg' in node_source:
+        vars_as_nodes = [np.unique(np.hstack([hvgs1, degs1])),
+                        np.unique(np.hstack([hvgs2, degs2]))]
+    elif 'hvg' in node_source:
+        vars_as_nodes = [hvgs1, hvgs2]
+    else:
+        vars_as_nodes = [degs1, degs2]
 
     dct = dict(
         adatas=adatas,
