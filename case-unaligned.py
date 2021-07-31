@@ -37,7 +37,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse0'),    
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[-1]  # [::-1]
+dsnames = DATASET_PAIRS[-3]  # [::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -194,7 +194,7 @@ adt.write(resdir / 'adt_hidden_cell.h5ad')
 # In[]
 ''' similaraties of cell-type embeddings
 '''
-adt1, adt2 = pp.bisplit_adata(adt, 'dataset', dsn1, reset_index_by='original_name')
+adt1, adt2 = pp.bisplit_adata(adt, 'dataset', dsnames[0], reset_index_by='original_name')
 avg_embed1 = pp.group_mean_adata(adt1, 'celltype')
 avg_embed2 = pp.group_mean_adata(adt2, 'celltype')
 
@@ -254,7 +254,7 @@ df_var_links = came.weight_linked_vars(
 )
 
 # split
-gadt1, gadt2 = pp.bisplit_adata(gadt, 'dataset', dsn1, reset_index_by='name')
+gadt1, gadt2 = pp.bisplit_adata(gadt, 'dataset', dsnames[0], reset_index_by='name')
 
 color_by = 'module'
 sc.pl.umap(gadt1, color=color_by, s=10, edges=True, edges_width=0.05,
