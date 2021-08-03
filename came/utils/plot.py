@@ -869,9 +869,9 @@ def plot_multipartite_graph(
 
 
 def _prepare_for_nxplot(
-        g, names=['cell group', 'gene module'],
-        sizes=[1800, 900, 900, 1800],
-        colors=['pink', 'lightblue', 'lightblue', 'pink']):
+        g, names=('cell group', 'gene module'),
+        sizes=(1800, 900, 900, 1800),
+        colors=('pink', 'lightblue', 'lightblue', 'pink')):
     """
     g: a multipartite graph with 4 layers
     """
@@ -886,7 +886,7 @@ def _prepare_for_nxplot(
 
     for isubset, size_scale in enumerate(sizes):
         inds_sub = nodedf['subset'] == isubset
-        nodedf['plt_size'][inds_sub] *= size_scale
+        nodedf.loc[inds_sub, 'plt_size'] *= size_scale
     return nodedf
 
 

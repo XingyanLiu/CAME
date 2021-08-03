@@ -87,8 +87,13 @@ def load_dpair_and_model(
                 )
     if ckpt is None:
         ckpt = _infer_ckpt(model_dir)
+    if not torch.cuda.is_available():
+        map_location = torch.device('cpu')
+    else:
+        map_location = None
     model.load_state_dict(
-        torch.load(model_dir / f'weights_epoch{ckpt}.pt')
+        torch.load(model_dir / f'weights_epoch{ckpt}.pt',
+                   map_location=map_location)
     )
     return dpair, model
 

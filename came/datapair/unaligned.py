@@ -127,7 +127,9 @@ class DataPair(object):
         if make_graph:
             self.make_whole_net(**kwds)
         else:
-            print('graph has not been made, call `self.make_whole_net()` if needed.')
+            logging.info(
+                'graph has not been made, call `self.make_whole_net()` '
+                'if needed.')
 
     def save_init(self, path='datapair_init.pickle'):
         """
@@ -662,11 +664,11 @@ def datapair_from_adatas(
     adatas: list or tuple
         a list or tuple of 2 sc.AnnData object.
     
-    vars_use: list or tuple
+    vars_use:
         a list or tuple of 2 variable name-lists.
         for example, differentail expressed genes, highly variable features.
     
-    df_varmap: pd.DataFrame
+    df_varmap:
         pd.DataFrame with 2 columns.
         relationships between features in 2 datasets, for making the 
         adjacent matrix (`vv_adj`) between variables from these 2 datasets. 
@@ -711,19 +713,19 @@ def datapair_from_adatas(
 
     if vars_as_nodes is None:
         vars_as_nodes = vars_use
-    ### features selected for modeling. (e.g. DEGs, HVGs)
+    # features selected for modeling. (e.g. DEGs, HVGs)
     vars_use1, vars_use2 = vars_use
     vars_nodes1, vars_nodes2 = vars_as_nodes
-    ### --- obs. annotation dataframes
+    # --- obs. annotation dataframes
     obs1 = adata1.obs.copy()
     obs2 = adata2.obs.copy()
 
-    ### --- deal with variable mapping dataframe
+    # --- deal with variable mapping dataframe
     if df_varmap_1v1 is None:
         print('1-to-1 mapping between variables (`df_varmap_1v1`) is not '
               'provided, extracting from `df_varmap`')
         df_varmap_1v1 = utp.take_1v1_matches(df_varmap)
-    ### --- connection between variables from 2 datasets
+    # --- connection between variables from 2 datasets
     vars_all1, vars_all2 = adata_raw1.var_names, adata_raw2.var_names
     submaps = utp.subset_matches(df_varmap, vars_nodes1, vars_nodes2, union=True)
     submaps = utp.subset_matches(submaps, vars_all1, vars_all2, union=False)
@@ -737,13 +739,13 @@ def datapair_from_adatas(
         vv_adj, vnodes1, vnodes2 = utp.make_bipartite_adj(
             submaps, with_singleton=False, symmetric=True,
         )
-        ### --- ov_adjs (unaligned features, for making `ov_adj`)
+    # --- ov_adjs (unaligned features, for making `ov_adj`)
     ov_adjs1 = adata_raw1[:, vnodes1].X  # for ov_adj
     ov_adjs2 = adata_raw2[:, vnodes2].X
     var1 = adata1.var.copy().loc[vnodes1, :]
     var2 = adata2.var.copy().loc[vnodes2, :]
 
-    ### --- node features 
+    # --- node features
     if union_node_feats == 'auto' and sum(map(len, vars_use)) < 3000:
         union_node_feats = True
     else:
@@ -764,8 +766,9 @@ def datapair_from_adatas(
     #        features1 = adata1[:, vnames_feat1].X
     #        features2 = adata2[:, vnames_feat2].X
     #    except:
-    print('[NOTE]\nthe node features will be extracted from `adata.raw`, '
-          'please make sure that the values are normalized.\n')
+    logging.info(
+        '[NOTE]\nthe node features will be extracted from `adata.raw`, '
+        'please make sure that the values are normalized.\n')
     features1 = adata_raw1[:, vnames_feat1].X
     features2 = adata_raw2[:, vnames_feat2].X
 

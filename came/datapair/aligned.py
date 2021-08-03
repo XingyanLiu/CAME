@@ -331,7 +331,7 @@ class AlignedDataPair(object):
                 (ntypes['v'], f'self_loop_{ntypes["v"]}', ntypes['v'])
             ] = sparse.eye(self.n_vnodes)
 
-        ### for compatibility with the new version of DGL
+        # for compatibility with the new version of DGL
         edge_dict = utp.scipy_edge_dict_for_dgl(edge_dict)
         self.G = dgl.heterograph(edge_dict)
 
@@ -452,10 +452,6 @@ class AlignedDataPair(object):
             elif obs.shape[0] != n_obs:
                 raise ValueError(f'the number of observations are not matched '
                                  f'expect {n_obs}, got {obs.shape[0]}.')
-            #            else:
-            #                print(f'adding column "{key}"')
-            #                obs[key] = val # TODO: separate out
-            #            print(f'[*] Setting metadata (annotations) for {n_obs} observations:')
             print(obs.columns)
             return obs
 
@@ -562,7 +558,8 @@ def aligned_datapair_from_adatas(
     
     vars_feat: a sequence of variable names
         a name-list of variables that will be used as (cell) node features.
-        for example, names of differentail expressed genes, highly variable features.
+        for example, names of differentail expressed genes (DEGs),
+        highly variable features.
     
     vars_as_nodes: a sequence of variable names, optional.
         a name-list of variables that will be taken as nodes in the graph
@@ -595,28 +592,29 @@ def aligned_datapair_from_adatas(
     adata_raw2 = adata2.raw.to_adata() if adata2.raw is not None else adata2
 
     vars_common = set(adata_raw1.var_names).intersection(adata_raw2.var_names)
-    ### features selected for modeling. (e.g. DEGs, HVGs)
+    # features selected for modeling. (e.g. DEGs, HVGs)
     vars_feat = list(vars_common.intersection(vars_feat))
     vars_as_nodes = vars_feat if vars_as_nodes is None else list(
         vars_common.intersection(vars_as_nodes))
 
-    ### --- obs. annotation dataframes
+    # --- obs. annotation dataframes
     obs1 = adata1.obs.copy()
     obs2 = adata2.obs.copy()
 
-    ### --- node features (for single-cells)
-    try:
-        features1 = adata1[:, vars_feat].X
-        features2 = adata2[:, vars_feat].X
-    except:
-        print('[NOTE]\nthe node features will be extracted from `adata.raw`, '
-              'please make sure that the values are normalized.\n')
-        features1 = adata_raw1[:, vars_feat].X
-        features2 = adata_raw2[:, vars_feat].X
+    # --- node features (for single-cells)
+    # try:
+    #     features1 = adata1[:, vars_feat].X
+    #     features2 = adata2[:, vars_feat].X
+    # except:
+    logging.info(
+        '[NOTE]\nthe node features will be extracted from `adata.raw`, '
+        'please make sure that the values are normalized.\n')
+    features1 = adata_raw1[:, vars_feat].X
+    features2 = adata_raw2[:, vars_feat].X
 
     features = list(map(_check_sparse_toarray, [features1, features2]))
 
-    ### --- ov_adjs (features for making `ov_adj`)
+    # --- ov_adjs (features for making `ov_adj`)
     ov_adj1 = adata_raw1[:, vars_as_nodes].X  # for ov_adj
     ov_adj2 = adata_raw2[:, vars_as_nodes].X
 

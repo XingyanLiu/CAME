@@ -270,7 +270,6 @@ def main_for_unaligned(
     )
     save_json_dict(params_model, resdir / 'model_params.json')
 
-    # TODO: save model parameters, json file (whether eval?)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = CGGCNet(**params_model)
 
@@ -382,7 +381,8 @@ def gather_came_results(
     probas_all = as_probabilities(out_cell, mode='softmax')
     cl_preds = predict_from_logits(probas_all, classes=classes)
     obs = pd.DataFrame(
-        {keys[0]: dpair.get_obs_labels(keys, asint=False),
+        # TODO: `keys[0]` -> 'REF', may rasise another exceptions
+        {'REF': dpair.get_obs_labels(keys, asint=False),
          # true labels with `unknown` for unseen classes in query data
          'celltype': dpair.get_obs_anno(keys_compare),  # labels for comparison
          'predicted': cl_preds,
