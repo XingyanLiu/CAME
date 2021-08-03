@@ -23,3 +23,4 @@ from .downsample_counts import (
         downsample_total_counts,
         downsample_counts_per_cell
 )
+from _io_h5py import load_hidden_states, save_hidden_states
