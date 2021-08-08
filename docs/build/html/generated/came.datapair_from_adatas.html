@@ -209,9 +209,9 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>adatas</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 sc.AnnData object.</p></li>
-<li><p><strong>vars_use</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 variable name-lists.
+<li><p><strong>vars_use</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – a list or tuple of 2 variable name-lists.
 for example, differentail expressed genes, highly variable features.</p></li>
-<li><p><strong>df_varmap</strong> (<em>pd.DataFrame</em>) – pd.DataFrame with 2 columns.
+<li><p><strong>df_varmap</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – pd.DataFrame with 2 columns.
 relationships between features in 2 datasets, for making the
 adjacent matrix (<cite>vv_adj</cite>) between variables from these 2 datasets.</p></li>
 <li><p><strong>df_varmap_1v1</strong> (<em>None</em><em>, </em><em>pd.DataFrame; optional.</em>) – dataframe containing only 1-to-1 correspondance between features

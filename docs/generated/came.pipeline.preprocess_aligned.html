@@ -207,16 +207,16 @@
 <span class="sig-prename descclassname"><span class="pre">came.pipeline.</span></span><span class="sig-name descname"><span class="pre">preprocess_aligned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_varmap_1v1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_scnets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nneigh_scnet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nneigh_clust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntop_deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_clust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clust_lbs'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.pipeline.preprocess_aligned" title="Permalink to this definition">¶</a></dt>
 <dd><p>Packed function for process adatas with aligned features
 (i.e. one-to-one correspondence).</p>
-<dl class="simple">
-<dt>Processing Steps:</dt><dd><ul class="simple">
+<p>Processing Steps:</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>align variables</p></li>
 <li><p>preprocessing</p></li>
 <li><p>candidate genes (HVGs and DEGs)</p></li>
 <li><p>pre-clustering query data</p></li>
 <li><p>single-cell network</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

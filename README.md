@@ -4,7 +4,7 @@ Cross-species cell-type assignment and gene module extraction of single-cell RNA
 ### Testing the package
 To test the package, run the python file `test_pipeline.py`:
 ```shell
-python test_pipeline.py
+python test_pipeline.py install
 ```
 When running the test, make sure that the sample data (`/CAME/sample_data/`) exist, which contains:
 - gene_matches_1v1_human2mouse.csv (optional)

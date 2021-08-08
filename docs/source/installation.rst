@@ -19,6 +19,6 @@ Or fetch from GitHub and manually install:
 
    git clone XXX
    cd CAME
-   python setup.py
+   python setup.py install
 
 END
