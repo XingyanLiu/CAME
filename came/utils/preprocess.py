@@ -1212,13 +1212,18 @@ def normalize_default(adata: sc.AnnData,
     return adata if copy or force_return else None
 
 
-def normalize_default_rev0(adata, target_sum=5e2,
+def normalize_log_then_total(adata, target_sum=5e2,
                            copy=False, force_return=False):
+    """ For SplitSeq data, performing log(x+1) BEFORE total-sum normalization
+        will results a better UMAP visualization (e.g. clusters would be less
+        confounded by different total-counts ).
+    """
     if copy:
         adata = adata.copy()
-    logging.info('normalizing datasets with default settings (log1p first).'
-          f'target_sum = {target_sum:.1f}')
-    sc.pp.log1p(adata)  ### x <- log(x + 1)
+    logging.info(
+        'normalizing datasets with default settings (log1p first).'
+        f'target_sum = {target_sum:.1f}')
+    sc.pp.log1p(adata)  # x <- log(x + 1)
     sc.pp.normalize_total(adata, target_sum=target_sum)
     return adata if copy or force_return else None
 
