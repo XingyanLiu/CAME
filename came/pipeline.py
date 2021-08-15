@@ -121,7 +121,7 @@ def main_for_aligned(
     save_json_dict(params_model, resdir / 'model_params.json')
 
     # TODO: save model parameters, json file (whether eval?)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = CGCNet(**params_model)
 
     params_lossfunc = get_loss_params(**params_lossfunc)
@@ -162,19 +162,23 @@ def main_for_aligned(
         checkpoint='best',
         batch_size=batch_size,
     )
-    test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
     # ============= confusion matrix & heatmap plot ==============
     if plot_results:
-        labels_cat = obs[keys[0]] if key_class2 != 'clust_lbs' else obs['celltype']
+        test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
+        if key_class2 == 'clust_lbs':
+            labels_cat = obs['celltype']
+            acc_tag = ''
+        else:
+            labels_cat = obs["REF"]
+            acc_tag = f'(acc{test_acc:.1%})'
         cl_preds = obs['predicted']
-        sc.set_figure_params(fontsize=10)
-    
+
         # confusion matrix OR alluvial plot
         sc.set_figure_params(fontsize=10)
         ax, contmat = pl.plot_contingency_mat(
             labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
-            fp=figdir / f'contingency_matrix(acc{test_acc:.1%}).png',
+            fp=figdir / f'contingency_matrix{acc_tag}.png',
         )
         pl.plot_confus_mat(
             labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
@@ -186,7 +190,7 @@ def main_for_aligned(
             df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
             col_label='celltype', col_pred='predicted',
             n_subsample=50,
-            cmap_heat='magma_r', #if prob_func == 'softmax' else 'RdBu_r'
+            cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
             fp=figdir / f'heatmap_probas.pdf'
         )
 
@@ -209,7 +213,6 @@ def main_for_unaligned(
         tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
         params_model: dict = {},
         params_lossfunc: dict = {},
-        check_umap: bool = False,  # TODO
         n_pass: int = 100,
         plot_results: bool = True,
         batch_size: Optional[int] = None,
@@ -311,17 +314,22 @@ def main_for_unaligned(
         checkpoint='best',
         batch_size=batch_size,
     )
-    test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
 
     if plot_results:
-        labels_cat = obs[keys[0]] if key_class2 != 'clust_lbs' else obs['celltype']
+        test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
+        if key_class2 == 'clust_lbs':
+            labels_cat = obs['celltype']
+            acc_tag = ''
+        else:
+            labels_cat = obs["REF"]
+            acc_tag = f'(acc{test_acc:.1%})'
         cl_preds = obs['predicted']
 
         # confusion matrix OR alluvial plot
         sc.set_figure_params(fontsize=10)
         ax, contmat = pl.plot_contingency_mat(
             labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
-            fp=figdir / f'contingency_matrix(acc{test_acc:.1%}).png',
+            fp=figdir / f'contingency_matrix{acc_tag}.png',
         )
         pl.plot_confus_mat(
             labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
@@ -388,7 +396,7 @@ def gather_came_results(
          'predicted': cl_preds,
          'max_probs': np.max(probas_all, axis=1),
          })
-    obs['is_right'] = obs['predicted'] == obs[keys[0]]
+    obs['is_right'] = obs['predicted'] == obs['REF']
     df_probs = pd.DataFrame(probas_all, columns=classes)
     dpair.set_common_obs_annos(obs)
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
@@ -624,7 +632,6 @@ def __test1__(n_epochs: int = 5, batch_size=None):
         do_normalize=True,
         n_epochs=n_epochs,
         resdir=resdir,
-        check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
         params_model=dict(residual=False),
         batch_size=batch_size
@@ -669,7 +676,6 @@ def __test2__(n_epochs: int = 5, batch_size=None):
         do_normalize=True,
         n_epochs=n_epochs,
         resdir=resdir,
-        check_umap=not True,  # True for visualizing embeddings each 40 epochs
         n_pass=100,
         params_model=dict(residual=False),
         batch_size=batch_size,

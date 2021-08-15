@@ -177,7 +177,12 @@ class DataPair(object):
             features = th.FloatTensor(features)
         return features
 
-    def get_feature_dict(self, astensor=True, scale=False, unit_var=True, **kwds):
+    def get_feature_dict(
+            self,
+            astensor: bool = True,
+            scale: bool = True,
+            unit_var: bool = True,
+            **kwds):
         features = self.get_obs_features(astensor=astensor, scale=scale,
                                          unit_var=unit_var, **kwds)
         return {self.ntypes['o']: features}
@@ -330,14 +335,26 @@ class DataPair(object):
         else:
             return vnode_ids
 
-    def get_vnode_ids_by_name(self, varlist, which=0, unseen=np.nan):
+    def get_vnode_ids_by_name(
+            self, varlist, which=0,
+            unseen=np.nan,
+            rm_unseen: bool = False):
         """
         looking-up var-node indices for the given names
         """
         if isinstance(varlist, str):
             varlist = [varlist]
-        gids = [self._n2i_dict[which].get(g, unseen) for g in varlist]
-        return gids
+        if rm_unseen:
+            ids, names = [], []
+            for g in varlist:
+                gid = self._n2i_dict[which].get(g, None)
+                if gid:
+                    ids.append(gid)
+                    names.append(g)
+            return ids, names
+        else:
+            ids = [self._n2i_dict[which].get(g, unseen) for g in varlist]
+            return ids
 
     def get_vnode_names(self, vnode_ids=None, tolist=True):
 

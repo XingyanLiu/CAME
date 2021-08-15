@@ -165,7 +165,12 @@ class AlignedDataPair(object):
             features = th.FloatTensor(features)
         return features
 
-    def get_feature_dict(self, astensor=True, scale=False, unit_var=True, **kwds):
+    def get_feature_dict(
+            self,
+            astensor: bool = True,
+            scale: bool = True,
+            unit_var: bool = True,
+            **kwds):
         features = self.get_obs_features(astensor=astensor, scale=scale,
                                          unit_var=unit_var, **kwds)
         return {self.ntypes['o']: features}

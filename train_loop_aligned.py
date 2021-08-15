@@ -121,7 +121,6 @@ for tiss in Tissues:
                 do_normalize=True,
                 n_epochs=n_epochs,
                 resdir=resdir,
-                check_umap=not True,
                 # True for visualizing embeddings each 40 epochs
                 n_pass=100,
                 params_model=dict(residual=False),

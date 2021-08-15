@@ -113,9 +113,8 @@ for tiss in Tissues:
                     do_normalize=True,
                     n_epochs=n_epochs,
                     resdir=resdir,
-                    check_umap=not True,
                     n_pass=100,
-                    plot_results=True, # TODO: if raise error, change it to False
+                    plot_results=True,  # TODO: if raise error, change it to False
                     params_model=params_model,
                     params_lossfunc=params_lossfunc,
                     batch_size=batch_size,

@@ -224,8 +224,6 @@ class Predictor(object):
     def save(self, json_path, encoding='utf-8'):
         mean, std = list(zip(*self._background_mean_std))
         
-        # else:
-        #     mean_fg = std_fg = None
         dct = {
             'classes': list(self.classes),
             'mode': self._mode,
@@ -239,7 +237,7 @@ class Predictor(object):
                 'mean_fg': list(map(float, mean_fg)),
                 'std_fg': list(map(float, std_fg))
             })
-        logging.warning(dct)
+        # logging.info(dct)
         save_json_dict(dct, json_path, encoding=encoding)
         logging.info(json_path)
 

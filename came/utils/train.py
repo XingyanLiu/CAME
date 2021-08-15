@@ -137,8 +137,22 @@ class BaseTrainer(object):
                  dir_main: Union[str, Path] = Path('.'),
                  **kwds  # for code compatibility (not raising error)
                  ):
+        self.model = None
+        self.feat_dict = None
+        self.train_labels = None
+        self.test_labels = None
+        self.train_idx = None
+        self.test_idx = None
+        self.device = None
+        self.dir_main = None
+        self.dir_model = None
+        self.lr = None
+        self.l2norm = None
+        self._record_names = None
+        self._train_logs = None
+        self.with_ground_truth = None
 
-        # self.use_cuda = use_cuda and torch.cuda.is_available()
+        self.set_dir(dir_main)
         self.set_inputs(
             model, feat_dict,
             train_labels, test_labels,
@@ -146,14 +160,11 @@ class BaseTrainer(object):
             )
 
         self.cluster_labels = cluster_labels
-        self.set_train_params(
+        self._set_train_params(
             lr=lr,
-            l2norm=l2norm,  # 1e-2 is tested for all datasets
+            l2norm=l2norm,
         )
-        self.optimizer = torch.optim.Adam(
-            model.parameters(), lr=lr, weight_decay=l2norm)
 
-        self.set_dir(dir_main)
         self._cur_epoch = -1
         self._cur_epoch_best = -1
         self._cur_epoch_adopted = 0
@@ -167,7 +178,7 @@ class BaseTrainer(object):
         print('model directory:', self.dir_model)
 
     def set_inputs(
-            self, model,
+            self, model: torch.nn.Module,
             feat_dict: Mapping,
             train_labels: Union[Tensor, List[Tensor]],
             test_labels: Union[Tensor, List[Tensor], None],
@@ -180,6 +191,7 @@ class BaseTrainer(object):
         self.test_labels = test_labels
         self.train_idx = train_idx
         self.test_idx = test_idx
+        self.with_ground_truth = self.test_labels is None
         # inference device
         try:
             self.device = self.train_idx.device
@@ -206,22 +218,24 @@ class BaseTrainer(object):
             self.test_idx
         )
 
-    def set_train_params(self,
-                         lr: float = 1e-3,
-                         l2norm: float = 1e-2,
-                         ):
+    def _set_train_params(self,
+                          lr: float = 1e-3,
+                          l2norm: float = 1e-2,
+                          ):
         """
         setting parameters for model training
 
         Parameters
         ----------
-        lr: float (default=1e-3)
-            learning rate
+        lr: float
+            the learning rate (default=1e-3)
         l2norm:
             the ``weight_decay``, 1e-2 is tested for all datasets
         """
         self.lr = lr
         self.l2norm = l2norm
+        self.optimizer = torch.optim.Adam(
+            self.model.parameters(), lr=lr, weight_decay=l2norm)
 
     def set_recorder(self, *names):
         self._record_names = tuple(names)
@@ -505,14 +519,17 @@ class Trainer(BaseTrainer):
             else:
                 ami = -1.
 
+            backup = False
             if self._cur_epoch >= n_pass - 1:
                 self.ami_max = max(self.ami_max, ami)
                 if ami >= self.ami_max - eps:
                     self._cur_epoch_best = self._cur_epoch
                     self.save_model_weights()
+                    backup = True
                     print('[current best] model weights backup')
                 elif self._cur_epoch % backup_stride == 0:
                     self.save_model_weights()
+                    backup = True
                     print('model weights backup')
 
             # backward AFTER model saved
@@ -533,13 +550,20 @@ class Trainer(BaseTrainer):
 
             dur_avg = np.average(self.dur)
             self.test_acc_max = max(test_acc, self.test_acc_max)
-            logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test Acc or AMI: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
-            self._cur_log = logfmt.format(
-                self._cur_epoch, train_acc,
-                ami if test_labels is None else test_acc,
-                self.ami_max if test_labels is None else self.test_acc_max,
-                ami, dur_avg)
-            print(self._cur_log)
+
+            if self.with_ground_truth:
+                logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
+                self._cur_log = logfmt.format(
+                    self._cur_epoch, train_acc, ami, self.ami_max,
+                    ami, dur_avg)
+            else:
+                logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
+                self._cur_log = logfmt.format(
+                    self._cur_epoch, train_acc, test_acc, self.test_acc_max,
+                    ami, dur_avg)
+            if self._cur_epoch % 5 == 0 or backup:
+                print(self._cur_log)
+
         self._cur_epoch_adopted = self._cur_epoch
         self.save_checkpoint_record()
 
@@ -569,7 +593,9 @@ class Trainer(BaseTrainer):
             class_weights = None
 
         if not hasattr(self, 'ami_max'):
-            self.ami_max = 0
+            self.ami_max = 0.
+        if not hasattr(self, 'test_acc_max'):
+            self.test_acc_max = 0.
 
         print("start training".center(50, '='))
         model = self.model.to(device)
@@ -637,14 +663,17 @@ class Trainer(BaseTrainer):
                 if self.cluster_labels is not None:
                     ami = get_AMI(cluster_labels, all_test_preds)
 
+                backup = False
                 if self._cur_epoch >= n_pass - 1:
                     self.ami_max = max(self.ami_max, ami)
                     if ami > self.ami_max - eps:
                         self._cur_epoch_best = self._cur_epoch
                         self.save_model_weights()
+                        backup = True
                         print('[current best] model weights backup')
                     elif self._cur_epoch % backup_stride == 0:
                         self.save_model_weights()
+                        backup = True
                         print('model weights backup')
 
                 t1 = time.time()
@@ -661,14 +690,21 @@ class Trainer(BaseTrainer):
                              )
 
                 dur_avg = np.average(self.dur)
-                test_acc_max = max(self.test_acc)
-                logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test Acc: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
-                self._cur_log = logfmt.format(
-                    self._cur_epoch, train_acc,
-                    test_acc, test_acc_max,
-                    ami, dur_avg)
+                self.test_acc_max = max(test_acc, self.test_acc_max)
 
-                print(self._cur_log)
+                if self.with_ground_truth:
+                    logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
+                    self._cur_log = logfmt.format(
+                        self._cur_epoch, train_acc, ami, self.ami_max,
+                        ami, dur_avg)
+                else:
+                    logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
+                    self._cur_log = logfmt.format(
+                        self._cur_epoch, train_acc, test_acc, self.test_acc_max,
+                        ami, dur_avg)
+                if self._cur_epoch % 5 == 0 or backup:
+                    print(self._cur_log)
+
             self._cur_epoch_adopted = self._cur_epoch
 
     def get_current_outputs(self,

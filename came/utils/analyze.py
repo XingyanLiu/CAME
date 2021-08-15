@@ -178,6 +178,99 @@ def weight_linked_vars(
     return df
 
 
+''' TF-targets
+'''
+
+
+def tf_cross_knn(
+        embedding: np.ndarray,
+        dpair: DataPair,
+        tflist1, tflist2,
+        k: int = 30,
+        metric='cosine',
+        algorithm='brute',
+):
+    """ search KNNs for given sets of variables (genes), based on embeddings
+
+    Parameters
+    ----------
+    embedding
+        low-dimensional embeddings for ALL the variable-nodes.
+    dpair
+        the ``DataPair`` object induced from two datasets
+    tflist1: Iterable
+        variable-names of interest (e.g. TFs), for the first dataset (species)
+         in ``dpair``
+    tflist2: Iterable
+        variable-names of interest (e.g. TFs), for the second dataset (species)
+        in ``dpair``
+    k: int
+        the number of nearest neighbor to search
+    metric
+        metric for distance
+    algorithm
+        KNN searching algorithm
+
+    Returns
+    -------
+    Two pd.DataFrame with columns {'TF_name', 'knn', 'knn_cross'}
+    """
+    from sklearn.neighbors import NearestNeighbors
+    var_ids1, var_ids2 = dpair.var_ids1, dpair.var_ids2
+    names1, names2 = dpair.vnode_names1, dpair.vnode_names2
+    tfids1, tfnames1 = dpair.get_vnode_ids_by_name(tflist1, 0, rm_unseen=True)
+    tfids2, tfnames2 = dpair.get_vnode_ids_by_name(tflist2, 1, rm_unseen=True)
+
+    # tfnames1 = dpair.get_vnode_names(tfids1)
+    # tfnames2 = dpair.get_vnode_names(tfids2)
+
+    # indexer
+    indexer1 = NearestNeighbors(
+        n_neighbors=k, algorithm=algorithm,
+        metric=metric,
+    ).fit(embedding[var_ids1, :])
+    indexer2 = NearestNeighbors(
+        n_neighbors=k, algorithm=algorithm,
+        metric=metric,
+    ).fit(embedding[var_ids2, :])
+
+    # TF-centered links
+    # ======== KNN for "1" ===========
+    knn_dists11, knn_indices11 = indexer1.kneighbors(
+        embedding[tfids1, :], n_neighbors=k, return_distance=True
+    )
+    knn_names11 = np.take(names1, knn_indices11)
+    knn_dists12, knn_indices12 = indexer2.kneighbors(
+        embedding[tfids1, :], n_neighbors=k, return_distance=True
+    )
+    knn_names12 = np.take(names2, knn_indices12)
+    # knn_indices12 = np.take(var_ids2, knn_indices12)
+    df_tf_targets1 = pd.DataFrame({
+        'TF_name': tfnames1,
+        'knn': list(knn_names11),
+        'knn_cross': list(knn_names12)
+    }).set_index('TF_name', drop=False)
+
+    # ======== KNN for "2" ===========
+    knn_dists21, knn_indices21 = indexer1.kneighbors(
+        embedding[tfids2, :], n_neighbors=k, return_distance=True
+    )
+    knn_names21 = np.take(names1, knn_indices21)
+
+    knn_dists22, knn_indices22 = indexer2.kneighbors(
+        embedding[tfids2, :], n_neighbors=k, return_distance=True
+    )
+    knn_names22 = np.take(names2, knn_indices22)
+    # knn_indices22 = np.take(var_ids2, knn_indices22)
+
+    df_tf_targets2 = pd.DataFrame({
+        'TF_name': tfnames2,
+        'knn': list(knn_names22),
+        'knn_cross': list(knn_names21)
+    }).set_index('TF_name', drop=False)
+
+    return df_tf_targets1, df_tf_targets2
+
 # In[]
 """ compute module eigen-vector
 """
@@ -239,18 +332,7 @@ def compute_group_eigens(X, labels, groups=None, whiten=False, **kwds):
     return eigen_df, memberships
 
 
-def jointly_extract_modules(
-        adata,
-        resolution=0.8,
-        method='leiden',
-        key_added='cluster',
-        neighbors_key=None,  # or 'integrative'
-        **kwds):
-    pass
-
 # =================[ module extraction ]=================
-
-
 def _filter_for_abstract(
         var_labels1, var_labels2,
         avg_expr1, avg_expr2,
@@ -710,15 +792,16 @@ def make_abstracted_graph(
     """
     Parameters
     ----------
-    obs_labels1, obs_labels2,
+    obs_labels1, obs_labels2
     
-    var_labels1, var_labels2,
+    var_labels1, var_labels2
     
-    avg_expr1, avg_expr2,
+    avg_expr1, avg_expr2
     
-    df_var_links,
+    df_var_links
     
-    norm_mtd_ov: one of {None, 'zs', 'maxmin', 'max'}
+    norm_mtd_ov:
+        one of {None, 'zs', 'maxmin', 'max'}
     """
     tag_obs1, tag_obs2 = tags_obs
     tag_var1, tag_var2 = tags_var
@@ -841,13 +924,14 @@ def abstract_vv_edges(
         This can also be output form ResultsAnalyzer.weight_linked_vars(), 
         or the stored attribute `ResultsAnalyzer.var_link_weights`
     
-    keys_edge: If `keys_edge` is provided, it should be a tuple of 2 column-names
+    keys_link:
+        If `keys_edge` is provided, it should be a tuple of 2 column-names
         in df_links.columns, indicating the edge columns.
     var_labels1, var_labels2:
         grouping labels for the two sets of variables, respectively.
     """
-    #    _var_labels1 = pd.Series({k: f'{tag_var1}{c}' for k, c in var_labels1.items()})
-    #    _var_labels2 = pd.Series({k: f'{tag_var1}{c}' for k, c in var_labels2.items()})
+    # _var_labels1 = pd.Series({k: f'{tag_var1}{c}' for k, c in var_labels1.items()})
+    # _var_labels2 = pd.Series({k: f'{tag_var1}{c}' for k, c in var_labels2.items()})
 
     abs_vv = aggregate_links(
         df_links, var_labels1, var_labels2, norm_sizes=None,  # normalize latter
@@ -990,9 +1074,11 @@ def abstract_ov_edges(
     """
     Parameters
     ----------
-    avg_expr: pd.DataFrame; each column represent the average expressoions 
+    avg_expr: pd.DataFrame
+        each column represent the average expressoions
         for each observation group, and each row as a variable.
-    norm_method: one of {None, 'zs', 'maxmin', 'max'}
+    norm_method:
+        one of {None, 'zs', 'maxmin', 'max'}
     """
     df = avg_expr.copy()
     if norm_method is not None:
