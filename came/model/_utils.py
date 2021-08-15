@@ -5,8 +5,11 @@
 @time: 2021-06-12
 """
 
-from typing import Union, Sequence, Optional, Mapping, Any, List
+from typing import Union, Sequence, Optional, Mapping, Any, List, Callable
 import logging
+
+import numpy as np
+import torch
 from scipy import sparse
 import torch as th
 from torch import Tensor
@@ -26,6 +29,16 @@ def detach2numpy(x):
         x = {k: detach2numpy(v) for k, v in x.items()}
     elif isinstance(x, List):
         x = [detach2numpy(v) for v in x]
+    return x
+
+
+def as_torch_tensor(x, dtype: Callable = Tensor):
+    if isinstance(x, np.ndarray):
+        x = dtype(x, )
+    elif isinstance(x, Mapping):
+        x = {k: as_torch_tensor(v) for k, v in x.items()}
+    elif isinstance(x, List):
+        x = [as_torch_tensor(v) for v in x]
     return x
 
 
@@ -85,12 +98,15 @@ def get_all_hidden_states(
         feat_dict: Mapping[Any, Tensor],
         g: dgl.DGLGraph,
         detach2np: bool = True,
+        train: bool = False,
 ):
-    # embedding layer
-    h_embed = model.embed_layer(g, feat_dict)
-    # hidden layers
-    _ = model.rgcn(g, h_embed)
-    h_list = [h_embed] + model.rgcn.hidden_states
+    with torch.no_grad():
+        model.train(train)
+        # embedding layer
+        h_embed = model.embed_layer(g, feat_dict)
+        # hidden layers
+        _ = model.rgcn(g, h_embed)
+        h_list = [h_embed] + model.rgcn.hidden_states
     if detach2np:
         h_list = [detach2numpy(h) for h in h_list]
     return h_list
@@ -98,7 +114,7 @@ def get_all_hidden_states(
 
 def get_attentions(
         model: nn.Module,
-        feat_dict: Mapping,
+        feat_dict: Mapping[str, Tensor],
         g: dgl.DGLGraph,
         fuse='mean',
         from_scratch: bool = True,
