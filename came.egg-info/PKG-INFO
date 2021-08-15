@@ -1,3 +1,23 @@
+Metadata-Version: 2.1
+Name: came
+Version: 0.1.0
+Summary: cell-type assignment and gene module extraction of scRNA-seq
+Home-page: https://github.com/XingyanLiu/CAME
+Author: Xingyan Liu
+Author-email: 544568643@qq.com
+License: MIT
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Requires-Python: >=3.8.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+
 # CAME
 Cross-species cell-type assignment and gene module extraction of single-cell RNA-seq by graph neural network
 
@@ -34,3 +54,5 @@ TODO:
   * Aligned features.
   * Unaligned features.
 * Documentation of API.
+
+
