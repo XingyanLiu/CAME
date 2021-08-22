@@ -467,7 +467,7 @@ class Trainer(BaseTrainer):
                                 self.g,
                                 **other_inputs)
             out_cell = logits[cat_class]
-            loss = self.model.get_classification_loss(
+            loss = self.model.cross_entropy_loss(
                 out_cell[train_idx],
                 train_labels,
                 weight=class_weights,
@@ -606,7 +606,7 @@ class Trainer(BaseTrainer):
                 out_cell = logits[cat_class]  # .cuda()
                 output_labels = labels[output_nodes]
                 out_train_labels = output_labels[batch_train_idx].clone().detach()
-                loss = model.get_classification_loss(
+                loss = model.cross_entropy_loss(
                     out_cell[batch_train_idx],
                     to_device(out_train_labels, device),
                     weight=class_weights,

@@ -144,7 +144,8 @@ class CGGCNet(nn.Module):
             h_dict = self.embed_layer(g[0], feat_dict, )
             h_dict = self.rgcn.forward(g[0], h_dict, **kwds).copy()
             self.cell_classifier.eval()
-            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict, **kwds)['cell']#The last graph is a graph of batch_size cells and it's connected genes
+            # The last graph is a graph of batch_size cells and it's connected genes
+            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict, **kwds)['cell']
         else:
             if self.residual:
                 h_dict0 = self.embed_layer(g, feat_dict, )

@@ -206,12 +206,12 @@ class Trainer(BaseTrainer):
             out_cell1 = out_cell[:, : self.n_classes1]
             out_cell2 = out_cell[:, self.n_classes1:]
             
-            loss1 = self.model.get_classification_loss(
+            loss1 = self.model.cross_entropy_loss(
                 out_cell1[train_idx1, :], labels1[train_idx1],
                 weight=class_weights1,
                 **params_lossfunc
             )
-            loss2 = self.model.get_classification_loss(
+            loss2 = self.model.cross_entropy_loss(
                 out_cell2[train_idx2, :], labels2[train_idx2],
                 weight=class_weights2,
                 **params_lossfunc

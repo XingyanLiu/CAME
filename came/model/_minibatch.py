@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """
 @CreateDate: 2021/07/15
-@Author: Xingyan Liu
+@Author: Qunlun Shen
 @File: _minibatch.py
 @Project: CAME
 """
@@ -43,20 +43,28 @@ def create_batch(
 ):
     """
     This function create batch idx, i.e. the cells IDs in a batch.
-    ----------------------------------------------------------------------
+
     Parameters
-    -----------
-    train_idx: the index for reference cells
-    test_idx: the index for query cells
-    batch_size: the number of cells in each batch
-    labels: the labels for both Reference cells and Query cells
-    ----------------------------------------------------------------------
+    ----------
+    train_idx:
+        the index for reference cells
+    test_idx:
+        the index for query cells
+    batch_size:
+        the number of cells in each batch
+    labels:
+        the labels for both Reference cells and Query cells
+
     Returns
-    -----------
-    train_labels: the shuffled or non-shuffled labels for all reference cells
-    test_labels: the shuffled or non-shuffled labels for all query cells
-    batch_list: the list sores the batch of cell IDs
-    all_idx: the shuffled or non-shuffled index for all cells
+    -------
+    train_labels
+        the shuffled or non-shuffled labels for all reference cells
+    test_labels
+        the shuffled or non-shuffled labels for all query cells
+    batch_list
+        the list sores the batch of cell IDs
+    all_idx
+        the shuffled or non-shuffled index for all cells
     """
     if label:
         batch_list = []

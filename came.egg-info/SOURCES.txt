@@ -25,6 +25,7 @@ came/model/hidden.py
 came/model/loss.py
 came/utils/__init__.py
 came/utils/_alluvial.py
+came/utils/_base_trainer.py
 came/utils/_get_example_data.py
 came/utils/_io_h5py.py
 came/utils/_knn.py

@@ -264,7 +264,7 @@ def merge_metas(adatas, obs_keys):
 
 def merge_adatas(
         adatas: Union[Mapping[str, sc.AnnData], Sequence[sc.AnnData]],
-        union: bool = True,
+        union: bool = False,
         obs_keys: Optional[Sequence] = None,
         dsnames: Optional[Sequence] = None,
         key_dsname: str = None
@@ -1704,14 +1704,15 @@ def group_mean_multiadata(adatas: Sequence[sc.AnnData],
 # In[]
 
 def quick_preprocess(
-        adata,
-        hvgs=None,
-        normalize_data=True,
-        target_sum=1e4,
+        adata: sc.AnnData,
+        hvgs: Optional[Sequence] = None,
+        normalize_data: bool = True,
+        target_sum: Optional[float] = 1e4,
         batch_key=None,
-        n_pcs=30,  # if None, stop before PCA step
-        nneigh=10,  # 20 was used for clustering
-        copy=True,
+        n_top_genes: int = 2000,
+        n_pcs: int = 30,  # if None, stop before PCA step
+        nneigh: int = 10,  # 20 was used for clustering
+        copy: bool = True,
         **hvg_kwds):
     """
     quick preprocess of the raw data
@@ -1733,10 +1734,10 @@ def quick_preprocess(
     # 2: HVG selection (skipped if `hvgs` is not None)
     if hvgs is None:
         sc.pp.highly_variable_genes(
-            _adata, batch_key=batch_key, **hvg_kwds)
+            _adata, batch_key=batch_key, n_top_genes=n_top_genes, **hvg_kwds)
         _adata = _adata[:, _adata.var['highly_variable']].copy()
     else:
-        _adata = _adata[:, hvgs].copy() # detach form view-data
+        _adata = _adata[:, hvgs].copy()  # detach form view-data
     # 3: z-score 
     wrapper_scale(_adata, groupby=batch_key)
     #    sc.pp.scale(_adata)

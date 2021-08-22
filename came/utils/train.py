@@ -11,7 +11,7 @@ from typing import Sequence, Union, Mapping, Optional, List
 import time
 import random
 import numpy as np
-from pandas import DataFrame, value_counts
+from pandas import value_counts
 import torch
 from torch import Tensor, LongTensor
 import dgl
@@ -19,14 +19,17 @@ import tqdm
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 
-from ..model import to_device, onehot_encode, multilabel_binary_cross_entropy
-from .base import check_dirs, save_json_dict
+from ..model import (
+    to_device, onehot_encode,
+    multilabel_binary_cross_entropy,
+    cross_entropy_loss,
+    ce_loss_with_rdrop,
+    classification_loss
+)
+from ..model._minibatch import create_batch, create_blocks
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
-from came.model._minibatch import create_batch, create_blocks
-
-
-SUBDIR_MODEL = '_models'
+from ._base_trainer import BaseTrainer, SUBDIR_MODEL
 
 
 def seed_everything(seed=123):
@@ -109,220 +112,6 @@ def prepare4train(
     )
     return ENV_VARs
 
-
-def get_checkpoint_list(dirname):
-    all_ckpts = [
-        int(_fn.strip('weights_epoch.pt'))
-        for _fn in os.listdir(dirname) if _fn.endswith('.pt')
-    ]
-    return all_ckpts
-
-
-class BaseTrainer(object):
-    """
-    DO NOT use it directly!
-    
-    """
-
-    def __init__(self,
-                 model,
-                 feat_dict: Mapping,
-                 train_labels: Union[Tensor, List[Tensor]],
-                 test_labels: Union[Tensor, List[Tensor]],
-                 train_idx: Union[Tensor, List[Tensor]],
-                 test_idx: Union[Tensor, List[Tensor]],
-                 cluster_labels: Optional[Sequence] = None,
-                 lr: float = 1e-3,
-                 l2norm: float = 1e-2,  # 1e-2 is tested for all datasets
-                 dir_main: Union[str, Path] = Path('.'),
-                 **kwds  # for code compatibility (not raising error)
-                 ):
-        self.model = None
-        self.feat_dict = None
-        self.train_labels = None
-        self.test_labels = None
-        self.train_idx = None
-        self.test_idx = None
-        self.device = None
-        self.dir_main = None
-        self.dir_model = None
-        self.lr = None
-        self.l2norm = None
-        self._record_names = None
-        self._train_logs = None
-        self.with_ground_truth = None
-
-        self.set_dir(dir_main)
-        self.set_inputs(
-            model, feat_dict,
-            train_labels, test_labels,
-            train_idx, test_idx,
-            )
-
-        self.cluster_labels = cluster_labels
-        self._set_train_params(
-            lr=lr,
-            l2norm=l2norm,
-        )
-
-        self._cur_epoch = -1
-        self._cur_epoch_best = -1
-        self._cur_epoch_adopted = 0
-
-    def set_dir(self, dir_main=Path('.')):
-        self.dir_main = Path(dir_main)
-        self.dir_model = self.dir_main / SUBDIR_MODEL
-        check_dirs(self.dir_model)
-
-        print('main directory:', self.dir_main)
-        print('model directory:', self.dir_model)
-
-    def set_inputs(
-            self, model: torch.nn.Module,
-            feat_dict: Mapping,
-            train_labels: Union[Tensor, List[Tensor]],
-            test_labels: Union[Tensor, List[Tensor], None],
-            train_idx: Union[Tensor, List[Tensor]],
-            test_idx: Union[Tensor, List[Tensor]],
-            ):
-        self.model = model
-        self.feat_dict = feat_dict
-        self.train_labels = train_labels
-        self.test_labels = test_labels
-        self.train_idx = train_idx
-        self.test_idx = test_idx
-        self.with_ground_truth = self.test_labels is None
-        # inference device
-        try:
-            self.device = self.train_idx.device
-        except AttributeError:
-            self.device = self.train_idx[0].device
-
-    def all_to_device(self, device=None):
-        if device is None:
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.device = device
-        self.model.to(device)
-        self.feat_dict = to_device(self.feat_dict, device)
-        self.train_labels = to_device(self.train_labels, device)
-        if self.test_labels is not None:
-            self.test_labels = to_device(self.test_labels, device)
-        self.train_idx = to_device(self.train_idx, device)
-        self.test_idx = to_device(self.test_idx, device)
-        return (
-            self.model,
-            self.feat_dict,
-            self.train_labels,
-            self.test_labels,
-            self.train_idx,
-            self.test_idx
-        )
-
-    def _set_train_params(self,
-                          lr: float = 1e-3,
-                          l2norm: float = 1e-2,
-                          ):
-        """
-        setting parameters for model training
-
-        Parameters
-        ----------
-        lr: float
-            the learning rate (default=1e-3)
-        l2norm:
-            the ``weight_decay``, 1e-2 is tested for all datasets
-        """
-        self.lr = lr
-        self.l2norm = l2norm
-        self.optimizer = torch.optim.Adam(
-            self.model.parameters(), lr=lr, weight_decay=l2norm)
-
-    def set_recorder(self, *names):
-        self._record_names = tuple(names)
-        for nm in names:
-            setattr(self, nm, [])
-
-    def _record(self, **kwds):
-        for nm in self._record_names:
-            if nm in kwds:
-                getattr(self, nm).append(kwds[nm])
-
-    def make_train_logs(self, ):
-        dct = {}
-        for nm in self._record_names:
-            v = getattr(self, nm)
-            if len(v) > 0:
-                dct[nm] = v
-        self._train_logs = DataFrame(dct)
-
-    def write_train_logs(self, fn='train_logs.csv', fp=None):
-        if fp is None:
-            fp = self.dir_main / fn
-        self.make_train_logs()
-        self._train_logs.to_csv(fp, index_label='epoch')
-
-    def save_whole_model(self, fn='model.pt', fp=None, **kwds):
-        if fp is None:
-            fp = self.dir_model / fn
-        torch.save(self.model, fp, **kwds)
-        print('model saved into:', fp)
-
-    def save_model_weights(self, fp=None, **kwds):
-        """ better NOT set the path `fp` manually~
-        """
-        n_epoch = self._cur_epoch
-        if fp is None:
-            fp = self.dir_model / f'weights_epoch{n_epoch}.pt'
-        torch.save(self.model.state_dict(), fp, **kwds)
-
-    def load_model_weights(self, n_epoch=None, fp=None, **kwds):
-        if fp is None:
-            if n_epoch is None:
-                if self._cur_epoch_best > 0:
-                    n_epoch = self._cur_epoch_best
-                else:
-                    n_epoch = self._cur_epoch
-            fp = self.dir_model / f'weights_epoch{n_epoch}.pt'
-        sdct = torch.load(fp, **kwds)
-        self.model.load_state_dict(sdct)
-        self._cur_epoch_adopted = n_epoch
-        print('states loaded from:', fp)
-
-    def save_checkpoint_record(self):
-        cur_epoch = self._cur_epoch
-        if self._cur_epoch_best > 0:
-            cur_epoch_rec = self._cur_epoch_best
-        else:
-            cur_epoch_rec = self._cur_epoch
-        all_ckpts = get_checkpoint_list(self.dir_model)
-        all_ckpts = [x for x in all_ckpts if
-                     x not in {cur_epoch, cur_epoch_rec}]
-        ckpt_dict = {
-            'recommended': cur_epoch_rec,
-            'last': cur_epoch,
-            'others': all_ckpts
-        }
-        save_json_dict(
-            ckpt_dict, self.dir_model / 'checkpoint_dict.json')
-        # load_json_dict(self.dir_model / 'checkpoint_dict.json')
-
-    def get_current_outputs(self, **other_inputs):
-        """ get the current states of the model output
-        """
-        raise NotImplementedError
-
-    def train(self, ):
-        """ abstract method to be re-defined
-        """
-        raise NotImplementedError
-
-    def train_minibatch(self, **kwargs):
-        """ abstract method to be re-defined
-        """
-        raise NotImplementedError
-
-
-# In[]
 
 class Trainer(BaseTrainer):
     """
@@ -442,7 +231,8 @@ class Trainer(BaseTrainer):
             tolerance for cluster-index
         cat_class: str
             node type for classification
-        device: {'cpu', 'gpu', None}
+        device:
+            one of {'cpu', 'gpu', None}
         backup_stride: int
             saving checkpoint after `backup_stride` epochs
         other_inputs:
@@ -477,28 +267,27 @@ class Trainer(BaseTrainer):
 
             self.optimizer.zero_grad()
             t0 = time.time()
-            logits = self.model(self.feat_dict,
-                                self.g,
-                                **other_inputs)
-            out_cell = logits[cat_class]
-            loss = self.model.get_classification_loss(
-                out_cell[train_idx],
-                train_labels,
-                weight=class_weights,
+            logits = self.model(feat_dict, self.g, **other_inputs)[cat_class]
+            logits2 = self.model(feat_dict, self.g, **other_inputs)[cat_class]
+            loss = ce_loss_with_rdrop(
+                logits, logits2, labels=train_labels,
+                labels_1hot=self.train_labels_1hot,
+                train_idx=train_idx, weight=class_weights,
+                loss_fn=classification_loss,
                 **params_lossfunc
             )
-            # multi-label loss
-            loss += multilabel_binary_cross_entropy(
-                out_cell[train_idx],
-                train_labels_1hot,
-                weight=class_weights,
-            )
+            # loss = classification_loss(
+            #     logits[train_idx],
+            #     train_labels, labels_1hot=self.train_labels_1hot,
+            #     weight=class_weights,
+            #     **params_lossfunc
+            # )
 
             # prediction 
-            _, y_pred = torch.max(out_cell, dim=1)
+            _, y_pred = torch.max(logits, dim=1)
             y_pred_test = y_pred[test_idx]
 
-            # evaluation (Acc.)
+            # ========== evaluation (Acc.) ==========
             train_acc = accuracy(y_pred[train_idx], train_labels)
             if test_labels is None:
                 # ground-truth unavailable
@@ -506,12 +295,9 @@ class Trainer(BaseTrainer):
             else:
                 test_acc = accuracy(y_pred_test, test_labels)
                 # F1-scores
-                microF1 = get_F1_score(test_labels, y_pred_test,
-                                       average='micro')
-                macroF1 = get_F1_score(test_labels, y_pred_test,
-                                       average='macro')
-                weightedF1 = get_F1_score(test_labels, y_pred_test,
-                                          average='weighted')
+                microF1 = get_F1_score(test_labels, y_pred_test, 'micro')
+                macroF1 = get_F1_score(test_labels, y_pred_test, 'macro')
+                weightedF1 = get_F1_score(test_labels, y_pred_test, 'weighted')
 
             # unsupervised cluster index
             if self.cluster_labels is not None:
@@ -522,7 +308,7 @@ class Trainer(BaseTrainer):
             backup = False
             if self._cur_epoch >= n_pass - 1:
                 self.ami_max = max(self.ami_max, ami)
-                if ami >= self.ami_max - eps:
+                if ami >= self.ami_max - eps > 0:
                     self._cur_epoch_best = self._cur_epoch
                     self.save_model_weights()
                     backup = True
@@ -532,7 +318,7 @@ class Trainer(BaseTrainer):
                     backup = True
                     print('model weights backup')
 
-            # backward AFTER model saved
+            # backward AFTER the model being saved
             loss.backward()
             self.optimizer.step()
             t1 = time.time()
@@ -552,15 +338,16 @@ class Trainer(BaseTrainer):
             self.test_acc_max = max(test_acc, self.test_acc_max)
 
             if self.with_ground_truth:
-                logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
-                self._cur_log = logfmt.format(
-                    self._cur_epoch, train_acc, ami, self.ami_max,
-                    ami, dur_avg)
-            else:
                 logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
                 self._cur_log = logfmt.format(
                     self._cur_epoch, train_acc, test_acc, self.test_acc_max,
                     ami, dur_avg)
+            else:
+                logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
+                self._cur_log = logfmt.format(
+                    self._cur_epoch, train_acc, ami, self.ami_max,
+                    ami, dur_avg)
+
             if self._cur_epoch % 5 == 0 or backup:
                 print(self._cur_log)
 
@@ -615,58 +402,72 @@ class Trainer(BaseTrainer):
 
         for epoch in range(n_epochs):
             self._cur_epoch += 1
-            self.optimizer.zero_grad()
             all_train_preds = to_device(torch.tensor([]), device)
             all_test_preds = to_device(torch.tensor([]), device)
             t0 = time.time()
             batch_rank = 0
             for output_nodes in tqdm.tqdm(batch_list):
+                self.optimizer.zero_grad()
                 block = blocks[batch_rank]
                 batch_rank += 1
                 feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['ids'], :]
+                # TODO: here might raise error if the data are shuffled!
                 batch_train_idx = output_nodes.clone().detach() < len(train_idx)
                 batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
-                logits = model(to_device(feat_dict, device),
-                               to_device(block, device),
-                               **other_inputs)
-                out_cell = logits[cat_class]  # .cuda()
-                output_labels = labels[output_nodes]
-                out_train_labels = output_labels[batch_train_idx].clone().detach()
-                loss = model.get_classification_loss(
-                    out_cell[batch_train_idx],
-                    to_device(out_train_labels, device),
-                    weight=class_weights,
+                feat_dict, block = to_device(feat_dict, device), to_device(block, device)
+                logits = model(feat_dict, block, **other_inputs)[cat_class]
+                logits2 = model(feat_dict, block, **other_inputs)[cat_class]
+
+                # out_cell = logits[cat_class]
+                # output_labels = labels[output_nodes]
+                out_train_labels = labels[output_nodes][batch_train_idx].clone().detach()
+                out_train_lbs1hot = self.train_labels_1hot[output_nodes[batch_train_idx]].clone().detach()
+
+                loss = ce_loss_with_rdrop(
+                    logits, logits2, labels=out_train_labels,
+                    labels_1hot=out_train_lbs1hot,
+                    train_idx=batch_train_idx, weight=class_weights,
+                    loss_fn=classification_loss,
                     **params_lossfunc
                 )
-                self.optimizer.zero_grad()
+                # loss = classification_loss(
+                #     logits[batch_train_idx],
+                #     to_device(out_train_labels, device),
+                #     labels_1hot=to_device(out_train_lbs1hot, device),
+                #     weight=class_weights,
+                #     **params_lossfunc
+                # )
                 loss.backward()
                 self.optimizer.step()
 
-                _, y_pred = torch.max(out_cell, dim=1)
+                _, y_pred = torch.max(logits, dim=1)
                 y_pred_train = y_pred[batch_train_idx]
                 y_pred_test = y_pred[batch_test_idx]
                 all_train_preds = torch.cat((all_train_preds, y_pred_train), 0)
                 all_test_preds = torch.cat((all_test_preds, y_pred_test), 0)
 
-            # evaluation (Acc.)
+            # ========== evaluation (Acc.) ==========
             all_train_preds = all_train_preds.cpu()
             all_test_preds = all_test_preds.cpu()
             with torch.no_grad():
                 train_acc = accuracy(train_labels, all_train_preds)
-                test_acc = accuracy(test_labels, all_test_preds)
-                # F1-scores
-                microF1 = get_F1_score(test_labels, all_test_preds, average='micro')
-                macroF1 = get_F1_score(test_labels, all_test_preds, average='macro')
-                weightedF1 = get_F1_score(test_labels, all_test_preds, average='weighted')
-
+                if self.with_ground_truth:
+                    test_acc = accuracy(test_labels, all_test_preds)
+                    # F1-scores
+                    microF1 = get_F1_score(test_labels, all_test_preds, average='micro')
+                    macroF1 = get_F1_score(test_labels, all_test_preds, average='macro')
+                    weightedF1 = get_F1_score(test_labels, all_test_preds, average='weighted')
+                else:
+                    test_acc = microF1 = macroF1 = weightedF1 = -1.
                 # unsupervised cluster index
                 if self.cluster_labels is not None:
                     ami = get_AMI(cluster_labels, all_test_preds)
-
+                else:
+                    ami = -1.
                 backup = False
                 if self._cur_epoch >= n_pass - 1:
                     self.ami_max = max(self.ami_max, ami)
-                    if ami > self.ami_max - eps:
+                    if ami > self.ami_max - eps > 0:
                         self._cur_epoch_best = self._cur_epoch
                         self.save_model_weights()
                         backup = True
@@ -693,15 +494,16 @@ class Trainer(BaseTrainer):
                 self.test_acc_max = max(test_acc, self.test_acc_max)
 
                 if self.with_ground_truth:
-                    logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
-                    self._cur_log = logfmt.format(
-                        self._cur_epoch, train_acc, ami, self.ami_max,
-                        ami, dur_avg)
-                else:
                     logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
                     self._cur_log = logfmt.format(
                         self._cur_epoch, train_acc, test_acc, self.test_acc_max,
                         ami, dur_avg)
+                else:
+                    logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
+                    self._cur_log = logfmt.format(
+                        self._cur_epoch, train_acc, ami, self.ami_max,
+                        ami, dur_avg)
+
                 if self._cur_epoch % 5 == 0 or backup:
                     print(self._cur_log)
 

@@ -836,7 +836,7 @@ def make_abstracted_graph(
         var_labels1,
         var_labels2,
         norm_sizes='auto',
-        #            norm_sizes=(df_vnodes1[key_count], df_vnodes2[key_count]),
+        # norm_sizes=(df_vnodes1[key_count], df_vnodes2[key_count]),
         return_full_adj=True,
         global_adjust=global_adjust_vv,
         key_weight=key_weight,

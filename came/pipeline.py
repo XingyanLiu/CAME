@@ -375,9 +375,19 @@ def gather_came_results(
             f'`checkpoint` should be either str ("best" or "last") or int, '
             f'got {checkpoint}'
         )
-    out_cell = trainer.get_current_outputs(batch_size=batch_size)['cell']
+    # all hidden states
+    from .model import get_all_hidden_states
+    from . import save_hidden_states
+    hidden_list = get_all_hidden_states(
+        trainer.model, trainer.feat_dict, trainer.g)
+    save_hidden_states(hidden_list, resdir / 'hidden_list.h5')
+    # hidden states are stored in sc.AnnData to facilitated downstream analysis
+    # h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
+    h_dict = hidden_list[-1]
 
+    out_cell = trainer.get_current_outputs(batch_size=batch_size)['cell']
     out_cell = out_cell.cpu().clone().detach().numpy()
+
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
     pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
     predictor = Predictor(classes=classes).fit(
@@ -402,9 +412,6 @@ def gather_came_results(
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
     dpair.save_init(resdir / 'datapair_init.pickle')
-
-    # hidden states are stored in sc.AnnData to facilitated downstream analysis
-    h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
 
     # group counts statistics (optinal)
     gcnt = pp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
@@ -462,6 +469,7 @@ def preprocess_aligned(
         n_top_genes=2000,
         n_pcs=n_pcs,
         nneigh=nneigh_scnet,
+        copy=True,
     )
     # NOTE: using the median total-counts as the scale factor
     # (may perform better than fixed number)
@@ -549,6 +557,7 @@ def preprocess_unaligned(
         n_top_genes=2000,
         n_pcs=n_pcs,
         nneigh=nneigh_scnet,
+        copy=True,
     )
     # NOTE:
     # by default, the original adatas will not be changed

@@ -62,7 +62,8 @@ _params_model = dict(
 )
 
 _params_lossfunc = dict(
-    smooth=True, smooth_eps=0.1, smooth_reduction='mean',
+    smooth_eps=0.1, reduction='mean',
+    alpha=3.,  # for R-drop
 )
 
 

@@ -99,14 +99,17 @@ def get_all_hidden_states(
         g: dgl.DGLGraph,
         detach2np: bool = True,
         train: bool = False,
+        batch_size: Optional[int] = None,
 ):
     with torch.no_grad():
-        model.train(train)
+        # model.train(train)
         # embedding layer
         h_embed = model.embed_layer(g, feat_dict)
         # hidden layers
         _ = model.rgcn(g, h_embed)
         h_list = [h_embed] + model.rgcn.hidden_states
+        # out_cls_dict = model.cell_classifier(g, h_list[-1])
+        # h_list.append(out_cls_dict)
     if detach2np:
         h_list = [detach2numpy(h) for h in h_list]
     return h_list
