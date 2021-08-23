@@ -271,14 +271,14 @@ class Trainer(BaseTrainer):
             logits2 = self.model(feat_dict, self.g, **other_inputs)[cat_class]
             loss = ce_loss_with_rdrop(
                 logits, logits2, labels=train_labels,
-                labels_1hot=self.train_labels_1hot,
+                labels_1hot=train_labels_1hot,
                 train_idx=train_idx, weight=class_weights,
                 loss_fn=classification_loss,
                 **params_lossfunc
             )
             # loss = classification_loss(
             #     logits[train_idx],
-            #     train_labels, labels_1hot=self.train_labels_1hot,
+            #     train_labels, labels_1hot=train_labels_1hot,
             #     weight=class_weights,
             #     **params_lossfunc
             # )
@@ -420,12 +420,16 @@ class Trainer(BaseTrainer):
 
                 # out_cell = logits[cat_class]
                 # output_labels = labels[output_nodes]
-                out_train_labels = labels[output_nodes][batch_train_idx].clone().detach()
-                out_train_lbs1hot = self.train_labels_1hot[output_nodes[batch_train_idx]].clone().detach()
+                out_train_labels = to_device(
+                    labels[output_nodes][batch_train_idx].clone().detach(), device)
+                out_train_lbs1hot = to_device(
+                    self.train_labels_1hot[output_nodes[batch_train_idx]].clone().detach(),
+                    device,
+                )
 
                 loss = ce_loss_with_rdrop(
                     logits, logits2, labels=out_train_labels,
-                    labels_1hot=out_train_lbs1hot,
+                    # labels_1hot=out_train_lbs1hot,
                     train_idx=batch_train_idx, weight=class_weights,
                     loss_fn=classification_loss,
                     **params_lossfunc
