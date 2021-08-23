@@ -26,7 +26,6 @@ from came.utils.base import make_pairs_from_lists
 from came import pipeline, pp, pl
 
 from DATASET_NAMES import NAMES_ALL, Tissues
-pipeline.seed_everything()
 
 
 # In[]
@@ -56,11 +55,12 @@ only_1v1homo = False
 use_scnets = True
 
 n_epochs = 400
-n_pass = 5
-batch_size = 8192
+n_pass = 100  # 5
+batch_size = None  # 8192
 
 
-resdir0 = RESDIR / 'minibatch' / f'batch_size-{batch_size}'
+# resdir0 = RESDIR / 'minibatch' / f'batch_size-{batch_size}'
+resdir0 = RESDIR / 'rdrop' / f'batch_size-{batch_size}'
 
 for tiss in Tissues:
     print(f'Tissue: {tiss}')
@@ -88,7 +88,6 @@ for tiss in Tissues:
             if resdir.exists():
                 print(f'already run for {dsnames}, skipped')
                 continue
-
             print(f'Step 0: loading adatas {dsnames}...')
 
             fn1 = dir_formal / f'raw-{dsn1}.h5ad'
@@ -113,11 +112,13 @@ for tiss in Tissues:
                     do_normalize=True,
                     n_epochs=n_epochs,
                     resdir=resdir,
-                    n_pass=100,
-                    plot_results=True,  # TODO: if raise error, change it to False
+                    n_pass=n_pass,
+                    plot_results=False,  # if raising error, change it to False
                     params_model=params_model,
                     params_lossfunc=params_lossfunc,
                     batch_size=batch_size,
+                    save_hidden_list=False,  # `False` for large-scale testing
+                    save_dpair=False,  # `False` for large-scale testing
                 )
 
             del _
@@ -174,7 +175,7 @@ def record_from_logdf(
 
 dir_restb = resdir0
 baseon = 'AMI'
-nepoch_pass = n_pass # 100
+nepoch_pass = n_pass  # 100
 
 if True:
     records = {}

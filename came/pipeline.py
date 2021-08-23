@@ -65,6 +65,8 @@ def main_for_aligned(
         batch_size: Optional[int] = None,
         plot_results: bool = True,
         norm_target_sum: Optional[float] = 1e4,
+        save_hidden_list: bool = True,
+        save_dpair: bool = True,
 ):
     if resdir is None:
         tag_time = make_nowtime_tag()
@@ -161,6 +163,8 @@ def main_for_aligned(
         resdir=resdir,
         checkpoint='best',
         batch_size=batch_size,
+        save_hidden_list=save_hidden_list,
+        save_dpair=save_dpair,
     )
 
     # ============= confusion matrix & heatmap plot ==============
@@ -214,8 +218,11 @@ def main_for_unaligned(
         params_model: dict = {},
         params_lossfunc: dict = {},
         n_pass: int = 100,
-        plot_results: bool = True,
         batch_size: Optional[int] = None,
+        plot_results: bool = True,
+        norm_target_sum: Optional[float] = 1e4,
+        save_hidden_list: bool = True,
+        save_dpair: bool = True,
 ):
     if resdir is None:
         tag_time = make_nowtime_tag()
@@ -242,7 +249,8 @@ def main_for_unaligned(
 
     if do_normalize:
         adatas = list(map(
-            lambda a: pp.normalize_default(a, force_return=True),
+            lambda a: pp.normalize_default(
+                a, target_sum=norm_target_sum, force_return=True),
             adatas
         ))
     logging.info('preparing DataPair object...')
@@ -313,6 +321,8 @@ def main_for_unaligned(
         resdir=resdir,
         checkpoint='best',
         batch_size=batch_size,
+        save_hidden_list=save_hidden_list,
+        save_dpair=save_dpair,
     )
 
     if plot_results:
@@ -356,6 +366,8 @@ def gather_came_results(
         resdir: Union[str, Path] = '.',
         checkpoint: Union[int, str] = 'best',
         batch_size: Optional[int] = None,
+        save_hidden_list: bool = True,
+        save_dpair: bool = True,
 ):
     """ Packed function for pipeline as follows:
     1. load the 'best' model weights
@@ -377,10 +389,11 @@ def gather_came_results(
         )
     # all hidden states
     from .model import get_all_hidden_states
-    from . import save_hidden_states
     hidden_list = get_all_hidden_states(
         trainer.model, trainer.feat_dict, trainer.g)
-    save_hidden_states(hidden_list, resdir / 'hidden_list.h5')
+    if save_hidden_list:
+        from . import save_hidden_states
+        save_hidden_states(hidden_list, resdir / 'hidden_list.h5')
     # hidden states are stored in sc.AnnData to facilitated downstream analysis
     # h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
     h_dict = hidden_list[-1]
@@ -411,9 +424,10 @@ def gather_came_results(
     dpair.set_common_obs_annos(obs)
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
-    dpair.save_init(resdir / 'datapair_init.pickle')
+    if save_dpair:
+        dpair.save_init(resdir / 'datapair_init.pickle')
 
-    # group counts statistics (optinal)
+    # group counts statistics (optional)
     gcnt = pp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
     logging.info(str(gcnt))
     gcnt.to_csv(resdir / 'group_counts.csv')
@@ -560,7 +574,7 @@ def preprocess_unaligned(
         copy=True,
     )
     # NOTE:
-    # by default, the original adatas will not be changed
+    # by default, the original adatas will not be changed;
     # using the median total-counts as the scale factor \
     # may perform better than fixed number
     adata1 = pp.quick_preprocess(adatas[0], **params_preproc)
