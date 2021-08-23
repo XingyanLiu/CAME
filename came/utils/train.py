@@ -271,7 +271,7 @@ class Trainer(BaseTrainer):
             logits2 = self.model(feat_dict, self.g, **other_inputs)[cat_class]
             loss = ce_loss_with_rdrop(
                 logits, logits2, labels=train_labels,
-                labels_1hot=train_labels_1hot,
+                # labels_1hot=train_labels_1hot,
                 train_idx=train_idx, weight=class_weights,
                 loss_fn=classification_loss,
                 **params_lossfunc
