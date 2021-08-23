@@ -33,9 +33,8 @@ from DATASET_NAMES import NAMES_ALL, Tissues
 # datadir = Path('D:/SQL/datasets')
 # dir_gmap = Path('D:/lxy/resources/exported_gene_matches')
 
-
-#datadir = Path('datasets')
-#dir_gmap = Path('./exported_gene_matches')
+# datadir = Path('datasets')
+# dir_gmap = Path('./exported_gene_matches')
 datadir = Path('D:/Fifth paper/datasets')
 dir_gmap = Path('D:/Fifth paper/datasets/formal/exported_gene_matches')
 
@@ -47,9 +46,7 @@ header = 'scanpy'
 
 
 # In[]
-# for parameter...
-params_model = came.get_model_params()
-params_lossfunc = came.get_loss_params()
+# parameters
 
 only_1v1homo = False
 use_scnets = True
@@ -57,10 +54,13 @@ use_scnets = True
 n_epochs = 400
 n_pass = 100  # 5
 batch_size = None  # 8192
+alpha = 3.  # 2. (如果 2 比 3 好，就再试试 1，否则跑 4)
 
+params_model = came.get_model_params()
+params_lossfunc = came.get_loss_params(alpha=alpha)
 
 # resdir0 = RESDIR / 'minibatch' / f'batch_size-{batch_size}'
-resdir0 = RESDIR / 'rdrop' / f'batch_size-{batch_size}'
+resdir0 = RESDIR / 'rdrop' / f'alpha-{alpha}-batch_size-{batch_size}'
 
 for tiss in Tissues:
     print(f'Tissue: {tiss}')
