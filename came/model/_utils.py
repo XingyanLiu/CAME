@@ -100,7 +100,13 @@ def get_all_hidden_states(
         detach2np: bool = True,
         train: bool = False,
         batch_size: Optional[int] = None,
+        device=None,
 ):
+    if device is None:
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    g = g.to(device)
+    model = model.to(device)
+    feat_dict = to_device(feat_dict)
     with torch.no_grad():
         # model.train(train)
         # embedding layer
