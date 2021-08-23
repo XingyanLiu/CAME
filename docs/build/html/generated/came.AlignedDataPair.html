@@ -1,0 +1,486 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>came.AlignedDataPair &mdash; CAME  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="came.DataPair" href="came.DataPair.html" />
+    <link rel="prev" title="came.datapair_from_adatas" href="came.datapair_from_adatas.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CAME
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-0">DataPair and AlignedDataPair</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="came.aligned_datapair_from_adatas.html">came.aligned_datapair_from_adatas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.datapair_from_adatas.html">came.datapair_from_adatas</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.AlignedDataPair</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.DataPair.html">came.DataPair</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CAME</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+      <li>came.AlignedDataPair</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/generated/came.AlignedDataPair.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="came-aligneddatapair">
+<h1>came.AlignedDataPair<a class="headerlink" href="#came-aligneddatapair" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="came.AlignedDataPair">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">AlignedDataPair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ov_adjs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_feat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'o':</span> <span class="pre">'cell',</span> <span class="pre">'v':</span> <span class="pre">'gene'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'oo':</span> <span class="pre">'similar_to',</span> <span class="pre">'ov':</span> <span class="pre">'express',</span> <span class="pre">'vo':</span> <span class="pre">'expressed_by'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.AlignedDataPair" title="Permalink to this definition">¶</a></dt>
+<dd><p>paired datasets with the aligned features</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 feature matrices.
+common / aligned feratures, as node-features (for observations).
+of shape (n_obs1, n_features) and (n_obs2, n_features)</p></li>
+<li><p><strong>ov_adjs</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 (sparse) feature matrices.
+unaligned features, for making <cite>ov_adj</cite>.
+of shape (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)</p></li>
+<li><p><strong>varnames_feat</strong> (<em>list</em><em> or </em><em>tuple</em>) – names of variables that will be treated as node-features for observations</p></li>
+<li><p><strong>varnames_node</strong> (<em>list</em><em> or </em><em>tuple</em>) – names of variables that will be treated as nodes.</p></li>
+<li><p><strong>obs_dfs</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 DataFrame s</p></li>
+<li><p><strong>ntypes</strong> (<em>dict</em>) – </p></li>
+<li><p><strong>etypes</strong> (<em>dict</em>) – </p></li>
+<li><p><strong>**kwds</strong> – other key words for constructiong of the HeteroGraph</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair._features">
+<span class="sig-name descname"><span class="pre">_features</span></span><a class="headerlink" href="#came.AlignedDataPair._features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair._ov_adjs">
+<span class="sig-name descname"><span class="pre">_ov_adjs</span></span><a class="headerlink" href="#came.AlignedDataPair._ov_adjs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.vv_adj">
+<span class="sig-name descname"><span class="pre">vv_adj</span></span><a class="headerlink" href="#came.AlignedDataPair.vv_adj" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>var-var adjacent matrix (e.g. gene-gene adjacent matrix)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.ov_adj">
+<span class="sig-name descname"><span class="pre">ov_adj</span></span><a class="headerlink" href="#came.AlignedDataPair.ov_adj" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>combined observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.G">
+<span class="sig-name descname"><span class="pre">G</span></span><a class="headerlink" href="#came.AlignedDataPair.G" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dgl.Heterograph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_obs">
+<span class="sig-name descname"><span class="pre">n_obs</span></span><a class="headerlink" href="#came.AlignedDataPair.n_obs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_obs1">
+<span class="sig-name descname"><span class="pre">n_obs1</span></span><a class="headerlink" href="#came.AlignedDataPair.n_obs1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_obs2">
+<span class="sig-name descname"><span class="pre">n_obs2</span></span><a class="headerlink" href="#came.AlignedDataPair.n_obs2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_vnodes">
+<span class="sig-name descname"><span class="pre">n_vnodes</span></span><a class="headerlink" href="#came.AlignedDataPair.n_vnodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_vnodes1">
+<span class="sig-name descname"><span class="pre">n_vnodes1</span></span><a class="headerlink" href="#came.AlignedDataPair.n_vnodes1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.n_vnodes2">
+<span class="sig-name descname"><span class="pre">n_vnodes2</span></span><a class="headerlink" href="#came.AlignedDataPair.n_vnodes2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.ntypes">
+<span class="sig-name descname"><span class="pre">ntypes</span></span><a class="headerlink" href="#came.AlignedDataPair.ntypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.etypes">
+<span class="sig-name descname"><span class="pre">etypes</span></span><a class="headerlink" href="#came.AlignedDataPair.etypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="came.AlignedDataPair.dataset_names">
+<span class="sig-name descname"><span class="pre">dataset_names</span></span><a class="headerlink" href="#came.AlignedDataPair.dataset_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">DataPair</span><span class="p">([</span><span class="n">features1</span><span class="p">,</span> <span class="n">features2</span><span class="p">],</span>
+<span class="gp">... </span>         <span class="p">[</span><span class="n">ov_adj1</span><span class="p">,</span> <span class="n">ov_adj2</span><span class="p">],</span>
+<span class="gp">... </span>         <span class="n">varnames_feat</span> <span class="o">=</span> <span class="n">vars_feat</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="n">varnames_node</span> <span class="o">=</span> <span class="n">vars_node</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="n">obs_dfs</span> <span class="o">=</span> <span class="p">[</span><span class="n">obs1</span><span class="p">,</span> <span class="n">obs2</span><span class="p">],</span>
+<span class="gp">... </span>         <span class="n">dataset_names</span><span class="o">=</span><span class="n">dataset_names</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="came.AlignedDataPair.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ov_adjs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_feat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'o':</span> <span class="pre">'cell',</span> <span class="pre">'v':</span> <span class="pre">'gene'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'oo':</span> <span class="pre">'similar_to',</span> <span class="pre">'ov':</span> <span class="pre">'express',</span> <span class="pre">'vo':</span> <span class="pre">'expressed_by'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.AlignedDataPair.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#came.AlignedDataPair.__init__" title="came.AlignedDataPair.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(features, ov_adjs[, oo_adjs, …])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_feature_dict</span></code>([astensor, scale, unit_var])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_anno</span></code>(keys[, which, concat])</p></td>
+<td><p>get the annotations of samples (observations)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_dataset</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_features</span></code>([astensor, scale, …])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_ids</span></code>([which, astensor])</p></td>
+<td><p>get node indices for obs-nodes (samples), choices are:</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_labels</span></code>(keys[, astensor, train_use, …])</p></td>
+<td><p>make labels for model training</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_whole_net</span></code>([rebuild])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_ov_adj</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_whole_net</span></code>([selfloop_o, selfloop_v])</p></td>
+<td><p>make the whole hetero-graph (e.g.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_init</span></code>([path])</p></td>
+<td><p>save object for reloading</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_common_obs_annos</span></code>([df, ignore_index])</p></td>
+<td><p>Shared and merged annotation labels for ALL of the observations in both datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_dataset_names</span></code>(dataset_names)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_etypes</span></code>(etypes)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_features</span></code>(features[, varnames_feat])</p></td>
+<td><p>setting feature matrices, where features are aligned across datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ntypes</span></code>(ntypes)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_obs_dfs</span></code>([obs1, obs2])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_oo_adj</span></code>([oo_adjs])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ov_adj</span></code>(ov_adjs)</p></td>
+<td><p>set observation-by-variable adjacent matrices</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_varnames_node</span></code>([varnames_node, index])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">summary_graph</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_ETYPES</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_NTYPES</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">KEY_DATASET</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">KEY_OBSNAME</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">KEY_VARNAME</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids1</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids2</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vnode_ids</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="came.DataPair.html" class="btn btn-neutral float-right" title="came.DataPair" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="came.datapair_from_adatas.html" class="btn btn-neutral float-left" title="came.datapair_from_adatas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Academy of Mathematics and Systems Science, CAS..
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

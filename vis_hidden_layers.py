@@ -20,8 +20,8 @@ from scipy.special import softmax
 import networkx as nx
 import torch
 
-import CAME
-from CAME import pipeline, pp, pl
+import came
+from came import pipeline, pp, pl
 
 # In[]
 TEST_ON_MAC = not True
@@ -46,7 +46,7 @@ if not TEST_ON_MAC:
     for _tiss in Tissues:
         NameDict = NAMES_ALL[_tiss]
         species = list(NameDict.keys())
-        pair_species = CAME.base.make_pairs_from_lists(species, species)
+        pair_species = came.base.make_pairs_from_lists(species, species)
         for _sp1, _sp2 in pair_species:
             if dsn1 in NameDict[_sp1] and dsn2 in NameDict[_sp2]:
                 tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
@@ -70,13 +70,13 @@ df_varmap_1v1 = pd.read_csv(dir_gmap / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
 df_varmap = pd.read_csv(dir_gmap / f'gene_matches_{sp1}2{sp2}.csv', )
 
 # setting directory for results
-_time_tag = CAME.make_nowtime_tag()
+_time_tag = came.make_nowtime_tag()
 subdir_res0 = f"{tiss}-{dsnames}{_time_tag}"
 
 resdir = Path('./_case_res') / subdir_res0
 figdir = resdir / 'figs'
 sc.settings.figdir = figdir
-CAME.check_dirs(figdir)
+came.check_dirs(figdir)
 
 # In[]
 # loading data
@@ -144,11 +144,11 @@ if 'unknown' in classes:
 
 _resdir = Path(r"_temp\('Baron_human', 'Baron_mouse')-(06-14 17.48.41)")
 _modeldir = _resdir / '_models'
-element_dict = CAME.load_pickle(_resdir / 'datapair_init.pickle')
-adpair = CAME.AlignedDataPair(**element_dict)
-model_params = CAME.load_json_dict(_resdir / 'model_params.json')
-tmpmodel = CAME.CGCNet(**model_params)
-ckpt = CAME.load_json_dict(_modeldir / 'chckpoint_dict.json')['recommended']
+element_dict = came.load_pickle(_resdir / 'datapair_init.pickle')
+adpair = came.AlignedDataPair(**element_dict)
+model_params = came.load_json_dict(_resdir / 'model_params.json')
+tmpmodel = came.CGCNet(**model_params)
+ckpt = came.load_json_dict(_modeldir / 'chckpoint_dict.json')['recommended']
 tmpmodel.load_state_dict(torch.load(_modeldir / f'weights_epoch{ckpt}.pt'))
 
     
@@ -159,8 +159,8 @@ cols_anno = ['celltype', 'predicted'][:]
 
 out_cell = trainer.get_current_outputs()['cell']
 
-probas_all = CAME.as_probabilities(out_cell)
-probas_all = CAME.model.detach2numpy(torch.sigmoid(out_cell))
+probas_all = came.as_probabilities(out_cell)
+probas_all = came.model.detach2numpy(torch.sigmoid(out_cell))
 #probas_all = np.apply_along_axis(lambda x: x / x.sum(), 1, probas_all,)
 df_probs = pd.DataFrame(probas_all, columns=classes)
 
@@ -168,7 +168,7 @@ for i, _obs_ids in enumerate([obs_ids1, obs_ids2]):
     # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
     df_lbs = obs[cols_anno].iloc[_obs_ids].sort_values(cols_anno)
     
-    indices = CAME.subsample_each_group(df_lbs['celltype'], n_out=50, )
+    indices = came.subsample_each_group(df_lbs['celltype'], n_out=50, )
     # indices = df_lbs.index
     df_data = df_probs.loc[indices, :].copy()
     df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
@@ -184,7 +184,7 @@ for i, _obs_ids in enumerate([obs_ids1, obs_ids2]):
 # ======================= further analysis =======================
 #trainer.model.rgcn.hidden_states
 #h_dict = trainer.model.get_hidden_states()
-h_dict_all = CAME.model.get_all_hidden_states(
+h_dict_all = came.model.get_all_hidden_states(
         trainer.model, trainer.feat_dict, trainer.g
         )
 h_dict = h_dict_all[-1]
@@ -238,10 +238,10 @@ def umap_reduce(
     return _adt.obsm['X_umap']
     
 
-h_dict_all = CAME.model.get_all_hidden_states(
+h_dict_all = came.model.get_all_hidden_states(
         trainer.model, trainer.feat_dict, trainer.g
         )
-attn_mat = CAME.model.get_attentions(
+attn_mat = came.model.get_attentions(
         trainer.model, trainer.feat_dict, trainer.g, 
 #        from_scratch=False
         )

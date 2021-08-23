@@ -20,8 +20,8 @@ from scipy.special import softmax
 import networkx as nx
 import torch
 
-import CAME
-from CAME import pipeline, pp, pl
+import came
+from came import pipeline, pp, pl
 
 # In[]
 DATASET_PAIRS = [
@@ -37,7 +37,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse0'),    
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[2]  # [::-1]
+dsnames = DATASET_PAIRS[-3]  # [::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -45,11 +45,15 @@ from DATASET_NAMES import Tissues, NAMES_ALL
 for _tiss in Tissues:
     NameDict = NAMES_ALL[_tiss]
     species = list(NameDict.keys())
-    pair_species = CAME.base.make_pairs_from_lists(species, species)
+    pair_species = came.base.make_pairs_from_lists(species, species)
     for _sp1, _sp2 in pair_species:
         if dsn1 in NameDict[_sp1] and dsn2 in NameDict[_sp2] + ['testis_mouse0']:
             tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
             break
+
+# temp: SPG subtypes
+dsn1 = 'spg---' + dsn1
+dsn2 = 'spg---' + dsn2
 
 print(f'Tissue:\t{tiss}', f'ref: {sp1}\t{dsn1}', f'que: {sp2}\t{dsn2}',
       sep='\n')
@@ -65,13 +69,13 @@ dir_formal = datadir / 'formal' / tiss
 df_varmap_1v1 = pd.read_csv(dir_gmap / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
 df_varmap = pd.read_csv(dir_gmap / f'gene_matches_{sp1}2{sp2}.csv', )
 
-_time_tag = CAME.make_nowtime_tag()
+_time_tag = came.make_nowtime_tag()
 subdir_res0 = f"{tiss}-{dsnames}{_time_tag}"
 
 resdir = Path('./_case_res') / subdir_res0
 figdir = resdir / 'figs'
 sc.settings.figdir = figdir
-CAME.check_dirs(figdir)
+came.check_dirs(figdir)
 
 # In[]
 ''' loading data
@@ -85,7 +89,7 @@ adatas = [adata_raw1, adata_raw2]
 
 # In[]
 # temp: remove known-ref-type
-if True:
+if False:
     rm_groups = ['inhibitory neuron', 'excitatory neuron']
     adata_raw1 = pp.remove_adata_groups(adata_raw1, key_class1, rm_groups, copy=False)
     adatas = [adata_raw1, adata_raw2]
@@ -106,10 +110,13 @@ sc.pp.filter_genes(adata_raw2, min_cells=3)
 # In[]
 ''' default pipeline of CAME
 '''
+node_source = 'deg' if 'spg' in dsn1 else 'deg,hvg'
+
 came_inputs, (adata1, adata2) = pipeline.preprocess_unaligned(
     adatas,
     key_class=key_class1,
     use_scnets=True,
+    node_source=node_source,
 )
 
 dpair, trainer, h_dict, predictor, ENV_VARs = pipeline.main_for_unaligned(
@@ -138,7 +145,7 @@ if load_other_ckpt:
             checkpoint='last',
     )
 # out_cell = trainer.eval_current()['cell']
-# probas_all = CAME.as_probabilities(out_cell)
+# probas_all = came.as_probabilities(out_cell)
 # df_probs = pd.DataFrame(probas_all, columns = trainer.classes)
 # In[]
 ''' trainer '''
@@ -166,7 +173,7 @@ gadt.write(resdir / 'adt_hidden_gene.h5ad')
 
 # In[]
 '''======================= cell embeddings ======================='''
-# from CAME_v0.utils.plot_pub import plot_pure_umap
+# from came_v0.utils.plot_pub import plot_pure_umap
 
 sc.set_figure_params(dpi_save=200)
 
@@ -187,7 +194,7 @@ adt.write(resdir / 'adt_hidden_cell.h5ad')
 # In[]
 ''' similaraties of cell-type embeddings
 '''
-adt1, adt2 = pp.bisplit_adata(adt, 'dataset', dsn1, reset_index_by='original_name')
+adt1, adt2 = pp.bisplit_adata(adt, 'dataset', dsnames[0], reset_index_by='original_name')
 avg_embed1 = pp.group_mean_adata(adt1, 'celltype')
 avg_embed2 = pp.group_mean_adata(adt2, 'celltype')
 
@@ -208,8 +215,8 @@ cols_anno = ['celltype', 'predicted'][:]
 
 out_cell = trainer.get_current_outputs()['cell']
 
-probas_all = CAME.as_probabilities(out_cell)
-probas_all = CAME.model.detach2numpy(torch.sigmoid(out_cell))
+probas_all = came.as_probabilities(out_cell)
+probas_all = came.model.detach2numpy(torch.sigmoid(out_cell))
 #probas_all = np.apply_along_axis(lambda x: x / x.sum(), 1, probas_all,)
 df_probs = pd.DataFrame(probas_all, columns=classes)
 
@@ -217,7 +224,7 @@ for i, _obs_ids in enumerate([obs_ids1, obs_ids2]):
     # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
     df_lbs = obs[cols_anno].iloc[_obs_ids].sort_values(cols_anno)
     
-    indices = CAME.subsample_each_group(df_lbs['celltype'], n_out=50, )
+    indices = came.subsample_each_group(df_lbs['celltype'], n_out=50, )
     # indices = df_lbs.index
     df_data = df_probs.loc[indices, :].copy()
     df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
@@ -241,13 +248,13 @@ sc.tl.leiden(gadt, resolution=.8, key_added='module')
 sc.pl.umap(gadt, color=['dataset', 'module'], ncols=1)
 
 ''' link-weights between homologous gene pairs '''
-df_var_links = CAME.weight_linked_vars(
+df_var_links = came.weight_linked_vars(
     gadt.X, dpair._vv_adj, names=dpair.get_vnode_names(),
     matric='cosine', index_names=dsnames,
 )
 
 # split
-gadt1, gadt2 = pp.bisplit_adata(gadt, 'dataset', dsn1, reset_index_by='name')
+gadt1, gadt2 = pp.bisplit_adata(gadt, 'dataset', dsnames[0], reset_index_by='name')
 
 color_by = 'module'
 sc.pl.umap(gadt1, color=color_by, s=10, edges=True, edges_width=0.05,
@@ -300,7 +307,7 @@ sc.pl.umap(gadt2, color=ctypes2,
 ''' gene annotation on UMAP (top DEGs)
 '''
 fdir_gmap = resdir / 'gene_umap'
-CAME.check_dirs(fdir_gmap)
+came.check_dirs(fdir_gmap)
 
 adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1],
                                         categories=classes)
@@ -343,7 +350,7 @@ obs_labels1, obs_labels2 = adt.obs['celltype'][dpair.obs_ids1], \
                            adt.obs['celltype'][dpair.obs_ids2]
 var_labels1, var_labels2 = gadt1.obs[groupby_var], gadt2.obs[groupby_var]
 
-g = CAME.make_abstracted_graph(
+g = came.make_abstracted_graph(
     obs_labels1, obs_labels2,
     var_labels1, var_labels2,
     avg_expr1, avg_expr2,
