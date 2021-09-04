@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 # @author: Xingyan Liu
 
-from .utils import load_hidden_states, save_hidden_states
+from .utils import (
+        load_hidden_states,
+        save_hidden_states,
+        load_example_data
+)
 from .utils import base
 from .utils.base import (
         save_pickle,

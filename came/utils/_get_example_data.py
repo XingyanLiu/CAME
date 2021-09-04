@@ -26,8 +26,11 @@ def load_example_data():
     df_varmap = pd.read_csv(datadir / f'gene_matches_{sp1}2{sp2}.csv', )
 
     dsn1, dsn2 = dsnames
-    adata_raw1 = sc.read_h5ad(datadir / f'raw-{dsn1}.h5ad')
-    adata_raw2 = sc.read_h5ad(datadir / f'raw-{dsn2}.h5ad')
+    fp1, fp2 = datadir / f'raw-{dsn1}.h5ad', datadir / f'raw-{dsn2}.h5ad'
+    if not fp1.exists():
+        fp1 = datadir / f'raw-{dsn1}-sampled.h5ad'
+
+    adata_raw1, adata_raw2 = sc.read_h5ad(fp1), sc.read_h5ad(fp2)
 
     key_class = 'cell_ontology_class'
     # time_tag = make_nowtime_tag()

@@ -136,7 +136,7 @@ def ce_loss_with_rdrop(
         logits1, logits2,
         labels,
         train_idx=None,
-        alpha=3.,
+        alpha=0.5,
         reduction='mean',
         weight=None,
         loss_fn: Callable = cross_entropy_loss,
@@ -160,7 +160,7 @@ def ce_loss_with_rdrop(
     if alpha > 0.:
         kl_loss = compute_kl_loss(logits1, logits2, reduction=reduction)
         # carefully choose hyper-parameters
-        loss = loss + alpha * kl_loss
+        loss += alpha * kl_loss
     return loss
 
 
