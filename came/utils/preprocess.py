@@ -1147,8 +1147,8 @@ def bisplit_adata(adata: sc.AnnData,
     if reset_index_by:
         if isinstance(reset_index_by, str):
             reset_index_by = [reset_index_by] * 2
-        left.obs_names = left.obs[reset_index_by[0]]
-        right.obs_names = right.obs[reset_index_by[1]]
+        left.obs_names = left.obs[reset_index_by[0]].tolist()
+        right.obs_names = right.obs[reset_index_by[1]].tolist()
     return [left, right]
 
 

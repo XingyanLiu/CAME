@@ -49,6 +49,7 @@ def plot_pure_umap(
     ax.legend_.remove()
     ax.set_xlabel(None)
     ax.set_ylabel(None)
-    _save_with_adjust(fig, Path(figdir) / f'umap-{tag}-{color}-{title}.{ftype}', 
-                          transparent=transparent, )
+    _save_with_adjust(
+        ax.figure, Path(figdir) / f'umap-{tag}-{color}-{title}.{ftype}',
+        transparent=transparent, )
     return ax
