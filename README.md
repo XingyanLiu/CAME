@@ -14,7 +14,7 @@ Install required packages:
 
 ```shell
 pip install "scanpy[leiden]"
-pip install torch>=1.8 
+pip install torch  # >=1.8 
 pip install dgl  
 ```
 
@@ -25,7 +25,7 @@ for detailed installation guide (for GPU version).
 Install CAME from source code:
 
 ```shell
-git clone https://github.com/XingyanLiu/CAME
+git clone https://github.com/XingyanLiu/CAME.git
 python setup.py install
 ```
 
