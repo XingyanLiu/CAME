@@ -9,7 +9,6 @@ __pycache__
 /_case_res/
 
 /came/sample_data/
-!/came/sample_data.rar
 
 /notebooks/_tmp*
 /notebooks/.ipynb_checkpoints
