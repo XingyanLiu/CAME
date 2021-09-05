@@ -98,11 +98,11 @@ def prepare4train(
         train_idx = LongTensor([i for i in range(dpair.n_obs) if i not in test_idx])
         test_idx = LongTensor(test_idx)
 
-    G = dpair.get_whole_net(rebuild=False, )
+    g = dpair.get_whole_net(rebuild=False, )
 
     ENV_VARs = dict(
         classes=classes,
-        G=G,
+        g=g,
         feat_dict=feat_dict,
         train_labels=labels[train_idx],
         test_labels=labels[test_idx] if ground_truth else None,
@@ -429,7 +429,7 @@ class Trainer(BaseTrainer):
 
                 loss = ce_loss_with_rdrop(
                     logits, logits2, labels=out_train_labels,
-                    # labels_1hot=out_train_lbs1hot,
+                    labels_1hot=out_train_lbs1hot,
                     train_idx=batch_train_idx, weight=class_weights,
                     loss_fn=classification_loss,
                     **params_lossfunc

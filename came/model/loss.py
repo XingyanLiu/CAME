@@ -84,6 +84,7 @@ def classification_loss(
         weight=None,
         smooth_eps=0.1,
         reduction='mean',
+        beta=1.,  # balance factor
 ):
     loss = cross_entropy_loss(
         logits,
@@ -99,7 +100,7 @@ def classification_loss(
             labels_1hot,
             weight=weight,
             reduction=reduction,
-        )
+        ) * beta
     return loss
 
 
@@ -148,15 +149,15 @@ def ce_loss_with_rdrop(
 
     # cross entropy loss for classifier
     if train_idx is None:
-        loss = loss_fn(logits1, labels, reduction=reduction,
-                       weight=weight, **kwargs) + \
-               loss_fn(logits2, labels, reduction=reduction,
-                       weight=weight, **kwargs)
+        logits1_tr, logits2_tr = logits1, logits2
     else:
-        loss = loss_fn(logits1[train_idx], labels,
-                       reduction=reduction, weight=weight, **kwargs) + \
-               loss_fn(logits2[train_idx], labels,
-                       reduction=reduction, weight=weight, **kwargs)
+        logits1_tr, logits2_tr = logits1[train_idx], logits2[train_idx]
+
+    loss = loss_fn(logits1_tr, labels, reduction=reduction, weight=weight,
+                   **kwargs) + \
+           loss_fn(logits2_tr, labels, reduction=reduction, weight=weight,
+                   **kwargs)
+
     if alpha > 0.:
         kl_loss = compute_kl_loss(logits1, logits2, reduction=reduction)
         # carefully choose hyper-parameters

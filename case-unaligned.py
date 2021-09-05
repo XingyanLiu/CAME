@@ -108,18 +108,38 @@ sc.pp.filter_genes(adata_raw1, min_cells=3)
 sc.pp.filter_genes(adata_raw2, min_cells=3)
 
 # In[]
+''' parameter settings
+'''
+# node genes. Using DEGs and HVGs by default
+
+if 'spg' in dsn1 or '4inh' in dsn1:
+    node_source = 'deg' 
+else:
+    node_source = 'deg,hvg'
+    
+# the numer of training epochs
+n_epochs = 350
+
+# the training batch size (when GPU memory is limited, recommanded is 8192 or more)
+batch_size = None  
+
+# the number of epochs to skip for checkpoint backup
+n_pass = 100
+
+# whether to use the single-cell network
+use_scnets = True
+
+# In[]
 ''' default pipeline of CAME
 '''
-node_source = 'deg' if 'spg' in dsn1 else 'deg,hvg'
 
 came_inputs, (adata1, adata2) = pipeline.preprocess_unaligned(
     adatas,
     key_class=key_class1,
-    use_scnets=True,
-    node_source=node_source,
+    use_scnets=use_scnets,
 )
 
-dpair, trainer, h_dict, predictor, ENV_VARs = pipeline.main_for_unaligned(
+outputs = pipeline.main_for_unaligned(
     **came_inputs,
     df_varmap=df_varmap,
     df_varmap_1v1=df_varmap_1v1,
@@ -127,12 +147,24 @@ dpair, trainer, h_dict, predictor, ENV_VARs = pipeline.main_for_unaligned(
     key_class1=key_class1,
     key_class2=key_class2,
     do_normalize=True,
-    n_epochs=350,
+    n_epochs=n_epochs,
     resdir=resdir,
-    check_umap=not True,  # True for visualizing embeddings each 40 epochs
-    n_pass=100,
-    params_model=dict(residual=False)
+    n_pass=n_pass,
+    batch_size=batch_size,
+    plot_results=True,
 )
+
+dpair = outputs['dpair']
+trainer = outputs['trainer']
+h_dict = outputs['h_dict']
+out_cell = outputs['out_cell']
+predictor = outputs['predictor']
+
+obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
+obs = dpair.obs
+classes = predictor.classes
+
+# In[]
 load_other_ckpt = False
 if load_other_ckpt:
     obs, df_probs, h_dict, predictor = pipeline.gather_came_results(
@@ -144,11 +176,10 @@ if load_other_ckpt:
             resdir=resdir,
             checkpoint='last',
     )
-# out_cell = trainer.eval_current()['cell']
-# probas_all = came.as_probabilities(out_cell)
-# df_probs = pd.DataFrame(probas_all, columns = trainer.classes)
+
 # In[]
 ''' trainer '''
+
 # trainer.plot_class_accs()
 # plt.figure(figsize=(3, 4))
 # trainer.plot_class_accs(fp=figdir / 'clf_acc.pdf')
@@ -159,17 +190,13 @@ if load_other_ckpt:
 # In[]
 ''' ======================= further analysis =======================
 '''
-obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
-obs = dpair.obs
-classes = dpair.classes
-if 'unknown' in classes:
-    classes = classes[: -1]
-# h_dict = trainer.model.get_hidden_states()
-adt = pp.make_adata(h_dict['cell'], obs=dpair.obs, assparse=False)
-gadt = pp.make_adata(h_dict['gene'], obs=dpair.var, assparse=False)
 
-adt.write(resdir / 'adt_hidden_cell.h5ad')
-gadt.write(resdir / 'adt_hidden_gene.h5ad')
+# h_dict = trainer.model.get_hidden_states()
+adt = pp.make_adata(h_dict['cell'], obs=dpair.obs, assparse=False, ignore_index=True)
+gadt = pp.make_adata(h_dict['gene'], obs=dpair.var, assparse=False, ignore_index=True)
+
+# adt.write(resdir / 'adt_hidden_cell.h5ad')
+# gadt.write(resdir / 'adt_hidden_gene.h5ad')
 
 # In[]
 '''======================= cell embeddings ======================='''
@@ -179,17 +206,23 @@ sc.set_figure_params(dpi_save=200)
 
 sc.pp.neighbors(adt, n_neighbors=15, metric='cosine', use_rep='X')
 sc.tl.umap(adt)
-sc.pl.umap(adt, color=['dataset', 'celltype'], ncols=1)
-# setting UMAP to the original adata
-obs_umap = adt.obsm['X_umap']
-adata1.obsm['X_umap'] = obs_umap[obs_ids1]
-adata2.obsm['X_umap'] = obs_umap[obs_ids2]
 
 ftype = ['.svg', ''][1]
 sc.pl.umap(adt, color='dataset', save=f'-dataset{ftype}')
 sc.pl.umap(adt, color='celltype', save=f'-ctype{ftype}')
 
+# store UMAP coordinates
+obs_umap = adt.obsm['X_umap']
+obs['UMAP1'] = obs_umap[:, 0]
+obs['UMAP2'] = obs_umap[:, 1]
+obs.to_csv(resdir / 'obs.csv')
 adt.write(resdir / 'adt_hidden_cell.h5ad')
+
+# setting UMAP to the original adata
+obs_umap = adt.obsm['X_umap']
+adata1.obsm['X_umap'] = obs_umap[obs_ids1]
+adata2.obsm['X_umap'] = obs_umap[obs_ids2]
+
 
 # In[]
 ''' similaraties of cell-type embeddings
@@ -213,35 +246,29 @@ ax.figure.show()
 name_label = 'celltype'
 cols_anno = ['celltype', 'predicted'][:]
 
-out_cell = trainer.get_current_outputs()['cell']
 
 probas_all = came.as_probabilities(out_cell)
 probas_all = came.model.detach2numpy(torch.sigmoid(out_cell))
-#probas_all = np.apply_along_axis(lambda x: x / x.sum(), 1, probas_all,)
 df_probs = pd.DataFrame(probas_all, columns=classes)
 
 for i, _obs_ids in enumerate([obs_ids1, obs_ids2]):
-    # df_lbs = obs[cols_anno][obs[key_class1] == 'unknown'].sort_values(cols_anno)
-    df_lbs = obs[cols_anno].iloc[_obs_ids].sort_values(cols_anno)
-    
-    indices = came.subsample_each_group(df_lbs['celltype'], n_out=50, )
-    # indices = df_lbs.index
-    df_data = df_probs.loc[indices, :].copy()
-    df_data = df_data[sorted(df_lbs['predicted'].unique())]  # .T
-    lbs = df_lbs[name_label][indices]
-    
-    _ = pl.heatmap_probas(
-        df_data.T, lbs, name_label='true label', 
-        cmap_heat='RdBu_r',
-        figsize=(5, 3.), fp=figdir / f'heatmap_probas-{i}.pdf'
+    gs = pl.wrapper_heatmap_scores(
+        df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
+        col_label='celltype', col_pred='predicted',
+        n_subsample=50,
+        cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
+        fp=figdir / f'heatmap_probas.pdf'
     )
+
+    # gs.figure
+    
 # In[]
 '''===================== gene embeddings ====================='''
 sc.set_figure_params(dpi_save=200)
 
 sc.pp.neighbors(gadt, n_neighbors=15, metric='cosine', use_rep='X')
 sc.tl.umap(gadt)
-sc.pl.umap(gadt, color='dataset', )
+sc.pl.umap(gadt, color='dataset', palette='tab20b')
 
 ''' joint gene module extraction '''
 sc.tl.leiden(gadt, resolution=.8, key_added='module')
@@ -257,10 +284,13 @@ df_var_links = came.weight_linked_vars(
 gadt1, gadt2 = pp.bisplit_adata(gadt, 'dataset', dsnames[0], reset_index_by='name')
 
 color_by = 'module'
+palette = 'tab20b'
 sc.pl.umap(gadt1, color=color_by, s=10, edges=True, edges_width=0.05,
-           save=f'_{color_by}-{dsn1}')
+           palette=palette,
+           save=f'_{color_by}-{dsnames[0]}')
 sc.pl.umap(gadt2, color=color_by, s=10, edges=True, edges_width=0.05,
-           save=f'_{color_by}-{dsn2}')
+           palette=palette,
+           save=f'_{color_by}-{dsnames[0]}')
 
 # In[]
 ''' gene 3d map
@@ -270,20 +300,27 @@ sc.pl.umap(gadt2, color=color_by, s=10, edges=True, edges_width=0.05,
 ''' ============ cell type gene-profiles on gene embeddings ============
 '''
 # averaged expressions
-avg_expr1 = pp.group_mean_adata(adata_raw1, groupby=key_class1,
-                                features=dpair.vnode_names1, use_raw=True)
-avg_expr2 = pp.group_mean_adata(adata_raw2, groupby=key_class2,
-                                features=dpair.vnode_names2, use_raw=True)
-# adata_raw1.X.data
+avg_expr1 = pp.group_mean_adata(
+    adatas[0], groupby=key_class1,
+    features=dpair.vnode_names1, use_raw=True)
+avg_expr2 = pp.group_mean_adata(
+    adatas[1], groupby=key_class2,
+    features=dpair.vnode_names2, use_raw=True)
 
+# z-scores across cell types
 avg_expr_add1, avg_expr_add2 = list(map(
     lambda x: pp.zscore(x.T).T, (avg_expr1, avg_expr2)
 ))
+
 
 # add annos
 pp.add_obs_annos(gadt1, avg_expr_add1, ignore_index=True)
 pp.add_obs_annos(gadt2, avg_expr_add2, ignore_index=True)
 
+gadt1.write(resdir / 'adt_hidden_gene1.h5ad')  # scanpy raise errors
+gadt2.write(resdir / 'adt_hidden_gene2.h5ad')
+
+# In[]
 ''' plot cell type gene-profiles (plot all the cell types) on UMAP '''
 ctypes1 = avg_expr1.columns.tolist()
 ctypes2 = avg_expr2.columns.tolist()
@@ -293,15 +330,29 @@ vmax = None
 vmin = - 1.5
 plkwds = dict(color_map=cmap_expr, vmax=vmax, vmin=vmin, ncols=5, )
 sc.pl.umap(gadt1, color=ctypes1,
-           #           edges=True, size=50,
+           # edges=True, size=50,
            save=f'_exprAvgs-{dsn1}-all.png', **plkwds)
 sc.pl.umap(gadt2, color=ctypes2,
-           #           edges=True, size=50,
+           # edges=True, size=50,
            save=f'_exprAvgs-{dsn2}-all.png', **plkwds)
 
-# gadt1.write(resdir / 'adt_hidden_gene1.h5ad')
-# gadt2.write(resdir / 'adt_hidden_gene2.h5ad')
+# In[]
+''' single UMAp plot '''
+_ctype = ctypes1[0]
+_xy = gadt1.obsm['X_umap'].T
+_color_values = gadt1.obs[_ctype]
 
+fig, ax = plt.subplots(1, 1, figsize=(3, 3), gridspec_kw={'wspace': 0.1})
+ax.scatter(*_xy, s=3,
+           c=_color_values, 
+           cmap=cmap_expr, 
+           vmin=-1.5, vmax=None
+          )
+ax.grid(False)
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_title(_ctype)
+# ax.set_frame_on(False)
 
 # In[]
 ''' gene annotation on UMAP (top DEGs)
@@ -360,6 +411,8 @@ g = came.make_abstracted_graph(
     cut_ov=cut_ov,
     norm_mtd_ov=norm_ov,
 )
+came.save_pickle(g, resdir / 'abs_graph.pickle')
+
 
 ''' visualization '''
 fp_abs = figdir / f'abstracted_graph-{groupby_var}-cut{cut_ov}-{norm_ov}-{ovby}.pdf'
@@ -368,6 +421,7 @@ ax = pl.plot_multipartite_graph(
     figsize=(9, 7.5), alpha=0.5, fp=fp_abs)  # nodelist=nodelist,
 
 ax.figure
+
 # unlabeled
 ax = pl.plot_multipartite_graph(
     g, edge_scale=10, figsize=(9, 7.5), alpha=0.5,

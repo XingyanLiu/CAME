@@ -109,16 +109,16 @@ def main_for_aligned(
     ENV_VARs = prepare4train(adpair, key_class=keys, )
 
     logging.debug(ENV_VARs.keys())
-    G = ENV_VARs['G']
+    g = ENV_VARs['g']
     classes0 = ENV_VARs['classes']
     classes = classes0[:-1] if 'unknown' in classes0 else classes0
     n_classes = len(classes)
     params_model = get_model_params(**params_model)
     params_model.update(
-        g_or_canonical_etypes=G.canonical_etypes,
+        g_or_canonical_etypes=g.canonical_etypes,
         in_dim_dict={'cell': adpair.n_feats, 'gene': 0},
         out_dim=n_classes,
-        layernorm_ntypes=G.ntypes,
+        layernorm_ntypes=g.ntypes,
     )
     save_json_dict(params_model, resdir / 'model_params.json')
 
@@ -127,7 +127,7 @@ def main_for_aligned(
     model = CGCNet(**params_model)
 
     params_lossfunc = get_loss_params(**params_lossfunc)
-    trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
+    trainer = Trainer(model=model, dir_main=resdir, **ENV_VARs)
 
     if batch_size is not None:
         trainer.train_minibatch(
@@ -146,7 +146,7 @@ def main_for_aligned(
     write_info(resdir / 'info.txt',
                current_performance=trainer._cur_log,
                params_model=params_model,
-               graph=G,
+               graph=g,
                model=model,
                )
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
@@ -154,7 +154,7 @@ def main_for_aligned(
     # ======================== Gather results ======================
     obs_ids1 = adpair.get_obs_ids(0, False)
     obs_ids2 = adpair.get_obs_ids(1, False)
-    obs, df_probs, h_dict, predictor = gather_came_results(
+    out_cell, df_probs, h_dict, predictor = gather_came_results(
         adpair,
         trainer,
         classes=classes,
@@ -166,7 +166,7 @@ def main_for_aligned(
         save_hidden_list=save_hidden_list,
         save_dpair=save_dpair,
     )
-
+    obs = adpair.obs
     # ============= confusion matrix & heatmap plot ==============
     if plot_results:
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
@@ -197,8 +197,14 @@ def main_for_aligned(
             cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
             fp=figdir / f'heatmap_probas.pdf'
         )
-
-    return adpair, trainer, h_dict, predictor, ENV_VARs
+    outputs = {
+        "dpair": adpair,
+        "trainer": trainer,
+        "h_dict": h_dict,
+        "out_cell": out_cell,
+        "predictor": predictor
+    }
+    return outputs
 
 
 def main_for_unaligned(
@@ -268,16 +274,16 @@ def main_for_unaligned(
     ENV_VARs = prepare4train(dpair, key_class=keys, )
 
     logging.info(ENV_VARs.keys())
-    G = ENV_VARs['G']
+    g = ENV_VARs['g']
     classes0 = ENV_VARs['classes']
     classes = classes0[:-1] if 'unknown' in classes0 else classes0
     n_classes = len(classes)
     params_model = get_model_params(**params_model)
     params_model.update(
-        g_or_canonical_etypes=G.canonical_etypes,
+        g_or_canonical_etypes=g.canonical_etypes,
         in_dim_dict={'cell': dpair.n_feats, 'gene': 0},
         out_dim=n_classes,
-        layernorm_ntypes=G.ntypes,
+        layernorm_ntypes=g.ntypes,
     )
     save_json_dict(params_model, resdir / 'model_params.json')
 
@@ -286,7 +292,7 @@ def main_for_unaligned(
 
     # training
     params_lossfunc = get_loss_params(**params_lossfunc)
-    trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
+    trainer = Trainer(model=model, dir_main=resdir, **ENV_VARs)
     if batch_size is not None:
         trainer.train_minibatch(
             n_epochs=n_epochs,
@@ -294,7 +300,7 @@ def main_for_unaligned(
             batch_size=batch_size,
             n_pass=n_pass, )
     else:
-        trainer = Trainer(model=model, g=G, dir_main=resdir, **ENV_VARs)
+        trainer = Trainer(model=model, g=g, dir_main=resdir, **ENV_VARs)
         trainer.train(n_epochs=n_epochs,
                       params_lossfunc=params_lossfunc,
                       n_pass=n_pass, )
@@ -304,7 +310,7 @@ def main_for_unaligned(
     write_info(resdir / 'info.txt',
                current_performance=trainer._cur_log,
                params_model=params_model,
-               graph=G,
+               graph=g,
                model=model,
                )
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
@@ -312,7 +318,7 @@ def main_for_unaligned(
     # ======================== Gather results ======================
     obs_ids1 = dpair.get_obs_ids(0, False)
     obs_ids2 = dpair.get_obs_ids(1, False)
-    obs, df_probs, h_dict, predictor = gather_came_results(
+    out_cell, df_probs, h_dict, predictor = gather_came_results(
         dpair,
         trainer,
         classes=classes,
@@ -324,7 +330,7 @@ def main_for_unaligned(
         save_hidden_list=save_hidden_list,
         save_dpair=save_dpair,
     )
-
+    obs = dpair.obs
     if plot_results:
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
         if key_class2 == 'clust_lbs':
@@ -351,10 +357,17 @@ def main_for_unaligned(
             df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
             col_label='celltype', col_pred='predicted',
             n_subsample=50,
-            cmap_heat='magma_r', #if prob_func == 'softmax' else 'RdBu_r'
+            cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
             fp=figdir / f'heatmap_probas.pdf'
         )
-    return dpair, trainer, h_dict, predictor, ENV_VARs
+    outputs = {
+        "dpair": dpair,
+        "trainer": trainer,
+        "h_dict": h_dict,
+        "out_cell": out_cell,
+        "predictor": predictor
+    }
+    return outputs
 
 
 def gather_came_results(
@@ -431,7 +444,7 @@ def gather_came_results(
     gcnt = pp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
     logging.info(str(gcnt))
     gcnt.to_csv(resdir / 'group_counts.csv')
-    return obs, df_probs, h_dict, predictor
+    return out_cell, df_probs, h_dict, predictor
 
 
 def preprocess_aligned(
