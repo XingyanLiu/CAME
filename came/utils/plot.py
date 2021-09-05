@@ -599,6 +599,61 @@ def plot_mapped_graph(
     return ax
 
 
+def embedding_mock3d(
+        adata,
+        color: Optional[str] = 'module',
+        edges: bool = False,
+        neighbor_key: str = None,
+        pt_size: int = 10,
+        angle_x=30, angle_y=150,
+        cmap_pt='tab20',
+        ax=None,
+        figsize=(4, 3),
+        fp=None,
+        **kwds_edge):
+    """
+
+    Parameters
+    ----------
+    adata
+    color
+        a key in adata.obs
+    edges
+    neighbor_key
+    pt_size
+    angle_x
+    angle_y
+    cmap_pt
+    ax
+    figsize
+    fp
+    kwds_edge
+
+    Returns
+    -------
+
+    """
+
+    xy = adata.obsm['X_umap']
+    _transmat = _get_affine_mat(angle_x, angle_y)
+    xy = xy.dot(_transmat)
+    x, y = xy[:, 0], xy[:, 1]
+    if color:
+        pt_color = np.array(adata.obs[color].cat.codes)
+    else:
+        pt_color = None
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize) # w*h
+    if edges:
+        nn_key = f'{neighbor_key}_connectivities' if neighbor_key else 'connectivities'
+        adj = adata.obsp[nn_key]
+        plot_edges_by_adj(adj, xy, ax=ax, zorder=0.9, **kwds_edge)
+    ax.scatter(x, y, marker='.', c=pt_color, s=pt_size, cmap=cmap_pt, zorder=2.5)
+    ax.set_axis_off()
+    if fp: _save_with_adjust(ax.figure, fp, dpi=400)
+    return ax
+
+
 # In[]
 def umap_grid(adatas, colors=None,
               ncols=1, figsize=None,
