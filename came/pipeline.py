@@ -300,7 +300,6 @@ def main_for_unaligned(
             batch_size=batch_size,
             n_pass=n_pass, )
     else:
-        trainer = Trainer(model=model, g=g, dir_main=resdir, **ENV_VARs)
         trainer.train(n_epochs=n_epochs,
                       params_lossfunc=params_lossfunc,
                       n_pass=n_pass, )

@@ -29,7 +29,7 @@ DATASET_PAIRS = [
     ('panc8', 'Baron_mouse'),
     ('Baron_human', 'Baron_mouse'),
     ('Baron_human', 'FACS'),
-    ('Lake_2018', 'Tasic18'),
+    ('Lake_2018', 'Tasic18'),  # 4
     ('Lake_2018', 'Tosches_turtle'),
     ('Lake_2018', 'Tosches_lizard'),
     ('Tosches_turtle', 'Tosches_lizard'),
@@ -37,7 +37,7 @@ DATASET_PAIRS = [
     ('testis_human', 'testis_mouse0'),    
     ('testis_human', 'testis_monkey'),
 ]
-dsnames = DATASET_PAIRS[-3]  # [::-1]
+dsnames = DATASET_PAIRS[-1]  #[::-1]
 dsn1, dsn2 = dsnames
 
 from DATASET_NAMES import Tissues, NAMES_ALL
@@ -51,9 +51,15 @@ for _tiss in Tissues:
             tiss, (sp1, sp2) = _tiss, (_sp1, _sp2)
             break
 
-# temp: SPG subtypes
-dsn1 = 'spg---' + dsn1
-dsn2 = 'spg---' + dsn2
+if tiss == 'testis':
+    # temp: SPG subtypes
+    dsn1 = 'spg---' + dsn1
+    dsn2 = 'spg---' + dsn2
+elif tiss == 'brain':
+    # temp: Inh subtypes
+    dsn1 = '4inh---' + dsn1
+    dsn2 = '4inh---' + dsn2
+
 
 print(f'Tissue:\t{tiss}', f'ref: {sp1}\t{dsn1}', f'que: {sp2}\t{dsn2}',
       sep='\n')
@@ -82,6 +88,8 @@ came.check_dirs(figdir)
 '''
 key_class1 = ['major_class', 'cell_ontology_class'][1]
 key_class2 = key_class1
+if '4inh' in dsn1:
+    key_class1 = key_class2 = 'subclass'
 
 adata_raw1 = sc.read_h5ad(dir_formal / f'raw-{dsn1}.h5ad')
 adata_raw2 = sc.read_h5ad(dir_formal / f'raw-{dsn2}.h5ad')
@@ -162,7 +170,7 @@ predictor = outputs['predictor']
 
 obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
 obs = dpair.obs
-classes = predictor.classes
+classes = list(predictor.classes)
 
 # In[]
 load_other_ckpt = False
@@ -247,8 +255,7 @@ name_label = 'celltype'
 cols_anno = ['celltype', 'predicted'][:]
 
 
-probas_all = came.as_probabilities(out_cell)
-probas_all = came.model.detach2numpy(torch.sigmoid(out_cell))
+probas_all = came.as_probabilities(out_cell, mode='softmax')
 df_probs = pd.DataFrame(probas_all, columns=classes)
 
 for i, _obs_ids in enumerate([obs_ids1, obs_ids2]):
@@ -360,7 +367,7 @@ ax.set_title(_ctype)
 fdir_gmap = resdir / 'gene_umap'
 came.check_dirs(fdir_gmap)
 
-adata1.obs[key_class1] = pd.Categorical(obs[key_class1][obs_ids1],
+adata1.obs[key_class1] = pd.Categorical(obs['celltype'][obs_ids1],
                                         categories=classes)
 adata2.obs['predicted'] = pd.Categorical(obs['predicted'][obs_ids2],
                                          categories=classes)
