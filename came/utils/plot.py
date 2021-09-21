@@ -454,10 +454,14 @@ def grid_display_probas(
         classes=None,
         figsize=(6, 5),
         sharey=True,
+        ylim=(-0.1, 1.1),
 ):
     """ violin plots of the distributions """
     if classes is None:
-        classes = list(set(labels))
+        classes = sorted(set(labels))
+    classes = [c for c in df.columns if c in classes] + [
+        c for c in classes if c not in df.columns]
+    labels = np.asarray(labels)
     fig, axs = plt.subplots(
         len(classes), 2, figsize=figsize,
         sharex=True, sharey=sharey,
@@ -465,9 +469,43 @@ def grid_display_probas(
     )
     for i, cl in enumerate(classes):
         df_sub = df[labels == cl]
-        y_mid = 0.4  # (df_sub.max() + df_sub.min()) / 2
         sns.violinplot(data=df_sub, ax=axs[i, 1], linewidth=.01, vmin=0)
-        axs[i, 1].set_ylim(-0.1, 1.1)
+        y_mid = (ylim[0] + ylim[1]) / 2 - 0.2
+        axs[i, 1].set_ylim(*ylim)
+        axs[i, 0].text(df.shape[1] - 1, y_mid, cl, ha='right')
+        axs[i, 0].set_axis_off()
+    rotate_xticklabels(axs[-1, 1], ha='right')
+    return fig
+
+
+def grid_bars_display_probas(
+        df,
+        labels,
+        classes=None,
+        figsize=(6, 5),
+        sharey=True,
+        ylim=(0.25, 1.05),
+):
+    """ bar plots of the distributions """
+    if classes is None:
+        classes = sorted(set(labels))
+    classes = [c for c in df.columns if c in classes] + [
+        c for c in classes if c not in df.columns]
+    labels = np.asarray(labels)
+
+    fig, axs = plt.subplots(
+        len(classes), 2, figsize=figsize,
+        sharex=True, sharey=sharey,
+        gridspec_kw={'hspace': 0.0, 'wspace': 0.}
+    )
+    for i, cl in enumerate(classes):
+        df_sub = df[labels == cl]
+        sns.barplot(data=df_sub, ax=axs[i, 1])
+
+        ymin, ymax = ylim
+        axs[i, 1].set_ylim(*ylim)
+        axs[i, 1].set_yticks([])
+        y_mid = (ymax + ymin) / 2 - 0.2
         axs[i, 0].text(df.shape[1] - 1, y_mid, cl, ha='right')
         axs[i, 0].set_axis_off()
     rotate_xticklabels(axs[-1, 1], ha='right')
@@ -478,7 +516,7 @@ def wrapper_heatmap_scores(
         df_score: pd.DataFrame,
         obs: pd.DataFrame,
         col_label: str = 'celltype',
-        col_pred: str = 'predicted',
+        col_pred: str = 'predicted',  # TODO: unnecessary, use argmax on scores
         figsize: tuple = (5, 3),
         n_subsample: Optional[int] = 50,
         ignore_index: bool = False,

@@ -424,7 +424,7 @@ def gather_came_results(
     probas_all = as_probabilities(out_cell, mode='softmax')
     cl_preds = predict_from_logits(probas_all, classes=classes)
     obs = pd.DataFrame(
-        # TODO: `keys[0]` -> 'REF', may rasise another exceptions
+        # TODO: `keys[0]` -> 'REF', may raise another exceptions
         {'REF': dpair.get_obs_labels(keys, asint=False),
          # true labels with `unknown` for unseen classes in query data
          'celltype': dpair.get_obs_anno(keys_compare),  # labels for comparison
