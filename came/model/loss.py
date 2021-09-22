@@ -94,7 +94,7 @@ def classification_loss(
         reduction=reduction,
     )
     # multi-label loss
-    if labels_1hot is not None:
+    if labels_1hot is not None and beta > 0.:
         loss += multilabel_binary_cross_entropy(
             logits,
             labels_1hot,
