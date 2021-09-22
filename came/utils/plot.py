@@ -520,6 +520,7 @@ def wrapper_heatmap_scores(
         figsize: tuple = (5, 3),
         n_subsample: Optional[int] = 50,
         ignore_index: bool = False,
+        name_label='Cell type',  # 'true label',
         fp=None,
         **kwds
 ):
@@ -542,7 +543,7 @@ def wrapper_heatmap_scores(
     lbs = df_lbs[col_label].loc[indices]
 
     gs = heatmap_probas(
-        df_data.T, lbs, name_label='true label',
+        df_data.T, lbs, name_label=name_label,
         figsize=figsize, fp=fp, **kwds
     )
     return gs
