@@ -512,6 +512,41 @@ def grid_bars_display_probas(
     return fig
 
 
+def grid_bars_display_probas_transposed(
+        df,
+        labels,
+        classes=None,
+        figsize=(5, 6),
+        sharey=True,
+        xlim=(0.25, 1.05),
+        **kwargs
+):
+    """ bar plots of the distributions (transposed) """
+    if classes is None:
+        classes = sorted(set(labels))
+    classes = [c for c in df.columns if c in classes] + [
+        c for c in classes if c not in df.columns]
+    labels = np.asarray(labels)
+    n_cl = len(classes)
+    fig, axs = plt.subplots(
+        2, len(classes), figsize=figsize,
+        sharex=True, sharey=sharey,
+        gridspec_kw={'hspace': 0.0, 'wspace': 0.}
+    )
+    for i, cl in enumerate(classes):
+        df_sub = df[labels == cl]
+        sns.barplot(data=df_sub, ax=axs[0, i], orient='h', **kwargs)
+
+        xmin, xmax = xlim
+        axs[0, i].set_xlim(xmin, xmax)
+        axs[0, i].set_xticks([])
+        x_mid = (xmax + xmin) / 2 - 0.2
+        axs[1, i].text(x_mid, -0.25, cl,
+                       ha='right', va='top', rotation=30)
+        axs[1, i].set_axis_off()
+    return fig
+
+
 def wrapper_heatmap_scores(
         df_score: pd.DataFrame,
         obs: pd.DataFrame,
