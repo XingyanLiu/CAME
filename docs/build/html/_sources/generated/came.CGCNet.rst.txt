@@ -29,7 +29,7 @@
       ~CGCNet.float
       ~CGCNet.forward
       ~CGCNet.get_attentions
-      ~CGCNet.cross_entropy_loss
+      ~CGCNet.get_classification_loss
       ~CGCNet.get_hidden_states
       ~CGCNet.get_out_logits
       ~CGCNet.half

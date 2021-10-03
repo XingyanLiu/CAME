@@ -1963,13 +1963,6 @@ def compute_and_get_DEGs(adata: sc.AnnData,
                                   key=key_added)
 
 
-@dec_timewrapper('K-means')
-def get_kmeans_labels_fromX(X, k=10, random_state=10, **kwds):
-    from sklearn.cluster import KMeans
-    kmeans = KMeans(n_clusters=k, random_state=random_state, **kwds).fit(X)
-    return kmeans.labels_
-
-
 @dec_timewrapper('leiden')
 def get_leiden_labels(adata, hvgs=None,
                       force_redo=False,
