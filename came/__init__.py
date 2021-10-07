@@ -26,6 +26,7 @@ from .utils.analyze import (
         make_abstracted_graph,
         )
 from .utils.train import prepare4train, Trainer, SUBDIR_MODEL
+from .utils._base_trainer import get_checkpoint_list
 from .utils.evaluation import accuracy
 from .model import (
         Predictor,

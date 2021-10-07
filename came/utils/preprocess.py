@@ -162,7 +162,7 @@ def adata_from_raw(dirname, backup_npz=True, name_mtx='matrix',
     adata.obs_names = barcodes.index.values
     for col in barcodes.columns:
         adata.obs[col] = barcodes[col]
-    print(adata)
+    # print(adata)
     return adata
 
 
@@ -304,7 +304,6 @@ def merge_adatas(
     genes = []
     bcds = []
     lbs_datasets = []
-    #    print("merging matrix...")
     for i, adt in enumerate(_adatas):
         data = adt.raw if adt.raw is not None else adt
         mats.append(data.X)
@@ -380,8 +379,7 @@ def merge_named_matrices(
         if not union and (dsnames is not None) and verbose:
             print('After {}: {} genes'.format(dsnames[idx], len(keep_genes)))
         if len(keep_genes) == 0:
-            print('Error: No genes found in all datasets, exiting...')
-            exit(1)
+            raise ValueError('Error: No genes found in all datasets, exiting...')
     if verbose:
         print('Found {} genes among all datasets'
               .format(len(keep_genes)))
@@ -396,14 +394,11 @@ def merge_named_matrices(
             X_new = np.zeros((mat_list[i].shape[0], len(union_genes)))
             X_old = sparse.csc_matrix(mat_list[i])
             gene_to_idx = {gene: idx for idx, gene in enumerate(gene_lists[i])}
-            #            print(gene_to_idx)
             for j, gene in enumerate(union_genes):
-                #                print(j, gene)
                 if gene in gene_to_idx:
                     X_new[:, j] = X_old[:, gene_to_idx[gene]].toarray().flatten()
-            #                    print(X_new[:, j])
             mat_list[i] = sparse.csr_matrix(X_new)
-        #            print('TEST:', mat_list[i].data[:5])
+        # print('TEST:', mat_list[i].data[:5])
         ret_genes = np.array(union_genes)
     else:
         # Only keep genes in common.
@@ -845,7 +840,7 @@ def homograph_from_scipy(adj, as_dgl=True, self_loop=True):
         from dgl import DGLGraph
         g = DGLGraph(g)
     if self_loop:
-        print('adding self-loops to the homologous graph')
+        logging.info('adding self-loops to the homologous graph')
         g.add_edges(g.nodes(), g.nodes())
     return g
 
@@ -994,7 +989,7 @@ def remove_small_groups(labels, min_samples=10,
     vcnts = pd.value_counts(labels)
     #    print(vcnts)
     groups_rmv = list(vcnts[vcnts <= min_samples].index)
-    print('groups to be removed:\n\t', groups_rmv)
+    logging.info('groups to be removed:\n\t', groups_rmv)
     return take_group_labels(labels, group_names=groups_rmv,
                              indicate=indicate, remove=True)
 
@@ -1051,7 +1046,7 @@ def merge_group_labels(labels: Sequence,
         groups = group_lists  # list(map(str, group_lists))
         new_name = '_'.join(groups)
         labels = change_names(labels, lambda x: new_name if x in groups else x)
-        print('groups are merged into a new single group: ', new_name)
+        logging.info('groups are merged into a new single group: ', new_name)
         return labels
     else:
         # merge multiple sets of groups

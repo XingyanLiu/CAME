@@ -382,7 +382,7 @@ def gather_came_results(
         save_dpair: bool = True,
 ):
     """ Packed function for pipeline as follows:
-    1. load the 'best' model weights
+    1. load the 'best' or given model weights
     2. get the predictions for cells, including probabilities (from logits)
     3. get and the hidden states for both cells and genes
     3. make a predictor

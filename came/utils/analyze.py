@@ -783,8 +783,8 @@ def make_abstracted_graph(
         key_weight='weight',
         key_count='size',
         key_identity='identity',
-        cut_ov=0.55,
-        norm_mtd_ov='max',
+        cut_ov=0,  # 0.55,
+        norm_mtd_ov='zs',  # 'max',
         global_adjust_ov=True,
         global_adjust_vv=True,
         vargroup_filtered='filtered',
@@ -813,7 +813,7 @@ def make_abstracted_graph(
     #    obs_group_order2 = _unique_cats(obs_labels2, obs_group_order2)
     var_group_order1 = _unique_cats(var_labels1, var_group_order1)
     var_group_order2 = _unique_cats(var_labels2, var_group_order2)
-    print('--->', var_group_order1)
+    # print('--->', var_group_order1)
     # obs-var edge abstraction #
     edges_ov1, avg_vo1 = abstract_ov_edges(
         avg_expr1, var_labels1,
@@ -829,7 +829,7 @@ def make_abstracted_graph(
         tag_var=tag_var2, tag_obs=tag_obs2,
         global_adjust=global_adjust_ov,
         return_full_adj=True)
-    print('---> avg_vo1\n', avg_vo1)
+    # print('---> avg_vo1\n', avg_vo1)
     # var-weights abstraction #
     edges_vv, adj_vv = abstract_vv_edges(
         df_var_links,  # res.var_link_weights,
@@ -843,7 +843,7 @@ def make_abstracted_graph(
         tag_var1=tag_var1,
         tag_var2=tag_var2,
         **kwds)
-    print('---> adj_vv\n', adj_vv)
+    # print('---> adj_vv\n', adj_vv)
 
     # deciding orders of the groups #
     avg_vo1 = pp.order_contingency_mat(avg_vo1, 1)  # 1 for the rows (vars)
@@ -851,7 +851,7 @@ def make_abstracted_graph(
     var_group_order1, obs_group_order1 = avg_vo1.index, avg_vo1.columns
 
     var_name_order1 = [f'{tag_var1}{x}' for x in var_group_order1]
-    print(var_name_order1)
+    # print(var_name_order1)
     adj_vv = pp.order_contingency_mat(adj_vv.loc[var_name_order1, :], 0)
     var_group_order2 = [x.replace(tag_var2, '') for x in adj_vv.columns]
     if set(obs_group_order1) == set(obs_labels2):
@@ -882,7 +882,7 @@ def make_abstracted_graph(
         df_var_links,  # res.var_link_weights,
         var_labels1,
         var_labels2,
-        #            norm_sizes=(df_vnodes1[key_count], df_vnodes2[key_count]),
+        # norm_sizes=(df_vnodes1[key_count], df_vnodes2[key_count]),
         return_full_adj=True,
         global_adjust=global_adjust_vv,
         key_weight=key_weight,

@@ -116,7 +116,7 @@ class AlignedDataPair(object):
         self.set_varnames_node(varnames_node)
 
         self.set_common_obs_annos(ignore_index=True)  # TODO!!!
-        #        self.set_vnode_annos(ignore_index=True)
+        # self.set_vnode_annos(ignore_index=True)
         self.set_ntypes(ntypes)
         self.set_etypes(etypes)
         self.make_whole_net(**kwds)
@@ -212,7 +212,7 @@ class AlignedDataPair(object):
 
         if oneshot or add_unknown_force:
             labels_cat = labels_cat.fillna(name_unknown)
-        print(labels_cat.value_counts())
+        # print(labels_cat.value_counts())
 
         if asint:
             labels = labels_cat.codes.copy()
@@ -457,7 +457,7 @@ class AlignedDataPair(object):
             elif obs.shape[0] != n_obs:
                 raise ValueError(f'the number of observations are not matched '
                                  f'expect {n_obs}, got {obs.shape[0]}.')
-            print(obs.columns)
+            # print(obs.columns)
             return obs
 
         obs1 = _check_obs(obs1, self.n_obs1, )  # self.dataset_names[0]
