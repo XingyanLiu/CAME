@@ -1,11 +1,9 @@
 Tutorials
 =========
 
-To be completed!
-
-see :doc:`_notebooks/load_results`
-
 .. toctree::
    :maxdepth: 1
 
    _notebooks/load_results
+   _notebooks/getting_started_pipeline_un
+   _notebooks/getting_started_pipeline_aligned
