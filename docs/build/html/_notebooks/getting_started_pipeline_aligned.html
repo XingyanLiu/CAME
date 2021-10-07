@@ -1,0 +1,1266 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Getting started (for datasets with aligned features) &mdash; CAME  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Load pre-computed results" href="load_results.html" />
+    <link rel="prev" title="Getting started (for datasets with unaligned features)" href="getting_started_pipeline_un.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CAME
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="getting_started_pipeline_un.html">Getting started (for datasets with unaligned features)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Getting started (for datasets with aligned features)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#0-Load-datasets">0 Load datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#1-The-default-pipeline-of-CAME">1 The default pipeline of CAME</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Laod-other-checkpont-(optional)">Laod other checkpont (optional)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Plot-the-contingency-matrix-for-query-dataset">Plot the contingency matrix for query dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Plot-heatmap-of-predicted-probabilities">Plot heatmap of predicted probabilities</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#2-Further-analysis">2 Further analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#UMAP-of-cell-embeddings">UMAP of cell embeddings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="load_results.html">Load pre-computed results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CAME</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Getting started (for datasets with aligned features)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/_notebooks/getting_started_pipeline_aligned.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Getting-started-(for-datasets-with-aligned-features)">
+<h1>Getting started (for datasets with aligned features)<a class="headerlink" href="#Getting-started-(for-datasets-with-aligned-features)" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;../&#39;</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ROOT</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">came</span>
+<span class="kn">from</span> <span class="nn">came</span> <span class="kn">import</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">pp</span><span class="p">,</span> <span class="n">pl</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Using backend: pytorch
+</pre></div></div>
+</div>
+<div class="section" id="0-Load-datasets">
+<h2>0 Load datasets<a class="headerlink" href="#0-Load-datasets" title="Permalink to this headline">¶</a></h2>
+<p>Load the example datasets:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">came.utils</span> <span class="kn">import</span> <span class="n">load_example_data</span>
+
+<span class="n">example_data_dict</span> <span class="o">=</span> <span class="n">load_example_data</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">example_data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="n">dsnames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Baron_human&#39;</span><span class="p">,</span> <span class="s1">&#39;Baron_mouse&#39;</span><span class="p">)</span>
+
+<span class="n">adatas</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;adatas&#39;</span><span class="p">]</span>
+<span class="n">dsnames</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;dataset_names&#39;</span><span class="p">]</span>
+
+<span class="n">adata_raw1</span><span class="p">,</span> <span class="n">adata_raw2</span> <span class="o">=</span> <span class="n">adatas</span>
+<span class="n">key_class1</span> <span class="o">=</span> <span class="n">key_class2</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;key_class&#39;</span><span class="p">]</span>
+
+<span class="n">df_varmap_1v1</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;varmap_1v1&#39;</span><span class="p">]</span>   <span class="c1"># set as None if NOT cross species</span>
+
+<span class="c1"># setting directory for results</span>
+<span class="n">time_tag</span> <span class="o">=</span> <span class="n">came</span><span class="o">.</span><span class="n">make_nowtime_tag</span><span class="p">()</span>
+<span class="n">resdir</span> <span class="o">=</span> <span class="n">ROOT</span> <span class="o">/</span><span class="s1">&#39;_temp&#39;</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dsnames</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">time_tag</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="n">figdir</span> <span class="o">=</span> <span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;figs&#39;</span>
+<span class="n">came</span><span class="o">.</span><span class="n">check_dirs</span><span class="p">(</span><span class="n">figdir</span><span class="p">)</span>  <span class="c1"># check and make the directory</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+dict_keys([&#39;adatas&#39;, &#39;varmap&#39;, &#39;varmap_1v1&#39;, &#39;dataset_names&#39;, &#39;key_class&#39;])
+a new directory made:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs
+</pre></div></div>
+</div>
+<p>To load your own datasets, see the code example below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ========= customized paths ==========</span>
+
+<span class="n">dsnames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Baron_human&#39;</span><span class="p">,</span> <span class="s1">&#39;Baron_mouse&#39;</span><span class="p">)</span>  <span class="c1"># the dataset names, set by user</span>
+<span class="n">dsn1</span><span class="p">,</span> <span class="n">dsn2</span> <span class="o">=</span> <span class="n">dsnames</span>
+
+<span class="n">path_rawdata1</span> <span class="o">=</span> <span class="n">ROOT</span> <span class="o">/</span> <span class="s1">&#39;came/sample_data/raw-Baron_human.h5ad&#39;</span>
+<span class="n">path_rawdata2</span> <span class="o">=</span> <span class="n">ROOT</span> <span class="o">/</span> <span class="s1">&#39;came/sample_data/raw-Baron_mouse.h5ad&#39;</span>
+</pre></div>
+</div>
+<p>Load scRNA-seq datasets.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ========= load data =========</span>
+<span class="n">df_varmap_1v1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_varmap_1v1</span><span class="p">)</span> <span class="k">if</span> <span class="n">path_varmap_1v1</span> <span class="k">else</span> <span class="kc">None</span>
+<span class="n">df_varmap</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_varmap</span><span class="p">)</span>
+
+<span class="n">adata_raw1</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">path_rawdata1</span><span class="p">)</span>
+<span class="n">adata_raw2</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">path_rawdata2</span><span class="p">)</span>
+<span class="n">adatas</span> <span class="o">=</span> <span class="p">[</span><span class="n">adata_raw1</span><span class="p">,</span> <span class="n">adata_raw2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Sepcifiy the column names of the cell-type labels, where <code class="docutils literal notranslate"><span class="pre">key_class1</span></code> is for reference data, and <code class="docutils literal notranslate"><span class="pre">key_class2</span></code> is for query data. If there aren’t any cell-type or clustering labels for the query cells, you can set <code class="docutils literal notranslate"><span class="pre">key_class=None</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">key_class1</span> <span class="o">=</span> <span class="s1">&#39;cell_ontology_class&#39;</span>  <span class="c1"># set by user</span>
+<span class="n">key_class2</span> <span class="o">=</span> <span class="s1">&#39;cell_ontology_class&#39;</span>  <span class="c1"># set by user</span>
+</pre></div>
+</div>
+<p>Setting directory for results</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">time_tag</span> <span class="o">=</span> <span class="n">came</span><span class="o">.</span><span class="n">make_nowtime_tag</span><span class="p">()</span>
+<span class="n">resdir</span> <span class="o">=</span> <span class="n">ROOT</span> <span class="o">/</span><span class="s1">&#39;_temp&#39;</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dsnames</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">time_tag</span><span class="si">}</span><span class="s1">&#39;</span>  <span class="c1"># set by user</span>
+<span class="n">figdir</span> <span class="o">=</span> <span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;figs&#39;</span>
+<span class="n">came</span><span class="o">.</span><span class="n">check_dirs</span><span class="p">(</span><span class="n">figdir</span><span class="p">)</span>  <span class="c1"># check and make the directory</span>
+</pre></div>
+</div>
+<p>Filtering genes (a preprocessing step, optional)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata_raw1</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata_raw2</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Inspect classes:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Inspect classes</span>
+<span class="k">if</span> <span class="n">key_class2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">group_counts_ori</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">adata_raw1</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">key_class1</span><span class="p">]),</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">adata_raw2</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">key_class2</span><span class="p">]),</span>
+    <span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">group_counts_ori</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="n">group_counts_ori</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cell_ontology_class</th>
+      <th>cell_ontology_class</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>B cell</th>
+      <td>NaN</td>
+      <td>10.0</td>
+    </tr>
+    <tr>
+      <th>Schwann cell</th>
+      <td>13.0</td>
+      <td>6.0</td>
+    </tr>
+    <tr>
+      <th>T cell</th>
+      <td>7.0</td>
+      <td>7.0</td>
+    </tr>
+    <tr>
+      <th>endothelial cell</th>
+      <td>252.0</td>
+      <td>139.0</td>
+    </tr>
+    <tr>
+      <th>leukocyte</th>
+      <td>NaN</td>
+      <td>8.0</td>
+    </tr>
+    <tr>
+      <th>macrophage</th>
+      <td>55.0</td>
+      <td>36.0</td>
+    </tr>
+    <tr>
+      <th>mast cell</th>
+      <td>25.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>pancreatic A cell</th>
+      <td>2326.0</td>
+      <td>191.0</td>
+    </tr>
+    <tr>
+      <th>pancreatic D cell</th>
+      <td>601.0</td>
+      <td>218.0</td>
+    </tr>
+    <tr>
+      <th>pancreatic PP cell</th>
+      <td>255.0</td>
+      <td>41.0</td>
+    </tr>
+    <tr>
+      <th>pancreatic acinar cell</th>
+      <td>958.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>pancreatic ductal cell</th>
+      <td>1077.0</td>
+      <td>275.0</td>
+    </tr>
+    <tr>
+      <th>pancreatic epsilon cell</th>
+      <td>18.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>pancreatic stellate cell</th>
+      <td>457.0</td>
+      <td>61.0</td>
+    </tr>
+    <tr>
+      <th>type B pancreatic cell</th>
+      <td>2525.0</td>
+      <td>894.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="1-The-default-pipeline-of-CAME">
+<h2>1 The default pipeline of CAME<a class="headerlink" href="#1-The-default-pipeline-of-CAME" title="Permalink to this headline">¶</a></h2>
+<p>Parameter setting:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># the numer of training epochs (a recommended setting is 200-400)</span>
+<span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">300</span>
+
+<span class="c1"># the training batch size (when GPU memory is limited, recommanded is 8192 or more)</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># the number of epochs to skip for checkpoint backup</span>
+<span class="n">n_pass</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="c1"># whether to use the single-cell network</span>
+<span class="n">use_scnets</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># node genes. Using DEGs and HVGs by default</span>
+<span class="n">node_source</span> <span class="o">=</span> <span class="s1">&#39;deg,hvg&#39;</span>
+<span class="n">ntop_deg</span> <span class="o">=</span> <span class="mi">50</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">came_inputs</span><span class="p">,</span> <span class="p">(</span><span class="n">adata1</span><span class="p">,</span> <span class="n">adata2</span><span class="p">)</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">preprocess_aligned</span><span class="p">(</span>
+    <span class="n">adatas</span><span class="p">,</span>
+    <span class="n">key_class</span><span class="o">=</span><span class="n">key_class1</span><span class="p">,</span>
+    <span class="n">use_scnets</span><span class="o">=</span><span class="n">use_scnets</span><span class="p">,</span>
+    <span class="n">ntop_deg</span><span class="o">=</span><span class="n">ntop_deg</span><span class="p">,</span>
+    <span class="n">node_source</span><span class="o">=</span><span class="n">node_source</span><span class="p">,</span>
+    <span class="n">df_varmap_1v1</span><span class="o">=</span><span class="n">df_varmap_1v1</span><span class="p">,</span>  <span class="c1"># set as None if NOT cross species</span>
+<span class="p">)</span>
+
+<span class="n">outputs</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">main_for_aligned</span><span class="p">(</span>
+    <span class="o">**</span><span class="n">came_inputs</span><span class="p">,</span>
+    <span class="n">dataset_names</span><span class="o">=</span><span class="n">dsnames</span><span class="p">,</span>
+    <span class="n">key_class1</span><span class="o">=</span><span class="n">key_class1</span><span class="p">,</span>
+    <span class="n">key_class2</span><span class="o">=</span><span class="n">key_class2</span><span class="p">,</span>
+    <span class="n">do_normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_epochs</span><span class="o">=</span><span class="n">n_epochs</span><span class="p">,</span>
+    <span class="n">resdir</span><span class="o">=</span><span class="n">resdir</span><span class="p">,</span>
+    <span class="n">n_pass</span><span class="o">=</span><span class="n">n_pass</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+    <span class="n">plot_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dpair</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;dpair&#39;</span><span class="p">]</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;trainer&#39;</span><span class="p">]</span>
+<span class="n">h_dict</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;h_dict&#39;</span><span class="p">]</span>
+<span class="n">out_cell</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;out_cell&#39;</span><span class="p">]</span>
+<span class="n">predictor</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;predictor&#39;</span><span class="p">]</span>
+
+<span class="n">obs_ids1</span><span class="p">,</span> <span class="n">obs_ids2</span> <span class="o">=</span> <span class="n">dpair</span><span class="o">.</span><span class="n">obs_ids1</span><span class="p">,</span> <span class="n">dpair</span><span class="o">.</span><span class="n">obs_ids2</span>
+<span class="n">obs</span> <span class="o">=</span> <span class="n">dpair</span><span class="o">.</span><span class="n">obs</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">classes</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[leiden] Time used:  0.3693 s
+650 genes before taking unique
+taking total of 494 unique differential expressed genes
+450 genes before taking unique
+taking total of 369 unique differential expressed genes
+already exists:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs
+already exists:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)
+[*] Setting dataset names:
+        0--&gt;Baron_human
+        1--&gt;Baron_mouse
+[*] Setting aligned features for observation nodes (self._features)
+[*] Setting observation-by-variable adjacent matrices (`self._ov_adjs`) for making merged graph adjacent matrix of observation and variable nodes
+-------------------- Summary of the DGL-Heterograph --------------------
+Graph(num_nodes={&#39;cell&#39;: 10455, &#39;gene&#39;: 3343},
+      num_edges={(&#39;cell&#39;, &#39;express&#39;, &#39;gene&#39;): 4257363, (&#39;cell&#39;, &#39;self_loop_cell&#39;, &#39;cell&#39;): 10455, (&#39;cell&#39;, &#39;similar_to&#39;, &#39;cell&#39;): 65800, (&#39;gene&#39;, &#39;expressed_by&#39;, &#39;cell&#39;): 4257363, (&#39;gene&#39;, &#39;self_loop_gene&#39;, &#39;gene&#39;): 3343},
+      metagraph=[(&#39;cell&#39;, &#39;gene&#39;, &#39;express&#39;), (&#39;cell&#39;, &#39;cell&#39;, &#39;self_loop_cell&#39;), (&#39;cell&#39;, &#39;cell&#39;, &#39;similar_to&#39;), (&#39;gene&#39;, &#39;cell&#39;, &#39;expressed_by&#39;), (&#39;gene&#39;, &#39;gene&#39;, &#39;self_loop_gene&#39;)])
+self-loops for observation-nodes: True
+self-loops for variable-nodes: True
+a new directory made:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\_models
+main directory: ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)
+model directory: ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\_models
+============== start training (device=&#39;cuda&#39;) ==============
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\Users\Administrator\AppData\Roaming\Python\Python38\site-packages\torch\nn\modules\container.py:552: UserWarning: Setting attributes on ParameterDict is not supported.
+  warnings.warn(&#34;Setting attributes on ParameterDict is not supported.&#34;)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch 0000 | Train Acc: 0.0298 | Test: 0.0748 (max=0.0748) | AMI=-0.0005 | Time: 0.6075
+Epoch 0005 | Train Acc: 0.4082 | Test: 0.1055 (max=0.4618) | AMI=0.3812 | Time: 0.3615
+Epoch 0010 | Train Acc: 0.5186 | Test: 0.5779 (max=0.5779) | AMI=0.3447 | Time: 0.3393
+Epoch 0015 | Train Acc: 0.7018 | Test: 0.3590 (max=0.5779) | AMI=0.4169 | Time: 0.3307
+Epoch 0020 | Train Acc: 0.7983 | Test: 0.7131 (max=0.7131) | AMI=0.4956 | Time: 0.3264
+Epoch 0025 | Train Acc: 0.8525 | Test: 0.7598 (max=0.7598) | AMI=0.5360 | Time: 0.3239
+Epoch 0030 | Train Acc: 0.8685 | Test: 0.7550 (max=0.7741) | AMI=0.5587 | Time: 0.3224
+Epoch 0035 | Train Acc: 0.8860 | Test: 0.7667 (max=0.7747) | AMI=0.5756 | Time: 0.3263
+Epoch 0040 | Train Acc: 0.8811 | Test: 0.7375 (max=0.7805) | AMI=0.5495 | Time: 0.3258
+Epoch 0045 | Train Acc: 0.9585 | Test: 0.7534 (max=0.7805) | AMI=0.5775 | Time: 0.3246
+Epoch 0050 | Train Acc: 0.9663 | Test: 0.7614 (max=0.7969) | AMI=0.5708 | Time: 0.3239
+Epoch 0055 | Train Acc: 0.9735 | Test: 0.7641 (max=0.7980) | AMI=0.5857 | Time: 0.3230
+Epoch 0060 | Train Acc: 0.9785 | Test: 0.7810 (max=0.8017) | AMI=0.6030 | Time: 0.3221
+Epoch 0065 | Train Acc: 0.9779 | Test: 0.7948 (max=0.8028) | AMI=0.6246 | Time: 0.3227
+Epoch 0070 | Train Acc: 0.9806 | Test: 0.8022 (max=0.8187) | AMI=0.5940 | Time: 0.3221
+Epoch 0075 | Train Acc: 0.9837 | Test: 0.8293 (max=0.8293) | AMI=0.6193 | Time: 0.3229
+Epoch 0080 | Train Acc: 0.9855 | Test: 0.8282 (max=0.8537) | AMI=0.6019 | Time: 0.3235
+Epoch 0085 | Train Acc: 0.9847 | Test: 0.8277 (max=0.8547) | AMI=0.6048 | Time: 0.3241
+Epoch 0090 | Train Acc: 0.9872 | Test: 0.8584 (max=0.8717) | AMI=0.6310 | Time: 0.3240
+Epoch 0095 | Train Acc: 0.9875 | Test: 0.8303 (max=0.8717) | AMI=0.6103 | Time: 0.3256
+[current best] model weights backup
+Epoch 0099 | Train Acc: 0.9883 | Test: 0.8796 (max=0.8796) | AMI=0.6548 | Time: 0.3252
+Epoch 0100 | Train Acc: 0.9880 | Test: 0.8224 (max=0.8796) | AMI=0.6014 | Time: 0.3251
+Epoch 0105 | Train Acc: 0.9883 | Test: 0.8584 (max=0.8796) | AMI=0.6307 | Time: 0.3247
+Epoch 0110 | Train Acc: 0.9891 | Test: 0.8680 (max=0.8796) | AMI=0.6345 | Time: 0.3245
+[current best] model weights backup
+Epoch 0112 | Train Acc: 0.9900 | Test: 0.8828 (max=0.8828) | AMI=0.6684 | Time: 0.3243
+Epoch 0115 | Train Acc: 0.9915 | Test: 0.8950 (max=0.8950) | AMI=0.6683 | Time: 0.3242
+[current best] model weights backup
+Epoch 0118 | Train Acc: 0.9901 | Test: 0.8918 (max=0.8950) | AMI=0.6712 | Time: 0.3240
+Epoch 0120 | Train Acc: 0.9904 | Test: 0.8765 (max=0.8950) | AMI=0.6511 | Time: 0.3239
+[current best] model weights backup
+Epoch 0124 | Train Acc: 0.9910 | Test: 0.8849 (max=0.8950) | AMI=0.6756 | Time: 0.3249
+Epoch 0125 | Train Acc: 0.9915 | Test: 0.8924 (max=0.8950) | AMI=0.6666 | Time: 0.3248
+[current best] model weights backup
+Epoch 0126 | Train Acc: 0.9909 | Test: 0.8961 (max=0.8961) | AMI=0.6780 | Time: 0.3249
+model weights backup
+Epoch 0129 | Train Acc: 0.9917 | Test: 0.8770 (max=0.8961) | AMI=0.6720 | Time: 0.3246
+[current best] model weights backup
+Epoch 0130 | Train Acc: 0.9914 | Test: 0.9019 (max=0.9019) | AMI=0.6886 | Time: 0.3246
+Epoch 0135 | Train Acc: 0.9908 | Test: 0.8924 (max=0.9019) | AMI=0.6701 | Time: 0.3249
+Epoch 0140 | Train Acc: 0.9917 | Test: 0.8876 (max=0.9019) | AMI=0.6624 | Time: 0.3253
+[current best] model weights backup
+Epoch 0142 | Train Acc: 0.9924 | Test: 0.8955 (max=0.9019) | AMI=0.6939 | Time: 0.3252
+Epoch 0145 | Train Acc: 0.9918 | Test: 0.8918 (max=0.9062) | AMI=0.6738 | Time: 0.3250
+[current best] model weights backup
+Epoch 0147 | Train Acc: 0.9923 | Test: 0.9040 (max=0.9062) | AMI=0.6994 | Time: 0.3256
+[current best] model weights backup
+Epoch 0150 | Train Acc: 0.9936 | Test: 0.9056 (max=0.9088) | AMI=0.7008 | Time: 0.3255
+[current best] model weights backup
+Epoch 0152 | Train Acc: 0.9922 | Test: 0.9056 (max=0.9088) | AMI=0.7073 | Time: 0.3255
+[current best] model weights backup
+Epoch 0154 | Train Acc: 0.9925 | Test: 0.9178 (max=0.9178) | AMI=0.7088 | Time: 0.3256
+Epoch 0155 | Train Acc: 0.9933 | Test: 0.9152 (max=0.9178) | AMI=0.7044 | Time: 0.3255
+[current best] model weights backup
+Epoch 0157 | Train Acc: 0.9930 | Test: 0.9115 (max=0.9178) | AMI=0.7118 | Time: 0.3255
+[current best] model weights backup
+Epoch 0159 | Train Acc: 0.9924 | Test: 0.9157 (max=0.9178) | AMI=0.7148 | Time: 0.3259
+Epoch 0160 | Train Acc: 0.9926 | Test: 0.9099 (max=0.9178) | AMI=0.6942 | Time: 0.3259
+[current best] model weights backup
+Epoch 0165 | Train Acc: 0.9937 | Test: 0.9152 (max=0.9183) | AMI=0.7152 | Time: 0.3256
+[current best] model weights backup
+Epoch 0169 | Train Acc: 0.9938 | Test: 0.9130 (max=0.9183) | AMI=0.7203 | Time: 0.3258
+Epoch 0170 | Train Acc: 0.9949 | Test: 0.9062 (max=0.9183) | AMI=0.6883 | Time: 0.3259
+model weights backup
+Epoch 0172 | Train Acc: 0.9945 | Test: 0.8987 (max=0.9183) | AMI=0.7014 | Time: 0.3258
+[current best] model weights backup
+Epoch 0173 | Train Acc: 0.9940 | Test: 0.9051 (max=0.9183) | AMI=0.7211 | Time: 0.3257
+[current best] model weights backup
+Epoch 0174 | Train Acc: 0.9944 | Test: 0.9221 (max=0.9221) | AMI=0.7300 | Time: 0.3257
+Epoch 0175 | Train Acc: 0.9947 | Test: 0.9189 (max=0.9221) | AMI=0.7242 | Time: 0.3257
+Epoch 0180 | Train Acc: 0.9937 | Test: 0.9290 (max=0.9290) | AMI=0.7297 | Time: 0.3263
+[current best] model weights backup
+Epoch 0183 | Train Acc: 0.9947 | Test: 0.9268 (max=0.9290) | AMI=0.7393 | Time: 0.3270
+Epoch 0185 | Train Acc: 0.9949 | Test: 0.9141 (max=0.9290) | AMI=0.7189 | Time: 0.3269
+Epoch 0190 | Train Acc: 0.9947 | Test: 0.9173 (max=0.9353) | AMI=0.7225 | Time: 0.3280
+Epoch 0195 | Train Acc: 0.9960 | Test: 0.9130 (max=0.9353) | AMI=0.7278 | Time: 0.3282
+Epoch 0200 | Train Acc: 0.9956 | Test: 0.9236 (max=0.9353) | AMI=0.7358 | Time: 0.3282
+[current best] model weights backup
+Epoch 0205 | Train Acc: 0.9961 | Test: 0.9290 (max=0.9353) | AMI=0.7425 | Time: 0.3283
+[current best] model weights backup
+Epoch 0209 | Train Acc: 0.9959 | Test: 0.9369 (max=0.9369) | AMI=0.7516 | Time: 0.3281
+Epoch 0210 | Train Acc: 0.9961 | Test: 0.9263 (max=0.9369) | AMI=0.7320 | Time: 0.3280
+model weights backup
+Epoch 0215 | Train Acc: 0.9963 | Test: 0.9252 (max=0.9369) | AMI=0.7399 | Time: 0.3280
+[current best] model weights backup
+Epoch 0219 | Train Acc: 0.9967 | Test: 0.9406 (max=0.9406) | AMI=0.7582 | Time: 0.3280
+Epoch 0220 | Train Acc: 0.9965 | Test: 0.9242 (max=0.9406) | AMI=0.7384 | Time: 0.3283
+Epoch 0225 | Train Acc: 0.9970 | Test: 0.9242 (max=0.9417) | AMI=0.7400 | Time: 0.3285
+Epoch 0230 | Train Acc: 0.9965 | Test: 0.9374 (max=0.9417) | AMI=0.7480 | Time: 0.3281
+Epoch 0235 | Train Acc: 0.9974 | Test: 0.9231 (max=0.9417) | AMI=0.7368 | Time: 0.3281
+Epoch 0240 | Train Acc: 0.9972 | Test: 0.9332 (max=0.9417) | AMI=0.7309 | Time: 0.3280
+[current best] model weights backup
+Epoch 0245 | Train Acc: 0.9963 | Test: 0.9411 (max=0.9417) | AMI=0.7624 | Time: 0.3287
+Epoch 0250 | Train Acc: 0.9965 | Test: 0.9268 (max=0.9417) | AMI=0.7280 | Time: 0.3287
+Epoch 0255 | Train Acc: 0.9971 | Test: 0.9417 (max=0.9417) | AMI=0.7526 | Time: 0.3285
+model weights backup
+Epoch 0258 | Train Acc: 0.9975 | Test: 0.9231 (max=0.9417) | AMI=0.7249 | Time: 0.3284
+Epoch 0260 | Train Acc: 0.9960 | Test: 0.9290 (max=0.9417) | AMI=0.7525 | Time: 0.3283
+[current best] model weights backup
+Epoch 0261 | Train Acc: 0.9967 | Test: 0.9385 (max=0.9417) | AMI=0.7632 | Time: 0.3283
+Epoch 0265 | Train Acc: 0.9977 | Test: 0.9343 (max=0.9417) | AMI=0.7622 | Time: 0.3283
+[current best] model weights backup
+Epoch 0268 | Train Acc: 0.9972 | Test: 0.9337 (max=0.9417) | AMI=0.7698 | Time: 0.3283
+Epoch 0270 | Train Acc: 0.9973 | Test: 0.9364 (max=0.9417) | AMI=0.7550 | Time: 0.3282
+Epoch 0275 | Train Acc: 0.9980 | Test: 0.9374 (max=0.9438) | AMI=0.7640 | Time: 0.3281
+Epoch 0280 | Train Acc: 0.9973 | Test: 0.9305 (max=0.9438) | AMI=0.7622 | Time: 0.3284
+Epoch 0285 | Train Acc: 0.9980 | Test: 0.9279 (max=0.9438) | AMI=0.7507 | Time: 0.3283
+Epoch 0290 | Train Acc: 0.9982 | Test: 0.9321 (max=0.9438) | AMI=0.7413 | Time: 0.3288
+Epoch 0295 | Train Acc: 0.9986 | Test: 0.9369 (max=0.9438) | AMI=0.7589 | Time: 0.3289
+figure has been saved into:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs\cluster_index.png
+states loaded from: ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\_models\weights_epoch268.pt
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\Users\Administrator\AppData\Roaming\Python\Python38\site-packages\torch\nn\modules\container.py:552: UserWarning: Setting attributes on ParameterDict is not supported.
+  warnings.warn(&#34;Setting attributes on ParameterDict is not supported.&#34;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+object saved into:
+         ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\datapair_init.pickle
+Re-order the rows
+figure has been saved into:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs\contingency_matrix(acc93.4%).png
+figure has been saved into:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs\contingency_matrix-train.png
+figure has been saved into:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs\heatmap_probas.pdf
+</pre></div></div>
+</div>
+<div class="section" id="Laod-other-checkpont-(optional)">
+<h3>Laod other checkpont (optional)<a class="headerlink" href="#Laod-other-checkpont-(optional)" title="Permalink to this headline">¶</a></h3>
+<p>You can load other model checkpoint if the default model is not satisfying.</p>
+<p>For example, load the last checkpoint and compute the results of it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">out_cell</span><span class="p">,</span> <span class="n">df_probs</span><span class="p">,</span> <span class="n">h_dict</span><span class="p">,</span> <span class="n">predictor</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">gather_came_results</span><span class="p">(</span>
+    <span class="n">dpair</span><span class="p">,</span>
+    <span class="n">trainer</span><span class="p">,</span>
+    <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">,</span>
+    <span class="n">keys</span><span class="o">=</span><span class="p">(</span><span class="n">key_class1</span><span class="p">,</span> <span class="n">key_class2</span><span class="p">),</span>
+    <span class="n">keys_compare</span><span class="o">=</span><span class="p">(</span><span class="n">key_class1</span><span class="p">,</span> <span class="n">key_class2</span><span class="p">),</span>
+    <span class="n">resdir</span><span class="o">=</span><span class="n">resdir</span><span class="p">,</span>
+    <span class="n">checkpoint</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>You can get all saved checkpoint numbers by:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">came</span><span class="o">.</span><span class="n">get_checkpoint_list</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;_models&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[112,
+ 118,
+ 124,
+ 126,
+ 129,
+ 130,
+ 142,
+ 147,
+ 150,
+ 152,
+ 154,
+ 157,
+ 159,
+ 165,
+ 169,
+ 172,
+ 173,
+ 174,
+ 183,
+ 205,
+ 209,
+ 215,
+ 219,
+ 245,
+ 258,
+ 261,
+ 268,
+ 299,
+ 99]
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Plot-the-contingency-matrix-for-query-dataset">
+<h3>Plot the contingency matrix for query dataset<a class="headerlink" href="#Plot-the-contingency-matrix-for-query-dataset" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># contingency matrix for query dataset</span>
+<span class="n">y_true</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="s1">&#39;celltype&#39;</span><span class="p">][</span><span class="n">obs_ids2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">][</span><span class="n">obs_ids2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+<span class="n">ax</span><span class="p">,</span> <span class="n">contmat</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">plot_contingency_mat</span><span class="p">(</span>
+    <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">norm_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">order_rows</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">order_cols</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">_save_with_adjust</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="p">,</span> <span class="n">figdir</span> <span class="o">/</span> <span class="s1">&#39;contingency_mat.png&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">figure</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+figure has been saved into:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs\contingency_mat.png
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_notebooks_getting_started_pipeline_aligned_15_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_15_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Plot-heatmap-of-predicted-probabilities">
+<h3>Plot heatmap of predicted probabilities<a class="headerlink" href="#Plot-heatmap-of-predicted-probabilities" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">name_label</span> <span class="o">=</span> <span class="s1">&#39;celltype&#39;</span>
+<span class="n">cols_anno</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;celltype&#39;</span><span class="p">,</span> <span class="s1">&#39;predicted&#39;</span><span class="p">][:]</span>
+<span class="n">df_probs</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">classes</span><span class="p">)]</span>
+
+
+<span class="n">gs</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">wrapper_heatmap_scores</span><span class="p">(</span>
+        <span class="n">df_probs</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">obs_ids2</span><span class="p">],</span> <span class="n">obs</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">obs_ids2</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">col_label</span><span class="o">=</span><span class="s1">&#39;celltype&#39;</span><span class="p">,</span> <span class="n">col_pred</span><span class="o">=</span><span class="s1">&#39;predicted&#39;</span><span class="p">,</span>
+        <span class="n">n_subsample</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">cmap_heat</span><span class="o">=</span><span class="s1">&#39;magma_r&#39;</span><span class="p">,</span>  <span class="c1"># if prob_func == &#39;softmax&#39; else &#39;RdBu_r&#39;</span>
+        <span class="n">fp</span><span class="o">=</span><span class="n">figdir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;heatmap_probas.pdf&#39;</span>
+    <span class="p">)</span>
+
+<span class="n">gs</span><span class="o">.</span><span class="n">figure</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+figure has been saved into:
+        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs\heatmap_probas.pdf
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_notebooks_getting_started_pipeline_aligned_17_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_17_1.png" />
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="2-Further-analysis">
+<h2>2 Further analysis<a class="headerlink" href="#2-Further-analysis" title="Permalink to this headline">¶</a></h2>
+<p>By default, CAME will use the <strong>last</strong> layer of hidden states, as the embeddings, to produce cell- and gene-UMAP.</p>
+<blockquote>
+<div><p>You can also load ALL of the model hidden states that have been seved during CAME’s default pipeline:</p>
+</div></blockquote>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">hidden_list</span> <span class="o">=</span> <span class="n">came</span><span class="o">.</span><span class="n">load_hidden_states</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;hidden_list.h5&#39;</span><span class="p">)</span>
+<span class="n">hidden_list</span>  <span class="c1"># a list of dicts</span>
+<span class="n">h_dict</span> <span class="o">=</span> <span class="n">hidden_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span> <span class="c1"># the last layer of hidden states</span>
+</pre></div>
+</div>
+<p>Make AnnData objects, storing only the CAME-embeddings and annotations, for cells and genes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">adt</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">make_adata</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="s1">&#39;cell&#39;</span><span class="p">],</span> <span class="n">obs</span><span class="o">=</span><span class="n">dpair</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="n">assparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">gadt</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">make_adata</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="s1">&#39;gene&#39;</span><span class="p">],</span> <span class="n">obs</span><span class="o">=</span><span class="n">dpair</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">assparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># adt.write(resdir / &#39;adt_hidden_cell.h5ad&#39;)</span>
+<span class="c1"># gadt.write_h5ad(resdir / &#39;adt_hidden_gene.h5ad&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+adding columns to `adata.obs` (ignore_index=True):
+original_name, dataset, REF, celltype, predicted, max_probs, is_right, pancreatic acinar cell, type B pancreatic cell, pancreatic D cell, pancreatic stellate cell, pancreatic ductal cell, pancreatic A cell, pancreatic epsilon cell, pancreatic PP cell, endothelial cell, macrophage, Schwann cell, mast cell, T cell, done!
+adding columns to `adata.obs` (ignore_index=True):
+name, done!
+</pre></div></div>
+</div>
+<div class="section" id="UMAP-of-cell-embeddings">
+<h3>UMAP of cell embeddings<a class="headerlink" href="#UMAP-of-cell-embeddings" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">dpi_save</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adt</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adt</span><span class="p">)</span>
+<span class="c1"># sc.pl.umap(adt, color=[&#39;dataset&#39;, &#39;celltype&#39;], ncols=1)</span>
+
+<span class="n">ftype</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.svg&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adt</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;dataset&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;-dataset</span><span class="si">{</span><span class="n">ftype</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adt</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;celltype&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;-ctype</span><span class="si">{</span><span class="n">ftype</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+... storing &#39;dataset&#39; as categorical
+... storing &#39;REF&#39; as categorical
+... storing &#39;celltype&#39; as categorical
+... storing &#39;predicted&#39; as categorical
+WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs\umap-dataset.pdf
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_notebooks_getting_started_pipeline_aligned_21_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_21_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs\umap-ctype.pdf
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_notebooks_getting_started_pipeline_aligned_21_3.png" src="../_images/_notebooks_getting_started_pipeline_aligned_21_3.png" />
+</div>
+</div>
+<p>Store UMAP coordinates:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">obs_umap</span> <span class="o">=</span> <span class="n">adt</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_umap&#39;</span><span class="p">]</span>
+<span class="n">obs</span><span class="p">[</span><span class="s1">&#39;UMAP1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">obs</span><span class="p">[</span><span class="s1">&#39;UMAP2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">obs</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;obs.csv&#39;</span><span class="p">)</span>
+<span class="n">adt</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;adt_hidden_cell.h5ad&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Setting UMAP to the original adata</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">adata1</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_umap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[</span><span class="n">obs_ids1</span><span class="p">]</span>
+<span class="n">adata2</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_umap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[</span><span class="n">obs_ids2</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="load_results.html" class="btn btn-neutral float-right" title="Load pre-computed results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="getting_started_pipeline_un.html" class="btn btn-neutral float-left" title="Getting started (for datasets with unaligned features)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Academy of Mathematics and Systems Science, CAS..
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

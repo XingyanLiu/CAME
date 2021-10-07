@@ -9,7 +9,7 @@ CAME
 CAME is a tool for Cell-type Assignment and Module Extraction,
 based on a heterogeneous graph neural network.
 
-see :doc:`_notebooks/getting_started_pipeline_un` and
+To get started, refer to :doc:`_notebooks/getting_started_pipeline_un` and
 :doc:`_notebooks/getting_started_pipeline_aligned` for CAME's analysis pipeline
 of the cross-species and cross-dataset cell-typing, respectively.
 

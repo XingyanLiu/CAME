@@ -5,7 +5,7 @@ CAME is a tool for Cell-type Assignment and Module Extraction, based on a hetero
 
 ### Installation
 
-It's recommended to create an environment for running CAME:
+It's recommended to create a conda environment for running CAME:
 
 ```shell
 conda create -n came python=3.8
@@ -22,12 +22,13 @@ pip install dgl
 
 See [scanpy](https://scanpy.readthedocs.io/en/stable/), 
 [PyTorch](https://pytorch.org/) and [DGL](https://www.dgl.ai/) 
-for detailed installation guide (for GPU version).
+for detailed installation guide (especially for GPU version).
 
 Install CAME from source code:
 
 ```shell
 git clone https://github.com/XingyanLiu/CAME.git
+cd CAME
 python setup.py install
 ```
 

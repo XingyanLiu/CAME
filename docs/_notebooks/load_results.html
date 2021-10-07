@@ -45,7 +45,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="API Reference" href="../api.html" />
-    <link rel="prev" title="Tutorials" href="../tutorials.html" /> 
+    <link rel="prev" title="Getting started (for datasets with aligned features)" href="getting_started_pipeline_aligned.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -94,9 +94,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="getting_started_pipeline_un.html">Getting started (for datasets with unaligned features)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_pipeline_aligned.html">Getting started (for datasets with aligned features)</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Load pre-computed results</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Load-CAME-results">Load CAME results</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#common-variables">common variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Common-variables-that-can-be-used-in-the-downstream-analysis">Common variables that can be used in the downstream analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#Get-hidden-states">Get hidden states</a><ul>
@@ -452,7 +454,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Load-pre-computed-results">
 <h1>Load pre-computed results<a class="headerlink" href="#Load-pre-computed-results" title="Permalink to this headline">¶</a></h1>
-<p>Assume you have finished the model training process and had the results properly.</p>
+<p>Make sure that you have finished the model training process (CAME’s pipeline) and had the results properly stored.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -546,8 +548,8 @@ self-loops for observation-nodes: True
 self-loops for variable-nodes: True
 </pre></div></div>
 </div>
-<div class="section" id="common-variables">
-<h3>common variables<a class="headerlink" href="#common-variables" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="Common-variables-that-can-be-used-in-the-downstream-analysis">
+<h3>Common variables that can be used in the downstream analysis<a class="headerlink" href="#Common-variables-that-can-be-used-in-the-downstream-analysis" title="Permalink to this headline">¶</a></h3>
 <p>Including:</p>
 <ul class="simple">
 <li><p>The model inputs</p>
@@ -582,7 +584,7 @@ self-loops for variable-nodes: True
 </div>
 <div class="section" id="Get-hidden-states">
 <h2>Get hidden states<a class="headerlink" href="#Get-hidden-states" title="Permalink to this headline">¶</a></h2>
-<p>format like:</p>
+<p>The hidden states are saved as format like:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[dict0, dict1, dict2]
 </pre></div>
 </div>
@@ -592,8 +594,8 @@ self-loops for variable-nodes: True
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># all hidden states</span>
-<span class="n">hidden_list</span> <span class="o">=</span> <span class="n">came</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_all_hidden_states</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">feat_dict</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+<span></span><span class="c1"># Load all hidden states (saved during CAME&#39;s pipeline)</span>
+<span class="n">hidden_list</span> <span class="o">=</span> <span class="n">came</span><span class="o">.</span><span class="n">load_hidden_states</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;hidden_list.h5&#39;</span><span class="p">)</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">hidden_list</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -726,7 +728,7 @@ h2_gene2.shape=(3135, 128)
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="../api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="getting_started_pipeline_aligned.html" class="btn btn-neutral float-left" title="Getting started (for datasets with aligned features)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
