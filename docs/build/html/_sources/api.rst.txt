@@ -2,8 +2,8 @@
 .. automodule:: came
    :noindex:
 
-API Reference
-=============
+API References
+==============
 
 
 Import CAME:
