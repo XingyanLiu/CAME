@@ -455,7 +455,8 @@ def preprocess_aligned(
         nneigh_scnet: int = 5,
         nneigh_clust: int = 20,
         ntop_deg: int = 50,
-        key_clust: str = 'clust_lbs'
+        key_clust: str = 'clust_lbs',
+        node_source: str = 'hvg,deg'
 ):
     """
     Packed function for process adatas with aligned features
@@ -530,6 +531,14 @@ def preprocess_aligned(
     ###
     vars_feat = list(set(degs1).union(degs2))
     vars_node = list(set(hvgs1).union(hvgs2).union(vars_feat))
+
+    node_source = node_source.lower()
+    if 'hvg' in node_source and 'deg' in node_source:
+        vars_node = list(set(hvgs1).union(hvgs2).union(vars_feat))
+    elif 'hvg' in node_source:
+        vars_nodes = list(set(hvgs1).union(hvgs2))
+    else:
+        vars_nodes = vars_feat
 
     dct = dict(
         adatas=adatas,
