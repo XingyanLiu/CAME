@@ -4,7 +4,6 @@ setup.py
 came/PARAMETERS.py
 came/__init__.py
 came/pipeline.py
-came/pipeline_supervised.py
 came.egg-info/PKG-INFO
 came.egg-info/SOURCES.txt
 came.egg-info/dependency_links.txt

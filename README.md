@@ -43,6 +43,9 @@ Before running the testing code, make sure that the sample data
 - raw-Baron_mouse.h5ad
 - raw-Baron_human.h5ad 
 
+> NOTE: the file `raw-Baron_mouse.h5ad` is subsample from the original data 
+> for code testing. The resulting annotation accuracy may not be as good as 
+> using full dataset as the refernce.
 
 To test the package, run the python file `test_pipeline.py`:
 
@@ -53,13 +56,7 @@ python test_pipeline.py
 
 ### Example code for analysis
 
-See code in `case-unaligned.py`
-
-TODO:
-* Jupyter notebooks of tutorials in different cases, that is dataset pairs with
-  * Aligned features.
-  * Unaligned features.
-* Documentation of API.
+See code in files in `./notebooks`
 
 
 ### Citation

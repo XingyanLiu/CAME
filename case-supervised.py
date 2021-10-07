@@ -4,26 +4,17 @@
 @file: case-supervised.py
 @time: 2021-05-30
 """
-import os
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-import seaborn as sns
 
 import scanpy as sc
-from scipy import sparse
-from scipy.special import softmax
-
-import networkx as nx
-import torch
 
 # ROOT = os.path.dirname(os.path.abspath(__file__))
 # os.chdir(ROOT)
 
 import came
-from came.pipeline_supervised import preprocess_unaligned, main_for_unaligned
+from pipeline_supervised import preprocess_unaligned, main_for_unaligned
 from came import pp, pl
 
 

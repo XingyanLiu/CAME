@@ -21,7 +21,7 @@ import networkx as nx
 import torch
 import logging
 
-from . import (
+from came import (
     save_pickle,
     make_nowtime_tag,
     write_info,
@@ -29,19 +29,19 @@ from . import (
     predict_from_logits,
     subsample_each_group,
 )
-from .PARAMETERS import (
+from came.PARAMETERS import (
     get_model_params,
     get_loss_params,
     get_preprocess_params
 )
-from . import pp as utp
-from . import pl as uplt
-from .utils import base, evaluation
-from . import (
+from came import pp as utp
+from came import pl as uplt
+from came.utils import base, evaluation
+from came import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-from .utils._train_for_both import prepare4train, Trainer, seed_everything
+from came.utils._train_for_both import prepare4train, Trainer, seed_everything
 
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()

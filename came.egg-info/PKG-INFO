@@ -19,22 +19,43 @@ License-File: LICENSE
 
 
 # CAME
-Cross-species cell-type assignment and gene module extraction of single-cell RNA-seq by graph neural network
+
+CAME is a tool for Cell-type Assignment and Module Extraction, based on a heterogeneous graph neural network.
+
 
 ### Installation
- Install from source code:
+
+It's recommended to create an environment for running CAME:
+
 ```shell
+conda create -n came python=3.8
+conda activate came
+```
+
+Install required packages:
+
+```shell
+pip install "scanpy[leiden]"
+pip install torch  # >=1.8 
+pip install dgl  
+```
+
+See [scanpy](https://scanpy.readthedocs.io/en/stable/), 
+[PyTorch](https://pytorch.org/) and [DGL](https://www.dgl.ai/) 
+for detailed installation guide (for GPU version).
+
+Install CAME from source code:
+
+```shell
+git clone https://github.com/XingyanLiu/CAME.git
 python setup.py install
 ```
 
 ### Testing the package
-To test the package, run the python file `test_pipeline.py`:
 
-```shell
-python test_pipeline.py 
-```
+Before running the testing code, make sure that the sample data 
+(`./came/sample_data/`, currently stored in `./came/sample_data.rar`) exist, which contains:
 
-When running the testing code, make sure that the sample data (`/came/sample_data/`) exist, which contains:
 - gene_matches_1v1_human2mouse.csv (optional)
 - gene_matches_1v1_mouse2human.csv (optional)
 - gene_matches_human2mouse.csv
@@ -42,17 +63,29 @@ When running the testing code, make sure that the sample data (`/came/sample_dat
 - raw-Baron_mouse.h5ad
 - raw-Baron_human.h5ad 
 
-NOTE:
-Currently, files in folder `/came/sample_data/` are ignored, i.e., NOT included in the project folder.
+> NOTE: the file `raw-Baron_mouse.h5ad` is subsample from the original data 
+> for code testing. The resulting annotation accuracy may not be as good as 
+> using full dataset as the refernce.
+
+To test the package, run the python file `test_pipeline.py`:
+
+```shell
+python test_pipeline.py 
+```
+
 
 ### Example code for analysis
 
-See code in `case-unaligned.py`
+See code in files in `./notebooks`
 
-TODO:
-* Jupyter notebooks of tutorials in different cases, that is dataset pairs with
-  * Aligned features.
-  * Unaligned features.
-* Documentation of API.
+
+### Citation
+
+If CAME is useful for your research, consider citing our preprint:
+
+> Cross-species cell-type assignment of single-cell RNA-seq by a heterogeneous graph neural network.
+   Xingyan Liu, Qunlun Shen, Shihua Zhang.
+   bioRxiv 2021.09.25.461790; doi: https://doi.org/10.1101/2021.09.25.461790
+
 
 
