@@ -4,9 +4,11 @@ CAME is a tool for **Cell-type Assignment and Module Extraction**, based on a he
 
 For the detailed usage, please refer to [CAME-Documentation](https://xingyanliu.github.io/CAME/index.html).
 
-<img src="docs/_images/Fig1ABC.png" width="250"/>
+<img src="docs/_images/Fig1ABC.png" width="600"/>
 
-![image](./docs/_images/Fig1D.png)
+<img src="docs/_images/Fig1D.png" width="600"/>
+
+[comment]: <> (![image]&#40;./docs/_images/Fig1D.png&#41;)
 
 ### Installation
 
