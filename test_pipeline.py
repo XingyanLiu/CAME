@@ -5,16 +5,20 @@ Created on Wed May  5 20:08:52 2021
 @author: Xingyan Liu
 """
 import came
-import matplotlib as mpl
 import logging
 
 
 try:
+    import matplotlib as mpl
     mpl.use('agg')
 except Exception as e:
     print(f"An error occurred when setting matplotlib backend ({e})")
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(filename)s-%(lineno)d-%(funcName)s(): '
+               '%(levelname)s\n %(message)s')
 
     came.__test1__(6, batch_size=2048)
     came.__test2__(6, batch_size=None)
