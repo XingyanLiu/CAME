@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="came.pipeline.main_for_aligned" href="generated/came.pipeline.main_for_aligned.html" />
+    <link rel="next" title="came.load_example_data" href="generated/came.load_example_data.html" />
     <link rel="prev" title="Load pre-computed results" href="_notebooks/load_results.html" /> 
 </head>
 
@@ -43,6 +43,10 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-0">Example data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.load_example_data.html">came.load_example_data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.pipeline.main_for_aligned.html">came.pipeline.main_for_aligned</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.pipeline.main_for_unaligned.html">came.pipeline.main_for_unaligned</a></li>
@@ -52,18 +56,15 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#preprocessing-functions">Preprocessing functions</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="generated/came.utils.preprocess.align_adata_vars.html">came.utils.preprocess.align_adata_vars</a></li>
-<li class="toctree-l4"><a class="reference internal" href="generated/came.utils.preprocess.normalize_default.html">came.utils.preprocess.normalize_default</a></li>
-<li class="toctree-l4"><a class="reference internal" href="generated/came.utils.preprocess.quick_preprocess.html">came.utils.preprocess.quick_preprocess</a></li>
-<li class="toctree-l4"><a class="reference internal" href="generated/came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="generated/came.utils.preprocess.group_mean_adata.html">came.utils.preprocess.group_mean_adata</a></li>
-<li class="toctree-l4"><a class="reference internal" href="generated/came.utils.preprocess.wrapper_scale.html">came.utils.preprocess.wrapper_scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.align_adata_vars.html">came.utils.preprocess.align_adata_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.normalize_default.html">came.utils.preprocess.normalize_default</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.quick_preprocess.html">came.utils.preprocess.quick_preprocess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.group_mean_adata.html">came.utils.preprocess.group_mean_adata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.wrapper_scale.html">came.utils.preprocess.wrapper_scale</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-0">DataPair and AlignedDataPair</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-1">DataPair and AlignedDataPair</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.aligned_datapair_from_adatas.html">came.aligned_datapair_from_adatas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.datapair_from_adatas.html">came.datapair_from_adatas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.AlignedDataPair.html">came.AlignedDataPair</a></li>
@@ -134,6 +135,20 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">came</span>
 </pre></div>
 </div>
+<section id="module-0">
+<span id="example-data"></span><h2>Example data<a class="headerlink" href="#module-0" title="Permalink to this headline"></a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.load_example_data.html#came.load_example_data" title="came.load_example_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_example_data</span></code></a>()</p></td>
+<td><p>Load example data, for a quick start with CAME.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="module-came.pipeline">
 <span id="pipeline-came-pipeline"></span><h2>Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code><a class="headerlink" href="#module-came.pipeline" title="Permalink to this headline"></a></h2>
 <table class="longtable docutils align-default">
@@ -143,27 +158,25 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.pipeline.main_for_aligned.html#came.pipeline.main_for_aligned" title="came.pipeline.main_for_aligned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_for_aligned</span></code></a>(adatas, vars_feat[, ...])</p></td>
-<td><p></p></td>
+<td><p>Run the main process of CAME (model training), for integrating 2 datasets of aligned features.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/came.pipeline.main_for_unaligned.html#came.pipeline.main_for_unaligned" title="came.pipeline.main_for_unaligned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_for_unaligned</span></code></a>(adatas, vars_use, ...[, ...])</p></td>
-<td><p></p></td>
+<td><p>Run the main process of CAME (model training), for integrating 2 datasets of unaligned features.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.pipeline.preprocess_aligned.html#came.pipeline.preprocess_aligned" title="came.pipeline.preprocess_aligned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_aligned</span></code></a>(adatas, key_class[, ...])</p></td>
-<td><p>Packed function for process adatas with aligned features (i.e.</p></td>
+<td><p>Packed function for process adatas with aligned features (i.e., one-to-one correspondence).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/came.pipeline.preprocess_unaligned.html#came.pipeline.preprocess_unaligned" title="came.pipeline.preprocess_unaligned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_unaligned</span></code></a>(adatas, key_class[, ...])</p></td>
 <td><p>Packed function for process adatas with un-aligned features.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.pipeline.gather_came_results.html#came.pipeline.gather_came_results" title="came.pipeline.gather_came_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gather_came_results</span></code></a>(dpair, trainer, classes, ...)</p></td>
-<td><p>Packed function for pipeline as follows: 1.</p></td>
+<td><p>Packed function for pipeline as follows:</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="module-came.utils.preprocess">
 <span id="preprocessing-came-pp"></span><h2>Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code><a class="headerlink" href="#module-came.utils.preprocess" title="Permalink to this headline"></a></h2>
-<section id="preprocessing-functions">
-<h3>Preprocessing functions<a class="headerlink" href="#preprocessing-functions" title="Permalink to this headline"></a></h3>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -191,9 +204,8 @@
 </tbody>
 </table>
 </section>
-</section>
-<section id="module-0">
-<span id="datapair-and-aligneddatapair"></span><h2>DataPair and AlignedDataPair<a class="headerlink" href="#module-0" title="Permalink to this headline"></a></h2>
+<section id="module-1">
+<span id="datapair-and-aligneddatapair"></span><h2>DataPair and AlignedDataPair<a class="headerlink" href="#module-1" title="Permalink to this headline"></a></h2>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -207,10 +219,10 @@
 <td><p>Build <code class="docutils literal notranslate"><span class="pre">DataPair</span></code> object from a pair of adatas</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.AlignedDataPair.html#came.AlignedDataPair" title="came.AlignedDataPair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AlignedDataPair</span></code></a>(features, ov_adjs[, ...])</p></td>
-<td><p>paired datasets with the aligned features</p></td>
+<td><p>Paired datasets with the aligned features (e.g.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/came.DataPair.html#came.DataPair" title="came.DataPair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataPair</span></code></a>(features, ov_adjs, vv_adj[, ...])</p></td>
-<td><p>paired datasets with the un-aligned features</p></td>
+<td><p>Paired datasets with the un-aligned features (e.g., cross-speceis)</p></td>
 </tr>
 </tbody>
 </table>
@@ -239,7 +251,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="_notebooks/load_results.html" class="btn btn-neutral float-left" title="Load pre-computed results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="generated/came.pipeline.main_for_aligned.html" class="btn btn-neutral float-right" title="came.pipeline.main_for_aligned" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="generated/came.load_example_data.html" class="btn btn-neutral float-right" title="came.load_example_data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

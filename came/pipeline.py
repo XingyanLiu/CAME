@@ -34,7 +34,7 @@ from .PARAMETERS import (
     get_preprocess_params
 )
 from . import (
-    Predictor,
+    Predictor, DataPair, AlignedDataPair,
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
@@ -68,6 +68,63 @@ def main_for_aligned(
         save_hidden_list: bool = True,
         save_dpair: bool = True,
 ):
+    """ Run the main process of CAME (model training), for integrating 2 datasets
+    of aligned features. (e.g., cross-species integration)
+
+    Parameters
+    ----------
+
+    adatas
+        A pair of ``sc.AnnData`` objects, the reference and query raw data
+    vars_feat: a sequence of strings
+        variables to be taken as the node-features of the observations
+    vars_as_nodes: a sequence of strings
+        variables to be taken as the graph nodes
+    scnets
+        two single-cell-networks or a merged one
+    dataset_names
+        a tuple of two names for reference and query, respectively
+    key_class1
+        the key to the type-labels for the reference data,
+        should be a column name of ``adatas[0].obs``.
+    key_class2
+        the key to the type-labels for the query data. Optional, if provided,
+        should be a column name of ``adatas[1].obs``.
+    do_normalize
+        whether to normalize the input data
+        (the they have already been normalized, set it False)
+    n_epochs
+        number of training epochs.
+        A recommended setting is 200-400 for whole-graph training,
+        and 80-200 for sub-graph training.
+    resdir
+        directory for saving results output by CAME
+    tag_data
+        a tag for auto-creating result directory
+    params_model
+        the model parameters
+    params_lossfunc
+        parameters for loss function
+    n_pass
+        number of epochs to skip; not backup model checkpoints until ``n_pass``
+        epochs.
+    batch_size
+        the number of observation nodes in each mini-batch, based on which the
+        sub-graphs will be used for mini-batch training.
+        if None, the model will be trained on the whole graph.
+    plot_results
+        whether to automatically plot the classification results
+    norm_target_sum
+        the scale factor for library-size normalization
+    save_hidden_list
+        whether to save the hidden states for all the layers
+    save_dpair
+        whether to save the elements of the DataPair object
+
+    Returns
+    -------
+    outputs: dict
+    """
     if resdir is None:
         tag_time = make_nowtime_tag()
         tag_data = dataset_names if tag_data is None else tag_data
@@ -105,6 +162,7 @@ def main_for_aligned(
         oo_adjs=scnets,
         dataset_names=dataset_names,
     )
+    print(adpair)
 
     ENV_VARs = prepare4train(adpair, key_class=keys, )
 
@@ -230,6 +288,70 @@ def main_for_unaligned(
         save_hidden_list: bool = True,
         save_dpair: bool = True,
 ):
+    """ Run the main process of CAME (model training), for integrating 2 datasets
+    of unaligned features. (e.g., cross-species integration)
+
+    Parameters
+    ----------
+    adatas
+        A pair of ``sc.AnnData`` objects, the reference and query raw data
+    vars_use
+        a list or tuple of 2 variable name-lists.
+        for example, differential expressed genes, highly variable features.
+    vars_as_nodes: list or tuple of 2
+        variables to be taken as the graph nodes
+    df_varmap
+        pd.DataFrame with (at least) 2 columns.
+        relationships between features in 2 datasets, for making the
+        adjacent matrix (`vv_adj`) between variables from these 2 datasets.
+    df_varmap_1v1: None, pd.DataFrame; optional.
+        dataframe containing only 1-to-1 correspondence between features
+        in 2 datasets, if not provided, it will be inferred from `df_varmap`
+    scnets
+        two single-cell-networks or a merged one
+    dataset_names
+        a tuple of two names for reference and query, respectively
+    key_class1
+        the key to the type-labels for the reference data,
+        should be a column name of ``adatas[0].obs``.
+    key_class2
+        the key to the type-labels for the query data. Optional, if provided,
+        should be a column name of ``adatas[1].obs``.
+    do_normalize
+        whether to normalize the input data
+        (the they have already been normalized, set it False)
+    n_epochs
+        number of training epochs.
+        A recommended setting is 200-400 for whole-graph training,
+        and 80-200 for sub-graph training.
+    resdir
+        directory for saving results output by CAME
+    tag_data
+        a tag for auto-creating result directory
+    params_model
+        the model parameters
+    params_lossfunc
+        parameters for loss function
+    n_pass
+        number of epochs to skip; not backup model checkpoints until ``n_pass``
+        epochs.
+    batch_size
+        the number of observation nodes in each mini-batch, based on which the
+        sub-graphs will be used for mini-batch training.
+        if None, the model will be trained on the whole graph.
+    plot_results
+        whether to automatically plot the classification results
+    norm_target_sum
+        the scale factor for library-size normalization
+    save_hidden_list
+        whether to save the hidden states for all the layers
+    save_dpair
+        whether to save the elements of the DataPair object
+
+    Returns
+    -------
+    outputs: dict
+    """
     if resdir is None:
         tag_time = make_nowtime_tag()
         tag_data = dataset_names if tag_data is None else tag_data
@@ -270,6 +392,7 @@ def main_for_unaligned(
         union_node_feats='auto',
         dataset_names=dataset_names,
     )
+    print(dpair)
 
     ENV_VARs = prepare4train(dpair, key_class=keys, )
 
@@ -370,7 +493,7 @@ def main_for_unaligned(
 
 
 def gather_came_results(
-        dpair,
+        dpair: Union[DataPair, AlignedDataPair],
         trainer: Trainer,
         classes: Sequence,
         keys: Sequence,
@@ -382,10 +505,29 @@ def gather_came_results(
         save_dpair: bool = True,
 ):
     """ Packed function for pipeline as follows:
+
     1. load the 'best' or given model weights
     2. get the predictions for cells, including probabilities (from logits)
     3. get and the hidden states for both cells and genes
-    3. make a predictor
+    4. make a predictor
+
+    Parameters
+    ----------
+    dpair
+
+    trainer
+    classes
+    keys
+    keys_compare
+    resdir
+    checkpoint
+    batch_size
+    save_hidden_list
+    save_dpair
+
+    Returns
+    -------
+
     """
     resdir = Path(resdir)
     if isinstance(checkpoint, int):
@@ -447,7 +589,7 @@ def gather_came_results(
 
 
 def preprocess_aligned(
-        adatas,
+        adatas: [sc.AnnData, sc.AnnData],
         key_class: str,
         df_varmap_1v1: Optional[pd.DataFrame] = None,
         use_scnets: bool = True,
@@ -460,7 +602,7 @@ def preprocess_aligned(
 ):
     """
     Packed function for process adatas with aligned features
-    (i.e. one-to-one correspondence).
+    (i.e., one-to-one correspondence).
 
     Processing Steps:
 
@@ -468,23 +610,38 @@ def preprocess_aligned(
         * preprocessing
         * candidate genes (HVGs and DEGs)
         * pre-clustering query data
-        * single-cell network
+        * computing single-cell network
 
     Parameters
     ----------
-    adatas:
+
+    adatas
+        A pair of ``sc.AnnData`` objects, the reference and query raw data
     key_class
+        the key to the type-labels, should be a column name of ``adatas[0].obs``
     df_varmap_1v1
+        dataframe containing only 1-to-1 correspondence between features
+        in ``adatas``; if not provided, map the variables of their original names.
     use_scnets
+        whether to use the cell-cell-similarity edges (single-cell-network)
     n_pcs
+        the number of PCs for computing the single-cell-network
     nneigh_scnet
+        the number of nearest neighbors to account for the single-cell-network
     nneigh_clust
+        the number of nearest neighbors to account for pre-clustering
     ntop_deg
+        the number of top DEGs to take as the node-features
     key_clust
+        where to add the per-clustering labels to the query data, i.e.,
+        ``adatas[1].obs``
+    node_source
+        source of the node genes, using both DEGs and HVGs by default
 
     Returns
     -------
-
+        came_inputs: a dict containing CAME inputs
+        (adata1, adata2): a tuple of the preprocessed ``AnnData`` objects
     """
     adatas = pp.align_adata_vars(
         adatas[0], adatas[1], df_varmap_1v1, unify_names=True,
@@ -530,15 +687,14 @@ def preprocess_aligned(
         adata2, key_clust, **params_deg)
     ###
     vars_feat = list(set(degs1).union(degs2))
-    vars_node = list(set(hvgs1).union(hvgs2).union(vars_feat))
 
     node_source = node_source.lower()
     if 'hvg' in node_source and 'deg' in node_source:
         vars_node = list(set(hvgs1).union(hvgs2).union(vars_feat))
     elif 'hvg' in node_source:
-        vars_nodes = list(set(hvgs1).union(hvgs2))
+        vars_node = list(set(hvgs1).union(hvgs2))
     else:
-        vars_nodes = vars_feat
+        vars_node = vars_feat
 
     dct = dict(
         adatas=adatas,
@@ -550,7 +706,7 @@ def preprocess_aligned(
 
 
 def preprocess_unaligned(
-        adatas,
+        adatas: [sc.AnnData, sc.AnnData],
         key_class: str,
         use_scnets: bool = True,
         n_pcs: int = 30,
@@ -562,29 +718,41 @@ def preprocess_unaligned(
 ):
     """
     Packed function for process adatas with un-aligned features.
-    (i.e. some of them could be one-to-many or many-to-one correspondence)
+    (i.e., some of them could be one-to-many or many-to-one correspondence)
 
     Processing Steps:
 
         * preprocessing
         * candidate genes (HVGs and DEGs)
         * pre-clustering query data
-        * single-cell network
+        * computing single-cell network
 
     Parameters
     ----------
     adatas
+        A pair of ``sc.AnnData`` objects, the reference and query raw data
     key_class
+        the key to the type-labels, should be a column name of ``adatas[0].obs``
     use_scnets
+        whether to use the cell-cell-similarity edges (single-cell-network)
     n_pcs
+        the number of PCs for computing the single-cell-network
     nneigh_scnet
+        the number of nearest neighbors to account for the single-cell-network
     nneigh_clust
+        the number of nearest neighbors to account for pre-clustering
     ntop_deg
+        the number of top DEGs to take as the node-features
     key_clust
+        where to add the per-clustering labels to the query data, i.e.,
+        ``adatas[1].obs``
+    node_source
+        source of the node genes, using both DEGs and HVGs by default
 
     Returns
     -------
-
+        came_inputs: a dict containing CAME inputs
+        (adata1, adata2): a tuple of the preprocessed ``AnnData`` objects
     """
     logging.info('================ preprocessing ===============')
     params_preproc = dict(

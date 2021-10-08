@@ -155,8 +155,8 @@ class ResultsAnalyzer(object):
             self.dpair = dpair
         self.vv_adj = dpair._vv_adj
         self.KEY_DATASET = dpair.KEY_DATASET
-        self.KEY_OBSNAME = dpair.KEY_OBSNAME
-        self.KEY_VARNAME = dpair.KEY_VARNAME
+        self.KEY_OBSNAME = dpair._KEY_OBSNAME
+        self.KEY_VARNAME = dpair._KEY_VARNAME
         self.dataset_names = dpair.dataset_names
         self.obs_ids1 = dpair.get_obs_ids(0, astensor=False)
         self.obs_ids2 = dpair.get_obs_ids(1, astensor=False)

@@ -4,7 +4,7 @@ Created on Fri Aug 28 23:57:02 2020
 
 @author: Xingyan Liu
 """
-from typing import Union, Sequence, Mapping, Optional
+from typing import Union, Sequence, Dict, Optional, Tuple
 import logging
 import numpy as np
 import pandas as pd
@@ -21,7 +21,7 @@ from ..utils.base import save_pickle
 # In[]
 
 class DataPair(object):
-    """ paired datasets with the un-aligned features
+    """ Paired datasets with the un-aligned features (e.g., cross-speceis)
     
     Parameters
     ----------
@@ -48,31 +48,12 @@ class DataPair(object):
     obs_dfs: list or tuple
         a list or tuple of 2 DataFrame s
     ntypes: dict
+        A dict for specifying names of the node types
     etypes: dict
+        A dict for specifying names of the edge types
     **kwds:
         other key words for constructiong of the HeteroGraph
     
-
-    Attributes
-    ----------
-
-    _features:
-    _ov_adjs:
-    vv_adj:
-        var-var adjacent matrix (e.g. gene-gene adjacent matrix)
-    ov_adj:
-        observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)
-    G: dgl.Heterograph
-    n_obs
-    n_obs1
-    n_obs2
-    n_vnodes
-    n_vnodes1
-    n_vnodes2
-    ntypes
-    etypes
-    dataset_names
-
     Examples
     --------
 
@@ -85,15 +66,19 @@ class DataPair(object):
     ...          )
     
     """
-    KEY_DATASET = 'dataset'  # '_datapair_name'
-    KEY_VARNAME = 'name'
-    KEY_OBSNAME = 'original_name'
-    DEFAULT_NTYPES = {'o': 'cell', 'v': 'gene'}
-    DEFAULT_ETYPES = {'ov': 'express',
-                      'vo': 'expressed_by',
-                      'vv': 'homolog_with',
-                      'oo': 'similar_to'
-                      }
+    _KEY_DATASET = 'dataset'
+    _KEY_VARNAME = 'name'
+    _KEY_OBSNAME = 'original_name'
+    _DEFAULT_NTYPES = {'o': 'cell', 'v': 'gene'}
+    _DEFAULT_ETYPES = {'ov': 'express',
+                       'vo': 'expressed_by',
+                       'vv': 'homolog_with',
+                       'oo': 'similar_to'
+                       }
+    # dataset_names = ('reference', 'query')
+    ntypes = _DEFAULT_NTYPES
+    etypes = _DEFAULT_ETYPES
+    _net_info = None
 
     def __init__(
             self,
@@ -106,11 +91,22 @@ class DataPair(object):
             obs_dfs: Optional[Sequence[pd.DataFrame]] = None,
             var_dfs: Optional[Sequence[pd.DataFrame]] = None,  # TODO!!!
             dataset_names: Sequence[str] = ('reference', 'query'),
-            ntypes: Mapping[str, str] = DEFAULT_NTYPES,
-            etypes: Mapping[str, str] = DEFAULT_ETYPES,
+            ntypes: Dict[str, str] = None,
+            etypes: Dict[str, str] = None,
             make_graph: bool = True,
             **kwds
     ):
+        self._g = None
+        self._features = None  # a pair of matrices
+        self.obs_dfs = [None, None]  # a pair of pd.DataFrame
+        self.obs = None  # pd.DataFrame
+        self.var = None  # pd.DataFrame
+        self._oo_adj = None
+        self._ov_adjs = None
+        self._vv_adj = None
+        self._var_id2name = None  # pd.Series
+        self._n2i_dict = None  # (Dict[str, int], Dict[str, int])
+        self._varnames_feat = None  # pd.DataFrame
 
         self.set_dataset_names(dataset_names)
 
@@ -130,6 +126,134 @@ class DataPair(object):
             logging.info(
                 'graph has not been made, call `self.make_whole_net()` '
                 'if needed.')
+
+    @property
+    def n_feats(self):
+        """ Number of dimensions of the observation-node features """
+        return self._features[0].shape[1]
+
+    @property
+    def n_obs1(self):
+        """ Number of observations (e.g., cells) in the reference data """
+        return self._features[0].shape[0]
+
+    @property
+    def n_obs2(self):
+        """ Number of observations (e.g., cells) in the query data """
+        return self._features[1].shape[0]
+
+    @property
+    def n_obs(self):
+        """ Total number of the observations (e.g., cells) """
+        return self.n_obs1 + self.n_obs2
+
+    @property
+    def n_vnodes1(self):
+        """ Number of variables (e.g., genes) in the reference data """
+        return self._ov_adjs[0].shape[1]
+
+    @property
+    def n_vnodes2(self):
+        """ Number of variables (e.g., genes) in the query data """
+        return self._ov_adjs[1].shape[1]
+
+    @property
+    def n_vnodes(self):
+        """ Total number of the variables (e.g., genes) """
+        return self.n_vnodes1 + self.n_vnodes2
+
+    @property
+    def obs_ids1(self, ):
+        """Indices of the observation (e.g., cell) nodes in the reference data
+        """
+        return self.get_obs_ids(0, False)
+
+    @property
+    def obs_ids2(self, ):
+        """Indices of the observation (e.g., cell) nodes in the query data
+        """
+        return self.get_obs_ids(1, False)
+
+    @property
+    def obs_ids(self, ):
+        """All of the observation (e.g., cell) indices"""
+        return self.get_obs_ids(None, False)
+
+    @property
+    def var_ids1(self, ):
+        """Indices of the variable (e.g., gene) nodes in the reference data"""
+        return self.get_vnode_ids(0, False)
+
+    @property
+    def var_ids2(self, ):
+        """Indices of the variable (e.g., gene) nodes in the query data"""
+        return self.get_vnode_ids(1, False)
+
+    @property
+    def G(self):
+        """ The graph structure, of type ``dgl.Heterograph`` """
+        return self._g
+
+    @property
+    def _ov_adj(self, ):
+        return sparse.block_diag(self._ov_adjs)
+
+    @property
+    def ov_adj(self, ):
+        """ merged adjacent matrix between observation and variable nodes
+        (e.g. cell-gene adjacent matrix)
+        """
+        return self._ov_adj
+
+    @property
+    def vv_adj(self):
+        """var-var adjacent matrix (e.g. gene-gene adjacent matrix)"""
+        return self._vv_adj
+
+    @property
+    def oo_adj(self):
+        """ observation-by-variable adjacent matrix
+        (e.g. cell-gene adjacent matrix)"""
+        return self._oo_adj
+
+    @property
+    def vnode_names1(self, ):
+        """Names of the variable (e.g., gene) nodes in the reference data"""
+        return self._var_id2name[: self.n_vnodes1].tolist()
+
+    @property
+    def vnode_names2(self, ):
+        """Names of the variable (e.g., gene) nodes in the query data"""
+        return self._var_id2name[self.n_vnodes1:].tolist()
+
+    @property
+    def labels(self, ):
+        """ Labels for each observations that would be taken as the supervised
+        information for model-training.
+        """
+        return self._labels.copy() if hasattr(self, '_labels') else None
+
+    @property
+    def classes(self, ):
+        """ Unique classes (types) in the reference data, may contain "unknown"
+        if there are any types in the query data but not in the reference,
+        or if the query data is un-labeled.
+        """
+        return self._classes.copy() if hasattr(self, '_classes') else None
+
+    @property
+    def _obs_id2name(self):
+        obs1, obs2 = self.obs_dfs
+        return pd.Series(obs1.index.tolist() + obs2.index.tolist())
+
+    def __str__(self):
+        s = "\n".join([
+            f"DataPair with {self.n_obs} obs- and {self.n_vnodes} var-nodes",
+            f"obs1 x var1 ({self.dataset_names[0]}): {self.n_obs1} x {self.n_vnodes1}",
+            f"obs2 x var2 ({self.dataset_names[0]}): {self.n_obs2} x {self.n_vnodes2}",
+            f"Dimensions of the obs-node-features: {self.n_feats}",
+        ])
+        return s
 
     def save_init(self, path='datapair_init.pickle'):
         """
@@ -162,7 +286,7 @@ class DataPair(object):
                          clip=False, clip_range=(-3, 3.5)):
         feats = self._features
         if scale:
-            def zscore(X, with_mean=True, unit_var=unit_var, ):
+            def zscore(X, with_mean=True, ):
                 return utp.zscore(X, with_mean=with_mean, scale=unit_var)
 
             feats = list(map(zscore, feats))
@@ -189,7 +313,7 @@ class DataPair(object):
 
     def get_whole_net(self, rebuild=False, **kwds):
 
-        if rebuild:
+        if self.G is None or rebuild:
             print('rebuilding the Hetero-graph...')
             self.make_whole_net(**kwds)
         return self.G
@@ -225,7 +349,7 @@ class DataPair(object):
 
         if oneshot or add_unknown_force:
             labels_cat = labels_cat.fillna(name_unknown)
-        print(labels_cat.value_counts())
+        # print(labels_cat.value_counts())
 
         if set_attr:
             self._labels = labels_cat.codes.copy()
@@ -245,14 +369,6 @@ class DataPair(object):
                 labels_cat = (labels_cat[: self.n_obs1],
                               labels_cat[self.n_obs1: self.n_obs])
             return labels_cat
-
-    @property
-    def labels(self, ):
-        return self._labels.copy() if hasattr(self, '_labels') else None
-
-    @property
-    def classes(self, ):
-        return self._classes.copy() if hasattr(self, '_classes') else None
 
     def get_obs_anno(self,
                      keys: Union[str, Sequence[Union[str, None]]],
@@ -284,9 +400,8 @@ class DataPair(object):
             return anno1, anno2
 
     def get_obs_dataset(self, ):
-        return self.obs[self.KEY_DATASET]
-
-    #        return self.get_obs_anno(self.KEY_DATASET)
+        """Get the dataset-identities for the observations"""
+        return self.obs[self._KEY_DATASET]
 
     def get_obs_ids(self, which: Optional[int] = 0, astensor=True, ):
         """
@@ -365,34 +480,6 @@ class DataPair(object):
 
         return names.tolist() if tolist else names
 
-    @property
-    def vnode_names1(self, ):
-        return self._var_id2name[: self.n_vnodes1].tolist()
-
-    @property
-    def vnode_names2(self, ):
-        return self._var_id2name[self.n_vnodes1:].tolist()
-
-    @property
-    def var_ids1(self, ):
-        return self.get_vnode_ids(0, False)
-
-    @property
-    def var_ids2(self, ):
-        return self.get_vnode_ids(1, False)
-
-    @property
-    def obs_ids1(self, ):
-        return self.get_obs_ids(0, False)
-
-    @property
-    def obs_ids2(self, ):
-        return self.get_obs_ids(1, False)
-
-    @property
-    def obs_ids(self, ):
-        return self.get_obs_ids(None, False)
-
     def make_ov_adj(self, link2ord=False):
         """ observation-variable bipartite network
         """
@@ -428,12 +515,12 @@ class DataPair(object):
             edge_dict[
                 (ntypes['v'], etypes['vv'], ntypes['v'])
             ] += sparse.eye(self.n_vnodes)
-        #        print('TEST:', edge_dict)
-        ### for compatibility with the new version of DGL
+            # print('TEST:', edge_dict)
+        # for compatibility with the new version of DGL
         edge_dict = utp.scipy_edge_dict_for_dgl(edge_dict, foo=th.LongTensor)
-        self.G = dgl.heterograph(edge_dict, )
+        self._g = dgl.heterograph(edge_dict, )
 
-        self.info_net = dict(
+        self._net_info = dict(
             edge_types=tuple(edge_dict.keys()),
             link2ord=link2ord,
             selfloop_o=selfloop_o,
@@ -458,15 +545,12 @@ class DataPair(object):
         if len(features) == 2:
             print('[*] Setting aligned features for observation nodes '
                   '(self._features)')
-            self.n_obs1, n_ft1 = features[0].shape
-            self.n_obs2, n_ft2 = features[1].shape
+            n_ft1 = features[0].shape[1]
+            n_ft2 = features[1].shape[1]
 
-            if n_ft1 == n_ft2:
-                self.n_feats = n_ft1
-            else:
+            if n_ft1 != n_ft2:
                 raise ValueError(f'The second dimension of the two matrices '
                                  f'must be the same ! got {n_ft1} and {n_ft2}')
-            self.n_obs = self.n_obs1 + self.n_obs2
             self._features = tuple(features)
 
             if varnames_feat is None:
@@ -483,13 +567,13 @@ class DataPair(object):
         if len(ov_adjs) == 2:
             print('[*] Setting un-aligned features (`self._ov_adjs`) for '
                   'making links connecting observation and variable nodes')
-            n_obs1, self.n_vnodes1 = ov_adjs[0].shape
-            n_obs2, self.n_vnodes2 = ov_adjs[1].shape
+            n_obs1, _ = ov_adjs[0].shape
+            n_obs2, _ = ov_adjs[1].shape
             if n_obs1 != self.n_obs1 or n_obs2 != self.n_obs2:
                 raise ValueError(f'[DataPair] '
-                                 'The first dimensions of the unaligned-feature '
-                                 'matrices `ov_adjs` and the common-feature '
-                                 'matrices `self._features` are not matched !')
+                                 'The first dimensions of the unaligned-feature'
+                                 ' matrices `ov_adjs` and the common-feature'
+                                 ' matrices `self._features` are not matched !')
 
             def _process_spmat(adj):
                 adj = sparse.csr_matrix(adj)
@@ -497,15 +581,8 @@ class DataPair(object):
                 return adj
 
             self._ov_adjs = tuple(map(_process_spmat, ov_adjs))
-            self.n_vnodes = self.n_vnodes1 + self.n_vnodes2
         else:
             raise ValueError('`ov_adjs` should be a list or tuple of length 2!')
-
-    @property
-    def _ov_adj(self, ):
-        """ merged adjacent matrix between observation and variable nodes 
-        """
-        return sparse.block_diag(self._ov_adjs)
 
     def set_oo_adj(self, oo_adjs=None):
         if oo_adjs is None:
@@ -536,16 +613,17 @@ class DataPair(object):
         self._var_id2name, self._n2i_dict = utp.make_id_name_maps(*varnames_node)
 
     def set_var_dfs(self, var1, var2):
-        pass  # TODO! maybe not necessary
+        pass  # TODO! maybe unnecessary
 
     def set_obs_dfs(self,
                     obs1: Union[None, pd.DataFrame] = None,
                     obs2: Union[None, pd.DataFrame] = None):
         """
-        private observation annotaions
+        Set private observation annotations
+        (should be done AFTER running ``self.set_features(..)``)
         """
 
-        def _check_obs(obs, n_obs, ):  # val, key = self.KEY_DATASET
+        def _check_obs(obs, n_obs, ):  # val, key = self._KEY_DATASET
             if obs is None:
                 obs = pd.DataFrame(index=range(n_obs))
             elif obs.shape[0] != n_obs:
@@ -557,7 +635,6 @@ class DataPair(object):
         obs1 = _check_obs(obs1, self.n_obs1, )  # self.dataset_names[0]
         obs2 = _check_obs(obs2, self.n_obs2, )  # self.dataset_names[1]
         self.obs_dfs = [obs1, obs2]
-        self._obs_id2name = pd.Series(obs1.index.tolist() + obs2.index.tolist())
 
     def set_common_obs_annos(self,
                              df: Union[None, pd.DataFrame] = None,
@@ -567,11 +644,11 @@ class DataPair(object):
         Shared and merged annotation labels for ALL of the observations in both
         datasets. (self.obs, pd.DataFrame)
         """
-        if not hasattr(self, 'obs'):
-            self.obs = self._obs_id2name.to_frame(self.KEY_OBSNAME)
+        if not hasattr(self, 'obs') or self.obs is None:
+            self.obs = self._obs_id2name.to_frame(self._KEY_OBSNAME)
             dsn_lbs = self.n_obs1 * [self.dataset_names[0]] + \
                       self.n_obs2 * [self.dataset_names[1]]
-            self.obs[self.KEY_DATASET] = pd.Categorical(
+            self.obs[self._KEY_DATASET] = pd.Categorical(
                 dsn_lbs, categories=self.dataset_names)
 
         self._set_annos(self.obs, df,
@@ -584,11 +661,11 @@ class DataPair(object):
                         force_reset=False,
                         **kwannos):
 
-        if not hasattr(self, 'var') or force_reset:
-            self.var = self._var_id2name.to_frame(self.KEY_VARNAME)
+        if self.var is not None or force_reset:
+            self.var = self._var_id2name.to_frame(self._KEY_VARNAME)
             dsn_lbs = self.n_vnodes1 * [self.dataset_names[0]] + \
                       self.n_vnodes2 * [self.dataset_names[1]]
-            self.var[self.KEY_DATASET] = pd.Categorical(
+            self.var[self._KEY_DATASET] = pd.Categorical(
                 dsn_lbs, categories=self.dataset_names)
             # inferring variable-nodes that have homologues in the other dataset
             n_corresponds = self._vv_adj.sum(1).A1
@@ -599,25 +676,28 @@ class DataPair(object):
                         ignore_index=ignore_index,
                         copy=False, **kwannos)
 
-    def set_ntypes(self, ntypes: Mapping[str, str]):
-        if utp.dict_has_keys(ntypes, 'o', 'v'):
-            self.ntypes = ntypes
-        else:
-            raise KeyError('the dict for `ntypes` should have 2 keys: '
-                           '"o" (for observation types) and "v" (for variable types)')
+    def set_ntypes(self, ntypes: Dict[str, str] or None):
+        if ntypes is not None:
+            if utp.dict_has_keys(ntypes, 'o', 'v'):
+                self.ntypes = ntypes
+            else:
+                raise KeyError(
+                    'the dict for `ntypes` should have 2 keys: '
+                    '"o" (for observation types) and "v" (for variable types)')
 
-    def set_etypes(self, etypes: Mapping[str, str]):
-        if utp.dict_has_keys(etypes, 'ov', 'vo', 'vv'):
-            self.etypes = etypes
-        else:
-            raise KeyError('the dict for `etypes` should have 3 keys:',
-                           '"ov" (for observation-variable edge type)',
-                           '"vo" (for variable-observation edge type)',
-                           '"vv" (for edge type between variables)')
+    def set_etypes(self, etypes: Dict[str, str] or None):
+        if etypes is not None:
+            if utp.dict_has_keys(etypes, 'ov', 'vo', 'vv'):
+                self.etypes = etypes
+            else:
+                raise KeyError('the dict for `etypes` should have 3 keys:',
+                               '"ov" (for observation-variable edge type)',
+                               '"vo" (for variable-observation edge type)',
+                               '"vv" (for edge type between variables)')
 
     def summary_graph(self, ):
-        if hasattr(self, 'G') and hasattr(self, 'info_net'):
-            info = self.info_net
+        if not (self.G is None or self._net_info is None):
+            info = self._net_info
 
             print('-' * 20, 'Summary of the DGL-Heterograph', '-' * 20)
             print(self.G)
@@ -625,7 +705,7 @@ class DataPair(object):
             print('self-loops for observation-nodes: {}'.format(info['selfloop_o']))
             print('self-loops for variable-nodes: {}'.format(info['selfloop_v']))
         else:
-            print("graph haven't been made, run `self.make_whole_net(...)` first!")
+            print("graph haven't been made, call `self.make_whole_net(...)` first!")
 
     @staticmethod
     def _set_annos(df0, df=None, ignore_index=True,
@@ -683,7 +763,7 @@ def datapair_from_adatas(
     
     vars_use:
         a list or tuple of 2 variable name-lists.
-        for example, differentail expressed genes, highly variable features.
+        for example, differential expressed genes, highly variable features.
     
     df_varmap:
         pd.DataFrame with 2 columns.
@@ -691,7 +771,7 @@ def datapair_from_adatas(
         adjacent matrix (`vv_adj`) between variables from these 2 datasets. 
     
     df_varmap_1v1: None, pd.DataFrame; optional.
-        dataframe containing only 1-to-1 correspondance between features
+        dataframe containing only 1-to-1 correspondence between features
         in 2 datasets, if not provided, it will be inferred from `df_varmap`
     
     oo_adjs:
@@ -739,8 +819,9 @@ def datapair_from_adatas(
 
     # --- deal with variable mapping dataframe
     if df_varmap_1v1 is None:
-        print('1-to-1 mapping between variables (`df_varmap_1v1`) is not '
-              'provided, extracting from `df_varmap`')
+        logging.info(
+            '1-to-1 mapping between variables (`df_varmap_1v1`) is not '
+            'provided, extracting from `df_varmap`')
         df_varmap_1v1 = utp.take_1v1_matches(df_varmap)
     # --- connection between variables from 2 datasets
     vars_all1, vars_all2 = adata_raw1.var_names, adata_raw2.var_names
@@ -768,11 +849,12 @@ def datapair_from_adatas(
     else:
         union_node_feats = False
     if union_node_feats:
-        submaps_1v1 = utp.subset_matches(
-            df_varmap_1v1, vars_use1, vars_use2, union=True)
         # make sure that all the features are detected in both datasets
         submaps_1v1 = utp.subset_matches(
-            submaps_1v1, vars_all1, vars_all2, union=False)
+            df_varmap_1v1, vars_all1, vars_all2, union=False)
+        submaps_1v1 = utp.subset_matches(
+            submaps_1v1, vars_use1, vars_use2, union=True)
+        print("TEST", submaps_1v1.shape)
     else:
         # (intersection of 1-1 matched freatures)
         submaps_1v1 = utp.subset_matches(

@@ -363,6 +363,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Getting-started-(for-datasets-with-aligned-features)">
 <h1>Getting started (for datasets with aligned features)<a class="headerlink" href="#Getting-started-(for-datasets-with-aligned-features)" title="Permalink to this headline"></a></h1>
+<p>Import required packages:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -374,8 +375,8 @@ div.rendered_html tbody tr:hover {
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>  <span class="c1"># optional</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>  <span class="c1"># optional</span>
 
 <span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
@@ -385,15 +386,20 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+<p>If you get trouble with installing CAME, you can download the source code from GitHub, and append the path to <code class="docutils literal notranslate"><span class="pre">sys.path</span></code>. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CAME_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;path/to/CAME&#39;</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">CAME_ROOT</span><span class="p">))</span>
+</pre></div>
+</div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;../&#39;</span><span class="p">)</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ROOT</span><span class="p">))</span>
-<span class="kn">import</span> <span class="nn">came</span>
+<span></span><span class="kn">import</span> <span class="nn">came</span>
 <span class="kn">from</span> <span class="nn">came</span> <span class="kn">import</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">pp</span><span class="p">,</span> <span class="n">pl</span>
+
+<span class="n">ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>  <span class="c1"># set root</span>
 </pre></div>
 </div>
 </div>
@@ -452,8 +458,9 @@ a new directory made:
 <span class="n">dsnames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Baron_human&#39;</span><span class="p">,</span> <span class="s1">&#39;Baron_mouse&#39;</span><span class="p">)</span>  <span class="c1"># the dataset names, set by user</span>
 <span class="n">dsn1</span><span class="p">,</span> <span class="n">dsn2</span> <span class="o">=</span> <span class="n">dsnames</span>
 
-<span class="n">path_rawdata1</span> <span class="o">=</span> <span class="n">ROOT</span> <span class="o">/</span> <span class="s1">&#39;came/sample_data/raw-Baron_human.h5ad&#39;</span>
-<span class="n">path_rawdata2</span> <span class="o">=</span> <span class="n">ROOT</span> <span class="o">/</span> <span class="s1">&#39;came/sample_data/raw-Baron_mouse.h5ad&#39;</span>
+<span class="n">path_rawdata1</span> <span class="o">=</span> <span class="n">CAME_ROOT</span> <span class="o">/</span> <span class="s1">&#39;came/sample_data/raw-Baron_human.h5ad&#39;</span>
+<span class="n">path_rawdata2</span> <span class="o">=</span> <span class="n">CAME_ROOT</span> <span class="o">/</span> <span class="s1">&#39;came/sample_data/raw-Baron_mouse.h5ad&#39;</span>
+<span class="n">path_varmap_1v1</span> <span class="o">=</span> <span class="n">CAME_ROOT</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;came/sample_data/gene_matches_1v1_human2mouse.csv&#39;</span>
 </pre></div>
 </div>
 <p>Load scRNA-seq datasets.</p>
@@ -618,19 +625,21 @@ a new directory made:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># the numer of training epochs (a recommended setting is 200-400)</span>
+<span></span><span class="c1"># the numer of training epochs</span>
+<span class="c1"># (a recommended setting is 200-400 for whole-graph training, and 80-200 for sub-graph training)</span>
 <span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">300</span>
 
-<span class="c1"># the training batch size (when GPU memory is limited, recommanded is 8192 or more)</span>
+<span class="c1"># the training batch size</span>
+<span class="c1"># When the GPU memory is limited, set 8192 or more if possible.</span>
 <span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="c1"># the number of epochs to skip for checkpoint backup</span>
 <span class="n">n_pass</span> <span class="o">=</span> <span class="mi">100</span>
 
-<span class="c1"># whether to use the single-cell network</span>
+<span class="c1"># whether to use the single-cell networks</span>
 <span class="n">use_scnets</span> <span class="o">=</span> <span class="kc">True</span>
 
-<span class="c1"># node genes. Using DEGs and HVGs by default</span>
+<span class="c1"># node genes, use both the DEGs and HVGs by default</span>
 <span class="n">node_source</span> <span class="o">=</span> <span class="s1">&#39;deg,hvg&#39;</span>
 <span class="n">ntop_deg</span> <span class="o">=</span> <span class="mi">50</span>
 </pre></div>
@@ -958,7 +967,7 @@ figure has been saved into:
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_aligned_15_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_15_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_aligned_16_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_16_1.png" />
 </div>
 </div>
 </section>
@@ -1000,7 +1009,7 @@ figure has been saved into:
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_aligned_17_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_17_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_aligned_18_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_18_1.png" />
 </div>
 </div>
 </section>
@@ -1076,7 +1085,7 @@ WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_aligned_21_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_21_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_aligned_22_1.png" src="../_images/_notebooks_getting_started_pipeline_aligned_22_1.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -1091,7 +1100,7 @@ WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_aligned_21_3.png" src="../_images/_notebooks_getting_started_pipeline_aligned_21_3.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_aligned_22_3.png" src="../_images/_notebooks_getting_started_pipeline_aligned_22_3.png" />
 </div>
 </div>
 <p>Store UMAP coordinates:</p>

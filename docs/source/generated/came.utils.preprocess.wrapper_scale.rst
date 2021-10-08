@@ -1,4 +1,4 @@
-﻿came.utils.preprocess.wrapper\_scale
+came.utils.preprocess.wrapper\_scale
 ====================================
 
 .. currentmodule:: came.utils.preprocess

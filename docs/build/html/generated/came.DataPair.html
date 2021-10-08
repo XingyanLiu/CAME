@@ -43,9 +43,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-0">Example data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-0">DataPair and AlignedDataPair</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="came.aligned_datapair_from_adatas.html">came.aligned_datapair_from_adatas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.datapair_from_adatas.html">came.datapair_from_adatas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.AlignedDataPair.html">came.AlignedDataPair</a></li>
@@ -111,8 +112,8 @@
 <h1>came.DataPair<a class="headerlink" href="#came-datapair" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="came.DataPair">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">DataPair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ov_adjs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vv_adj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_feat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'o':</span> <span class="pre">'cell',</span> <span class="pre">'v':</span> <span class="pre">'gene'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'oo':</span> <span class="pre">'similar_to',</span> <span class="pre">'ov':</span> <span class="pre">'express',</span> <span class="pre">'vo':</span> <span class="pre">'expressed_by',</span> <span class="pre">'vv':</span> <span class="pre">'homolog_with'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.DataPair" title="Permalink to this definition"></a></dt>
-<dd><p>paired datasets with the un-aligned features</p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">DataPair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ov_adjs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vv_adj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_feat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.DataPair" title="Permalink to this definition"></a></dt>
+<dd><p>Paired datasets with the un-aligned features (e.g., cross-speceis)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -129,89 +130,12 @@ variable-nodes.</p></li>
 <li><p><strong>varnames_node</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 name-lists, or one concatenated name-list.
 lengths should be <cite>n_vnodes1</cite> and <cite>v_nodes2</cite>.</p></li>
 <li><p><strong>obs_dfs</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 DataFrame s</p></li>
-<li><p><strong>ntypes</strong> (<em>dict</em>) – </p></li>
-<li><p><strong>etypes</strong> (<em>dict</em>) – </p></li>
+<li><p><strong>ntypes</strong> (<em>dict</em>) – A dict for specifying names of the node types</p></li>
+<li><p><strong>etypes</strong> (<em>dict</em>) – A dict for specifying names of the edge types</p></li>
 <li><p><strong>**kwds</strong> – other key words for constructiong of the HeteroGraph</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair._features">
-<span class="sig-name descname"><span class="pre">_features</span></span><a class="headerlink" href="#came.DataPair._features" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair._ov_adjs">
-<span class="sig-name descname"><span class="pre">_ov_adjs</span></span><a class="headerlink" href="#came.DataPair._ov_adjs" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.vv_adj">
-<span class="sig-name descname"><span class="pre">vv_adj</span></span><a class="headerlink" href="#came.DataPair.vv_adj" title="Permalink to this definition"></a></dt>
-<dd><p>var-var adjacent matrix (e.g. gene-gene adjacent matrix)</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.ov_adj">
-<span class="sig-name descname"><span class="pre">ov_adj</span></span><a class="headerlink" href="#came.DataPair.ov_adj" title="Permalink to this definition"></a></dt>
-<dd><p>observation-by-variable adjacent matrix (e.g. cell-gene adjacent matrix)</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.G">
-<span class="sig-name descname"><span class="pre">G</span></span><a class="headerlink" href="#came.DataPair.G" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>dgl.Heterograph</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.n_obs">
-<span class="sig-name descname"><span class="pre">n_obs</span></span><a class="headerlink" href="#came.DataPair.n_obs" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.n_obs1">
-<span class="sig-name descname"><span class="pre">n_obs1</span></span><a class="headerlink" href="#came.DataPair.n_obs1" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.n_obs2">
-<span class="sig-name descname"><span class="pre">n_obs2</span></span><a class="headerlink" href="#came.DataPair.n_obs2" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.n_vnodes">
-<span class="sig-name descname"><span class="pre">n_vnodes</span></span><a class="headerlink" href="#came.DataPair.n_vnodes" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.n_vnodes1">
-<span class="sig-name descname"><span class="pre">n_vnodes1</span></span><a class="headerlink" href="#came.DataPair.n_vnodes1" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.n_vnodes2">
-<span class="sig-name descname"><span class="pre">n_vnodes2</span></span><a class="headerlink" href="#came.DataPair.n_vnodes2" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.ntypes">
-<span class="sig-name descname"><span class="pre">ntypes</span></span><a class="headerlink" href="#came.DataPair.ntypes" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.etypes">
-<span class="sig-name descname"><span class="pre">etypes</span></span><a class="headerlink" href="#came.DataPair.etypes" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="came.DataPair.dataset_names">
-<span class="sig-name descname"><span class="pre">dataset_names</span></span><a class="headerlink" href="#came.DataPair.dataset_names" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">DataPair</span><span class="p">([</span><span class="n">features1</span><span class="p">,</span> <span class="n">features2</span><span class="p">],</span>
 <span class="gp">... </span>         <span class="p">[</span><span class="n">ov_adj1</span><span class="p">,</span> <span class="n">ov_adj2</span><span class="p">],</span>
@@ -224,7 +148,7 @@ lengths should be <cite>n_vnodes1</cite> and <cite>v_nodes2</cite>.</p></li>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="came.DataPair.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ov_adjs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vv_adj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_feat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'o':</span> <span class="pre">'cell',</span> <span class="pre">'v':</span> <span class="pre">'gene'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'oo':</span> <span class="pre">'similar_to',</span> <span class="pre">'ov':</span> <span class="pre">'express',</span> <span class="pre">'vo':</span> <span class="pre">'expressed_by',</span> <span class="pre">'vv':</span> <span class="pre">'homolog_with'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.DataPair.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ov_adjs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vv_adj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_feat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varnames_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">etypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.DataPair.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -244,7 +168,7 @@ lengths should be <cite>n_vnodes1</cite> and <cite>v_nodes2</cite>.</p></li>
 <td><p>get the annotations of samples (observations)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_dataset</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Get the dataset-identities for the observations</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_obs_features</span></code>([astensor, scale, ...])</p></td>
 <td><p></p></td>
@@ -292,7 +216,7 @@ lengths should be <cite>n_vnodes1</cite> and <cite>v_nodes2</cite>.</p></li>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_obs_dfs</span></code>([obs1, obs2])</p></td>
-<td><p>private observation annotaions</p></td>
+<td><p>Set private observation annotations (should be done AFTER running <code class="docutils literal notranslate"><span class="pre">self.set_features(..)</span></code>)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_oo_adj</span></code>([oo_adjs])</p></td>
 <td><p></p></td>
@@ -321,47 +245,71 @@ lengths should be <cite>n_vnodes1</cite> and <cite>v_nodes2</cite>.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_ETYPES</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_NTYPES</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">KEY_DATASET</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">KEY_OBSNAME</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">KEY_VARNAME</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">G</span></code></p></td>
+<td><p>The graph structure, of type <code class="docutils literal notranslate"><span class="pre">dgl.Heterograph</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">classes</span></code></p></td>
+<td><p>Unique classes (types) in the reference data, may contain &quot;unknown&quot; if there are any types in the query data but not in the reference, or if the query data is un-labeled.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">etypes</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">labels</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">labels</span></code></p></td>
+<td><p>Labels for each observations that would be taken as the supervised information for model-training.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_feats</span></code></p></td>
+<td><p>Number of dimensions of the observation-node features</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_obs</span></code></p></td>
+<td><p>Total number of the observations (e.g., cells)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_obs1</span></code></p></td>
+<td><p>Number of observations (e.g., cells) in the reference data</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_obs2</span></code></p></td>
+<td><p>Number of observations (e.g., cells) in the query data</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_vnodes</span></code></p></td>
+<td><p>Total number of the variables (e.g., genes)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_vnodes1</span></code></p></td>
+<td><p>Number of variables (e.g., genes) in the reference data</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_vnodes2</span></code></p></td>
+<td><p>Number of variables (e.g., genes) in the query data</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ntypes</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids</span></code></p></td>
+<td><p>All of the observation (e.g., cell) indices</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids1</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids1</span></code></p></td>
+<td><p>Indices of the observation (e.g., cell) nodes in the reference data</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids2</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_ids2</span></code></p></td>
+<td><p>Indices of the observation (e.g., cell) nodes in the query data</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var_ids1</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">oo_adj</span></code></p></td>
+<td><p>observation-by-variable adjacent matrix (e.g.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var_ids2</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ov_adj</span></code></p></td>
+<td><p>merged adjacent matrix between observation and variable nodes (e.g.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vnode_names1</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var_ids1</span></code></p></td>
+<td><p>Indices of the variable (e.g., gene) nodes in the reference data</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vnode_names2</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var_ids2</span></code></p></td>
+<td><p>Indices of the variable (e.g., gene) nodes in the query data</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vnode_names1</span></code></p></td>
+<td><p>Names of the variable (e.g., gene) nodes in the reference data</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vnode_names2</span></code></p></td>
+<td><p>Names of the variable (e.g., gene) nodes in the query data</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vv_adj</span></code></p></td>
+<td><p>var-var adjacent matrix (e.g.</p></td>
 </tr>
 </tbody>
 </table>

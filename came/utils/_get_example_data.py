@@ -7,14 +7,14 @@
 
 import os
 from pathlib import Path
-from typing import Sequence, Union, Mapping, List, Optional  # , Callable
+from typing import Sequence, Union, Dict, List, Optional  # , Callable
 import numpy as np
 import pandas as pd
 import scanpy as sc
 from scipy import sparse
 import logging
 
-CAME_ROOT = Path(os.path.join(os.path.dirname(__file__), '..'))
+CAME_ROOT = Path(__file__).parents[1]
 
 
 def _extract_zip(
@@ -26,7 +26,26 @@ def _extract_zip(
         zipf.extractall(fp_unzip)
 
 
-def load_example_data():
+def load_example_data() -> Dict:
+    """ Load example data, for a quick start with CAME.
+
+    This pair of cross-species datasets contains the pancreatic scRNA-seq data
+    of human ("Baron_human") and mouse ("Baron_human"),
+    initially published with paper [1].
+
+    NOTE that "Baron_human" is a 20%-subsample from the original data.
+    The resulting cell-typing accuracy may not be as good as one
+    using full dataset as the reference.
+
+    [1] Baron, M. et al. (2016) A Single-Cell Transcriptomic Map of the Human
+    and Mouse Pancreas Reveals Inter- and Intra-cell Population Structure.
+    Cell Syst 3 (4), 346-360.e4.
+
+    Returns
+    -------
+    dict:
+        a dict with keys ['adatas', 'varmap', 'varmap_1v1', 'dataset_names', 'key_class']
+    """
     datadir = CAME_ROOT / 'sample_data'
 
     sp1, sp2 = ('human', 'mouse')
@@ -66,4 +85,4 @@ if __name__ == '__main__':
         format='%(asctime)s %(filename)s-%(lineno)d-%(funcName)s(): '
                '%(levelname)s\n %(message)s')
     d = load_example_data()
-    print(d)
+    print(d.keys())

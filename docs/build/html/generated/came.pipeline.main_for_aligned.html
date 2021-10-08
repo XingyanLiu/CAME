@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="came.pipeline.main_for_unaligned" href="came.pipeline.main_for_unaligned.html" />
-    <link rel="prev" title="API References" href="../api.html" /> 
+    <link rel="prev" title="came.load_example_data" href="came.load_example_data.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,6 +43,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-0">Example data</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">came.pipeline.main_for_aligned</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.main_for_unaligned.html">came.pipeline.main_for_unaligned</a></li>
@@ -52,7 +53,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-0">DataPair and AlignedDataPair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 </ul>
 </li>
@@ -113,7 +114,48 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="came.pipeline.main_for_aligned">
 <span class="sig-prename descclassname"><span class="pre">came.pipeline.</span></span><span class="sig-name descname"><span class="pre">main_for_aligned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_feat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_as_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scnets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_class1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cell_ontology_class'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_class2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">350</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_lossfunc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_target_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_hidden_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpair</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.pipeline.main_for_aligned" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Run the main process of CAME (model training), for integrating 2 datasets
+of aligned features. (e.g., cross-species integration)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adatas</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code>) – A pair of <code class="docutils literal notranslate"><span class="pre">sc.AnnData</span></code> objects, the reference and query raw data</p></li>
+<li><p><strong>vars_feat</strong> (<em>a sequence of strings</em>) – variables to be taken as the node-features of the observations</p></li>
+<li><p><strong>vars_as_nodes</strong> (<em>a sequence of strings</em>) – variables to be taken as the graph nodes</p></li>
+<li><p><strong>scnets</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">spmatrix</span></code>]]) – two single-cell-networks or a merged one</p></li>
+<li><p><strong>dataset_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a tuple of two names for reference and query, respectively</p></li>
+<li><p><strong>key_class1</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the key to the type-labels for the reference data,
+should be a column name of <code class="docutils literal notranslate"><span class="pre">adatas[0].obs</span></code>.</p></li>
+<li><p><strong>key_class2</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the key to the type-labels for the query data. Optional, if provided,
+should be a column name of <code class="docutils literal notranslate"><span class="pre">adatas[1].obs</span></code>.</p></li>
+<li><p><strong>do_normalize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to normalize the input data
+(the they have already been normalized, set it False)</p></li>
+<li><p><strong>n_epochs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – number of training epochs.
+A recommended setting is 200-400 for whole-graph training,
+and 80-200 for sub-graph training.</p></li>
+<li><p><strong>resdir</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – directory for saving results output by CAME</p></li>
+<li><p><strong>tag_data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a tag for auto-creating result directory</p></li>
+<li><p><strong>params_model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – the model parameters</p></li>
+<li><p><strong>params_lossfunc</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – parameters for loss function</p></li>
+<li><p><strong>n_pass</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – number of epochs to skip; not backup model checkpoints until <code class="docutils literal notranslate"><span class="pre">n_pass</span></code>
+epochs.</p></li>
+<li><p><strong>batch_size</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – the number of observation nodes in each mini-batch, based on which the
+sub-graphs will be used for mini-batch training.
+if None, the model will be trained on the whole graph.</p></li>
+<li><p><strong>plot_results</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to automatically plot the classification results</p></li>
+<li><p><strong>norm_target_sum</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – the scale factor for library-size normalization</p></li>
+<li><p><strong>save_hidden_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to save the hidden states for all the layers</p></li>
+<li><p><strong>save_dpair</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to save the elements of the DataPair object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>outputs</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
@@ -121,7 +163,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../api.html" class="btn btn-neutral float-left" title="API References" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="came.load_example_data.html" class="btn btn-neutral float-left" title="came.load_example_data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="came.pipeline.main_for_unaligned.html" class="btn btn-neutral float-right" title="came.pipeline.main_for_unaligned" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

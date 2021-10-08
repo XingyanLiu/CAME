@@ -1,4 +1,4 @@
-﻿came.DataPair
+came.DataPair
 =============
 
 .. currentmodule:: came
@@ -48,19 +48,27 @@
 
    .. autosummary::
    
-      ~DataPair.DEFAULT_ETYPES
-      ~DataPair.DEFAULT_NTYPES
-      ~DataPair.KEY_DATASET
-      ~DataPair.KEY_OBSNAME
-      ~DataPair.KEY_VARNAME
+      ~DataPair.G
       ~DataPair.classes
+      ~DataPair.etypes
       ~DataPair.labels
+      ~DataPair.n_feats
+      ~DataPair.n_obs
+      ~DataPair.n_obs1
+      ~DataPair.n_obs2
+      ~DataPair.n_vnodes
+      ~DataPair.n_vnodes1
+      ~DataPair.n_vnodes2
+      ~DataPair.ntypes
       ~DataPair.obs_ids
       ~DataPair.obs_ids1
       ~DataPair.obs_ids2
+      ~DataPair.oo_adj
+      ~DataPair.ov_adj
       ~DataPair.var_ids1
       ~DataPair.var_ids2
       ~DataPair.vnode_names1
       ~DataPair.vnode_names2
+      ~DataPair.vv_adj
    
    

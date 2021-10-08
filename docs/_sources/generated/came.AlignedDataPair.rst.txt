@@ -43,14 +43,21 @@ came.AlignedDataPair
 
    .. autosummary::
    
-      ~AlignedDataPair.DEFAULT_ETYPES
-      ~AlignedDataPair.DEFAULT_NTYPES
-      ~AlignedDataPair.KEY_DATASET
-      ~AlignedDataPair.KEY_OBSNAME
-      ~AlignedDataPair.KEY_VARNAME
+      ~AlignedDataPair.G
+      ~AlignedDataPair.classes
+      ~AlignedDataPair.etypes
+      ~AlignedDataPair.labels
+      ~AlignedDataPair.n_feats
+      ~AlignedDataPair.n_obs
+      ~AlignedDataPair.n_obs1
+      ~AlignedDataPair.n_obs2
+      ~AlignedDataPair.n_vnodes
+      ~AlignedDataPair.ntypes
       ~AlignedDataPair.obs_ids
       ~AlignedDataPair.obs_ids1
       ~AlignedDataPair.obs_ids2
+      ~AlignedDataPair.oo_adj
+      ~AlignedDataPair.ov_adj
       ~AlignedDataPair.vnode_ids
    
    

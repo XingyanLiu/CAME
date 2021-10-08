@@ -12,6 +12,16 @@ Import CAME:
 
     import came
 
+Example data
+------------
+
+.. module:: came
+
+.. autosummary::
+   :toctree: generated/
+
+   load_example_data
+
 
 Pipeline ``came.pipeline.*``
 ----------------------------
@@ -33,9 +43,6 @@ Preprocessing ``came.pp.*``
 
 .. module:: came.utils.preprocess
 .. :currentmodule:: came
-
-Preprocessing functions
-~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
    :toctree: generated/

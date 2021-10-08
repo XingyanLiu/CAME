@@ -56,7 +56,7 @@ Before running the testing code, make sure that the sample data
 - raw-Baron_mouse.h5ad
 - raw-Baron_human.h5ad 
 
-> NOTE: the file `raw-Baron_mouse.h5ad` is subsample from the original data 
+> NOTE: the file `raw-Baron_human.h5ad` is subsample from the original data 
 > for code testing. The resulting annotation accuracy may not be as good as 
 > using full dataset as the reference.
 

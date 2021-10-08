@@ -43,6 +43,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-0">Example data</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.main_for_aligned.html">came.pipeline.main_for_aligned</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.main_for_unaligned.html">came.pipeline.main_for_unaligned</a></li>
@@ -52,7 +53,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-0">DataPair and AlignedDataPair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 </ul>
 </li>
@@ -113,11 +114,29 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="came.pipeline.gather_came_results">
 <span class="sig-prename descclassname"><span class="pre">came.pipeline.</span></span><span class="sig-name descname"><span class="pre">gather_came_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dpair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_compare</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_hidden_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpair</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.pipeline.gather_came_results" title="Permalink to this definition"></a></dt>
-<dd><p>Packed function for pipeline as follows:
-1. load the ‘best’ or given model weights
-2. get the predictions for cells, including probabilities (from logits)
-3. get and the hidden states for both cells and genes
-3. make a predictor</p>
+<dd><p>Packed function for pipeline as follows:</p>
+<ol class="arabic simple">
+<li><p>load the ‘best’ or given model weights</p></li>
+<li><p>get the predictions for cells, including probabilities (from logits)</p></li>
+<li><p>get and the hidden states for both cells and genes</p></li>
+<li><p>make a predictor</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dpair</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.datapair.unaligned.DataPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataPair</span></code></a>, <a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.datapair.aligned.AlignedDataPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlignedDataPair</span></code></a>]) – </p></li>
+<li><p><strong>trainer</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Trainer</span></code>) – </p></li>
+<li><p><strong>classes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – </p></li>
+<li><p><strong>keys</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – </p></li>
+<li><p><strong>keys_compare</strong> – </p></li>
+<li><p><strong>resdir</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – </p></li>
+<li><p><strong>checkpoint</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – </p></li>
+<li><p><strong>batch_size</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – </p></li>
+<li><p><strong>save_hidden_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
+<li><p><strong>save_dpair</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

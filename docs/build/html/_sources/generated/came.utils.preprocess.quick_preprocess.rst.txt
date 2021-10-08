@@ -1,4 +1,4 @@
-﻿came.utils.preprocess.quick\_preprocess
+came.utils.preprocess.quick\_preprocess
 =======================================
 
 .. currentmodule:: came.utils.preprocess

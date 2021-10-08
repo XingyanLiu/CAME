@@ -541,9 +541,16 @@ def subset_matches(df_match: pd.DataFrame,
     df_match: pd.DataFrame
         a dataframe with at least 2 columns
     left:
-        list-like, for subsetting elements in the first column.
+        list-like, for extracting elements in the first column.
     right:
-        list-like, for subsetting elements in the second column.
+        list-like, for extracting elements in the second column.
+    union:
+        whether to take union of both sides of genes
+    cols:
+        if specified, should be 2 column names for left and right genes,
+        respectively.
+    indicators:
+        if True, only return the indicators.
     """
     if cols is None:
         cols = df_match.columns[: 2]
@@ -626,7 +633,7 @@ def make_id_name_maps(names1, names2):
     # id --> name
     name_srs = pd.Series(list(names1) + list(names2))
     # name --> id
-    # using 2 dict to map a name to its id for that
+    # using 2 dicts to map a name to its id for that
     # -- the 2 name-lists may share the same name!
     n2i_dict1 = reverse_dict(name_srs[: len(names1)])
     n2i_dict2 = reverse_dict(name_srs[len(names1):])

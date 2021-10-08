@@ -1,4 +1,4 @@
-﻿came.utils.preprocess.quick\_pre\_vis
+came.utils.preprocess.quick\_pre\_vis
 =====================================
 
 .. currentmodule:: came.utils.preprocess

@@ -1,4 +1,4 @@
-﻿came.CGGCNet
+came.CGGCNet
 ============
 
 .. currentmodule:: came

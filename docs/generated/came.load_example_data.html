@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>came.utils.preprocess.wrapper_scale &mdash; CAME  documentation</title>
+  <title>came.load_example_data &mdash; CAME  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="came.aligned_datapair_from_adatas" href="came.aligned_datapair_from_adatas.html" />
-    <link rel="prev" title="came.utils.preprocess.group_mean_adata" href="came.utils.preprocess.group_mean_adata.html" /> 
+    <link rel="next" title="came.pipeline.main_for_aligned" href="came.pipeline.main_for_aligned.html" />
+    <link rel="prev" title="API References" href="../api.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,17 +43,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API References</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-0">Example data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.align_adata_vars.html">came.utils.preprocess.align_adata_vars</a></li>
-<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.normalize_default.html">came.utils.preprocess.normalize_default</a></li>
-<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.quick_preprocess.html">came.utils.preprocess.quick_preprocess</a></li>
-<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.group_mean_adata.html">came.utils.preprocess.group_mean_adata</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.preprocess.wrapper_scale</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-0">Example data</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.load_example_data</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 </ul>
@@ -76,9 +71,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">API References</a> &raquo;</li>
-      <li>came.utils.preprocess.wrapper_scale</li>
+      <li>came.load_example_data</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/generated/came.utils.preprocess.wrapper_scale.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/generated/came.load_example_data.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -110,17 +105,29 @@
     text-align: unset;
 }
 </style>
-<section id="came-utils-preprocess-wrapper-scale">
-<h1>came.utils.preprocess.wrapper_scale<a class="headerlink" href="#came-utils-preprocess-wrapper-scale" title="Permalink to this headline"></a></h1>
+<section id="came-load-example-data">
+<h1>came.load_example_data<a class="headerlink" href="#came-load-example-data" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="came.utils.preprocess.wrapper_scale">
-<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">wrapper_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupby</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.wrapper_scale" title="Permalink to this definition"></a></dt>
-<dd><p>Wrapper function for centering and scaling data matrix <cite>X</cite> in sc.AnnData,
-extended for within-batch processing.</p>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">wrapper_scale</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="s1">&#39;batch&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
+<dt class="sig sig-object py" id="came.load_example_data">
+<span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">load_example_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#came.load_example_data" title="Permalink to this definition"></a></dt>
+<dd><p>Load example data, for a quick start with CAME.</p>
+<p>This pair of cross-species datasets contains the pancreatic scRNA-seq data
+of human (“Baron_human”) and mouse (“Baron_human”),
+initially published with paper [1].</p>
+<p>NOTE that “Baron_human” is a 20%-subsample from the original data.
+The resulting cell-typing accuracy may not be as good as one
+using full dataset as the reference.</p>
+<p>[1] Baron, M. et al. (2016) A Single-Cell Transcriptomic Map of the Human
+and Mouse Pancreas Reveals Inter- and Intra-cell Population Structure.
+Cell Syst 3 (4), 346-360.e4.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a dict with keys [‘adatas’, ‘varmap’, ‘varmap_1v1’, ‘dataset_names’, ‘key_class’]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -129,8 +136,8 @@ extended for within-batch processing.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="came.utils.preprocess.group_mean_adata.html" class="btn btn-neutral float-left" title="came.utils.preprocess.group_mean_adata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="came.aligned_datapair_from_adatas.html" class="btn btn-neutral float-right" title="came.aligned_datapair_from_adatas" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../api.html" class="btn btn-neutral float-left" title="API References" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="came.pipeline.main_for_aligned.html" class="btn btn-neutral float-right" title="came.pipeline.main_for_aligned" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
