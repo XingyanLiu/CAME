@@ -2,6 +2,11 @@
 
 CAME is a tool for Cell-type Assignment and Module Extraction, based on a heterogeneous graph neural network.
 
+For the detailed usage, please refer to [CAME-Documentation](https://xingyanliu.github.io/CAME/index.html).
+
+![image](docs/_images/Fig1ABC.png)
+
+![image](docs/_images/Fig1D.png)
 
 ### Installation
 
@@ -32,7 +37,7 @@ cd CAME
 python setup.py install
 ```
 
-### Testing the package
+### Test CAME's pipeline (optional)
 
 Before running the testing code, make sure that the sample data 
 (`./came/sample_data/`, currently stored in `./came/sample_data.zip`) exist, which contains:
@@ -53,11 +58,6 @@ To test the package, run the python file `test_pipeline.py`:
 ```shell
 python test_pipeline.py 
 ```
-
-
-### Example code for analysis
-
-See code in files in `./notebooks`
 
 
 ### Citation
