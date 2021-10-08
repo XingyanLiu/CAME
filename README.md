@@ -6,9 +6,14 @@ For the detailed usage, please refer to [CAME-Documentation](https://xingyanliu.
 
 <img src="docs/_images/Fig1ABC.png" width="600"/>
 
+CAME outputs the quantitative cell-type assignment for each query cell, that is, 
+the probabilities of cell types that exist in the reference species, which 
+enables the identification of the unresolved cell states in the query data. 
+Besides, CAME gives the aligned cell and gene embeddings across species, which 
+facilitates low-dimensional visualization and joint gene module extraction.
+
 <img src="docs/_images/Fig1D.png" width="600"/>
 
-[comment]: <> (![image]&#40;./docs/_images/Fig1D.png&#41;)
 
 ### Installation
 
