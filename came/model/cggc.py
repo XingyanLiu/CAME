@@ -115,49 +115,50 @@ class CGGCNet(nn.Module):
 
     def forward(self,
                 feat_dict, g,
-                **kwds):
+                **other_inputs):
         if isinstance(g, List):
             h_dict = self.embed_layer(g[0], feat_dict, )
-            h_dict = self.rgcn.forward(g[0], h_dict, **kwds).copy()
-            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict, **kwds)['cell']#The last graph is a graph of batch_size cells and it's connected genes
+            h_dict = self.rgcn.forward(g[0], h_dict,  **other_inputs).copy()
+            # The last graph is a graph with batch_size cells and it's connected genes
+            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict,  **other_inputs)['cell']
         else:
             if self.residual:
                 h_dict0 = self.embed_layer(g, feat_dict, )
-                h_dict = self.rgcn.forward(g, h_dict0, norm=True, activate=False, **kwds)
+                h_dict = self.rgcn.forward(g, h_dict0, norm=True, activate=False, **other_inputs)
                 relu = self.rgcn.leaky_relu
                 h_dict['cell'] = relu(h_dict0['cell'] + h_dict['cell'])
                 h_dict['gene'] = relu(h_dict0['gene'] + h_dict['gene'])
             else:
                 h_dict = self.embed_layer(g, feat_dict, )
-                h_dict = self.rgcn.forward(g, h_dict, **kwds).copy()
+                h_dict = self.rgcn.forward(g, h_dict,  **other_inputs).copy()
 
-            h_dict['cell'] = self.cell_classifier.forward(g, h_dict, **kwds)['cell']
+            h_dict['cell'] = self.cell_classifier.forward(g, h_dict,  **other_inputs)['cell']
 
         return h_dict
 
     def get_out_logits(
             self,
             feat_dict, g,
-            **kwds):
+            **other_inputs):
         if isinstance(g, List):
             # TODO: bug g[0] for all layers?
             h_dict = self.embed_layer(g[0], feat_dict, )
-            h_dict = self.rgcn.forward(g[0], h_dict, **kwds).copy()
+            h_dict = self.rgcn.forward(g[0], h_dict,  **other_inputs).copy()
             self.cell_classifier.eval()
-            # The last graph is a graph of batch_size cells and it's connected genes
-            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict, **kwds)['cell']
+            # The last graph is a graph with batch_size cells and it's connected genes
+            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict,  **other_inputs)['cell']
         else:
             if self.residual:
                 h_dict0 = self.embed_layer(g, feat_dict, )
-                h_dict = self.rgcn.forward(g, h_dict0, norm=True, activate=False, **kwds)
+                h_dict = self.rgcn.forward(g, h_dict0, norm=True, activate=False,  **other_inputs)
                 relu = self.rgcn.leaky_relu
                 h_dict['cell'] = relu(h_dict0['cell'] + h_dict['cell'])
                 h_dict['gene'] = relu(h_dict0['gene'] + h_dict['gene'])
             else:
                 h_dict = self.embed_layer(g, feat_dict, )
-                h_dict = self.rgcn.forward(g, h_dict, **kwds).copy()
+                h_dict = self.rgcn.forward(g, h_dict,  **other_inputs).copy()
             self.cell_classifier.eval()
-            h_dict['cell'] = self.cell_classifier.forward(g, h_dict, **kwds)['cell']
+            h_dict['cell'] = self.cell_classifier.forward(g, h_dict,  **other_inputs)['cell']
 
         return h_dict
 
@@ -165,7 +166,7 @@ class CGGCNet(nn.Module):
                           feat_dict=None, g=None,
                           i_layer=-1,
                           detach2np: bool = True,
-                          **kwds):
+                          **other_inputs):
         """
         detach2np: whether tensors be detached and transformed into numpy.ndarray
 
@@ -174,7 +175,7 @@ class CGGCNet(nn.Module):
             logging.info('Forward passing...')
             # activate the random dropouts, which gives a better integrated embedding
             self.train()
-            _ = self.forward(feat_dict, g=g, **kwds)
+            _ = self.forward(feat_dict, g=g,  **other_inputs)
         else:
             logging.warning(
                 'No inputs were given for the forward passing, so the '

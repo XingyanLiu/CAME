@@ -35,7 +35,7 @@ python setup.py install
 ### Testing the package
 
 Before running the testing code, make sure that the sample data 
-(`./came/sample_data/`, currently stored in `./came/sample_data.rar`) exist, which contains:
+(`./came/sample_data/`, currently stored in `./came/sample_data.zip`) exist, which contains:
 
 - gene_matches_1v1_human2mouse.csv (optional)
 - gene_matches_1v1_mouse2human.csv (optional)
@@ -46,7 +46,7 @@ Before running the testing code, make sure that the sample data
 
 > NOTE: the file `raw-Baron_mouse.h5ad` is subsample from the original data 
 > for code testing. The resulting annotation accuracy may not be as good as 
-> using full dataset as the refernce.
+> using full dataset as the reference.
 
 To test the package, run the python file `test_pipeline.py`:
 

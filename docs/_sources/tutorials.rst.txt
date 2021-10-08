@@ -1,6 +1,8 @@
 Tutorials
 =========
 
+ALL of the tutorials are based on the sample-data, stored within our package.
+
 .. toctree::
    :maxdepth: 1
 

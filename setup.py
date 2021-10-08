@@ -102,7 +102,8 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
+    packages=find_packages(exclude=[
+        "tests", "*.tests", "*.tests.*", "tests.*", "*.csv", ".h5ad"]),
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,

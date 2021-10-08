@@ -5,7 +5,7 @@
 @time: 2021-06-12
 """
 
-from typing import Union, Sequence, Optional, Mapping, Any, List, Callable
+from typing import Union, Sequence, Optional, Mapping, Dict, Any, List, Callable
 import logging
 
 import numpy as np
@@ -61,7 +61,8 @@ def to_device(
         raise NotImplementedError('Unresolved input type')
 
 
-def concat_tensor_dicts(dicts: Sequence[Mapping], dim=0):
+def concat_tensor_dicts(dicts: Sequence[Mapping], dim=0) -> Dict:
+    """Helper function for merging feature_dicts from multiple batches"""
     keys = set()
     for d in dicts:
         keys.update(d.keys())
@@ -98,24 +99,45 @@ def get_all_hidden_states(
         feat_dict: Mapping[Any, Tensor],
         g: dgl.DGLGraph,
         detach2np: bool = True,
-        train: bool = False,
         batch_size: Optional[int] = None,
         device=None,
+        **other_inputs
 ):
+    """ Get the embeddings on ALL the hidden layers
+    """
     if device is None:
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    g = g.to(device)
     model = model.to(device)
-    feat_dict = to_device(feat_dict)
-    with torch.no_grad():
-        # model.train(train)
-        # embedding layer
-        h_embed = model.embed_layer(g, feat_dict)
-        # hidden layers
-        _ = model.rgcn(g, h_embed)
-        h_list = [h_embed] + model.rgcn.hidden_states
-        # out_cls_dict = model.cell_classifier(g, h_list[-1])
-        # h_list.append(out_cls_dict)
+    if batch_size is None:
+        g = g.to(device)
+        feat_dict = to_device(feat_dict, device=device)
+        with torch.no_grad():
+            model.train()
+            # embedding layer
+            h_embed = model.embed_layer(g, feat_dict)
+            # hidden layers
+            _ = model.rgcn(g, h_embed, **other_inputs)
+            h_list = [h_embed] + model.rgcn.hidden_states
+            # out_cls_dict = model.cell_classifier(g, h_list[-1], **other_inputs)
+            # h_list.append(out_cls_dict)
+    else:
+        batch_list, all_idx, _, _ = create_batch(
+            sample_size=feat_dict['cell'].shape[0],
+            batch_size=batch_size, shuffle=False, label=False
+        )
+        batch_h_lists = []  # n_batches x n_layers x {'cell': .., 'gene': ..}
+        with th.no_grad():
+            for output_nodes in tqdm.tqdm(batch_list):
+                model.train()  # semi-supervised learning
+                block = create_blocks(g=g, output_nodes=output_nodes)
+                _feat_dict = {
+                    'cell': feat_dict['cell'][block.nodes['cell'].data['ids'], :]
+                }
+                _out_h_list = get_all_hidden_states(
+                    model, feat_dict, g, detach2np=False, device=device)
+                batch_h_lists.append(_out_h_list)
+        h_list = [concat_tensor_dicts(lyr) for lyr in zip(batch_h_lists)]
+
     if detach2np:
         h_list = [detach2numpy(h) for h in h_list]
     return h_list
@@ -227,8 +249,8 @@ def get_model_outputs(
                 if device is not None:
                     _feat_dict = to_device(_feat_dict, device)
                     block = to_device(block, device)
-                # print('DEBUG', _feat_dict, block,)
-                # print(other_inputs)
+                # logging.debug('DEBUG', _feat_dict, block,)
+                # logging.debug(other_inputs)
                 _out = model.forward(_feat_dict, block, **other_inputs)
                 batch_output_list.append(_out)
         outputs = concat_tensor_dicts(batch_output_list)
