@@ -1,12 +1,12 @@
 # CAME
 
-CAME is a tool for Cell-type Assignment and Module Extraction, based on a heterogeneous graph neural network.
+CAME is a tool for **Cell-type Assignment and Module Extraction**, based on a heterogeneous graph neural network.
 
 For the detailed usage, please refer to [CAME-Documentation](https://xingyanliu.github.io/CAME/index.html).
 
-![image](docs/_images/Fig1ABC.png)
+[<img src="docs/_images/Fig1ABC.png" width="250"/>](./docs/_images/Fig1ABC.png)
 
-![image](docs/_images/Fig1D.png)
+![image](./docs/_images/Fig1D.png)
 
 ### Installation
 
