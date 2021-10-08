@@ -21,4 +21,4 @@ code_test*
 .Python
 build/
 *.egg-info/
-dict/
+dist/
