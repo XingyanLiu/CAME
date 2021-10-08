@@ -669,6 +669,7 @@ def __test1__(n_epochs: int = 5, batch_size=None):
         adatas,
         key_class=key_class,
         df_varmap_1v1=df_varmap_1v1,
+        node_source='deg,hvg',
     )
 
     _ = main_for_aligned(
@@ -714,6 +715,7 @@ def __test2__(n_epochs: int = 5, batch_size=None):
     came_inputs, (adata1, adata2) = preprocess_unaligned(
         adatas,
         key_class=key_class,
+        node_source='deg,hvg',
     )
 
     _ = main_for_unaligned(

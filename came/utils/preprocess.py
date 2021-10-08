@@ -989,7 +989,7 @@ def remove_small_groups(labels, min_samples=10,
     vcnts = pd.value_counts(labels)
     #    print(vcnts)
     groups_rmv = list(vcnts[vcnts <= min_samples].index)
-    logging.info('groups to be removed:\n\t', groups_rmv)
+    logging.info('groups to be removed:\n\t%s', groups_rmv)
     return take_group_labels(labels, group_names=groups_rmv,
                              indicate=indicate, remove=True)
 
@@ -1046,7 +1046,7 @@ def merge_group_labels(labels: Sequence,
         groups = group_lists  # list(map(str, group_lists))
         new_name = '_'.join(groups)
         labels = change_names(labels, lambda x: new_name if x in groups else x)
-        logging.info('groups are merged into a new single group: ', new_name)
+        logging.info('groups are merged into a new single group: %s', new_name)
         return labels
     else:
         # merge multiple sets of groups
@@ -1207,8 +1207,9 @@ def normalize_default(adata: sc.AnnData,
     return adata if copy or force_return else None
 
 
-def normalize_log_then_total(adata, target_sum=5e2,
-                           copy=False, force_return=False):
+def normalize_log_then_total(
+        adata, target_sum=5e2,
+        copy=False, force_return=False):
     """ For SplitSeq data, performing log(x+1) BEFORE total-sum normalization
         will results a better UMAP visualization (e.g. clusters would be less
         confounded by different total-counts ).
@@ -1283,7 +1284,7 @@ def group_zscore(X: Union[np.ndarray, pd.DataFrame],
 
     if max_value is not None:
         X[X > max_value] = max_value
-        logging.info('... clipping at max_value %s', max_value)
+        logging.info(f'... clipping at max_value {max_value}')
 
     if isdf:
         X = pd.DataFrame(X, index=index, columns=columns)
@@ -1321,7 +1322,7 @@ def group_zscore_adata(adt: sc.AnnData,
     """
     labels = adt.obs[groupby]
     if key == 'counts':
-        logging.info('doing z-score scaling on count matrix, transformed into a dense array')
+        logging.info('Z-score scaling on count matrix, transformed into a dense array')
         if sparse.issparse(adt.X):
             X = adt.X.toarray()
         else:
@@ -1982,5 +1983,5 @@ def get_leiden_labels(adata, hvgs=None,
                  key_added=key_added,
                  neighbors_key=neighbors_key)
     lbs = adata.obs[key_added]
-    logging.info(lbs.value_counts())
+    logging.info("Leiden results:\n%s", lbs.value_counts())
     return lbs

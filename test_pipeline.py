@@ -16,7 +16,7 @@ except Exception as e:
 
 if __name__ == '__main__':
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format='%(asctime)s %(filename)s-%(lineno)d-%(funcName)s(): '
                '%(levelname)s\n %(message)s')
 

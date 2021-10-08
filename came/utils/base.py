@@ -70,7 +70,7 @@ def write_info(fn, **dicts):
     key words parameter-dicts
     """
     f = open(fn, 'w')
-    logging.info('file name:\n\t', fn, file=f)
+    print('file name:\n\t', fn, file=f)
     for kw, val in dicts.items():
         if isinstance(val, dict):
             dict_str = strline(val.items())
