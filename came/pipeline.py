@@ -816,6 +816,10 @@ def preprocess_unaligned(
 def __test1__(n_epochs: int = 5, batch_size=None):
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
+    if not datadir.exists():
+        from .utils._get_example_data import _extract_zip
+        _extract_zip()
+
     sp1, sp2 = ('human', 'mouse')
     dsnames = ('Baron_human', 'Baron_mouse')
 
@@ -862,6 +866,10 @@ def __test1__(n_epochs: int = 5, batch_size=None):
 def __test2__(n_epochs: int = 5, batch_size=None):
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
+    if not datadir.exists():
+        from .utils._get_example_data import _extract_zip
+        _extract_zip()
+
     sp1, sp2 = ('human', 'mouse')
     dsnames = ('Baron_human', 'Baron_mouse')
 

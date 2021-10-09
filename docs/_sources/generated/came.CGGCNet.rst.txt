@@ -18,8 +18,6 @@ came.CGGCNet
       ~CGGCNet.apply
       ~CGGCNet.bfloat16
       ~CGGCNet.buffers
-      ~CGGCNet.build_cell_classifier
-      ~CGGCNet.build_embed_layer
       ~CGGCNet.children
       ~CGGCNet.cpu
       ~CGGCNet.cuda
@@ -37,8 +35,6 @@ came.CGGCNet
       ~CGGCNet.get_submodule
       ~CGGCNet.half
       ~CGGCNet.load_state_dict
-      ~CGGCNet.make_out_gat
-      ~CGGCNet.make_out_gcn
       ~CGGCNet.modules
       ~CGGCNet.named_buffers
       ~CGGCNet.named_children

@@ -113,20 +113,24 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="came.aligned_datapair_from_adatas">
 <span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">aligned_datapair_from_adatas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_feat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_as_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.aligned_datapair_from_adatas" title="Permalink to this definition"></a></dt>
-<dd><p>Build <code class="docutils literal notranslate"><span class="pre">AlignedDataPair</span></code> object from a pair of adatas</p>
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">AlignedDataPair</span></code> object from a pair of adatas.</p>
+<p>Note that the node features will be extracted from <code class="docutils literal notranslate"><span class="pre">adata.raw</span></code>
+(if not None), so please make sure that these values are normalized.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adatas</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code>]) – a list or tuple of 2 sc.AnnData object.</p></li>
-<li><p><strong>vars_feat</strong> (<em>a sequence of variable names</em>) – a name-list of variables that will be used as (cell) node features.
+<li><p><strong>adatas</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code>]) – a list or tuple of 2 sc.AnnData objects.</p></li>
+<li><p><strong>vars_feat</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – a list of variable-names that will be used as (cell) node features.
 for example, names of differentail expressed genes (DEGs),
 highly variable features.</p></li>
-<li><p><strong>vars_as_nodes</strong> (<em>a sequence of variable names</em><em>, </em><em>optional.</em>) – a name-list of variables that will be taken as nodes in the graph
+<li><p><strong>vars_as_nodes</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – a sequence of variable names, optional.
+a name-list of variables that will be taken as nodes in the graph
 for model training.
 if None (not provided), it will be the same as <cite>vars_feat</cite></p></li>
 <li><p><strong>oo_adjs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">spmatrix</span></code>]]) – a sequence of (sparse) adjacent matrices of observations.
 for example, the single-cell network within each dataset.</p></li>
-<li><p><strong>dataset_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dataset names, for example, (‘ref’, ‘que’)</p></li>
+<li><p><strong>dataset_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list or tuple of 2. names to discriminate data source,
+e.g. (‘reference’, ‘query’)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -137,12 +141,16 @@ for example, the single-cell network within each dataset.</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dpair</span> <span class="o">=</span> <span class="n">datapair_from_adatas</span><span class="p">(</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dpair</span> <span class="o">=</span> <span class="n">aligned_datapair_from_adatas</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="p">[</span><span class="n">adata1</span><span class="p">,</span> <span class="n">adata2</span><span class="p">],</span>
 <span class="gp">... </span>    <span class="n">vars_feat</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">dataset_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">,</span> <span class="s1">&#39;query&#39;</span><span class="p">]</span>
 <span class="gp">... </span>    <span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.AlignedDataPair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AlignedDataPair</span></code></a>, <a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.DataPair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataPair</span></code></a>, <a class="reference internal" href="#came.aligned_datapair_from_adatas" title="came.aligned_datapair_from_adatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aligned_datapair_from_adatas</span></code></a></p>
 </div>
 </dd></dl>
 

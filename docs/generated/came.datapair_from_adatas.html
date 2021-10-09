@@ -113,23 +113,26 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="came.datapair_from_adatas">
 <span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">datapair_from_adatas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_use</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_varmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_varmap_1v1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_as_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">union_node_feats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_single_vnodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.datapair_from_adatas" title="Permalink to this definition"></a></dt>
-<dd><p>Build <code class="docutils literal notranslate"><span class="pre">DataPair</span></code> object from a pair of adatas</p>
+<dd><p>Build <code class="docutils literal notranslate"><span class="pre">DataPair</span></code> object from a pair of adatas.</p>
+<p>Note that the node features will be extracted from <code class="docutils literal notranslate"><span class="pre">adata.raw</span></code>
+(if not None), so please make sure that these values are normalized.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adatas</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 sc.AnnData object.</p></li>
+<li><p><strong>adatas</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 sc.AnnData objects.</p></li>
 <li><p><strong>vars_use</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – a list or tuple of 2 variable name-lists.
 for example, differential expressed genes, highly variable features.</p></li>
 <li><p><strong>df_varmap</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – pd.DataFrame with 2 columns.
 relationships between features in 2 datasets, for making the
 adjacent matrix (<cite>vv_adj</cite>) between variables from these 2 datasets.</p></li>
-<li><p><strong>df_varmap_1v1</strong> (<em>None</em><em>, </em><em>pd.DataFrame; optional.</em>) – dataframe containing only 1-to-1 correspondence between features
+<li><p><strong>df_varmap_1v1</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – dataframe containing only 1-to-1 correspondence between features
 in 2 datasets, if not provided, it will be inferred from <cite>df_varmap</cite></p></li>
 <li><p><strong>oo_adjs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">spmatrix</span></code>]]) – a sequence of (sparse) adjacent matrices of observations.</p></li>
-<li><p><strong>vars_as_nodes</strong> (<em>list</em><em> or </em><em>tuple of 2</em>) – variables to be taken as the graph nodes</p></li>
+<li><p><strong>vars_as_nodes</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]]) – list or tuple of 2; variables to be taken as the graph nodes</p></li>
 <li><p><strong>union_node_feats</strong> (<em>bool</em><em> or </em><em>'auto'</em>) – whether to take the union of the variable-nodes</p></li>
-<li><p><strong>dataset_names</strong> (<em>list</em><em> or </em><em>tuple of 2</em>) – names to discriminate data source, e.g. (‘reference’, ‘query’)</p></li>
-<li><p><strong>with_single_vnodes</strong> (<em>bool</em>) – whether to include the varibales (node) that are ocurred in only one of
+<li><p><strong>dataset_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list or tuple of 2. names to discriminate data source,
+e.g. (‘reference’, ‘query’)</p></li>
+<li><p><strong>with_single_vnodes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to include the varibales (node) that are ocurred in only one of
 the datasets</p></li>
 </ul>
 </dd>
@@ -148,6 +151,10 @@ the datasets</p></li>
 <span class="gp">... </span>    <span class="n">dataset_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">,</span> <span class="s1">&#39;query&#39;</span><span class="p">]</span>
 <span class="gp">... </span>    <span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.AlignedDataPair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AlignedDataPair</span></code></a>, <a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.DataPair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataPair</span></code></a>, <a class="reference internal" href="came.aligned_datapair_from_adatas.html#came.aligned_datapair_from_adatas" title="came.aligned_datapair_from_adatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aligned_datapair_from_adatas</span></code></a></p>
 </div>
 </dd></dl>
 

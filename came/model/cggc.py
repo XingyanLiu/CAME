@@ -5,7 +5,7 @@ Created on Sat Mar 20 18:59:29 2021
 @author: Xingyan Liu
 """
 
-from typing import Union, Sequence, Optional, List
+from typing import Union, Sequence, Optional, List, Dict, Tuple
 import logging
 import dgl
 import torch as th
@@ -28,48 +28,101 @@ def detach2numpy(x):
 # In[]
 class CGGCNet(nn.Module):
     """
-    cell-gene-gene-cell graph neural network
+    Cell-Gene-Gene-Cell graph neural network.
 
-    Graph Convolutional Network for cell-gene Heterogenous graph,
+    Graph Convolutional Network for cell-gene Heterogeneous graph,
     with edges named as:
 
-    * ('cell', 'express', 'gene'):        cg_net,
-    * ('gene', 'expressed_by', 'cell'):   cg_net.T,
-    * ('gene', 'homolog_with', 'gene'):   gg_net + sparse.eye(n_gnodes),
-    * ('cell', 'self_loop_cell', 'cell'):      sparse.eye(n_cells),
+    * ('cell', 'express', 'gene'):           ov_adj
+    * ('gene', 'expressed_by', 'cell'):      ov_adj.T
+    * ('gene', 'homolog_with', 'gene'):      vv_adj + sparse.eye(n_gnodes)
+    * ('cell', 'self_loop_cell', 'cell'):    sparse.eye(n_cells)
 
     Notes
     -----
     * gene embeddings are computed from cells;
     * weight sharing across hidden layers is allowed by setting
-        ``share_hidden_weights=True``
+      ``share_hidden_weights`` as ``True``.
     * attention can be applied on the last layer (`self.cell_classifier`);
     * the graph for the embedding layer and the hidden layers can be different;
     * allow expression values as static edge weights. (but seems not work...)
 
+    Parameters
+    ----------
+
+    g_or_canonical_etypes: dgl.DGLGraph or a list of 3-length-tuples
+        if provide a list of tuples, each of the tuples should be like
+        ``(node_type_source, edge_type, node_type_destination)``.
+
+    in_dim_dict: Dict[str, int]
+        Input dimensions for each node-type
+    h_dim: int
+        number of dimensions of the hidden states
+    h_dim_add: Optional[int or Tuple]
+        if provided, an extra hidden layer will be add before the classifier
+    out_dim: int
+        number of classes (e.g., cell types)
+    num_hidden_layers: int
+        number of hidden layers
+    norm: str
+        normalization method for message aggregation, should be one of
+        {'none', 'both', 'right', 'left'} (Default: 'right')
+    use_weight: bool
+        True if a linear layer is applied after message passing. Default: True
+    dropout_feat: float
+        dropout-rate for the input layer
+    dropout: float
+        dropout-rate for the hidden layer
+    negative_slope: float
+        negative slope for ``LeakyReLU``
+    batchnorm_ntypes: List[str]
+        specify the node types to apply BatchNorm (Default: None)
+    layernorm_ntypes: List[str]
+        specify the node types to apply ``LayerNorm``
+    out_bias: bool
+        whether to use the bias on the output classifier
+    rel_names_out: a list of tuples or strings
+        names of the output relations; if not provided, use all the relations
+        of the graph.
+    share_hidden_weights: bool
+        whether to share the graph-convolutional weights across hidden layers
+    attn_out: bool
+        whether to use attentions on the output layer
+    kwdict_outgat: Dict
+        a dict of key-word parameters for the output graph-attention layers
+    share_layernorm: bool
+        whether to share the LayerNorm across hidden layers
+    residual: bool
+        whether to use the residual connection between the embedding layer and
+        the last hidden layer. This operation may NOT be helpful in
+        transfer-learning scenario. (Default: False)
+
+    See Also
+    --------
+    HiddenRRGCN
     """
 
     def __init__(self,
-                 g_or_canonical_etypes,
-                 in_dim_dict={},
-                 h_dim=32,
-                 h_dim_add=None,  # None --> rgcn2
-                 out_dim=32,  # number of classes
-                 num_hidden_layers=1,
-                 norm='right',
-                 use_weight=True,
-                 dropout_feat=0.,
-                 dropout=0,
-                 negative_slope=0.2,
-                 batchnorm_ntypes=None,
-                 layernorm_ntypes=None,
-                 out_bias=False,
-                 rel_names_out=None,
-                 share_hidden_weights=False,
-                 attn_out=True,
-                 kwdict_outgat={},
-                 share_layernorm=True,
-                 residual=False,
+                 g_or_canonical_etypes: Union[dgl.DGLGraph, Sequence[Tuple[str]]],
+                 in_dim_dict: Dict[str, int],
+                 h_dim: int = 32,
+                 h_dim_add: Optional[int] = None,  # None --> rgcn2
+                 out_dim: int = 32,  # number of classes
+                 num_hidden_layers: int = 1,
+                 norm: str = 'right',
+                 use_weight: bool = True,
+                 dropout_feat: float = 0.,
+                 dropout: float = 0.,
+                 negative_slope: float = 0.05,
+                 batchnorm_ntypes: Optional[List[str]] = None,
+                 layernorm_ntypes: Optional[List[str]] = None,
+                 out_bias: bool = False,
+                 rel_names_out: Sequence[Tuple[str]]=None,
+                 share_hidden_weights: bool = False,
+                 attn_out: bool = True,
+                 kwdict_outgat: Dict = {},
+                 share_layernorm: bool = True,
+                 residual: bool = False,
                  **kwds):  # ignored
         super(CGGCNet, self).__init__()
         if isinstance(g_or_canonical_etypes, dgl.DGLGraph):
@@ -92,9 +145,9 @@ class CGGCNet(nn.Module):
         self.out_bias = out_bias
         self.attn_out = attn_out
 
-        self.build_embed_layer(activation=nn.LeakyReLU(negative_slope),
-                               dropout_feat=dropout_feat,
-                               dropout=dropout)
+        self._build_embed_layer(activation=nn.LeakyReLU(negative_slope),
+                                dropout_feat=dropout_feat,
+                                dropout=dropout)
 
         hidden_model = HiddenRRGCN if share_hidden_weights else HiddenRGCN
         self.rgcn = hidden_model(canonical_etypes,
@@ -110,7 +163,7 @@ class CGGCNet(nn.Module):
                                  share_layernorm=share_layernorm,
                                  )
 
-        self.build_cell_classifier(kwdict_gat=kwdict_outgat)
+        self._build_cell_classifier(kwdict_gat=kwdict_outgat)
         self.residual = residual
 
     def forward(self,
@@ -140,6 +193,7 @@ class CGGCNet(nn.Module):
             self,
             feat_dict, g,
             **other_inputs):
+        """ get the output logits """
         if isinstance(g, List):
             # TODO: bug g[0] for all layers?
             h_dict = self.embed_layer(g[0], feat_dict, )
@@ -167,7 +221,7 @@ class CGGCNet(nn.Module):
                           i_layer=-1,
                           detach2np: bool = True,
                           **other_inputs):
-        """
+        """ access the hidden states.
         detach2np: whether tensors be detached and transformed into numpy.ndarray
 
         """
@@ -190,9 +244,7 @@ class CGGCNet(nn.Module):
         return h_dict
 
     def get_attentions(self, feat_dict, g, fuse='mean'):
-        """
-        output:
-            cell-by-gene attention matrix
+        """ output a cell-by-gene attention matrix
         """
         # getting subgraph and the hidden states
         g_sub = g['gene', 'expressed_by', 'cell']
@@ -232,7 +284,7 @@ class CGGCNet(nn.Module):
         class_loss = criterion(out_cell, labels, weight=weight)
         return class_loss
 
-    def build_embed_layer(self, activation=None, **kwds):
+    def _build_embed_layer(self, activation=None, **kwds):
         embed_params = dict(
             in_dim_dict=self.in_dim_dict,
             out_dim_dict=self.h_dims[0],
@@ -252,13 +304,13 @@ class CGGCNet(nn.Module):
             embed_params.update(**kwds)
         self.embed_layer = GeneralRGCLayer(**embed_params)
 
-    def build_cell_classifier(self, kwdict_gat={}):
+    def _build_cell_classifier(self, kwdict_gat={}):
         if self.attn_out:
-            self.cell_classifier = self.make_out_gat(kwdict_gat)
+            self.cell_classifier = self._make_out_gat(kwdict_gat)
         else:
-            self.cell_classifier = self.make_out_gcn()
+            self.cell_classifier = self._make_out_gcn()
 
-    def make_out_gat(self, kwdict_gat={}):
+    def _make_out_gat(self, kwdict_gat={}):
         mod_params = {
             "gat": dict(
                 h_dim=self.out_dim,
@@ -298,7 +350,7 @@ class CGGCNet(nn.Module):
             layernorm_ntypes=['cell'] if self.layernorm_ntypes is not None else None
         )
 
-    def make_out_gcn(self, ):
+    def _make_out_gcn(self, ):
         return GeneralRGCLayer(
             self.h_dims[0], self.out_dim,
             canonical_etypes=self.rel_names_out,

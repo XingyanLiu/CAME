@@ -1,14 +1,17 @@
 # CAME
 
+**English** | [简体中文](README_CH.md)
+
 CAME is a tool for **Cell-type Assignment and Module Extraction**, based on a heterogeneous graph neural network.
 
-For the detailed usage, please refer to [CAME-Documentation](https://xingyanliu.github.io/CAME/index.html).
+For detailed usage, please refer to [CAME-Documentation](https://xingyanliu.github.io/CAME/index.html).
 
 <img src="docs/_images/Fig1ABC.png" width="600"/>
 
 CAME outputs the quantitative cell-type assignment for each query cell, that is, 
 the probabilities of cell types that exist in the reference species, which 
 enables the identification of the unresolved cell states in the query data. 
+
 Besides, CAME gives the aligned cell and gene embeddings across species, which 
 facilitates low-dimensional visualization and joint gene module extraction.
 
@@ -44,10 +47,12 @@ cd CAME
 python setup.py install
 ```
 
-### Test CAME's pipeline (optional)
+### Example data
 
-Before running the testing code, make sure that the sample data 
-(`./came/sample_data/`, currently stored in `./came/sample_data.zip`) exist, which contains:
+The test code is based on the sample data attached to the CAME package. 
+It is initially saved in compressed form (`CAME/came/sample_data.zip`),
+and will be automatically decompressed to the default directory 
+(`CAME/came/sample_data/`) when necessary, which contains the following files:
 
 - gene_matches_1v1_human2mouse.csv (optional)
 - gene_matches_1v1_mouse2human.csv (optional)
@@ -56,15 +61,36 @@ Before running the testing code, make sure that the sample data
 - raw-Baron_mouse.h5ad
 - raw-Baron_human.h5ad 
 
-> NOTE: the file `raw-Baron_human.h5ad` is subsample from the original data 
+If you want to apply CAME to analyze your own datasets, you need to 
+prepare at least the last four files for cross-species analysis, and 
+only the last two files for the same species (e.g., cross-dataset integration).
+
+> NOTE:
+> the file `raw-Baron_human.h5ad` is a subsample from the original data 
 > for code testing. The resulting annotation accuracy may not be as good as 
-> using full dataset as the reference.
+> using the full dataset as the reference.
+
+### Test CAME's pipeline (optional)
 
 To test the package, run the python file `test_pipeline.py`:
 
 ```shell
 python test_pipeline.py 
 ```
+
+### Contribute
+
+* Issue Tracker: https://github.com/XingyanLiu/CAME/issues
+* Source Code:
+  * https://github.com/zhanglabtools/CAME
+  * https://github.com/XingyanLiu/CAME (the developmental version)
+
+### Support
+
+If you are having issues, please let us know. We have a mailing list located at:
+
+* xingyan@amss.ac.cn
+* 544568643@qq.com
 
 
 ### Citation

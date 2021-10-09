@@ -93,28 +93,59 @@ class HiddenRGCN(nn.Module):
 
 class HiddenRRGCN(nn.Module):
     """
-    sharing parameters across hidden layers, so that the dimensions for 
-    each layer should be the same.
+    Stacked hidden layers sharing parameters with each other, so that the
+    dimensions for each layer should be the same.
+
+    Parameters
+    ----------
+
+    canonical_etypes: dgl.DGLGraph or a list of 3-length-tuples
+        if provide a list of tuples, each of the tuples should be like
+        ``(node_type_source, edge_type, node_type_destination)``.
+    h_dim: int
+        number of dimensions of the hidden states
+    num_hidden_layers: int
+        number of hidden layers
+    out_dim: Optional[int or Tuple[int]]
+        if provided, an extra hidden layer will be add before the classifier
+    norm: str
+        normalization method for message aggregation, should be one of
+        {'none', 'both', 'right', 'left'} (Default: 'right')
+    use_weight: bool
+        True if a linear layer is applied after message passing. Default: True
+    dropout: float
+        dropout-rate for the hidden layer
+    negative_slope: float
+        negative slope for ``LeakyReLU``
+    batchnorm_ntypes: List[str]
+        specify the node types to apply BatchNorm (Default: None)
+    layernorm_ntypes: List[str]
+        specify the node types to apply ``LayerNorm``
+    share_layernorm: bool
+        whether to share the LayerNorm across hidden layers
+
+    See Also
+    --------
+    GeneralRGCLayer
     """
 
     def __init__(self,
-                 canonical_etypes: Sequence[str],
+                 canonical_etypes,
                  h_dim: int = 32,
                  num_hidden_layers: int = 2,
                  out_dim: Union[Sequence, int, None] = None,  # integer or (2, 2, ...)
                  norm: Union[str, None] = 'right',
                  use_weight=True,
-                 dropout: Union[float, int] = 0.,
-                 negative_slope: Union[float, int] = 0.2,
+                 dropout: float = 0.,
+                 negative_slope: float = 0.05,
                  batchnorm_ntypes: Optional[Sequence[str]] = None,  # g.ntypes
                  layernorm_ntypes: Optional[Sequence[str]] = None,  # g.ntypes
                  share_layernorm: bool = True,
-                 #                 residual = False,
                  ):
         super(HiddenRRGCN, self).__init__()
         self.h_dim = h_dim
         self.out_dim = out_dim
-        self.canonical_etypes = canonical_etypes  # list(set(g.etypes))
+        self.canonical_etypes = canonical_etypes  # list(g.canonical_etypes)
         self.num_hidden_layers = num_hidden_layers
         self.dropout = dropout
         self.leaky_relu = nn.LeakyReLU(negative_slope)
@@ -154,7 +185,8 @@ class HiddenRRGCN(nn.Module):
                 _out_dims = (self.h_dim, self.out_dim)
             else:
                 raise ValueError(
-                    f'`out_dim` should be either Sequence or int if provided! Got {out_dim}')
+                    f'`out_dim` should be either Sequence or int if provided! '
+                    f'Got {out_dim}')
             for i, dim in enumerate(_out_dims[: -1]):
                 d_in, d_out = dim, _out_dims[i + 1]
                 self.layers.append(GeneralRGCLayer(

@@ -46,25 +46,32 @@ class DataPair(object):
         a list or tuple of 2 name-lists, or one concatenated name-list.
         lengths should be `n_vnodes1` and `v_nodes2`.
     obs_dfs: list or tuple
-        a list or tuple of 2 DataFrame s
+        a list or tuple of 2 ``DataFrame`` s
     ntypes: dict
         A dict for specifying names of the node types
     etypes: dict
         A dict for specifying names of the edge types
     **kwds:
-        other key words for constructiong of the HeteroGraph
+        other key words for the HeteroGraph construction
     
     Examples
     --------
 
-    >>> DataPair([features1, features2],
-    ...          [ov_adj1, ov_adj2],
-    ...          vv_adj = vv_adj,
-    ...          varnames_node = [vnodes1, vnodes2],
-    ...          obs_dfs = [df1, df2],
-    ...          dataset_names = ['reference', 'query'],
-    ...          )
-    
+    >>> dpair = DataPair(
+    ...     [features1, features2],
+    ...     [ov_adj1, ov_adj2],
+    ...     vv_adj = vv_adj,
+    ...     varnames_node = [vnodes1, vnodes2],
+    ...     obs_dfs = [df1, df2],
+    ...     dataset_names = ('reference', 'query'),
+    ...     )
+
+    See Also
+    --------
+    datapair_from_adatas
+    aligned_datapair_from_adatas
+    AlignedDataPair
+
     """
     _KEY_DATASET = 'dataset'
     _KEY_VARNAME = 'name'
@@ -753,13 +760,16 @@ def datapair_from_adatas(
         **kwds
 ) -> DataPair:
     """
-    Build ``DataPair`` object from a pair of adatas
+    Build ``DataPair`` object from a pair of adatas.
+
+    Note that the node features will be extracted from ``adata.raw``
+    (if not None), so please make sure that these values are normalized.
 
     Parameters
     ----------
 
     adatas: list or tuple
-        a list or tuple of 2 sc.AnnData object.
+        a list or tuple of 2 sc.AnnData objects.
     
     vars_use:
         a list or tuple of 2 variable name-lists.
@@ -770,23 +780,24 @@ def datapair_from_adatas(
         relationships between features in 2 datasets, for making the 
         adjacent matrix (`vv_adj`) between variables from these 2 datasets. 
     
-    df_varmap_1v1: None, pd.DataFrame; optional.
+    df_varmap_1v1:
         dataframe containing only 1-to-1 correspondence between features
         in 2 datasets, if not provided, it will be inferred from `df_varmap`
     
     oo_adjs:
         a sequence of (sparse) adjacent matrices of observations.
 
-    vars_as_nodes: list or tuple of 2
-        variables to be taken as the graph nodes
+    vars_as_nodes:
+        list or tuple of 2; variables to be taken as the graph nodes
 
     union_node_feats: bool or 'auto'
         whether to take the union of the variable-nodes
 
-    dataset_names: list or tuple of 2
-        names to discriminate data source, e.g. ('reference', 'query')
+    dataset_names:
+        list or tuple of 2. names to discriminate data source,
+        e.g. ('reference', 'query')
 
-    with_single_vnodes: bool
+    with_single_vnodes
         whether to include the varibales (node) that are ocurred in only one of
         the datasets
 
@@ -802,6 +813,12 @@ def datapair_from_adatas(
     ...     df_varmap = homo_gene_matches,
     ...     dataset_names = ['reference', 'query']
     ...     )
+
+    See Also
+    --------
+    AlignedDataPair
+    DataPair
+    aligned_datapair_from_adatas
 
     """
     adata1, adata2 = adatas

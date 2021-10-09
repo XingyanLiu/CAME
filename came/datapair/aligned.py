@@ -44,25 +44,31 @@ class AlignedDataPair(object):
         names of variables that will be treated as nodes.
 
     obs_dfs: list or tuple
-        a list or tuple of 2 DataFrame s
+        a list or tuple of 2 ``DataFrame`` s
     ntypes: dict
         A dict for specifying names of the node types
     etypes: dict
         A dict for specifying names of the edge types
     **kwds:
-        other key words for constructiong of the HeteroGraph
+        other key words for the HeteroGraph construction
 
-    
     Examples
     --------
 
-    >>> DataPair([features1, features2],
-    ...          [ov_adj1, ov_adj2],
-    ...          varnames_feat = vars_feat,
-    ...          varnames_node = vars_node,
-    ...          obs_dfs = [obs1, obs2],
-    ...          dataset_names=dataset_names,
-    ...          )
+    >>> dpair = AlignedDataPair(
+    ...     [features1, features2],
+    ...     [ov_adj1, ov_adj2],
+    ...     varnames_feat = vars_feat,
+    ...     varnames_node = vars_node,
+    ...     obs_dfs = [obs1, obs2],
+    ...     dataset_names=dataset_names,
+    ...     )
+
+    See Also
+    --------
+    aligned_datapair_from_adatas
+    datapair_from_adatas
+    DataPair
 
     """
     _KEY_DATASET = 'dataset'
@@ -72,7 +78,7 @@ class AlignedDataPair(object):
     _DEFAULT_ETYPES = {'ov': 'express',
                        'vo': 'expressed_by',
                        'oo': 'similar_to'
-                        }
+                       }
     ntypes = _DEFAULT_NTYPES
     etypes = _DEFAULT_ETYPES
     _net_info = None
@@ -630,20 +636,24 @@ def aligned_datapair_from_adatas(
         **kwds
 ) -> AlignedDataPair:
     """
-    Build ``AlignedDataPair`` object from a pair of adatas
+    Build ``AlignedDataPair`` object from a pair of adatas.
+
+    Note that the node features will be extracted from ``adata.raw``
+    (if not None), so please make sure that these values are normalized.
 
     Parameters
     ----------
     
     adatas:
-        a list or tuple of 2 sc.AnnData object.
+        a list or tuple of 2 sc.AnnData objects.
     
-    vars_feat: a sequence of variable names
-        a name-list of variables that will be used as (cell) node features.
+    vars_feat:
+        a list of variable-names that will be used as (cell) node features.
         for example, names of differentail expressed genes (DEGs),
         highly variable features.
     
-    vars_as_nodes: a sequence of variable names, optional.
+    vars_as_nodes:
+        a sequence of variable names, optional.
         a name-list of variables that will be taken as nodes in the graph
         for model training.
         if None (not provided), it will be the same as `vars_feat`
@@ -653,7 +663,8 @@ def aligned_datapair_from_adatas(
         for example, the single-cell network within each dataset.
 
     dataset_names:
-        dataset names, for example, ('ref', 'que')
+        list or tuple of 2. names to discriminate data source,
+        e.g. ('reference', 'query')
 
     Returns
     -------
@@ -662,11 +673,17 @@ def aligned_datapair_from_adatas(
 
     Examples
     --------
-    >>> dpair = datapair_from_adatas(
+    >>> dpair = aligned_datapair_from_adatas(
     ...     [adata1, adata2],
     ...     vars_feat,
     ...     dataset_names = ['reference', 'query']
     ...     )
+
+    See Also
+    --------
+    AlignedDataPair
+    DataPair
+    aligned_datapair_from_adatas
 
     """
     adata1, adata2 = adatas

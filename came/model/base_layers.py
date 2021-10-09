@@ -400,10 +400,10 @@ class RelGraphConvLayer(nn.Module):
 
 class GeneralRGCLayer(nn.Module):
     """ A variant of the Relational graph convolution (RGCN) layer, 
-        alowing different number dimensions for each node-type.
+        allowing different number dimensions for each node-type.
     
     Parameters
-    ==========
+    ----------
     in_dim_dict: Union[int, Mapping[str, int]]
         Input dimensions for each node-type
         
@@ -415,7 +415,7 @@ class GeneralRGCLayer(nn.Module):
         `G.canonical_etypes`
     
     norm: str
-        one of 'right', 'left', 'both'
+        one of 'right', 'left', 'both', 'none'
         
     use_weight: bool or list[str], optional.
         True if a linear layer is applied after message passing. Default: True
@@ -586,7 +586,7 @@ class GraphAttentionLayer(nn.Module):
     """ 
     Modified version of `dgl.nn.GATConv`
     * message passing with attentions.
-    * directed and assymetric message passing, allowing different dmensions
+    * directed and asymmetric message passing, allowing different dimensions
         of source and destination node-features.
     """
 
@@ -658,7 +658,7 @@ class GraphAttentionLayer(nn.Module):
 
         Parameters
         ----------
-        graph : DGLGraph
+        g : DGLGraph
             The graph.
         feat : torch.Tensor or pair of torch.Tensor
             If a torch.Tensor is given, the input feature of shape :math:`(N, D_{in})` where

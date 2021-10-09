@@ -126,22 +126,27 @@ unaligned features, for making <cite>ov_adj</cite>.
 of shape (n_obs1, n_vnodes1) and (n_obs2, n_vnodes2)</p></li>
 <li><p><strong>varnames_feat</strong> (<em>list</em><em> or </em><em>tuple</em>) – names of variables that will be treated as node-features for observations</p></li>
 <li><p><strong>varnames_node</strong> (<em>list</em><em> or </em><em>tuple</em>) – names of variables that will be treated as nodes.</p></li>
-<li><p><strong>obs_dfs</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 DataFrame s</p></li>
+<li><p><strong>obs_dfs</strong> (<em>list</em><em> or </em><em>tuple</em>) – a list or tuple of 2 <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> s</p></li>
 <li><p><strong>ntypes</strong> (<em>dict</em>) – A dict for specifying names of the node types</p></li>
 <li><p><strong>etypes</strong> (<em>dict</em>) – A dict for specifying names of the edge types</p></li>
-<li><p><strong>**kwds</strong> – other key words for constructiong of the HeteroGraph</p></li>
+<li><p><strong>**kwds</strong> – other key words for the HeteroGraph construction</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">DataPair</span><span class="p">([</span><span class="n">features1</span><span class="p">,</span> <span class="n">features2</span><span class="p">],</span>
-<span class="gp">... </span>         <span class="p">[</span><span class="n">ov_adj1</span><span class="p">,</span> <span class="n">ov_adj2</span><span class="p">],</span>
-<span class="gp">... </span>         <span class="n">varnames_feat</span> <span class="o">=</span> <span class="n">vars_feat</span><span class="p">,</span>
-<span class="gp">... </span>         <span class="n">varnames_node</span> <span class="o">=</span> <span class="n">vars_node</span><span class="p">,</span>
-<span class="gp">... </span>         <span class="n">obs_dfs</span> <span class="o">=</span> <span class="p">[</span><span class="n">obs1</span><span class="p">,</span> <span class="n">obs2</span><span class="p">],</span>
-<span class="gp">... </span>         <span class="n">dataset_names</span><span class="o">=</span><span class="n">dataset_names</span><span class="p">,</span>
-<span class="gp">... </span>         <span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dpair</span> <span class="o">=</span> <span class="n">AlignedDataPair</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">features1</span><span class="p">,</span> <span class="n">features2</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">ov_adj1</span><span class="p">,</span> <span class="n">ov_adj2</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">varnames_feat</span> <span class="o">=</span> <span class="n">vars_feat</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">varnames_node</span> <span class="o">=</span> <span class="n">vars_node</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">obs_dfs</span> <span class="o">=</span> <span class="p">[</span><span class="n">obs1</span><span class="p">,</span> <span class="n">obs2</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">dataset_names</span><span class="o">=</span><span class="n">dataset_names</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="came.aligned_datapair_from_adatas.html#came.aligned_datapair_from_adatas" title="came.aligned_datapair_from_adatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aligned_datapair_from_adatas</span></code></a>, <a class="reference internal" href="came.datapair_from_adatas.html#came.datapair_from_adatas" title="came.datapair_from_adatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datapair_from_adatas</span></code></a>, <a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.DataPair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataPair</span></code></a></p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="came.AlignedDataPair.__init__">
