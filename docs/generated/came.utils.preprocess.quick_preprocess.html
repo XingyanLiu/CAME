@@ -52,10 +52,20 @@
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.group_mean_adata.html">came.utils.preprocess.group_mean_adata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.wrapper_scale.html">came.utils.preprocess.wrapper_scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.make_bipartite_adj.html">came.utils.preprocess.make_bipartite_adj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.take_1v1_matches.html">came.utils.preprocess.take_1v1_matches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.subset_matches.html">came.utils.preprocess.subset_matches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.get_homologues.html">came.utils.preprocess.get_homologues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.take_adata_groups.html">came.utils.preprocess.take_adata_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.remove_adata_groups.html">came.utils.preprocess.remove_adata_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.merge_adata_groups.html">came.utils.preprocess.merge_adata_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.split_adata.html">came.utils.preprocess.split_adata</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#analysis">Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
@@ -115,7 +125,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.preprocess.quick_preprocess">
 <span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">quick_preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hvgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_top_genes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nneigh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">hvg_kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.quick_preprocess" title="Permalink to this definition"></a></dt>
-<dd><p>quick preprocess of the raw data</p>
+<dd><p>Quick preprocess of the raw data.</p>
 <p class="rubric">Notes</p>
 <p>if <cite>normalize_data</cite> is True, an adata with RAW counts is required!</p>
 </dd></dl>

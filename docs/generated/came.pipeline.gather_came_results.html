@@ -55,6 +55,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#analysis">Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
@@ -124,16 +126,24 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dpair</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.datapair.unaligned.DataPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataPair</span></code></a>, <a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.datapair.aligned.AlignedDataPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlignedDataPair</span></code></a>]) – </p></li>
-<li><p><strong>trainer</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Trainer</span></code>) – </p></li>
-<li><p><strong>classes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – </p></li>
-<li><p><strong>keys</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – </p></li>
-<li><p><strong>keys_compare</strong> – </p></li>
-<li><p><strong>resdir</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – </p></li>
-<li><p><strong>checkpoint</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – </p></li>
-<li><p><strong>batch_size</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – </p></li>
-<li><p><strong>save_hidden_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
-<li><p><strong>save_dpair</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
+<li><p><strong>dpair</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.datapair.unaligned.DataPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataPair</span></code></a>, <a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.datapair.aligned.AlignedDataPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlignedDataPair</span></code></a>]) – the <code class="docutils literal notranslate"><span class="pre">DataPair</span></code> or <code class="docutils literal notranslate"><span class="pre">AlignedDataPair</span></code> object. Note that it may be changed
+after pass through this function.</p></li>
+<li><p><strong>trainer</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Trainer</span></code>) – the model trainer</p></li>
+<li><p><strong>classes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – the class (or cell-type) space</p></li>
+<li><p><strong>keys</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a pair of names like [<cite>key_class1</cite>, <cite>key_class2</cite>], where <cite>key_class1</cite>
+is the column name of the reference cell-type labels, and
+<cite>key_class2</cite> for the query, which can be set as None if there
+are no labels for the query data.
+These labels will be extracted and stored in the column ‘REF’ of
+<code class="docutils literal notranslate"><span class="pre">dpair.obs</span></code>.</p></li>
+<li><p><strong>keys_compare</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – a pair of names like [key_class1, key_class2], just for comparison.
+These labels will be extracted and stored in the column ‘celltype’
+of <code class="docutils literal notranslate"><span class="pre">dpair.obs</span></code>.</p></li>
+<li><p><strong>resdir</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – the result directory</p></li>
+<li><p><strong>checkpoint</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – specify which checkpoint to adopt</p></li>
+<li><p><strong>batch_size</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – specify it when your GPU memory is limited</p></li>
+<li><p><strong>save_hidden_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to save the hidden states into <cite>{resdir}/hidden_list.h5</cite></p></li>
+<li><p><strong>save_dpair</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to save the dpair elements into <cite>{resdir}/datapair_init.pickle</cite></p></li>
 </ul>
 </dd>
 </dl>

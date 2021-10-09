@@ -42,9 +42,13 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="_notebooks/getting_started_pipeline_un.html">Getting started (for datasets with unaligned features)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_notebooks/getting_started_pipeline_aligned.html">Getting started (for datasets with aligned features)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_notebooks/load_results.html">Load pre-computed results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-example-data">The example data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_notebooks/getting_started_pipeline_un.html">Getting started (for datasets with unaligned features)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_notebooks/getting_started_pipeline_aligned.html">Getting started (for datasets with aligned features)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_notebooks/load_results.html">Load pre-computed results</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API References</a></li>
@@ -101,7 +105,36 @@
 </style>
 <section id="tutorials">
 <h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline"></a></h1>
-<p>ALL of the tutorials are based on the sample-data, stored within our package.</p>
+<section id="the-example-data">
+<h2>The example data<a class="headerlink" href="#the-example-data" title="Permalink to this headline"></a></h2>
+<p>The tutorials are based on the example data attached to the CAME package.
+It is initially saved in compressed form (<cite>CAME/came/sample_data.zip</cite>),
+and will be automatically decompressed to the default directory
+(<cite>CAME/came/sample_data/</cite>) when necessary, which contains the following files:</p>
+<ul class="simple">
+<li><p>gene_matches_1v1_human2mouse.csv (optional)</p></li>
+<li><p>gene_matches_1v1_mouse2human.csv (optional)</p></li>
+<li><p>gene_matches_human2mouse.csv</p></li>
+<li><p>gene_matches_mouse2human.csv</p></li>
+<li><p>raw-Baron_mouse.h5ad</p></li>
+<li><p>raw-Baron_human.h5ad</p></li>
+</ul>
+<p>You can access these data by <a class="reference internal" href="generated/came.load_example_data.html"><span class="doc">came.load_example_data</span></a>.</p>
+<p>If you tend to apply CAME to analyze your own datasets, you need to
+prepare at least the last two files for the same species (e.g., cross-dataset
+integration);</p>
+<p>For cross-species analysis, you need to provide another <cite>.csv</cite>
+file where the first column contains the genes in the reference species and the
+second contains the corresponding query homologous genes.</p>
+<p><strong>NOTE</strong></p>
+<blockquote>
+<div><p>The file <cite>raw-Baron_human.h5ad</cite> is a subsample from the original data
+for code testing. The resulting annotation accuracy may not be as good as
+using the full dataset as the reference.</p>
+</div></blockquote>
+</section>
+<section id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="_notebooks/getting_started_pipeline_un.html">Getting started (for datasets with unaligned features)</a></li>
@@ -109,6 +142,7 @@
 <li class="toctree-l1"><a class="reference internal" href="_notebooks/load_results.html">Load pre-computed results</a></li>
 </ul>
 </div>
+</section>
 </section>
 
 

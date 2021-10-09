@@ -5,8 +5,8 @@ It's recommended to create a conda environment for running CAME:
 
 .. code-block:: shell
 
-   conda create -n came python=3.8
-   conda activate came
+   conda create -n env_came python=3.8
+   conda activate env_came
 
 
 Install required packages:

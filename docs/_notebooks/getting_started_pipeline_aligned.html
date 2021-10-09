@@ -44,22 +44,18 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="getting_started_pipeline_un.html">Getting started (for datasets with unaligned features)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Getting started (for datasets with aligned features)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#0-Load-datasets">0 Load datasets</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#1-The-default-pipeline-of-CAME">1 The default pipeline of CAME</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Laod-other-checkpont-(optional)">Laod other checkpont (optional)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Plot-the-contingency-matrix-for-query-dataset">Plot the contingency matrix for query dataset</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Plot-heatmap-of-predicted-probabilities">Plot heatmap of predicted probabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials.html#the-example-data">The example data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../tutorials.html#getting-started">Getting started</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="getting_started_pipeline_un.html">Getting started (for datasets with unaligned features)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Getting started (for datasets with aligned features)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#0-Load-datasets">0 Load datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#1-The-default-pipeline-of-CAME">1 The default pipeline of CAME</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#2-Further-analysis">2 Further analysis</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#2-Further-analysis">2 Further analysis</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#UMAP-of-cell-embeddings">UMAP of cell embeddings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="load_results.html">Load pre-computed results</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="load_results.html">Load pre-computed results</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API References</a></li>
@@ -363,7 +359,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Getting-started-(for-datasets-with-aligned-features)">
 <h1>Getting started (for datasets with aligned features)<a class="headerlink" href="#Getting-started-(for-datasets-with-aligned-features)" title="Permalink to this headline"></a></h1>
-<p>Import required packages:</p>
+<p>Import the required packages:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -413,18 +409,17 @@ Using backend: pytorch
 </div>
 <section id="0-Load-datasets">
 <h2>0 Load datasets<a class="headerlink" href="#0-Load-datasets" title="Permalink to this headline"></a></h2>
-<p>Load the example datasets:</p>
+<section id="0.1-Load-the-example-datasets">
+<h3>0.1 Load the example datasets<a class="headerlink" href="#0.1-Load-the-example-datasets" title="Permalink to this headline"></a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">came.utils</span> <span class="kn">import</span> <span class="n">load_example_data</span>
+<span></span><span class="kn">from</span> <span class="nn">came</span> <span class="kn">import</span> <span class="n">load_example_data</span>
 
 <span class="n">example_data_dict</span> <span class="o">=</span> <span class="n">load_example_data</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">example_data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-
-<span class="n">dsnames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Baron_human&#39;</span><span class="p">,</span> <span class="s1">&#39;Baron_mouse&#39;</span><span class="p">)</span>
 
 <span class="n">adatas</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;adatas&#39;</span><span class="p">]</span>
 <span class="n">dsnames</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;dataset_names&#39;</span><span class="p">]</span>
@@ -452,6 +447,9 @@ a new directory made:
         ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.24.39)\figs
 </pre></div></div>
 </div>
+</section>
+<section id="0.2-Load-your-own-datasets">
+<h3>0.2 Load your own datasets<a class="headerlink" href="#0.2-Load-your-own-datasets" title="Permalink to this headline"></a></h3>
 <p>To load your own datasets, see the code example below:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ========= customized paths ==========</span>
 
@@ -490,7 +488,9 @@ a new directory made:
 <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata_raw2</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Inspect classes:</p>
+</section>
+<section id="0.3-Inspect-the-compositions-of-different-classes">
+<h3>0.3 Inspect the compositions of different classes<a class="headerlink" href="#0.3-Inspect-the-compositions-of-different-classes" title="Permalink to this headline"></a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -503,7 +503,8 @@ a new directory made:
         <span class="n">pd</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">adata_raw2</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">key_class2</span><span class="p">]),</span>
     <span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="n">group_counts_ori</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">group_counts_ori</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">adata_raw1</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">key_class1</span><span class="p">])</span>
+
 
 <span class="n">group_counts_ori</span>
 </pre></div>
@@ -616,6 +617,7 @@ a new directory made:
 </table>
 </div></div>
 </div>
+</section>
 </section>
 <section id="1-The-default-pipeline-of-CAME">
 <h2>1 The default pipeline of CAME<a class="headerlink" href="#1-The-default-pipeline-of-CAME" title="Permalink to this headline"></a></h2>

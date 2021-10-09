@@ -496,8 +496,8 @@ def gather_came_results(
         dpair: Union[DataPair, AlignedDataPair],
         trainer: Trainer,
         classes: Sequence,
-        keys: Sequence,
-        keys_compare=None,
+        keys: Sequence[str],
+        keys_compare: Optional[Sequence[str]] = None,
         resdir: Union[str, Path] = '.',
         checkpoint: Union[int, str] = 'best',
         batch_size: Optional[int] = None,
@@ -514,19 +514,33 @@ def gather_came_results(
     Parameters
     ----------
     dpair
-
+        the ``DataPair`` or ``AlignedDataPair`` object. Note that it may be changed
+        after pass through this function.
     trainer
+        the model trainer
     classes
+        the class (or cell-type) space
     keys
+        a pair of names like [`key_class1`, `key_class2`], where `key_class1`
+        is the column name of the reference cell-type labels, and
+        `key_class2` for the query, which can be set as None if there
+        are no labels for the query data.
+        These labels will be extracted and stored in the column 'REF' of
+        ``dpair.obs``.
     keys_compare
+        a pair of names like [key_class1, key_class2], just for comparison.
+        These labels will be extracted and stored in the column 'celltype'
+        of ``dpair.obs``.
     resdir
+        the result directory
     checkpoint
+        specify which checkpoint to adopt
     batch_size
+        specify it when your GPU memory is limited
     save_hidden_list
+        whether to save the hidden states into `{resdir}/hidden_list.h5`
     save_dpair
-
-    Returns
-    -------
+        whether to save the dpair elements into `{resdir}/datapair_init.pickle`
 
     """
     resdir = Path(resdir)

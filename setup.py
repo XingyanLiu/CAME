@@ -35,6 +35,7 @@ EXTRAS = {
 
 
 here = os.path.abspath(os.path.dirname(__file__))
+PKG_DIR = os.path.join(here, "came")
 
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
@@ -102,8 +103,10 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=[
-        "tests", "*.tests", "*.tests.*", "tests.*", "*.csv", ".h5ad"]),
+    packages=find_packages(
+        exclude=["tests", "*.tests", "*.tests.*", "tests.*", "*.csv", "*.h5ad"],
+        ),
+    package_data={NAME: [os.path.join(PKG_DIR, "sample_data.zip")]},  # additional package data
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,

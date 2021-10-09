@@ -51,6 +51,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#analysis">Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
@@ -128,6 +130,19 @@ Cell Syst 3 (4), 346-360.e4.</p>
 <dd class="field-even"><p>dict</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">example_data_dict</span> <span class="o">=</span> <span class="n">load_example_data</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">example_data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="go"># Out[]: dict_keys([&#39;adatas&#39;, &#39;varmap&#39;, &#39;varmap_1v1&#39;, &#39;dataset_names&#39;, &#39;key_class&#39;])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adatas</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;adatas&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsnames</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;dataset_names&#39;</span><span class="p">]</span>  <span class="c1"># (&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_varmap</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;varmap&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_varmap_1v1</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;varmap_1v1&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">key_class1</span> <span class="o">=</span> <span class="n">key_class2</span> <span class="o">=</span> <span class="n">example_data_dict</span><span class="p">[</span><span class="s1">&#39;key_class&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>

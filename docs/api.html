@@ -62,6 +62,14 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.group_mean_adata.html">came.utils.preprocess.group_mean_adata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.wrapper_scale.html">came.utils.preprocess.wrapper_scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.make_bipartite_adj.html">came.utils.preprocess.make_bipartite_adj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.take_1v1_matches.html">came.utils.preprocess.take_1v1_matches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.subset_matches.html">came.utils.preprocess.subset_matches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.get_homologues.html">came.utils.preprocess.get_homologues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.take_adata_groups.html">came.utils.preprocess.take_adata_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.remove_adata_groups.html">came.utils.preprocess.remove_adata_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.merge_adata_groups.html">came.utils.preprocess.merge_adata_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.split_adata.html">came.utils.preprocess.split_adata</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-1">DataPair and AlignedDataPair</a><ul>
@@ -74,6 +82,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#graph-neural-network-model">Graph Neural Network Model</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.CGGCNet.html">came.CGGCNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.CGCNet.html">came.CGCNet</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#i-o-functions">I/O Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.load_dpair_and_model.html">came.load_dpair_and_model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.load_hidden_states.html">came.load_hidden_states</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.save_hidden_states.html">came.save_hidden_states</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.save_pickle.html">came.save_pickle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.load_pickle.html">came.load_pickle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis">Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.weight_linked_vars.html">came.weight_linked_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.make_abstracted_graph.html">came.make_abstracted_graph</a></li>
 </ul>
 </li>
 </ul>
@@ -190,16 +211,40 @@
 <td><p>Normalizing datasets with default settings (total-counts normalization followed by log(x+1) transform).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.preprocess.quick_preprocess.html#came.utils.preprocess.quick_preprocess" title="came.utils.preprocess.quick_preprocess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quick_preprocess</span></code></a>(adata[, hvgs, ...])</p></td>
-<td><p>quick preprocess of the raw data</p></td>
+<td><p>Quick preprocess of the raw data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.preprocess.quick_pre_vis.html#came.utils.preprocess.quick_pre_vis" title="came.utils.preprocess.quick_pre_vis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quick_pre_vis</span></code></a>(adata[, hvgs, normalize_data, ...])</p></td>
-<td><p>go through the default pipeline and have a overall visualization of the data.</p></td>
+<td><p>Go through the default pipeline and have a overall visualization of the data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.preprocess.group_mean_adata.html#came.utils.preprocess.group_mean_adata" title="came.utils.preprocess.group_mean_adata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_mean_adata</span></code></a>(adata, groupby[, features, ...])</p></td>
 <td><p>Compute averaged feature-values for each group</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.preprocess.wrapper_scale.html#came.utils.preprocess.wrapper_scale" title="came.utils.preprocess.wrapper_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wrapper_scale</span></code></a>(adata[, zero_center, ...])</p></td>
 <td><p>Wrapper function for centering and scaling data matrix <cite>X</cite> in sc.AnnData, extended for within-batch processing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.preprocess.make_bipartite_adj.html#came.utils.preprocess.make_bipartite_adj" title="came.utils.preprocess.make_bipartite_adj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_bipartite_adj</span></code></a>(df_map[, nodes1, nodes2, ...])</p></td>
+<td><p>Make a bipartite adjacent (sparse) matrix from a <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code> with two mapping columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.preprocess.take_1v1_matches.html#came.utils.preprocess.take_1v1_matches" title="came.utils.preprocess.take_1v1_matches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">take_1v1_matches</span></code></a>(df[, cols])</p></td>
+<td><p>Take the one-to-one matches of the given two columns of a <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.preprocess.subset_matches.html#came.utils.preprocess.subset_matches" title="came.utils.preprocess.subset_matches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset_matches</span></code></a>(df_match, left, right[, ...])</p></td>
+<td><p>Take a subset of token matches (e.g., gene homologies)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.preprocess.get_homologues.html#came.utils.preprocess.get_homologues" title="came.utils.preprocess.get_homologues"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_homologues</span></code></a>(df_match, vals[, cols, ...])</p></td>
+<td><p>Get the homologous gene of input ones based on the homology-mappings</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.preprocess.take_adata_groups.html#came.utils.preprocess.take_adata_groups" title="came.utils.preprocess.take_adata_groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">take_adata_groups</span></code></a>(adata, key, group_names[, ...])</p></td>
+<td><p>Take given groups from an AnnData object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.preprocess.remove_adata_groups.html#came.utils.preprocess.remove_adata_groups" title="came.utils.preprocess.remove_adata_groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_adata_groups</span></code></a>(adata, key, group_names)</p></td>
+<td><p>Remove given groups from an AnnData object</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.preprocess.merge_adata_groups.html#came.utils.preprocess.merge_adata_groups" title="came.utils.preprocess.merge_adata_groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_adata_groups</span></code></a>(adata, key, group_lists)</p></td>
+<td><p>Merge the given groups into one single group which is named as <code class="docutils literal notranslate"><span class="pre">'_'.join(groups[i])</span></code> by default.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.preprocess.split_adata.html#came.utils.preprocess.split_adata" title="came.utils.preprocess.split_adata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_adata</span></code></a>(adata, key)</p></td>
+<td><p>Split an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object into a dict of multiple objects</p></td>
 </tr>
 </tbody>
 </table>
@@ -240,6 +285,49 @@
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/came.CGCNet.html#came.CGCNet" title="came.CGCNet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CGCNet</span></code></a>(**kwargs)</p></td>
 <td><p>Cell-Gene-Cell graph neural network (used when features are 1-to-1 aligned)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="i-o-functions">
+<h2>I/O Functions<a class="headerlink" href="#i-o-functions" title="Permalink to this headline"></a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.load_dpair_and_model.html#came.load_dpair_and_model" title="came.load_dpair_and_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_dpair_and_model</span></code></a>(dirname[, ...])</p></td>
+<td><p>Load the output results of CAME.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.load_hidden_states.html#came.load_hidden_states" title="came.load_hidden_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_hidden_states</span></code></a>(path)</p></td>
+<td><p>Load hidden states from .h5 file the data structure should be like     [     'layer0/cell', 'layer0/gene',     'layer1/cell', 'layer1/gene',     'layer2/cell', 'layer2/gene'     ]</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.save_hidden_states.html#came.save_hidden_states" title="came.save_hidden_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_hidden_states</span></code></a>(data_list, path)</p></td>
+<td><p>Save hidden states into .h5 file</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.save_pickle.html#came.save_pickle" title="came.save_pickle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_pickle</span></code></a>(obj, fpath)</p></td>
+<td><p>save the object into a .pickle file</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.load_pickle.html#came.load_pickle" title="came.load_pickle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_pickle</span></code></a>(fp)</p></td>
+<td><p>load the object from a .pickle file</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="analysis">
+<h2>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline"></a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.weight_linked_vars.html#came.weight_linked_vars" title="came.weight_linked_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weight_linked_vars</span></code></a>(X, adj[, names, metric, ...])</p></td>
+<td><p>Computes the similarity of each linked (homologous) pair of variables.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.make_abstracted_graph.html#came.make_abstracted_graph" title="came.make_abstracted_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_abstracted_graph</span></code></a>(obs_labels1, ...[, ...])</p></td>
+<td><p>Compute and make the abstracted graph from expression matrices and the linkage weights between homologous genes</p></td>
 </tr>
 </tbody>
 </table>

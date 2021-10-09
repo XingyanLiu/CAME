@@ -57,7 +57,7 @@ def load_hidden_states(path) -> List[dict]:
 
     Returns
     -------
-        values: list of dict
+    values: a list of dicts
     """
     f = h5py.File(path, 'r')
     prefix = 'layer'

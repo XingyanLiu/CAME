@@ -45,6 +45,19 @@ def load_example_data() -> Dict:
     -------
     dict:
         a dict with keys ['adatas', 'varmap', 'varmap_1v1', 'dataset_names', 'key_class']
+
+    Examples
+    --------
+    >>> example_data_dict = load_example_data()
+    >>> print(example_data_dict.keys())
+    # Out[]: dict_keys(['adatas', 'varmap', 'varmap_1v1', 'dataset_names', 'key_class'])
+
+    >>> adatas = example_data_dict['adatas']
+    >>> dsnames = example_data_dict['dataset_names']  # ('Baron_human', 'Baron_mouse')
+    >>> df_varmap = example_data_dict['varmap']
+    >>> df_varmap_1v1 = example_data_dict['varmap_1v1']
+    >>> key_class1 = key_class2 = example_data_dict['key_class']
+
     """
     datadir = CAME_ROOT / 'sample_data'
 
@@ -52,8 +65,6 @@ def load_example_data() -> Dict:
     dsnames = ('Baron_human', 'Baron_mouse')
     dsn1, dsn2 = dsnames
     fp1, fp2 = datadir / f'raw-{dsn1}.h5ad', datadir / f'raw-{dsn2}.h5ad'
-    if not fp1.exists():
-        fp1 = datadir / f'raw-{dsn1}-sampled.h5ad'
     fp_varmap_1v1 = datadir / f'gene_matches_1v1_{sp1}2{sp2}.csv'
     fp_varmap = datadir / f'gene_matches_{sp1}2{sp2}.csv'
 

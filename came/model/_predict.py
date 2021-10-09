@@ -51,7 +51,7 @@ def as_probabilities(
 
 
 def predict_from_logits(logits, classes=None):
-    """
+    """ transform `logits` to predictions
     logits: shape=(n_sample, n_classes)
     classes: list-like, unique categories
     """
@@ -118,27 +118,6 @@ def translate_binary_labels(
     return list(map(func, label_tuples))
 
 
-def translate_pvalues(
-        pvalues,
-        p_cut: float = 0.001,
-        trans_mode: Union[str, int] = 'multi-label',
-        classes: Optional[Sequence] = None,
-):
-    """
-    Parameters
-    ----------
-    pvalues: : np.ndarray or sparse matrix
-        two-dimensional p-values, of shape (n_samples, n_classes)
-    p_cut: p-value cit-off
-    trans_mode: str
-        {0, 'ml', 'multi-label'}: return an array of multi-label tuples
-        {1, 'unc', 'uncertain'}: "0"or">2 passed" -> "uncertain"
-        {2, 'top', 'top1-or-unknown'}: "0"->"unknown", ">2"->top1 min-p-value
-    """
-    # TODO: trans_mode 最好全局统一
-    pass
-
-
 def uncertainty_entropy(p, axis=1):
     """ normalized entropy """
     p = np.asarray(p)
@@ -158,9 +137,8 @@ def uncertainty_gini(p, axis=1):
 
 
 class Predictor(object):
-    """
-            Unknown class prediction
-    =============================================
+    """ Class predictor (help identify the potential unknown classes)
+
     Input:
     * output logits of testing samples
     * output logits of training samples
@@ -386,25 +364,6 @@ class Predictor(object):
             {2, 'unk', 'unknown'}: "0"->"unknown", ">2"->"multi-type"
         """
         return translate_binary_labels(labels, trans_mode, self.classes)
-
-    def translate_pvalues(
-            self,
-            pvalues,
-            p_cut: float = 0.001,
-            trans_mode: Union[str, int] = 'multi-label',
-    ):
-        """
-        Parameters
-        ----------
-        pvalues: two-dimensional p-values, of shape (n_samples, n_classes)
-        p_cut: p-value cit-off
-        trans_mode: str
-            {0, 'ml', 'multi-label'}: return an array of multi-label tuples
-            {1, 'unc', 'uncertain'}: "0"or">2 passed" -> "uncertain"
-            {2, 'top1', 'top1-unknown'}: "0"->"unknown", ">2"->top1 min-p-value
-        """
-        return translate_pvalues(
-            pvalues, p_cut, trans_mode, classes=self.classes)
 
     def __str__(self):
         desc = f'''

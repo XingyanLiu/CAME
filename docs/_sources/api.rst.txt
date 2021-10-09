@@ -53,6 +53,14 @@ Preprocessing ``came.pp.*``
    quick_pre_vis
    group_mean_adata
    wrapper_scale
+   make_bipartite_adj
+   take_1v1_matches
+   subset_matches
+   get_homologues
+   take_adata_groups
+   remove_adata_groups
+   merge_adata_groups
+   split_adata
 
 
 DataPair and AlignedDataPair
@@ -76,4 +84,23 @@ Graph Neural Network Model
    CGGCNet
    CGCNet
 
+
+I/O Functions
+-------------
+.. autosummary::
+   :toctree: generated/
+
+   load_dpair_and_model
+   load_hidden_states
+   save_hidden_states
+   save_pickle
+   load_pickle
+
+Analysis
+--------
+.. autosummary::
+   :toctree: generated/
+
+   weight_linked_vars
+   make_abstracted_graph
 

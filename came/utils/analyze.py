@@ -23,7 +23,7 @@ import networkx as nx
 import scanpy as sc
 from ..datapair import DataPair, AlignedDataPair
 from . import preprocess as pp
-from . import plot as pl
+from ..model import CGGCNet, CGCNet
 from . import _knn
 from .base import (
     make_nowtime_tag,
@@ -66,6 +66,44 @@ def load_dpair_and_model(
         subdir_model: str = '_models',
         ckpt: Union[int, str, None] = None,
 ):
+    """ Load the output results of CAME.
+
+    Parameters
+    ----------
+    dirname
+        result directory of CAME
+    subdir_model
+        subdirectory where the model checkpoints are saved.
+    ckpt
+        specify which model checkpoint to load.
+
+    Returns
+    -------
+    dpair: AlignedDataPair or DataPair
+        the datapair object that stores the features and graph
+    model: CGGCNet or CGCNet
+        the graph neural network model
+
+    Examples
+    --------
+    >>> dpair, model = came.load_dpair_and_model(came_resdir)
+
+    access the feature dict
+
+    >>> feat_dict = dpair.get_feature_dict(scale=True)
+
+    access the heterogrnrous cell-gene graph
+
+    >>> g = dpair.get_whole_net()
+
+    access the reference and query sample-ids
+
+    >>> obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2
+
+    passing forward
+
+    >>> outputs = model(feat_dict, g)
+    """
     import torch
     dirname = Path(dirname)
     model_dir = dirname / subdir_model
@@ -73,11 +111,9 @@ def load_dpair_and_model(
     model_params = load_json_dict(dirname / 'model_params.json')
 
     if 'vv_adj' not in element_dict.keys():
-        from ..model import CGCNet
         dpair = AlignedDataPair(**element_dict)
         model = CGCNet(**model_params)
     else:
-        from ..model import CGGCNet
         dpair = DataPair(**element_dict)
         model = CGGCNet(**model_params)
     if os.path.exists(dirname / 'obs.csv'):
@@ -121,14 +157,13 @@ def weight_linked_vars(
         X: np.ndarray,
         adj: sparse.spmatrix,
         names: Optional[Sequence] = None,
-        metric='cosine',
+        metric: str = 'cosine',
         func_dist2weight: Optional[Callable] = None,
         sigma: Optional[float] = None,
         sort: bool = True,
         index_names=(0, 1),
         **kwds):
-    """ correlations (or consine distances) of each linked (homologous) pairs
-    of variables.
+    """ Computes the similarity of each linked (homologous) pair of variables.
 
     Parameters
     ----------
@@ -138,13 +173,15 @@ def weight_linked_vars(
     adj: 
         sparse.spmatrix; binary adjacent matrix of shape (N, N).
     names: 
-        a sequence of names;
-        names for rows of `X`, of shape (N,)
+        a sequence of names for rows of `X`, of shape (N,)
+    metric:
+        the metric to quantify the similarities of the given vectors (embeddings)
+    sort
+        whether to sort by the resulting weights
     
     Returns
     -------
-    pd.DataFrame with columns:
-        (name1, name2), distance, weight
+    a pd.DataFrame with columns [``names[0]``, ``names[1]``, "distance", "weight"]
     """
     adj = sparse.triu(adj).tocoo()
 
@@ -176,10 +213,6 @@ def weight_linked_vars(
         df.sort_values(by='weight', ascending=False, inplace=True)
 
     return df
-
-
-''' TF-targets
-'''
 
 
 def tf_cross_knn(
@@ -774,34 +807,42 @@ def make_abstracted_graph(
         var_labels1, var_labels2,
         avg_expr1, avg_expr2,
         df_var_links,
-        # obs_group_order1 = None,# TODO ? deciding orders
-        # obs_group_order2 = None,
-        var_group_order1=None,
-        var_group_order2=None,
         tags_obs=('', ''),
         tags_var=('', ''),
-        key_weight='weight',
-        key_count='size',
-        key_identity='identity',
-        cut_ov=0,  # 0.55,
-        norm_mtd_ov='zs',  # 'max',
-        global_adjust_ov=True,
-        global_adjust_vv=True,
+        key_weight: str = 'weight',
+        # key_count='size',
+        key_identity: str = 'identity',
+        cut_ov: float = 0.,  # 0.55,
+        norm_mtd_ov: Optional[str] = 'zs',  # 'max',
+        global_adjust_ov: bool = True,
+        global_adjust_vv: bool = True,
         vargroup_filtered='filtered',
         **kwds):
-    """
+    """ Compute and make the abstracted graph from expression matrices and the
+    linkage weights between homologous genes
+
     Parameters
     ----------
     obs_labels1, obs_labels2
-    
+        group labels of the reference and query observations (cells), respectively.
     var_labels1, var_labels2
-    
-    avg_expr1, avg_expr2
-    
+        group labels of the reference and query variables (genes), respectively.
+    avg_expr1
+        averaged expression matrix of the reference data
+    avg_expr2
+        averaged expression matrix of the query data
+
     df_var_links
-    
-    norm_mtd_ov:
+        the linkage-weights between homologous genes
+    cut_ov
+        the threshold to cut edges with values lower than it.
+    norm_mtd_ov
         one of {None, 'zs', 'maxmin', 'max'}
+    global_adjust_ov
+        whether to globally adjust the weights between the observations and
+        the variables
+    global_adjust_vv
+        whether to globally adjust the weights between the observations
     """
     tag_obs1, tag_obs2 = tags_obs
     tag_var1, tag_var2 = tags_var
@@ -811,8 +852,8 @@ def make_abstracted_graph(
             name=vargroup_filtered)
     #    obs_group_order1 = _unique_cats(obs_labels1, obs_group_order1)
     #    obs_group_order2 = _unique_cats(obs_labels2, obs_group_order2)
-    var_group_order1 = _unique_cats(var_labels1, var_group_order1)
-    var_group_order2 = _unique_cats(var_labels2, var_group_order2)
+    # var_group_order1 = _unique_cats(var_labels1, var_group_order1)
+    # var_group_order2 = _unique_cats(var_labels2, var_group_order2)
     # print('--->', var_group_order1)
     # obs-var edge abstraction #
     edges_ov1, avg_vo1 = abstract_ov_edges(

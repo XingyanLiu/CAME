@@ -20,6 +20,7 @@ To get started with CAME's pipeline, browse the tutorials below:
 CAME outputs the quantitative cell-type assignment for each query cell, that is,
 the probabilities of cell types that exist in the reference species, which
 enables the identification of the unresolved cell states in the query data.
+
 Besides, CAME gives the aligned cell and gene embeddings across species, which
 facilitates low-dimensional visualization and joint gene module extraction.
 

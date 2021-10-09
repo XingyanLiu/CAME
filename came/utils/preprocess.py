@@ -15,7 +15,7 @@ Functions for handling AnnData:
 import logging
 import os
 from pathlib import Path
-from typing import Sequence, Union, Mapping, List, Optional , Callable
+from typing import Sequence, Union, Mapping, List, Optional, Dict, Callable
 import re
 import numpy as np
 import pandas as pd
@@ -498,27 +498,51 @@ def change_names(names: Sequence,
 def get_homologues(df_match: pd.DataFrame,
                    vals: Sequence,
                    cols: Union[None, Sequence[str]] = None,  # [col_from, col_to]
-                   reverse=False,
-                   uniquelist=True,
-                   #                   unique=True,
+                   reverse: bool = False,
+                   uniquelist: bool = True,
                    with_null=False):
-    if cols is None: cols = df_match.columns[: 2]
+    """ Get the homologous gene of input ones based on the homology-mappings
+
+    Parameters
+    ----------
+    df_match
+        homologous gene mappings
+    vals
+        the gene names.
+    cols
+        Two column names as ``[col_from, col_to]``, specifying the homology
+        mapping direction.
+    reverse
+        whether to reverse the mappings
+    uniquelist
+        whether to remove the duplicates from the results.
+    with_null
+        whether to return those genes without any homologies (copy names)
+
+    Returns
+    -------
+    If ``uniquelist=True`` and ``with_null=False``, a single list will be returned;
+    otherwise, returns a tuple of two lists (homo, null)
+
+    """
+    if cols is None:
+        cols = df_match.columns[: 2]
     col_from, col_to = cols
     if reverse:
         col_from, col_to = col_to, col_from
     _df_match = df_match.set_index([col_from, col_to], drop=False)
-    #    print(_df_match.head())
+    # print(_df_match.head())
     homos = []
     null = []
     for v in vals:
         try:
             homos.append(_df_match.loc[v, :])
-        #            print(homos[-1])
+        # print(homos[-1])
         except KeyError:
             null.append(v)
             continue
     homos = pd.concat(homos, axis=0, ignore_index=True)
-    #    homos = _df_match.loc[vals, col_to]
+    # homos = _df_match.loc[vals, col_to]
     if len(null) >= 1:
         print(f'the following have no homologies:\n{null}')
     if uniquelist:
@@ -534,8 +558,8 @@ def subset_matches(df_match: pd.DataFrame,
                    union: bool = False,
                    cols: Union[None, Sequence[str]] = None,
                    indicators=False):
-    """ 
-    (take a subset of homologous gene matches)
+    """ Take a subset of token matches (e.g., gene homologies)
+
     Parameters
     ----------
     df_match: pd.DataFrame
@@ -578,8 +602,23 @@ def take_freq1more(lst):
     return vcnts[vcnts > 1].index.to_list()
 
 
-def take_1v1_matches(df: pd.DataFrame):
-    left, right = take_freq1(df.iloc[:, 0]), take_freq1(df.iloc[:, 1])
+def take_1v1_matches(df: pd.DataFrame,
+                     cols: Optional[List] = None):
+    """ Take the one-to-one matches of the given two columns of a ``pd.DataFrame``
+
+    Parameters
+    ----------
+    df
+        a dataframe with at least two columns
+    cols
+        column names of ``df``, specifying the columns to match.
+
+    Returns
+    -------
+    A pd.DataFrame contains only one-to-one mappings and the corresponding rows
+    """
+    _df = df[cols] if cols is not None else df
+    left, right = take_freq1(_df.iloc[:, 0]), take_freq1(_df.iloc[:, 1])
     return subset_matches(df, left, right, union=False)
 
 
@@ -642,10 +681,12 @@ def make_id_name_maps(names1, names2):
 
 def make_bipartite_adj(df_map: pd.DataFrame,
                        nodes1=None, nodes2=None,
-                       key_data=None,
-                       with_singleton=True,
+                       key_data: Optional[str] = None,
+                       with_singleton: bool = True,
                        symmetric: bool = True):
-    """
+    """ Make a bipartite adjacent (sparse) matrix from a ``pd.DataFrame`` with
+    two mapping columns.
+
     Parameters
     ----------
     df_map: pd.DataFrame with 2 columns.
@@ -661,6 +702,11 @@ def make_bipartite_adj(df_map: pd.DataFrame,
         if nodes1 and nodes2 are not provided, this parameter makes no difference.
     symmetric
         whether make it symmetric, i.e. X += X.T
+
+    Examples
+    --------
+    >>> bi_adj, nodes1, nodes2 = make_bipartite_adj(df_map)
+
     """
     nodes1 = list(set(df_map.iloc[:, 0])) if nodes1 is None else nodes1
     nodes2 = list(set(df_map.iloc[:, 1])) if nodes2 is None else nodes2
@@ -1014,6 +1060,7 @@ def remove_adata_small_groups(adata: sc.AnnData,
 
 def remove_adata_groups(adata: sc.AnnData, key: str,
                         group_names: Sequence, copy=True):
+    """ Remove given groups from an AnnData object """
     indicators = take_group_labels(adata.obs[key], group_names,
                                    indicate=True, remove=True)
     return adata[indicators, :].copy() if copy else adata[indicators, :]
@@ -1024,8 +1071,7 @@ def take_adata_groups(adata: sc.AnnData,
                       group_names: Sequence,
                       onlyx: bool = False,
                       copy: bool = False):
-    """
-    """
+    """ Take given groups from an AnnData object """
     indicators = take_group_labels(adata.obs[key], group_names,
                                    indicate=True)
     if copy:
@@ -1069,9 +1115,8 @@ def merge_adata_groups(adata: sc.AnnData,
                        new_key=None,
                        rename=False,
                        copy=False):
-    """
-    merge the given groups into one single group
-    which is named as '_'.join(groups[i]) by default
+    """ Merge the given groups into one single group
+    which is named as ``'_'.join(groups[i])`` by default.
 
     Parameters
     ----------
@@ -1088,13 +1133,14 @@ def merge_adata_groups(adata: sc.AnnData,
     
     Examples
     --------
-    >>> merge_adata_groups(adata, 'batch', [list('AB'), list('EF')], copy=True)
-    >>> merge_adata_groups(adata, 'batch', [list('AB'), list('EF')],)
+    >>> adata_new = merge_adata_groups(
+    ...     adata, 'batch', group_lists=[['A', 'B'], ['E', 'F']], copy=True)
     >>> adata
+
     """
     adata = adata.copy() if copy else adata
     labels = adata.obs[key].copy()
-    #    group_lists = [group_lists] if not isinstance(group_lists[0], list) else group_lists
+    # group_lists = [group_lists] if not isinstance(group_lists[0], list) else group_lists
     labels = merge_group_labels(labels, group_lists)
 
     new_key = key + '_new' if new_key is None else new_key
@@ -1110,13 +1156,17 @@ def merge_adata_groups(adata: sc.AnnData,
 
 def split_adata(adata: sc.AnnData,
                 key: str,
-                ) -> Mapping[str, sc.AnnData]:
-    """
+                ) -> Dict[str, sc.AnnData]:
+    """ Split an ``AnnData`` object into a dict of multiple objects
+
     Parameters
     ----------
-    adata: sc.AnnData
+    adata:
+        the AnnData object to be split
+
     key:
         a column-name of `adata.obs`
+
     Returns
     -------
     a dict of AnnData
@@ -1134,6 +1184,22 @@ def bisplit_adata(adata: sc.AnnData,
                   left_groups: Union[Sequence, None] = None,
                   reset_index_by: Union[None, str, Sequence] = None,
                   ) -> List[sc.AnnData]:
+    """ Split an ``AnnData`` object into a pair of AnnData objects
+
+        Parameters
+        ----------
+        adata: sc.AnnData
+        key:
+            a column-name of `adata.obs`
+        left_groups
+            a list of names specifying which groups to be returned as the left one.
+        reset_index_by
+            the column(s) that store the observation names.
+            if provided, the observation names will be reset.
+        Returns
+        -------
+        a list of two ``AnnData``
+        """
     if left_groups is None:
         # take the first group-label by default
         lbs = adata.obs[key]
@@ -1718,7 +1784,7 @@ def quick_preprocess(
         copy: bool = True,
         **hvg_kwds):
     """
-    quick preprocess of the raw data
+    Quick preprocess of the raw data.
 
     Notes
     -----
@@ -1766,7 +1832,7 @@ def quick_pre_vis(adata, hvgs=None,
                   vis='umap',
                   color=None,
                   copy=True, **hvg_kwds):
-    """ go through the default pipeline and have a overall visualization of
+    """ Go through the default pipeline and have a overall visualization of
     the data.
     """
 

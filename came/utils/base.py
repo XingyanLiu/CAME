@@ -36,21 +36,20 @@ def _capital_strs(strs):
     return [s.capitalize() for s in strs]
 
 
-# In[]
-""" I/O functions
-    handling AnnData object(s)
-"""
-
-
 def save_pickle(obj, fpath):
+    """ save the object into a .pickle file
+    """
     with open(fpath, 'wb') as f:
         pickle.dump(obj, f)
     print('object saved into:\n\t', fpath)
 
 
 def load_pickle(fp):
-    """
-    >>> load_pickle('results.pickle')
+    """ load the object from a .pickle file
+
+    Examples
+    --------
+    >>> load_pickle('dpair.pickle')
     """
     with open(fp, 'rb') as f:
         res = pickle.load(f)

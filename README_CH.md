@@ -22,8 +22,8 @@ CAME 是一个基于异质图神经网络的 **细胞类型注释和基因模块
 推荐使用 Conda 新建一个 Python 环境来运行 CAME：
 
 ```shell
-conda create -n came python=3.8
-conda activate came
+conda create -n env_came python=3.8
+conda activate env_came
 ```
 
 安装必要的依赖包：
@@ -58,7 +58,9 @@ python setup.py install
 - raw-Baron_mouse.h5ad
 - raw-Baron_human.h5ad 
 
-如果你需要用 CAME 来分析你自己的数据集，跨物种分析至少要准备以上后四个文件，同物种只需要后两个。
+如果你需要用 CAME 来分析你自己的数据集，同物种的跨数据（跨组学）分析至少要准备以上后两个文件（基因表达count）。
+
+对于跨物种分析，您需要提供另一个“.csv”文件，其中第一列包含参考物种中的基因，第二列包含相应的查询同源基因。
 
 > 注意:
 > 数据文件 “raw-Baron_human.h5ad” 仅用于代码测试，是原始数据的子样本 （20%），
@@ -67,6 +69,15 @@ python setup.py install
 ### 测试 CAME 的分析流程 (非必要)
 
 可以直接运行 `test_pipeline.py` 来测试 CAME 的分析流程：
+
+```python
+# test_pipeline.py
+import came
+
+if __name__ == '__main__':
+    came.__test1__(6, batch_size=2048)
+    came.__test2__(6, batch_size=None)
+```
 
 ```shell
 python test_pipeline.py 

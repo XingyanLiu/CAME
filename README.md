@@ -23,8 +23,8 @@ facilitates low-dimensional visualization and joint gene module extraction.
 It's recommended to create a conda environment for running CAME:
 
 ```shell
-conda create -n came python=3.8
-conda activate came
+conda create -n env_came python=3.8
+conda activate env_came
 ```
 
 Install required packages:
@@ -61,9 +61,16 @@ and will be automatically decompressed to the default directory
 - raw-Baron_mouse.h5ad
 - raw-Baron_human.h5ad 
 
-If you want to apply CAME to analyze your own datasets, you need to 
-prepare at least the last four files for cross-species analysis, and 
-only the last two files for the same species (e.g., cross-dataset integration).
+You can access these data by ``came.load_example_data()``.
+
+If you tend to apply CAME to analyze your own datasets, you need to
+prepare at least the last two files for the same species (e.g., cross-dataset
+integration);
+
+For cross-species analysis, you need to provide another `.csv`
+file where the first column contains the genes in the reference species and the
+second contains the corresponding query homologous genes.
+
 
 > NOTE:
 > the file `raw-Baron_human.h5ad` is a subsample from the original data 
@@ -73,6 +80,15 @@ only the last two files for the same species (e.g., cross-dataset integration).
 ### Test CAME's pipeline (optional)
 
 To test the package, run the python file `test_pipeline.py`:
+
+```python
+# test_pipeline.py
+import came
+
+if __name__ == '__main__':
+    came.__test1__(6, batch_size=2048)
+    came.__test2__(6, batch_size=None)
+```
 
 ```shell
 python test_pipeline.py 
