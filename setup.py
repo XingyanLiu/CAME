@@ -20,7 +20,7 @@ URL = 'https://github.com/XingyanLiu/CAME'
 EMAIL = '544568643@qq.com'
 AUTHOR = 'Xingyan Liu'
 REQUIRES_PYTHON = '>=3.8.0'
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 REQUIRED = [
     'scanpy',
@@ -106,7 +106,7 @@ setup(
     packages=find_packages(
         exclude=["tests", "*.tests", "*.tests.*", "tests.*", "*.csv", "*.h5ad"],
         ),
-    package_data={NAME: [os.path.join(PKG_DIR, "sample_data.zip")]},  # additional package data
+    package_data={"": [os.path.join(PKG_DIR, "sample_data.zip")]},  # additional package data
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,

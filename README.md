@@ -35,11 +35,18 @@ pip install torch  # >=1.8
 pip install dgl  
 ```
 
-See [scanpy](https://scanpy.readthedocs.io/en/stable/), 
+See [Scanpy](https://scanpy.readthedocs.io/en/stable/), 
 [PyTorch](https://pytorch.org/) and [DGL](https://www.dgl.ai/) 
 for detailed installation guide (especially for GPU version).
 
-Install CAME from source code:
+
+Install CAME by PyPI:
+
+```shell
+pip install came
+```
+
+Install the developmental version of CAME from source code:
 
 ```shell
 git clone https://github.com/XingyanLiu/CAME.git
