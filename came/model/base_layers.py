@@ -66,7 +66,7 @@ class BaseMixConvLayer(nn.Module):
         etype: str, edge-type name.
         kind: str, either of 'gat' or 'gcn'.
         kwdict: dict.
-            paramter dict for GNN model for that edge type. If an empty dict 
+            parameter dict for GNN model for that edge type. If an empty dict
             {} is given, model will be built using the defaut parameters.
 
     bias: bool, optional
@@ -749,10 +749,10 @@ class GraphConvLayer(nn.Module):
     """ 
     Notes
     -----
-    * simliar to `dgl.nn.GraphConv`, while normalization can be 'left', which 
+    * similar to `dgl.nn.GraphConv`, while normalization can be 'left', which
         is not allowed in `dgl.nn.GraphConv`.
-    * directed and assymetric message passing, allowing different dmensions
-        of source and distinate node-features.
+    * directed and asymmetric message passing, allowing different dimensions
+        of source and destination node-features.
     
     Parameters
     ----------

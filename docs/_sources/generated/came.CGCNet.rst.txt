@@ -27,12 +27,9 @@ came.CGCNet
       ~CGCNet.float
       ~CGCNet.forward
       ~CGCNet.get_attentions
-      ~CGCNet.get_buffer
       ~CGCNet.get_classification_loss
       ~CGCNet.get_hidden_states
       ~CGCNet.get_out_logits
-      ~CGCNet.get_parameter
-      ~CGCNet.get_submodule
       ~CGCNet.half
       ~CGCNet.load_state_dict
       ~CGCNet.modules
@@ -51,7 +48,6 @@ came.CGCNet
       ~CGCNet.share_memory
       ~CGCNet.state_dict
       ~CGCNet.to
-      ~CGCNet.to_empty
       ~CGCNet.train
       ~CGCNet.type
       ~CGCNet.xpu
