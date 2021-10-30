@@ -812,7 +812,7 @@ def preprocess_unaligned(
     node_source = node_source.lower()
     if 'hvg' in node_source and 'deg' in node_source:
         vars_as_nodes = [np.unique(np.hstack([hvgs1, degs1])),
-                        np.unique(np.hstack([hvgs2, degs2]))]
+                         np.unique(np.hstack([hvgs2, degs2]))]
     elif 'hvg' in node_source:
         vars_as_nodes = [hvgs1, hvgs2]
     else:

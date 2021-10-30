@@ -668,7 +668,7 @@ class DataPair(object):
                         force_reset=False,
                         **kwannos):
 
-        if self.var is not None or force_reset:
+        if self.var is None or force_reset:
             self.var = self._var_id2name.to_frame(self._KEY_VARNAME)
             dsn_lbs = self.n_vnodes1 * [self.dataset_names[0]] + \
                       self.n_vnodes2 * [self.dataset_names[1]]
