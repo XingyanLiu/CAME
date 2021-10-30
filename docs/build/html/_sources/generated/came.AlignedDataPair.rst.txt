@@ -58,6 +58,8 @@ came.AlignedDataPair
       ~AlignedDataPair.obs_ids2
       ~AlignedDataPair.oo_adj
       ~AlignedDataPair.ov_adj
+      ~AlignedDataPair.varnames_feat
+      ~AlignedDataPair.varnames_node
       ~AlignedDataPair.vnode_ids
    
    

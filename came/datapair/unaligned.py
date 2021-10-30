@@ -234,6 +234,18 @@ class DataPair(object):
         return self._var_id2name[self.n_vnodes1:].tolist()
 
     @property
+    def feat_names1(self, ):
+        """Feature ames of the observation (e.g., cell) nodes
+        in the reference data"""
+        return self._varnames_feat.iloc[:, 0].values
+
+    @property
+    def feat_names2(self, ):
+        """Feature ames of the observation (e.g., cell) nodes
+        in the query data"""
+        return self._varnames_feat.iloc[:, 1].values
+
+    @property
     def labels(self, ):
         """ Labels for each observations that would be taken as the supervised
         information for model-training.
