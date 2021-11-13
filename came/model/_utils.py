@@ -117,6 +117,7 @@ def get_all_hidden_states(
             h_embed = model.embed_layer(g, feat_dict)
             # hidden layers
             _ = model.rgcn(g, h_embed, **other_inputs)
+            # TODO: get ride of storing hidden_states!
             h_list = [h_embed] + model.rgcn.hidden_states
             # out_cls_dict = model.cell_classifier(g, h_list[-1], **other_inputs)
             # h_list.append(out_cls_dict)

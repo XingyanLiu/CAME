@@ -77,36 +77,6 @@ def create_blocks(g, output_nodes, etype='expressed_by'):
     return block
 
 
-def __test__(g, train_nids):
-    k_each_etype = 30
-
-    etypes_each_layers = [
-        [('cell', 'express', 'gene'), ('cell', 'self_loop_cell', 'cell')],
-        g.canonical_etypes,
-        g.canonical_etypes,
-        [('gene', 'expressed_by', 'cell')],
-    ]
-
-    fanouts = make_fanouts(
-        g.canonical_etypes, etypes_each_layers, k_each_etype)
-    sampler = dgl.dataloading.MultiLayerNeighborSampler(fanouts)
-
-    device = 'cpu'
-    train_dataloader = dgl.dataloading.NodeDataLoader(
-        # The following arguments are specific to NodeDataLoader.
-        g,  # The graph
-        train_nids,  # The node IDs to iterate over in minibatches
-        sampler,  # The neighbor sampler
-        device=device,  # Put the sampled MFGs on CPU or GPU
-        # The following arguments are inherited from PyTorch DataLoader.
-        batch_size=1024,  # Batch size
-        shuffle=True,  # Whether to shuffle the nodes for every epoch
-        drop_last=False,  # Whether to drop the last incomplete batch
-        num_workers=0  # Number of sampler processes
-    )
-
-
-
 def create_batch(
         sample_size=None,
         train_idx=None,
@@ -200,3 +170,31 @@ def create_batch(
 
         return batch_list, all_idx, None, None
 
+
+def __test__(g, train_nids):
+    k_each_etype = 30
+
+    etypes_each_layers = [
+        [('cell', 'express', 'gene'), ('cell', 'self_loop_cell', 'cell')],
+        g.canonical_etypes,
+        g.canonical_etypes,
+        [('gene', 'expressed_by', 'cell')],
+    ]
+
+    fanouts = make_fanouts(
+        g.canonical_etypes, etypes_each_layers, k_each_etype)
+    sampler = dgl.dataloading.MultiLayerNeighborSampler(fanouts)
+
+    device = 'cpu'
+    train_dataloader = dgl.dataloading.NodeDataLoader(
+        # The following arguments are specific to NodeDataLoader.
+        g,  # The graph
+        train_nids,  # The node IDs to iterate over in minibatches
+        sampler,  # The neighbor sampler
+        device=device,  # Put the sampled MFGs on CPU or GPU
+        # The following arguments are inherited from PyTorch DataLoader.
+        batch_size=1024,  # Batch size
+        shuffle=True,  # Whether to shuffle the nodes for every epoch
+        drop_last=False,  # Whether to drop the last incomplete batch
+        num_workers=0  # Number of sampler processes
+    )
