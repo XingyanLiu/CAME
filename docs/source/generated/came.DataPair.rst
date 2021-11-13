@@ -51,6 +51,8 @@ came.DataPair
       ~DataPair.G
       ~DataPair.classes
       ~DataPair.etypes
+      ~DataPair.feat_names1
+      ~DataPair.feat_names2
       ~DataPair.labels
       ~DataPair.n_feats
       ~DataPair.n_obs

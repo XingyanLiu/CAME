@@ -234,6 +234,18 @@ class DataPair(object):
         return self._var_id2name[self.n_vnodes1:].tolist()
 
     @property
+    def feat_names1(self, ):
+        """Feature ames of the observation (e.g., cell) nodes
+        in the reference data"""
+        return self._varnames_feat.iloc[:, 0].values
+
+    @property
+    def feat_names2(self, ):
+        """Feature ames of the observation (e.g., cell) nodes
+        in the query data"""
+        return self._varnames_feat.iloc[:, 1].values
+
+    @property
     def labels(self, ):
         """ Labels for each observations that would be taken as the supervised
         information for model-training.
@@ -668,7 +680,7 @@ class DataPair(object):
                         force_reset=False,
                         **kwannos):
 
-        if self.var is not None or force_reset:
+        if self.var is None or force_reset:
             self.var = self._var_id2name.to_frame(self._KEY_VARNAME)
             dsn_lbs = self.n_vnodes1 * [self.dataset_names[0]] + \
                       self.n_vnodes2 * [self.dataset_names[1]]

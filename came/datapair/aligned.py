@@ -214,9 +214,14 @@ class AlignedDataPair(object):
         return pd.Series(obs1.index.tolist() + obs2.index.tolist())
 
     @property
-    def _varnames_node(self, ):
+    def varnames_node(self, ):
         """ Names of variable nodes """
         return self.var['name'].values.copy()
+
+    @property
+    def varnames_feat(self, ):
+        """ The observation feature names """
+        return self._varnames_feat.values.copy()
 
     def __str__(self):
         s = "\n".join([
@@ -241,8 +246,8 @@ class AlignedDataPair(object):
             features=self._features,
             ov_adjs=self._ov_adjs,
             oo_adjs=self._oo_adj,
-            varnames_feat=self._varnames_feat,
-            varnames_node=self._varnames_node,
+            varnames_feat=self.varnames_feat,
+            varnames_node=self.varnames_node,
             obs_dfs=self.obs_dfs,
             dataset_names=self.dataset_names,
             ntypes=self.ntypes,
@@ -510,7 +515,7 @@ class AlignedDataPair(object):
     def set_varnames_node(self, varnames_node=None, index=None):
         if varnames_node is None:
             varnames_node = list(range(self.n_vnodes))
-        #        self._varnames_node = pd.Series(varnames_node)
+        #        self.varnames_node = pd.Series(varnames_node)
         if not hasattr(self, 'var') or self.var is None:
             self.var = pd.DataFrame({'name': varnames_node}, index=index)
         else:
