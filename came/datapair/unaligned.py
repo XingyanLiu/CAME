@@ -402,7 +402,7 @@ class DataPair(object):
             anno2 = self.obs_dfs[1][keys[1]]
 
         if concat:
-            return np.array(anno1.tolist() + anno2.tolist())
+            return np.array(list(anno1) + list(anno2))
         else:
             return anno1, anno2
 

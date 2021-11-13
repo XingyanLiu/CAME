@@ -24,9 +24,9 @@ def sub_graph(cell_ids, gene_ids, g):
     return g_subgraph
 
 
-def create_blocks(g, output_nodes):
+def create_blocks(g, output_nodes, etype='expressed_by'):
     cell_ids = output_nodes.clone().detach()
-    gene_ids = g.in_edges(cell_ids, etype='expressed_by')[0]  # genes expressed_by cells
+    gene_ids = g.in_edges(cell_ids, etype=etype)[0]  # genes expressed_by cells
     gene_ids = torch.unique(gene_ids)
     block = sub_graph(cell_ids, gene_ids, g)  # graph for GAT
     return block

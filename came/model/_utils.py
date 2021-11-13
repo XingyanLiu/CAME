@@ -134,7 +134,7 @@ def get_all_hidden_states(
                     'cell': feat_dict['cell'][block.nodes['cell'].data['ids'], :]
                 }
                 _out_h_list = get_all_hidden_states(
-                    model, feat_dict, g, detach2np=False, device=device)
+                    model, _feat_dict, block, detach2np=False, device=device)
                 batch_h_lists.append(_out_h_list)
         h_list = [concat_tensor_dicts(lyr) for lyr in zip(batch_h_lists)]
 
@@ -240,12 +240,14 @@ def get_model_outputs(
         )
         batch_output_list = []
         with th.no_grad():
+            model.train()  # semi-supervised learning
             for output_nodes in tqdm.tqdm(batch_list):
-                model.train()  # semi-supervised learning
                 block = create_blocks(g=g, output_nodes=output_nodes)
                 _feat_dict = {
                     'cell': feat_dict['cell'][block.nodes['cell'].data['ids'], :]
+                    # 'cell': feat_dict['cell'][block.nodes['cell'].data[dgl.NID], :]
                 }
+                print("TEST:", dgl.NID)
                 if device is not None:
                     _feat_dict = to_device(_feat_dict, device)
                     block = to_device(block, device)
