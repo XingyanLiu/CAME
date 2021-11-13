@@ -883,7 +883,7 @@ def datapair_from_adatas(
             df_varmap_1v1, vars_all1, vars_all2, union=False)
         submaps_1v1 = utp.subset_matches(
             submaps_1v1, vars_use1, vars_use2, union=True)
-        print("TEST", submaps_1v1.shape)
+        # print("TEST", submaps_1v1.shape)
     else:
         # (intersection of 1-1 matched freatures)
         submaps_1v1 = utp.subset_matches(

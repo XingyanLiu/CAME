@@ -51,12 +51,12 @@ def to_device(
         device = 'cpu'
     if isinstance(x, Tensor):
         return x.to(device)
-    elif isinstance(x, List) and isinstance(x[0], (Tensor, dgl.DGLGraph)):
+    elif isinstance(x, List) and isinstance(x[0], Tensor):
         return [xx.to(device) for xx in x]
     elif isinstance(x, Mapping):
         return {k: v.to(device) for k, v in x.items()}
     elif isinstance(x, dgl.DGLGraph):
-        return x.to(device)
+        return [x.to(device)]
     else:
         raise NotImplementedError('Unresolved input type')
 
@@ -195,7 +195,6 @@ def get_model_outputs(
         feat_dict: Mapping[Any, Tensor],
         g: Union[dgl.DGLGraph, List[dgl.DGLGraph]],
         batch_size: Optional[int] = None,
-        sampler=None,
         device=None,
         **other_inputs
 ):
@@ -235,42 +234,27 @@ def get_model_outputs(
             # outputs = self.model.get_out_logits(feat_dict, g, **other_inputs)
         return outputs
     else:
-        # batch_list, all_idx, _, _ = create_batch(
-        #     sample_size=feat_dict['cell'].shape[0],
-        #     batch_size=batch_size, shuffle=False, label=False
-        # )
-        # batch_output_list = []
-        # with th.no_grad():
-        #     model.train()  # semi-supervised learning
-        #     for output_nodes in tqdm.tqdm(batch_list):
-        #         block = create_blocks(g=g, output_nodes=output_nodes)
-        #         _feat_dict = {
-        #             'cell': feat_dict['cell'][block.nodes['cell'].data[dgl.NID], :]
-        #         }
-        #         if device is not None:
-        #             _feat_dict = to_device(_feat_dict, device)
-        #             block = to_device(block, device)
-        #         # logging.debug('DEBUG', _feat_dict, block,)
-        #         # logging.debug(other_inputs)
-        #         _out = model.forward(_feat_dict, block, **other_inputs)
-        #         batch_output_list.append(_out)
-        # outputs = concat_tensor_dicts(batch_output_list)
-        from ._minibatch import idx_hetero
-        if sampler is None:
-            sampler = model.get_sampler(g.canonical_etypes, 50)
-        dataloader = dgl.dataloading.NodeDataLoader(
-            g, {'cell': torch.arange(0, g.num_nodes('cell'))},
-            sampler, device=device,
-            batch_size=batch_size,
-            shuffle=False, drop_last=False, num_workers=0
+        batch_list, all_idx, _, _ = create_batch(
+            sample_size=feat_dict['cell'].shape[0],
+            batch_size=batch_size, shuffle=False, label=False
         )
         batch_output_list = []
-        with tqdm.tqdm(dataloader) as tq, torch.no_grad():
-            for input_nodes, output_nodes, mfgs in tq:
-                inputs = to_device(idx_hetero(feat_dict, input_nodes), device)
-                mfgs = to_device(mfgs, device)
-                # mfgs = [blk.to(device) for blk in mfgs]
-                batch_output_list.append(model(inputs, mfgs, **other_inputs))
+        with th.no_grad():
+            model.train()  # semi-supervised learning
+            for output_nodes in tqdm.tqdm(batch_list):
+                block = create_blocks(g=g, output_nodes=output_nodes)
+                _feat_dict = {
+                    'cell': feat_dict['cell'][block.nodes['cell'].data['ids'], :]
+                    # 'cell': feat_dict['cell'][block.nodes['cell'].data[dgl.NID], :]
+                }
+                print("TEST:", dgl.NID)
+                if device is not None:
+                    _feat_dict = to_device(_feat_dict, device)
+                    block = to_device(block, device)
+                # logging.debug('DEBUG', _feat_dict, block,)
+                # logging.debug(other_inputs)
+                _out = model.forward(_feat_dict, block, **other_inputs)
+                batch_output_list.append(_out)
         outputs = concat_tensor_dicts(batch_output_list)
 
     return outputs

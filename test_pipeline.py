@@ -20,6 +20,6 @@ if __name__ == '__main__':
         format='%(asctime)s %(filename)s-%(lineno)d-%(funcName)s(): '
                '%(levelname)s\n %(message)s')
 
-    came.__test1__(2, batch_size=2048)
-    came.__test2__(2, batch_size=None)
+    came.__test1__(3, batch_size=2048)
+    came.__test2__(2, batch_size=2048)
 

@@ -15,51 +15,6 @@ import dgl
 import tqdm
 
 
-def make_fanouts(etypes, etypes_each_layers, k_each_etype: Union[int, dict]):
-    if isinstance(k_each_etype, int):
-        k_each_etype = dict.fromkeys(etypes, k_each_etype)
-
-    fanouts = []
-    for _etypes in etypes_each_layers:
-        _fanout = dict.fromkeys(etypes, 0)
-        _fanout.update({e: k_each_etype[e] for e in _etypes})
-        fanouts.append(_fanout)
-    return fanouts
-
-
-def idx_hetero(feat_dict, id_dict):
-    sub_feat_dict = {}
-    for k, ids in id_dict.items():
-        if k in feat_dict:
-            sub_feat_dict[k] = feat_dict[k][ids]
-        else:
-            # logging.warning(f'key "{k}" does not exist in {feat_dict.keys()}')
-            pass
-    return sub_feat_dict
-
-
-def involved_nodes(g,) -> dict:
-    """ collect all the involved nodes from the edges on g
-    (a heterogeneous graph)
-
-    Examples
-    --------
-
-    >>> input_nodes, output_nodes, mfgs = next(iter(train_dataloader))
-    >>> g.subgraph(involved_nodes(mfgs[0]))
-
-    """
-    from collections import defaultdict
-    nodes = defaultdict(set)
-    for stype, etype, dtype in g.canonical_etypes:
-        src, dst = g.edges(etype=etype)
-        nodes[stype].update(src.numpy())
-        nodes[dtype].update(dst.numpy())
-
-    nodes = {k: sorted(v) for k, v in nodes.items()}
-    return nodes
-
-
 def sub_graph(cell_ids, gene_ids, g):
     """
     Making sub_graph for g with input cell_ids and gene_ids
@@ -75,36 +30,6 @@ def create_blocks(g, output_nodes, etype='expressed_by'):
     gene_ids = torch.unique(gene_ids)
     block = sub_graph(cell_ids, gene_ids, g)  # graph for GAT
     return block
-
-
-def __test__(g, train_nids):
-    k_each_etype = 30
-
-    etypes_each_layers = [
-        [('cell', 'express', 'gene'), ('cell', 'self_loop_cell', 'cell')],
-        g.canonical_etypes,
-        g.canonical_etypes,
-        [('gene', 'expressed_by', 'cell')],
-    ]
-
-    fanouts = make_fanouts(
-        g.canonical_etypes, etypes_each_layers, k_each_etype)
-    sampler = dgl.dataloading.MultiLayerNeighborSampler(fanouts)
-
-    device = 'cpu'
-    train_dataloader = dgl.dataloading.NodeDataLoader(
-        # The following arguments are specific to NodeDataLoader.
-        g,  # The graph
-        train_nids,  # The node IDs to iterate over in minibatches
-        sampler,  # The neighbor sampler
-        device=device,  # Put the sampled MFGs on CPU or GPU
-        # The following arguments are inherited from PyTorch DataLoader.
-        batch_size=1024,  # Batch size
-        shuffle=True,  # Whether to shuffle the nodes for every epoch
-        drop_last=False,  # Whether to drop the last incomplete batch
-        num_workers=0  # Number of sampler processes
-    )
-
 
 
 def create_batch(

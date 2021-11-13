@@ -17,26 +17,26 @@ import numpy as np
 
 from .heteroframe import HeteroGraphConv
 
-# DEFAULT_MOD_PARAMS = {
-#     "GraphAttentionLayer": dict(
-#         h_dim=8,
-#         n_heads=8,
-#         feat_drop=0.1,
-#         attn_drop=0.1,
-#         negative_slope=0.2,
-#         residual=False,
-#         activation=None,
-#         attn_type='add',  # 'mul' or 'add' as the original paper
-#         heads_fuse='flat',  # 'flat' or 'mean'
-#     ),
-#     "GraphConvLayer": dict(
-#         norm='right',
-#         use_weight=True,
-#         bias=True,
-#         activation=None,
-#     ),
-#
-# }
+DEFAULT_MOD_PARAMS = {
+    "GraphAttentionLayer": dict(
+        h_dim=8,
+        n_heads=8,
+        feat_drop=0.1,
+        attn_drop=0.1,
+        negative_slope=0.2,
+        residual=False,
+        activation=None,
+        attn_type='add',  # 'mul' or 'add' as the original paper
+        heads_fuse='flat',  # 'flat' or 'mean'
+    ),
+    "GraphConvLayer": dict(
+        norm='right',
+        use_weight=True,
+        bias=True,
+        activation=None,
+    ),
+
+}
 
 
 def _unzip_canonical_etypes(canonical_etypes):
@@ -220,8 +220,8 @@ class BaseMixConvLayer(nn.Module):
         return GraphConvLayer(in_dim, out_dim, **params)
 
     def _make_gat_layer(self, in_dim, h_dim, n_heads, out_dim, **kwds):
+
         params = dict(
-            n_heads=n_heads,
             feat_drop=0.1,
             attn_drop=0.1,
             negative_slope=0.2,
@@ -660,7 +660,7 @@ class GraphAttentionLayer(nn.Module):
         ----------
         g : DGLGraph
             The graph.
-        feat : torch.Tensor or a pair of torch.Tensor
+        feat : torch.Tensor or pair of torch.Tensor
             If a torch.Tensor is given, the input feature of shape :math:`(N, D_{in})` where
             :math:`D_{in}` is size of input feature, :math:`N` is the number of nodes.
             If a pair of torch.Tensor is given, the pair must contain two tensors of shape

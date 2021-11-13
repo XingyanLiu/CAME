@@ -166,29 +166,14 @@ class CGGCNet(nn.Module):
         self._build_cell_classifier(kwdict_gat=kwdict_outgat)
         self.residual = residual
 
-    def get_sampler(self, canonical_etypes, k_each_etype: Union[int, dict] = 50):
-        from ._minibatch import make_fanouts
-        etypes_each_layers = [
-            self.embed_layer.canonical_etypes,
-            canonical_etypes,
-            canonical_etypes,
-            self.rel_names_out,
-        ]
-        fanouts = make_fanouts(
-            canonical_etypes, etypes_each_layers, k_each_etype)
-        sampler = dgl.dataloading.MultiLayerNeighborSampler(fanouts)
-        return sampler
-
     def forward(self,
                 feat_dict, g,
                 **other_inputs):
-        if isinstance(g, List) and len(g) == 1:
-            g = g[0]
         if isinstance(g, List):
-            h_embed = self.embed_layer(g[0], feat_dict, )
-            h_dict = self.rgcn.forward(g[1: -1], h_embed,  **other_inputs).copy()
+            h_dict = self.embed_layer(g[0], feat_dict, )
+            h_dict = self.rgcn.forward(g[0], h_dict,  **other_inputs).copy()
             # The last graph is a graph with batch_size cells and it's connected genes
-            h_dict['cell'] = self.cell_classifier.forward(g[-1], h_dict,  **other_inputs)['cell']
+            h_dict['cell'] = self.cell_classifier.forward(g[0], h_dict,  **other_inputs)['cell']
         else:
             if self.residual:
                 h_dict0 = self.embed_layer(g, feat_dict, )

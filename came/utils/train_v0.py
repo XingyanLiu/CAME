@@ -19,14 +19,12 @@ import tqdm
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 
-from ..model import (
+from ..model_v0 import (
     to_device, onehot_encode,
-    multilabel_binary_cross_entropy,
-    cross_entropy_loss,
     ce_loss_with_rdrop,
     classification_loss
 )
-from ..model._minibatch import create_batch, create_blocks
+from ..model_v0._minibatch import create_batch, create_blocks
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
 from ._base_trainer import BaseTrainer, SUBDIR_MODEL
@@ -72,8 +70,6 @@ def prepare4train(
         cluster_labels: Optional[Sequence] = None,
         test_idx: Optional[Sequence] = None,
         ground_truth: bool = True,
-        node_cls_type: str = 'cell',
-        key_label: str = 'label',
         **kwds  # for code compatibility (not raising error)
 ) -> dict:
     """
@@ -101,7 +97,6 @@ def prepare4train(
         test_idx = LongTensor(test_idx)
 
     g = dpair.get_whole_net(rebuild=False, )
-    g.nodes[node_cls_type].data[key_label] = labels   # date: 211113
 
     ENV_VARs = dict(
         classes=classes,
@@ -364,23 +359,19 @@ class Trainer(BaseTrainer):
                         eps=1e-4,
                         cat_class='cell',
                         batch_size=128,
-                        sampler=None,
                         device=None,
                         backup_stride: int = 43,
                         **other_inputs):
         """ Main function for model training (based on mini-batches)
         """
-        from ..model._minibatch import make_fanouts, idx_hetero
         # setting device to train
         if device is None:
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-        train_idx, test_idx = self.train_idx, self.test_idx
-        # train_labels, test_labels = self.train_labels, self.test_labels
-        g = self.g
-        model = self.model.to(device)
-        # self.g.nodes['cell'].data['ids'] = torch.arange(self.g.num_nodes('cell'))  # track the random shuffle
-        # self.g.nodes['cell'].data['label'] = labels  # at `prepare4train()`
+        train_idx, test_idx, train_labels, test_labels = self.train_idx, self.test_idx, self.train_labels, self.test_labels
+        labels = torch.cat((train_labels, test_labels), 0)
+        self.g.nodes['cell'].data['ids'] = torch.arange(self.g.num_nodes('cell'))  # track the random shuffle
+
         if use_class_weights:
             class_weights = to_device(self.class_weights, device)
         else:
@@ -391,50 +382,53 @@ class Trainer(BaseTrainer):
         if not hasattr(self, 'test_acc_max'):
             self.test_acc_max = 0.
 
-        if sampler is None:
-            sampler = model.get_sampler(g.canonical_etypes, 50)
-
-        train_dataloader = dgl.dataloading.NodeDataLoader(
-            # The following arguments are specific to NodeDataLoader.
-            g, {'cell': train_idx},  # The node IDs to iterate over in minibatches
-            sampler, device=device,  # Put the sampled MFGs on CPU or GPU
-            # The following arguments are inherited from PyTorch DataLoader.
-            batch_size=batch_size, shuffle=False, drop_last=False, num_workers=0
-        )
-        test_dataloader = dgl.dataloading.NodeDataLoader(
-            g, {'cell': test_idx}, sampler, device=device, batch_size=batch_size,
-            shuffle=False, drop_last=False, num_workers=0
-        )
         print("start training".center(50, '='))
+        model = self.model.to(device)
         model.train()
+        feat_dict = {}
+        train_labels, test_labels, batch_list, shuffled_idx = create_batch(
+            train_idx=train_idx, test_idx=test_idx, batch_size=batch_size,
+            labels=labels, shuffle=True)
+        shuffled_test_idx = detach2numpy(
+            shuffled_idx[shuffled_idx >= len(train_idx)]
+        ) - len(train_idx)
+        cluster_labels = self.cluster_labels[shuffled_test_idx]
+        blocks = []
+        for output_nodes in tqdm.tqdm(batch_list):
+            block = create_blocks(g=self.g, output_nodes=output_nodes)
+            blocks.append(block)
+
         for epoch in range(n_epochs):
             self._cur_epoch += 1
-            all_train_preds = []
-            train_labels = []
+            all_train_preds = to_device(torch.tensor([]), device)
+            all_test_preds = to_device(torch.tensor([]), device)
             t0 = time.time()
-            # batch_rank = 0
-            # with tqdm.tqdm(train_dataloader) as tq:
-            for input_nodes, output_nodes, mfgs in tqdm.tqdm(train_dataloader):
+            batch_rank = 0
+            for output_nodes in tqdm.tqdm(batch_list):
                 self.optimizer.zero_grad()
-                _labels = mfgs[-1].dstdata['label'][cat_class]
-                _feat_dict = to_device(idx_hetero(self.feat_dict, input_nodes), device)
-                mfgs = to_device(mfgs, device)
-                # _feat_dict = to_device(_feat_dict, device)
-                # mfgs = [blk.to(device) for blk in mfgs]
+                block = blocks[batch_rank]
+                batch_rank += 1
+                feat_dict['cell'] = self.feat_dict['cell'][block.nodes['cell'].data['ids'], :]
+                # TODO: here might raise error if the data are shuffled!
+                batch_train_idx = output_nodes.clone().detach() < len(train_idx)
+                batch_test_idx = output_nodes.clone().detach() >= len(train_idx)
+                feat_dict, block = to_device(feat_dict, device), to_device(block, device)
+                logits = model(feat_dict, block, **other_inputs)[cat_class]
+                logits2 = model(feat_dict, block, **other_inputs)[cat_class]
 
-                logits = model(_feat_dict, mfgs, **other_inputs)[cat_class]
-                logits2 = model(_feat_dict, mfgs, **other_inputs)[cat_class]
-
-                # out_train_labels
-                _labels = to_device(_labels, device)
+                # out_cell = logits[cat_class]
+                # output_labels = labels[output_nodes]
+                out_train_labels = to_device(
+                    labels[output_nodes][batch_train_idx].clone().detach(), device)
                 out_train_lbs1hot = to_device(
-                    self.train_labels_1hot[output_nodes[cat_class]].clone().detach(),
-                    device,)
+                    self.train_labels_1hot[output_nodes[batch_train_idx]].clone().detach(),
+                    device,
+                )
 
                 loss = ce_loss_with_rdrop(
-                    logits, logits2, labels=_labels,
+                    logits, logits2, labels=out_train_labels,
                     labels_1hot=out_train_lbs1hot,
-                    train_idx=None, weight=class_weights,
+                    train_idx=batch_train_idx, weight=class_weights,
                     loss_fn=classification_loss,
                     **params_lossfunc
                 )
@@ -448,29 +442,15 @@ class Trainer(BaseTrainer):
                 loss.backward()
                 self.optimizer.step()
 
-                # _, y_pred = torch.max(logits, dim=1)
-                all_train_preds.append(logits.argmax(1).cpu())  # .numpy())
-                train_labels.append(_labels.cpu())  # .numpy())
-            all_train_preds = torch.cat(all_train_preds, dim=0)
-            train_labels = torch.cat(train_labels, dim=0)
-
-            # ========== prediction (test data) ==========
-            all_test_preds = []
-            test_labels = []
-            with tqdm.tqdm(test_dataloader) as tq, torch.no_grad():
-                for input_nodes, output_nodes, mfgs in tq:
-                    inputs = to_device(idx_hetero(self.feat_dict, input_nodes), device)
-                    mfgs = to_device(mfgs, device)
-                    # mfgs = [blk.to(device) for blk in mfgs]
-                    test_labels.append(
-                        mfgs[-1].dstdata['label'][cat_class].cpu())
-                    all_test_preds.append(
-                        model(inputs, mfgs, )[cat_class].argmax(1).cpu()
-                    )
-                all_test_preds = torch.cat(all_test_preds, dim=0)
-                test_labels = torch.cat(test_labels, dim=0)
+                _, y_pred = torch.max(logits, dim=1)
+                y_pred_train = y_pred[batch_train_idx]
+                y_pred_test = y_pred[batch_test_idx]
+                all_train_preds = torch.cat((all_train_preds, y_pred_train), 0)
+                all_test_preds = torch.cat((all_test_preds, y_pred_test), 0)
 
             # ========== evaluation (Acc.) ==========
+            all_train_preds = all_train_preds.cpu()
+            all_test_preds = all_test_preds.cpu()
             with torch.no_grad():
                 train_acc = accuracy(train_labels, all_train_preds)
                 if self.with_ground_truth:
@@ -483,7 +463,7 @@ class Trainer(BaseTrainer):
                     test_acc = microF1 = macroF1 = weightedF1 = -1.
                 # unsupervised cluster index
                 if self.cluster_labels is not None:
-                    ami = get_AMI(self.cluster_labels, all_test_preds)
+                    ami = get_AMI(cluster_labels, all_test_preds)
                 else:
                     ami = -1.
                 backup = False
