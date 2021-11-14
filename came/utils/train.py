@@ -404,7 +404,7 @@ class Trainer(BaseTrainer):
             g, {'cell': test_idx}, sampler, device=device, batch_size=batch_size,
             shuffle=False, drop_last=False, num_workers=0
         )
-        print("start training".center(50, '='))
+        print(f" start training (device='{device}') ".center(60, '='))
         model.train()
         for epoch in range(n_epochs):
             self._cur_epoch += 1
