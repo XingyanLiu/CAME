@@ -156,9 +156,9 @@ def get_all_hidden_states(
         batch_output_list = []
         with tqdm.tqdm(dataloader) as tq, torch.no_grad():
             for input_nodes, output_nodes, mfgs in tq:
-                inputs = idx_hetero(feat_dict, input_nodes)
-                # inputs = to_device(idx_hetero(feat_dict, input_nodes), device)
-                # mfgs = to_device(mfgs, device)
+                # inputs = idx_hetero(feat_dict, input_nodes)
+                inputs = to_device(idx_hetero(feat_dict, input_nodes), device)
+                mfgs = to_device(mfgs, device)
                 # DGL默认前面的节点ID代表输出节点
                 output_subids = {_k: torch.arange(len(_v)) for _k, _v in
                                  output_nodes.items()}
