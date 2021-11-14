@@ -174,8 +174,8 @@ def get_all_hidden_states(
                 batch_output_list.append(_h_list)
 
         h_list = [concat_tensor_dicts(lyr) for lyr in zip(*batch_output_list)]
-        for x in h_list:
-            print("TEST-came.model._utils.py:", {k: v.shape for k, v in x.items()})
+        # for x in h_list:
+        #     print("TEST-came.model._utils.py:", {k: v.shape for k, v in x.items()})
     if detach2np:
         h_list = [detach2numpy(h) for h in h_list]
     return h_list
