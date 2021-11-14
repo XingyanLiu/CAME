@@ -27,17 +27,17 @@ def make_fanouts(etypes, etypes_each_layers, k_each_etype: Union[int, dict]):
     return fanouts
 
 
-def idx_hetero(feat_dict, id_dict):
-    sub_feat_dict = {}
-    for k, ids in id_dict.items():
-        if k in feat_dict:
-            sub_feat_dict[k] = feat_dict[k][ids]
-        else:
-            # logging.warning(f'key "{k}" does not exist in {feat_dict.keys()}')
-            pass
-    return sub_feat_dict
-
-
+# def idx_hetero(feat_dict, id_dict):
+#     sub_feat_dict = {}
+#     for k, ids in id_dict.items():
+#         if k in feat_dict:
+#             sub_feat_dict[k] = feat_dict[k][ids]
+#         else:
+#             # logging.warning(f'key "{k}" does not exist in {feat_dict.keys()}')
+#             pass
+#     return sub_feat_dict
+#
+#
 def involved_nodes(g,) -> dict:
     """ collect all the involved nodes from the edges on g
     (a heterogeneous graph)

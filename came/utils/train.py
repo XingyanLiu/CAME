@@ -20,7 +20,7 @@ from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 
 from ..model import (
-    to_device, onehot_encode,
+    to_device, onehot_encode, idx_hetero,
     multilabel_binary_cross_entropy,
     cross_entropy_loss,
     ce_loss_with_rdrop,
@@ -370,7 +370,6 @@ class Trainer(BaseTrainer):
                         **other_inputs):
         """ Main function for model training (based on mini-batches)
         """
-        from ..model._minibatch import make_fanouts, idx_hetero
         # setting device to train
         if device is None:
             device = 'cuda' if torch.cuda.is_available() else 'cpu'

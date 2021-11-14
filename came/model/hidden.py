@@ -223,7 +223,7 @@ class HiddenRRGCN(nn.Module):
             if self.layernorms and i < self.num_hidden_layers:
                 h_dict = self.layernorms[i](h_dict)
             self.hidden_states.append(h_dict)
-        # for residual connection, not normalize
+        # for residual connection, may not be normalized
         h_dict = self.layers[-1](
             graphs[-1], h_dict, norm=norm, bias=bias, activate=activate, **kwds)
         self.hidden_states.append(h_dict)

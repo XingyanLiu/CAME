@@ -166,16 +166,21 @@ class CGGCNet(nn.Module):
         self._build_cell_classifier(kwdict_gat=kwdict_outgat)
         self.residual = residual
 
-    def get_sampler(self, canonical_etypes, k_each_etype: Union[int, dict] = 50):
-        from ._minibatch import make_fanouts
-        etypes_each_layers = [
-            self.embed_layer.canonical_etypes,
-            canonical_etypes,
-            canonical_etypes,
-            self.rel_names_out,
-        ]
-        fanouts = make_fanouts(
-            canonical_etypes, etypes_each_layers, k_each_etype)
+    def get_sampler(self,
+                    canonical_etypes,
+                    k_each_etype: Union[int, dict] = 50,
+                    fanouts=None,
+                    ):
+        if fanouts is None:
+            from ._minibatch import make_fanouts
+            etypes_each_layers = [
+                self.embed_layer.canonical_etypes,
+                canonical_etypes,
+                canonical_etypes,
+                self.rel_names_out,
+            ]
+            fanouts = make_fanouts(
+                canonical_etypes, etypes_each_layers, k_each_etype)
         sampler = dgl.dataloading.MultiLayerNeighborSampler(fanouts)
         return sampler
 

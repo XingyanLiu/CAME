@@ -558,7 +558,7 @@ def gather_came_results(
     # all hidden states
     from .model import get_all_hidden_states
     hidden_list = get_all_hidden_states(
-        trainer.model, trainer.feat_dict, trainer.g)
+        trainer.model, trainer.feat_dict, trainer.g, batch_size=batch_size)
     if save_hidden_list:
         from . import save_hidden_states
         save_hidden_states(hidden_list, resdir / 'hidden_list.h5')

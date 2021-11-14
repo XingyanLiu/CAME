@@ -22,6 +22,17 @@ from .cgc import CGCNet
 from ._minibatch import create_blocks, create_batch
 
 
+def idx_hetero(feat_dict, id_dict):
+    sub_feat_dict = {}
+    for k, ids in id_dict.items():
+        if k in feat_dict:
+            sub_feat_dict[k] = feat_dict[k][ids]
+        else:
+            # logging.warning(f'key "{k}" does not exist in {feat_dict.keys()}')
+            pass
+    return sub_feat_dict
+
+
 def detach2numpy(x):
     if isinstance(x, Tensor):
         x = x.cpu().clone().detach().numpy()
@@ -68,7 +79,7 @@ def concat_tensor_dicts(dicts: Sequence[Mapping], dim=0) -> Dict:
         keys.update(d.keys())
     result = {}
     for _key in list(keys):
-        result[_key] = th.cat([d[_key] for d in dicts], dim=dim)
+        result[_key] = th.cat([d[_key] for d in dicts if _key in d], dim=dim)
     return result
 
 
@@ -100,10 +111,18 @@ def get_all_hidden_states(
         g: dgl.DGLGraph,
         detach2np: bool = True,
         batch_size: Optional[int] = None,
+        sampler=None,
         device=None,
         **other_inputs
 ):
     """ Get the embeddings on ALL the hidden layers
+
+    NOTE: Heterogeneous graph mini-batch sampling: first sample batch for nodes of one type, and then
+        sample batch for the next type.
+        For example, the nodes of the first few batches are all cells, followed by
+        gene-nodes
+
+
     """
     if device is None:
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -122,23 +141,57 @@ def get_all_hidden_states(
             # out_cls_dict = model.cell_classifier(g, h_list[-1], **other_inputs)
             # h_list.append(out_cls_dict)
     else:
-        batch_list, all_idx, _, _ = create_batch(
-            sample_size=feat_dict['cell'].shape[0],
-            batch_size=batch_size, shuffle=False, label=False
-        )
-        batch_h_lists = []  # n_batches x n_layers x {'cell': .., 'gene': ..}
-        with th.no_grad():
-            for output_nodes in tqdm.tqdm(batch_list):
-                model.train()  # semi-supervised learning
-                block = create_blocks(g=g, output_nodes=output_nodes)
-                _feat_dict = {
-                    'cell': feat_dict['cell'][block.nodes['cell'].data['ids'], :]
-                }
-                _out_h_list = get_all_hidden_states(
-                    model, _feat_dict, block, detach2np=False, device=device)
-                batch_h_lists.append(_out_h_list)
-        h_list = [concat_tensor_dicts(lyr) for lyr in zip(batch_h_lists)]
+        # batch_list, all_idx, _, _ = create_batch(
+        #     sample_size=feat_dict['cell'].shape[0],
+        #     batch_size=batch_size, shuffle=False, label=False
+        # )
+        # batch_h_lists = []  # n_batches x n_layers x {'cell': .., 'gene': ..}
+        # with th.no_grad():
+        #     for output_nodes in tqdm.tqdm(batch_list):
+        #         model.train()  # semi-supervised learning
+        #         block = create_blocks(g=g, output_nodes=output_nodes)
+        #         _feat_dict = {
+        #             'cell': feat_dict['cell'][block.nodes['cell'].data[dgl.NID], :]
+        #         }
+        #         _out_h_list = get_all_hidden_states(
+        #             model, _feat_dict, block, detach2np=False, device=device)
+        #         batch_h_lists.append(_out_h_list)
+        # h_list = [concat_tensor_dicts(lyr) for lyr in zip(*batch_h_lists)]
+        ######################################
+        if sampler is None:
+            sampler = model.get_sampler(g.canonical_etypes, k_each_etype=50, )
+            # remove the last layer
+            sampler = dgl.dataloading.MultiLayerNeighborSampler(
+                sampler.fanouts[:-1])
 
+        dataloader = dgl.dataloading.NodeDataLoader(
+            g, {'cell': g.nodes('cell'), 'gene': g.nodes('gene')},
+            sampler, device=device,
+            batch_size=batch_size, shuffle=False, drop_last=False, num_workers=0
+        )
+        batch_output_list = []
+        with tqdm.tqdm(dataloader) as tq, torch.no_grad():
+            for input_nodes, output_nodes, mfgs in tq:
+                inputs = idx_hetero(feat_dict, input_nodes)
+                # inputs = to_device(idx_hetero(feat_dict, input_nodes), device)
+                # mfgs = to_device(mfgs, device)
+                # DGL默认前面的节点ID代表输出节点
+                output_subids = {_k: torch.arange(len(_v)) for _k, _v in
+                                 output_nodes.items()}
+                _h_list = []
+                h = model.embed_layer(mfgs[0], inputs)
+                _h_list.append(idx_hetero(h, output_subids))
+
+                h = model.rgcn(mfgs[1:], h, **other_inputs)
+                # h_list.append(idx_hetero(h, output_subids))
+                # TODO: not stroring hidden states
+                _h_list.extend([idx_hetero(_h, output_subids)
+                               for _h in model.rgcn.hidden_states])
+                batch_output_list.append(_h_list)
+
+        h_list = [concat_tensor_dicts(lyr) for lyr in zip(*batch_output_list)]
+        for x in h_list:
+            print("TEST-came.model._utils.py:", {k: v.shape for k, v in x.items()})
     if detach2np:
         h_list = [detach2numpy(h) for h in h_list]
     return h_list
@@ -256,11 +309,10 @@ def get_model_outputs(
         #         _out = model.forward(_feat_dict, block, **other_inputs)
         #         batch_output_list.append(_out)
         # outputs = concat_tensor_dicts(batch_output_list)
-        from ._minibatch import idx_hetero
         if sampler is None:
             sampler = model.get_sampler(g.canonical_etypes, 50)
         dataloader = dgl.dataloading.NodeDataLoader(
-            g, {'cell': torch.arange(0, g.num_nodes('cell'))},
+            g, {'cell': g.nodes('cell')},
             sampler, device=device,
             batch_size=batch_size,
             shuffle=False, drop_last=False, num_workers=0
