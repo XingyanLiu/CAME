@@ -141,22 +141,6 @@ def get_all_hidden_states(
             # out_cls_dict = model.cell_classifier(g, h_list[-1], **other_inputs)
             # h_list.append(out_cls_dict)
     else:
-        # batch_list, all_idx, _, _ = create_batch(
-        #     sample_size=feat_dict['cell'].shape[0],
-        #     batch_size=batch_size, shuffle=False, label=False
-        # )
-        # batch_h_lists = []  # n_batches x n_layers x {'cell': .., 'gene': ..}
-        # with th.no_grad():
-        #     for output_nodes in tqdm.tqdm(batch_list):
-        #         model.train()  # semi-supervised learning
-        #         block = create_blocks(g=g, output_nodes=output_nodes)
-        #         _feat_dict = {
-        #             'cell': feat_dict['cell'][block.nodes['cell'].data[dgl.NID], :]
-        #         }
-        #         _out_h_list = get_all_hidden_states(
-        #             model, _feat_dict, block, detach2np=False, device=device)
-        #         batch_h_lists.append(_out_h_list)
-        # h_list = [concat_tensor_dicts(lyr) for lyr in zip(*batch_h_lists)]
         ######################################
         if sampler is None:
             sampler = model.get_sampler(g.canonical_etypes, k_each_etype=50, )
@@ -289,26 +273,7 @@ def get_model_outputs(
             # outputs = self.model.get_out_logits(feat_dict, g, **other_inputs)
         return outputs
     else:
-        # batch_list, all_idx, _, _ = create_batch(
-        #     sample_size=feat_dict['cell'].shape[0],
-        #     batch_size=batch_size, shuffle=False, label=False
-        # )
-        # batch_output_list = []
-        # with th.no_grad():
-        #     model.train()  # semi-supervised learning
-        #     for output_nodes in tqdm.tqdm(batch_list):
-        #         block = create_blocks(g=g, output_nodes=output_nodes)
-        #         _feat_dict = {
-        #             'cell': feat_dict['cell'][block.nodes['cell'].data[dgl.NID], :]
-        #         }
-        #         if device is not None:
-        #             _feat_dict = to_device(_feat_dict, device)
-        #             block = to_device(block, device)
-        #         # logging.debug('DEBUG', _feat_dict, block,)
-        #         # logging.debug(other_inputs)
-        #         _out = model.forward(_feat_dict, block, **other_inputs)
-        #         batch_output_list.append(_out)
-        # outputs = concat_tensor_dicts(batch_output_list)
+        ######################################
         if sampler is None:
             sampler = model.get_sampler(g.canonical_etypes, 50)
         dataloader = dgl.dataloading.NodeDataLoader(
