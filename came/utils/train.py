@@ -398,7 +398,7 @@ class Trainer(BaseTrainer):
             g, {'cell': train_idx},  # The node IDs to iterate over in minibatches
             sampler, device=device,  # Put the sampled MFGs on CPU or GPU
             # The following arguments are inherited from PyTorch DataLoader.
-            batch_size=batch_size, shuffle=False, drop_last=False, num_workers=0
+            batch_size=batch_size, shuffle=True, drop_last=False, num_workers=0
         )
         test_dataloader = dgl.dataloading.NodeDataLoader(
             g, {'cell': test_idx}, sampler, device=device, batch_size=batch_size,
