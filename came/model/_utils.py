@@ -19,7 +19,7 @@ import tqdm
 from sklearn.preprocessing import MultiLabelBinarizer
 from .cggc import CGGCNet
 from .cgc import CGCNet
-from ._minibatch import create_blocks, create_batch
+# from ._minibatch import create_blocks, create_batch
 
 
 def idx_hetero(feat_dict, id_dict):

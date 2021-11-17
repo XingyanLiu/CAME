@@ -26,7 +26,7 @@ from ..model import (
     ce_loss_with_rdrop,
     classification_loss
 )
-from ..model._minibatch import create_batch, create_blocks
+# from ..model._minibatch import create_batch, create_blocks
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
 from ._base_trainer import BaseTrainer, SUBDIR_MODEL

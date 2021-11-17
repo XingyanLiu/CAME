@@ -38,7 +38,7 @@ from . import (
     CGGCNet, datapair_from_adatas,
     CGCNet, aligned_datapair_from_adatas
 )
-from .utils.train import prepare4train, Trainer, seed_everything
+from .utils.train import prepare4train, Trainer
 
 PARAMS_MODEL = get_model_params()
 PARAMS_PRE = get_preprocess_params()
@@ -828,6 +828,7 @@ def preprocess_unaligned(
 
 
 def __test1__(n_epochs: int = 5, batch_size=None):
+    from .utils.train import seed_everything
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
     if not datadir.exists():
@@ -878,6 +879,7 @@ def __test1__(n_epochs: int = 5, batch_size=None):
 
 
 def __test2__(n_epochs: int = 5, batch_size=None):
+    from .utils.train import seed_everything
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
     if not datadir.exists():
