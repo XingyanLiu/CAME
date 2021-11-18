@@ -603,10 +603,14 @@ def _plot_edges(sids, tids,
     """
     Parameters
     ----------
-    sids: sequence of source ids, of shape (n_edges, )
-    tids: sequence of target ids, of shape (n_edges, )
-    xy1: x, y coordinates of source node (ids), of shape (n1, 2) or (n1+n2, 2)
-    xy2: x, y coordinates of target node (ids)
+    sids:
+        sequence of source ids, of shape (n_edges, )
+    tids:
+        sequence of target ids, of shape (n_edges, )
+    xy1:
+        x, y coordinates of source node (ids), of shape (n1, 2) or (n1+n2, 2)
+    xy2:
+        x, y coordinates of target node (ids)
     """
     xy2 = xy1 if xy2 is None else xy2
     if ax is None:
@@ -618,8 +622,8 @@ def _plot_edges(sids, tids,
     return ax
 
 
-def plot_edges_by_adj(adj, pos, ax=None, **kwds_edge):
-    """ adj: a sparse matrix, None is allowed"""
+def plot_edges_by_adj(adj: sparse.spmatrix, pos, ax=None, **kwds_edge):
+    """ adj: a sparse matrix, if None, nothing will be plotted"""
     adj = sparse.triu(adj).tocoo()
     sids, tids = adj.row, adj.col
     return _plot_edges(sids, tids, xy1=pos, xy2=None, ax=ax, **kwds_edge)

@@ -885,7 +885,7 @@ def scipy_edge_dict_for_dgl(edge_dict, foo=None):
 
 
 def homograph_from_scipy(adj, as_dgl=True, self_loop=True):
-    """ making a homolohous DGL graph from a scipy.sparse matrix
+    """ making a homologous DGL graph from a scipy.sparse matrix
     """
     from networkx import from_scipy_sparse_matrix
     g = from_scipy_sparse_matrix(adj)
