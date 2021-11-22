@@ -269,7 +269,7 @@ class DataPair(object):
         s = "\n".join([
             f"DataPair with {self.n_obs} obs- and {self.n_vnodes} var-nodes",
             f"obs1 x var1 ({self.dataset_names[0]}): {self.n_obs1} x {self.n_vnodes1}",
-            f"obs2 x var2 ({self.dataset_names[0]}): {self.n_obs2} x {self.n_vnodes2}",
+            f"obs2 x var2 ({self.dataset_names[1]}): {self.n_obs2} x {self.n_vnodes2}",
             f"Dimensions of the obs-node-features: {self.n_feats}",
         ])
         return s

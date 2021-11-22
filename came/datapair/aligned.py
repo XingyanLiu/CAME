@@ -225,9 +225,9 @@ class AlignedDataPair(object):
 
     def __str__(self):
         s = "\n".join([
-            f"DataPair with {self.n_obs} obs- and {self.n_vnodes} var-nodes",
+            f"AlignedDataPair with {self.n_obs} obs- and {self.n_vnodes} var-nodes",
             f"n_obs1 ({self.dataset_names[0]}): {self.n_obs1}",
-            f"n_obs2 ({self.dataset_names[0]}): {self.n_obs2}",
+            f"n_obs2 ({self.dataset_names[1]}): {self.n_obs2}",
             f"Dimensions of the obs-node-features: {self.n_feats}",
         ])
         return s
