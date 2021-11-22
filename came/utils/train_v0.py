@@ -6,7 +6,7 @@ Created on Sun Apr 11 19:15:45 2021
 """
 from pathlib import Path
 import os
-from typing import Sequence, Union, Mapping, Optional, List
+from typing import Sequence, Union, Mapping, Optional
 
 import time
 import random
@@ -19,15 +19,15 @@ import tqdm
 from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 
-from ..model_v0 import (
+from came.model.model_v0 import (
     to_device, onehot_encode,
     ce_loss_with_rdrop,
     classification_loss
 )
-from ..model_v0._minibatch import create_batch, create_blocks
+from came.model.model_v0._minibatch import create_batch, create_blocks
 from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
-from ._base_trainer import BaseTrainer, SUBDIR_MODEL
+from ._base_trainer import BaseTrainer
 
 
 def seed_everything(seed=123):
