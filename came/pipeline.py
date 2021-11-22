@@ -827,7 +827,7 @@ def preprocess_unaligned(
     return dct, (adata1, adata2)
 
 
-def __test1__(n_epochs: int = 5, batch_size=None):
+def __test1__(n_epochs: int = 5, batch_size=None, reverse=False):
     from .utils.train import seed_everything
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
@@ -837,6 +837,9 @@ def __test1__(n_epochs: int = 5, batch_size=None):
 
     sp1, sp2 = ('human', 'mouse')
     dsnames = ('Baron_human', 'Baron_mouse')
+    if reverse:
+        sp1, sp2 = sp2, sp1
+        dsnames = dsnames[::-1]
 
     df_varmap_1v1 = pd.read_csv(datadir / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
 
@@ -878,7 +881,7 @@ def __test1__(n_epochs: int = 5, batch_size=None):
     print('Test passed for ALIGNED!')
 
 
-def __test2__(n_epochs: int = 5, batch_size=None):
+def __test2__(n_epochs: int = 5, batch_size=None, reverse=False):
     from .utils.train import seed_everything
     seed_everything()
     datadir = Path(os.path.abspath(__file__)).parent / 'sample_data'
@@ -888,6 +891,9 @@ def __test2__(n_epochs: int = 5, batch_size=None):
 
     sp1, sp2 = ('human', 'mouse')
     dsnames = ('Baron_human', 'Baron_mouse')
+    if reverse:
+        sp1, sp2 = sp2, sp1
+        dsnames = dsnames[::-1]
 
     df_varmap_1v1 = pd.read_csv(datadir / f'gene_matches_1v1_{sp1}2{sp2}.csv', )
     df_varmap = pd.read_csv(datadir / f'gene_matches_{sp1}2{sp2}.csv', )
