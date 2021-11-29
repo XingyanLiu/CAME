@@ -890,15 +890,15 @@ def datapair_from_adatas(
             df_varmap_1v1, vars_use1, vars_use2, union=False)
     vnames_feat1, vnames_feat2 = list(zip(*submaps_1v1.values[:, :2]))
 
-    #    try:
-    #        features1 = adata1[:, vnames_feat1].X
-    #        features2 = adata2[:, vnames_feat2].X
-    #    except:
-    logging.info(
-        '[NOTE]\nthe node features will be extracted from `adata.raw`, '
-        'please make sure that the values are normalized.\n')
-    features1 = adata_raw1[:, vnames_feat1].X
-    features2 = adata_raw2[:, vnames_feat2].X
+    try:
+        features1 = adata1[:, vnames_feat1].X
+        features2 = adata2[:, vnames_feat2].X
+    except:
+        logging.warning(
+            '[NOTE]\nthe node features will be extracted from `adata.raw`, '
+            'please make sure that the values are normalized.\n')
+        features1 = adata_raw1[:, vnames_feat1].X
+        features2 = adata_raw2[:, vnames_feat2].X
 
     features = list(map(_check_sparse_toarray, [features1, features2]))
 

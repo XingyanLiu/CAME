@@ -706,15 +706,15 @@ def aligned_datapair_from_adatas(
     obs2 = adata2.obs.copy()
 
     # --- node features (for single-cells)
-    # try:
-    #     features1 = adata1[:, vars_feat].X
-    #     features2 = adata2[:, vars_feat].X
-    # except:
-    logging.info(
-        '[NOTE]\nthe node features will be extracted from `adata.raw`, '
-        'please make sure that the values are normalized.\n')
-    features1 = adata_raw1[:, vars_feat].X
-    features2 = adata_raw2[:, vars_feat].X
+    try:
+        features1 = adata1[:, vars_feat].X
+        features2 = adata2[:, vars_feat].X
+    except:
+        logging.warning(
+            '[NOTE]\nthe node features will be extracted from `adata.raw`, '
+            'please make sure that the values are normalized.\n')
+        features1 = adata_raw1[:, vars_feat].X
+        features2 = adata_raw2[:, vars_feat].X
 
     features = list(map(_check_sparse_toarray, [features1, features2]))
 

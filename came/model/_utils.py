@@ -83,6 +83,16 @@ def concat_tensor_dicts(dicts: Sequence[Mapping], dim=0) -> Dict:
     return result
 
 
+def infer_classes(y: Sequence or Sequence[Sequence]):
+    """ infer all the classes from the given label sequence """
+    if isinstance(y[0], Sequence):
+        # multi-label scenario
+        import itertools
+        return sorted(set(itertools.chain.from_iterable(y)))
+    else:
+        return sorted(set(y))
+
+
 def onehot_encode(
         x: Sequence,
         classes=None,

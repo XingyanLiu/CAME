@@ -20,7 +20,7 @@ from ..datapair.aligned import AlignedDataPair
 from ..datapair.unaligned import DataPair
 
 from ..model import (
-    to_device, onehot_encode, idx_hetero,
+    to_device, onehot_encode, idx_hetero, infer_classes,
     multilabel_binary_cross_entropy,
     cross_entropy_loss,
     ce_loss_with_rdrop,
@@ -157,8 +157,9 @@ class Trainer(BaseTrainer):
         # infer n_classes
         self.n_classes = len(self.class_weights)
         # for multi-label loss calculation
-        self.train_labels_1hot = onehot_encode(
-            self.train_labels, sparse_output=False, astensor=True)
+        self.classes = infer_classes(detach2numpy(self.train_labels))  # if classes is None else classes
+        # self.train_labels_1hot = onehot_encode(
+        #     self.train_labels, sparse_output=False, astensor=True)
 
         _record_names = (
             'dur',
@@ -251,7 +252,9 @@ class Trainer(BaseTrainer):
         self.g = self.g.to(device)
         _, feat_dict, train_labels, test_labels, train_idx, test_idx = \
             self.all_to_device(device)
-        train_labels_1hot = self.train_labels_1hot.to(device)
+        # train_labels_1hot = self.train_labels_1hot.to(device)
+        train_labels_1hot = onehot_encode(
+            self.train_labels, self.classes, sparse_output=False, astensor=True).to(device)
 
         if use_class_weights:
             class_weights = to_device(self.class_weights, device)
@@ -367,6 +370,7 @@ class Trainer(BaseTrainer):
                         sampler=None,
                         device=None,
                         backup_stride: int = 43,
+                        mod_info: int = 3,
                         **other_inputs):
         """ Main function for model training (based on mini-batches)
         """
@@ -425,10 +429,13 @@ class Trainer(BaseTrainer):
                 logits2 = model(_feat_dict, mfgs, **other_inputs)[cat_class]
 
                 # out_train_labels
+                out_train_lbs1hot = onehot_encode(
+                    _labels, classes=self.classes, astensor=True).to(device)
                 _labels = to_device(_labels, device)
-                out_train_lbs1hot = to_device(
-                    self.train_labels_1hot[output_nodes[cat_class]].clone().detach(),
-                    device,)
+
+                # out_train_lbs1hot = to_device(
+                #     self.train_labels_1hot[output_nodes[cat_class]].clone().detach(),
+                #     device,)
 
                 loss = ce_loss_with_rdrop(
                     logits, logits2, labels=_labels,
@@ -525,7 +532,7 @@ class Trainer(BaseTrainer):
                         self._cur_epoch, train_acc, ami, self.ami_max,
                         ami, dur_avg)
 
-                if self._cur_epoch % 5 == 0 or backup:
+                if self._cur_epoch % mod_info == 0 or backup:
                     print(self._cur_log)
 
             self._cur_epoch_adopted = self._cur_epoch

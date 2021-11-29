@@ -572,7 +572,7 @@ def gather_came_results(
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
     pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
     predictor = Predictor(classes=classes).fit(
-            out_cell[dpair.obs_ids1],
+            out_cell[trainer.train_idx],
             detach2numpy(trainer.train_labels),
         )
     predictor.save(resdir / f'predictor.json')
@@ -581,7 +581,7 @@ def gather_came_results(
     cl_preds = predict_from_logits(probas_all, classes=classes)
     obs = pd.DataFrame(
         # TODO: `keys[0]` -> 'REF', may raise another exceptions
-        {'REF': dpair.get_obs_labels(keys, asint=False),
+        {'REF': dpair.get_obs_labels(keys, asint=False, categories=classes),
          # true labels with `unknown` for unseen classes in query data
          'celltype': dpair.get_obs_anno(keys_compare),  # labels for comparison
          'predicted': cl_preds,
