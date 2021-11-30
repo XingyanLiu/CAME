@@ -301,16 +301,29 @@ class DataPair(object):
 
     # In[]
     def get_obs_features(self, astensor=True, scale=True,
-                         unit_var=True,
+                         unit_var=True, batch_keys=None,
                          clip=False, clip_range=(-3, 3.5)):
-        feats = self._features
+        features = self._features
         if scale:
-            def zscore(X, with_mean=True, ):
-                return utp.zscore(X, with_mean=with_mean, scale=unit_var)
+            feats = []
+            if batch_keys is None:
+                batch_keys = [None, None]
+            for X, _df, bch_key in zip(features, self.obs_dfs, batch_keys):
+                if bch_key is None:
+                    feats.append(utp.zscore(X, with_mean=True, scale=unit_var))
+                else:
+                    bch_lbs = _df[bch_key]
+                    feats.append(
+                        utp.group_zscore(X, bch_lbs, with_mean=True, scale=unit_var)
+                    )
+            features = feats
 
-            feats = list(map(zscore, feats))
+            def zscore(X):
+                return utp.zscore(X, with_mean=True, scale=unit_var)
 
-        features = np.vstack(feats)
+            # feats = list(map(zscore, feats))
+
+        features = np.vstack(features)
         if clip:
             vmin, vmax = clip_range
             print(f'clipping feature values within [{vmin: .2f}, {vmax: .2f}]')
