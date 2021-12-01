@@ -318,11 +318,6 @@ class DataPair(object):
                     )
             features = feats
 
-            def zscore(X):
-                return utp.zscore(X, with_mean=True, scale=unit_var)
-
-            # feats = list(map(zscore, feats))
-
         features = np.vstack(features)
         if clip:
             vmin, vmax = clip_range
