@@ -484,8 +484,8 @@ class AlignedDataPair(object):
         """
         if len(ov_adjs) == 2:
             print('[*] Setting observation-by-variable adjacent matrices '
-                  '(`self._ov_adjs`) for making merged graph adjacent matrix of '
-                  'observation and variable nodes')
+                  '(`self._ov_adjs`) for making merged graph adjacent matrix of'
+                  ' observation and variable nodes')
             n_obs1, n_vnodes1 = ov_adjs[0].shape
             n_obs2, n_vnodes2 = ov_adjs[1].shape
             # checking dimensions
