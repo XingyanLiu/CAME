@@ -47,4 +47,4 @@ from .PARAMETERS import get_model_params, get_loss_params
 from .pipeline import __test1__, __test2__
 
 
-__version__ = "0.0.2"
+__version__ = "0.1.2"
