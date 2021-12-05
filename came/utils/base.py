@@ -117,6 +117,72 @@ def dec_timewrapper(tag='function'):
     return my_decorator
 
 
+def pairs_to_dict(pairs, reverse=False):
+    """
+    pairs:
+        a list of tuples
+
+    returns
+    -------
+    dct: a dict of lists
+    """
+    dct = {}
+    for k, v in pairs:
+        if reverse:
+            k, v = v, k
+        if k in dct:
+            dct[k].append(v)
+        else:
+            dct[k] = [v]
+    return dct
+
+
+def dict_to_pairs(dct):
+    """
+    pairs = []
+    for k, lst in dct.items():
+        pairs.extend([(k, v) for v in lst])
+    """
+    pairs = [(k, v) for k, lst in dct.items() for v in lst]
+    return pairs
+
+
+def map_by_sme(
+        pairs_sm,
+        pairs_me,
+        to_pairs=False) -> Union[dict, list]:
+    """ start - media - end homologous mapping transform
+
+    pairs_sm, pairs_me:
+        a list of tuples
+
+    returns
+    -------
+    dct_se: a dict of lists
+
+    Examples
+    --------
+    make pairs (List[Tuple]) from dfs, mapping by a media
+    >>> pairs_sm = df1.iloc[:, :2].apply(tuple, axis=1).tolist()
+    >>> pairs_me = df2.iloc[:, :2].apply(tuple, axis=1).tolist()
+    >>> pairs_se = map_by_sme(pairs_sm, pairs_me, to_pairs=True)
+    >>> pd.DataFrame(pairs_se, columns=['amph_id', 'zebrafish_id'])
+
+    """
+
+    dct_sm = pairs_to_dict(pairs_sm)
+    dct_me = pairs_to_dict(pairs_me)
+    dct_se = {}
+    for k, lst in dct_sm.items():
+        set_end = set()  # initialize
+        for media in lst:
+            set_end.update(dct_me.get(media, []))
+        dct_se[k] = sorted(set_end)
+    if to_pairs:
+        return dict_to_pairs(dct_se)
+    return dct_se
+
+
 def make_pairs_from_lists(lst1, lst2=None, inverse=False, skip_equal=True):
     """ making combinational pairs
     """
