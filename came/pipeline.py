@@ -56,6 +56,7 @@ def main_for_aligned(
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
         do_normalize: bool = False,
+        batch_keys=None,
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
         tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
@@ -93,6 +94,10 @@ def main_for_aligned(
     do_normalize
         whether to normalize the input data
         (the they have already been normalized, set it False)
+    batch_keys
+        a list of two strings (or None), specifying the batch-keys for
+        data1 and data2, respectively.
+        if given, features (of cell nodes) will be scaled within each batch.
     n_epochs
         number of training epochs.
         A recommended setting is 200-400 for whole-graph training,
@@ -164,12 +169,12 @@ def main_for_aligned(
     )
     print(adpair)
 
-    ENV_VARs = prepare4train(adpair, key_class=keys, )
+    ENV_VARs = prepare4train(adpair, key_class=keys, batch_keys=batch_keys)
 
     logging.debug(ENV_VARs.keys())
     g = ENV_VARs['g']
-    classes0 = ENV_VARs['classes']
-    classes = classes0[:-1] if 'unknown' in classes0 else classes0
+    classes = ENV_VARs['classes']
+    # classes = classes0[:-1] if 'unknown' in classes0 else classes0
     n_classes = len(classes)
     params_model = get_model_params(**params_model)
     params_model.update(
@@ -210,8 +215,6 @@ def main_for_aligned(
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
 
     # ======================== Gather results ======================
-    obs_ids1 = adpair.get_obs_ids(0, False)
-    obs_ids2 = adpair.get_obs_ids(1, False)
     out_cell, df_probs, h_dict, predictor = gather_came_results(
         adpair,
         trainer,
@@ -224,9 +227,11 @@ def main_for_aligned(
         save_hidden_list=save_hidden_list,
         save_dpair=save_dpair,
     )
-    obs = adpair.obs
     # ============= confusion matrix & heatmap plot ==============
     if plot_results:
+        obs = adpair.obs
+        obs_ids1 = detach2numpy(trainer.train_idx)
+        obs_ids2 = detach2numpy(trainer.test_idx)
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
         if key_class2 == 'clust_lbs':
             labels_cat = obs['celltype']
@@ -276,6 +281,7 @@ def main_for_unaligned(
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
         do_normalize: bool = False,
+        batch_keys=None,
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
         tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
@@ -320,6 +326,10 @@ def main_for_unaligned(
     do_normalize
         whether to normalize the input data
         (the they have already been normalized, set it False)
+    batch_keys
+        a list of two strings (or None), specifying the batch-keys for
+        data1 and data2, respectively.
+        if given, features (of cell nodes) will be scaled within each batch
     n_epochs
         number of training epochs.
         A recommended setting is 200-400 for whole-graph training,
@@ -394,12 +404,12 @@ def main_for_unaligned(
     )
     print(dpair)
 
-    ENV_VARs = prepare4train(dpair, key_class=keys, )
+    ENV_VARs = prepare4train(dpair, key_class=keys, batch_keys=batch_keys,)
 
     logging.info(ENV_VARs.keys())
     g = ENV_VARs['g']
-    classes0 = ENV_VARs['classes']
-    classes = classes0[:-1] if 'unknown' in classes0 else classes0
+    classes = ENV_VARs['classes']
+    # classes = classes0[:-1] if 'unknown' in classes0 else classes0
     n_classes = len(classes)
     params_model = get_model_params(**params_model)
     params_model.update(
@@ -438,8 +448,6 @@ def main_for_unaligned(
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
 
     # ======================== Gather results ======================
-    obs_ids1 = dpair.get_obs_ids(0, False)
-    obs_ids2 = dpair.get_obs_ids(1, False)
     out_cell, df_probs, h_dict, predictor = gather_came_results(
         dpair,
         trainer,
@@ -452,8 +460,10 @@ def main_for_unaligned(
         save_hidden_list=save_hidden_list,
         save_dpair=save_dpair,
     )
-    obs = dpair.obs
     if plot_results:
+        obs = dpair.obs
+        obs_ids1 = detach2numpy(trainer.train_idx)
+        obs_ids2 = detach2numpy(trainer.test_idx)
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
         if key_class2 == 'clust_lbs':
             labels_cat = obs['celltype']

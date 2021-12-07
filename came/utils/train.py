@@ -65,6 +65,7 @@ def prepare4train(
         key_class,
         key_clust='clust_lbs',
         scale_within=True,
+        batch_keys=None,
         unit_var=True,
         clip=False,
         clip_range=(-3, 3.5),
@@ -78,7 +79,14 @@ def prepare4train(
 ) -> dict:
     """
     dpair: DataPair
-    test_idx: if provided, should be an index-sequence of the same length as 
+    batch_keys:
+        a list of two strings (or None), specifying the batch-keys for
+        data1 and data2, respectively.
+        If given, features (of cell nodes) will be scaled within each batch
+         e.g., ['batch', 'sample']
+    test_idx:
+        By default, the testing indices will be decided automatically.
+        if provided, should be an index-sequence of the same length as
         `cluster_labels`
     """
     if key_clust and cluster_labels is None:
@@ -86,6 +94,7 @@ def prepare4train(
 
     feat_dict = dpair.get_feature_dict(scale=scale_within,
                                        unit_var=unit_var,
+                                       batch_keys=batch_keys,
                                        clip=clip,
                                        clip_range=clip_range)
     labels, classes = dpair.get_obs_labels(
