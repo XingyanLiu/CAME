@@ -544,6 +544,7 @@ def gather_came_results(
 
     """
     resdir = Path(resdir)
+    keys_compare = keys if keys_compare is None else keys_compare
     if isinstance(checkpoint, int):
         trainer.load_model_weights(checkpoint)
     elif 'best' in checkpoint.lower():

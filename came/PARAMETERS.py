@@ -54,7 +54,7 @@ _params_model = dict(
                        attn_drop=0.6,
                        negative_slope=0.2,
                        residual=False,
-                       attn_type='add',
+                       attn_type='mul',  # 'add',
                        heads_fuse='mean',
                        ),
     share_layernorm=True,  # ignored if no weights are shared
