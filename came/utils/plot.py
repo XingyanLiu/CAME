@@ -992,8 +992,6 @@ def plot_multipartite_graph(
     #    ax = plot_graph(g, pos)
     if xscale is not None:
         _adjust_xlims(ax, xscale)
-    #        xlims = ax.get_xlim()
-    #        ax.set_xlim((xlims[0] * xscale, xlims[1] * xscale))
     if yscale is not None:
         _adjust_ylims(ax, yscale)
 

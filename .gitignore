@@ -7,10 +7,11 @@ __pycache__
 
 /_temp/
 /_case_res/
+/came_res/
 
 /came/sample_data/
 
-/notebooks/_tmp*
+/notebooks/*
 /notebooks/.ipynb_checkpoints
 
 /DATASET_NAMES.py

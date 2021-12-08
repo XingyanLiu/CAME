@@ -583,7 +583,7 @@ def gather_came_results(
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
     pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
     predictor = Predictor(classes=classes).fit(
-            out_cell[trainer.train_idx],
+            out_cell[detach2numpy(trainer.train_idx)],
             detach2numpy(trainer.train_labels),
         )
     predictor.save(resdir / f'predictor.json')

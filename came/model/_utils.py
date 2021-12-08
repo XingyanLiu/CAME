@@ -108,7 +108,7 @@ def onehot_encode(
         sparse_output=sparse_output and (not astensor),
     )
     x_onehot = binarizer.fit_transform(x)
-    logging.info("classes = %s", binarizer.classes)
+    # logging.debug("classes = %s", binarizer.classes)
     if astensor:
         return Tensor(x_onehot)
     else:
