@@ -55,7 +55,7 @@ def main_for_aligned(
         dataset_names: Sequence[str] = ('reference', 'query'),
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
-        do_normalize: bool = False,
+        do_normalize: bool = True,
         batch_keys=None,
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
@@ -64,6 +64,7 @@ def main_for_aligned(
         params_lossfunc: dict = {},
         n_pass: int = 100,
         batch_size: Optional[int] = None,
+        pred_batch_size: Union[int, str, None] = 'auto',
         plot_results: bool = True,
         norm_target_sum: Optional[float] = 1e4,
         save_hidden_list: bool = True,
@@ -117,6 +118,8 @@ def main_for_aligned(
         the number of observation nodes in each mini-batch, based on which the
         sub-graphs will be used for mini-batch training.
         if None, the model will be trained on the whole graph.
+    pred_batch_size
+        batch-size in prediction process
     plot_results
         whether to automatically plot the classification results
     norm_target_sum
@@ -280,7 +283,7 @@ def main_for_unaligned(
         dataset_names: Sequence[str] = ('reference', 'query'),
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
-        do_normalize: bool = False,
+        do_normalize: bool = True,
         batch_keys=None,
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
@@ -289,6 +292,7 @@ def main_for_unaligned(
         params_lossfunc: dict = {},
         n_pass: int = 100,
         batch_size: Optional[int] = None,
+        pred_batch_size: Union[int, str, None] = 'auto',
         plot_results: bool = True,
         norm_target_sum: Optional[float] = 1e4,
         save_hidden_list: bool = True,
@@ -349,6 +353,8 @@ def main_for_unaligned(
         the number of observation nodes in each mini-batch, based on which the
         sub-graphs will be used for mini-batch training.
         if None, the model will be trained on the whole graph.
+    pred_batch_size
+        batch-size in prediction process
     plot_results
         whether to automatically plot the classification results
     norm_target_sum
@@ -448,6 +454,8 @@ def main_for_unaligned(
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
 
     # ======================== Gather results ======================
+    if pred_batch_size == 'auto':
+        pred_batch_size = batch_size
     out_cell, df_probs, h_dict, predictor = gather_came_results(
         dpair,
         trainer,
@@ -456,7 +464,7 @@ def main_for_unaligned(
         keys_compare=keys_compare,
         resdir=resdir,
         checkpoint='best',
-        batch_size=batch_size,
+        batch_size=pred_batch_size,
         save_hidden_list=save_hidden_list,
         save_dpair=save_dpair,
     )

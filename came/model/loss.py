@@ -85,6 +85,7 @@ def classification_loss(
         smooth_eps=0.1,
         reduction='mean',
         beta=1.,  # balance factor
+        **ignored
 ):
     loss = cross_entropy_loss(
         logits,

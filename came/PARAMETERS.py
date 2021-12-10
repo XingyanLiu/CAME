@@ -54,7 +54,7 @@ _params_model = dict(
                        attn_drop=0.6,
                        negative_slope=0.2,
                        residual=False,
-                       attn_type='mul',  # 'add',
+                       attn_type='add',  # 'add' is more robust than 'mul'
                        heads_fuse='mean',
                        ),
     share_layernorm=True,  # ignored if no weights are shared
@@ -63,7 +63,7 @@ _params_model = dict(
 
 _params_lossfunc = dict(
     smooth_eps=0.1, reduction='mean',
-    beta=1.,  # balance factor for multi-label loss
+    beta=0.5,  # balance factor for multi-label loss
     alpha=0,  # for R-drop, setting it larger than zero
 )
 

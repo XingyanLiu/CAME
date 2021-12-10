@@ -263,7 +263,8 @@ class Trainer(BaseTrainer):
             self.all_to_device(device)
         # train_labels_1hot = self.train_labels_1hot.to(device)
         train_labels_1hot = onehot_encode(
-            self.train_labels, self.classes, sparse_output=False, astensor=True).to(device)
+            self.train_labels, self.classes,
+            sparse_output=False, astensor=True).to(device)
 
         if use_class_weights:
             class_weights = to_device(self.class_weights, device)
@@ -283,20 +284,20 @@ class Trainer(BaseTrainer):
             self.optimizer.zero_grad()
             t0 = time.time()
             logits = self.model(feat_dict, self.g, **other_inputs)[cat_class]
-            logits2 = self.model(feat_dict, self.g, **other_inputs)[cat_class]
-            loss = ce_loss_with_rdrop(
-                logits, logits2, labels=train_labels,
-                labels_1hot=train_labels_1hot,
-                train_idx=train_idx, weight=class_weights,
-                loss_fn=classification_loss,
-                **params_lossfunc
-            )
-            # loss = classification_loss(
-            #     logits[train_idx],
-            #     train_labels, labels_1hot=train_labels_1hot,
-            #     weight=class_weights,
+            # logits2 = self.model(feat_dict, self.g, **other_inputs)[cat_class]
+            # loss = ce_loss_with_rdrop(
+            #     logits, logits2, labels=train_labels,
+            #     labels_1hot=train_labels_1hot,
+            #     train_idx=train_idx, weight=class_weights,
+            #     loss_fn=classification_loss,
             #     **params_lossfunc
             # )
+            loss = classification_loss(
+                logits[train_idx], train_labels,
+                labels_1hot=train_labels_1hot,
+                weight=class_weights,
+                **params_lossfunc
+            )
 
             # prediction 
             _, y_pred = torch.max(logits, dim=1)
@@ -435,31 +436,26 @@ class Trainer(BaseTrainer):
                 # mfgs = [blk.to(device) for blk in mfgs]
 
                 logits = model(_feat_dict, mfgs, **other_inputs)[cat_class]
-                logits2 = model(_feat_dict, mfgs, **other_inputs)[cat_class]
+                # logits2 = model(_feat_dict, mfgs, **other_inputs)[cat_class]
 
                 # out_train_labels
                 out_train_lbs1hot = onehot_encode(
                     _labels, classes=self.classes, astensor=True).to(device)
                 _labels = to_device(_labels, device)
 
-                # out_train_lbs1hot = to_device(
-                #     self.train_labels_1hot[output_nodes[cat_class]].clone().detach(),
-                #     device,)
-
-                loss = ce_loss_with_rdrop(
-                    logits, logits2, labels=_labels,
-                    labels_1hot=out_train_lbs1hot,
-                    train_idx=None, weight=class_weights,
-                    loss_fn=classification_loss,
-                    **params_lossfunc
-                )
-                # loss = classification_loss(
-                #     logits[batch_train_idx],
-                #     to_device(out_train_labels, device),
-                #     labels_1hot=to_device(out_train_lbs1hot, device),
-                #     weight=class_weights,
+                # loss = ce_loss_with_rdrop(
+                #     logits, logits2, labels=_labels,
+                #     labels_1hot=out_train_lbs1hot,
+                #     train_idx=None, weight=class_weights,
+                #     loss_fn=classification_loss,
                 #     **params_lossfunc
                 # )
+                loss = classification_loss(
+                    logits, _labels,
+                    labels_1hot=out_train_lbs1hot,
+                    weight=class_weights,
+                    **params_lossfunc
+                )
                 loss.backward()
                 self.optimizer.step()
 
