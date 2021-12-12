@@ -55,7 +55,7 @@ def main_for_aligned(
         dataset_names: Sequence[str] = ('reference', 'query'),
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
-        do_normalize: bool = True,
+        do_normalize: Union[bool, Sequence[bool]] = True,
         batch_keys=None,
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
@@ -66,7 +66,7 @@ def main_for_aligned(
         batch_size: Optional[int] = None,
         pred_batch_size: Union[int, str, None] = 'auto',
         plot_results: bool = True,
-        norm_target_sum: Optional[float] = 1e4,
+        norm_target_sum: Optional[float] = None,
         save_hidden_list: bool = True,
         save_dpair: bool = True,
 ):
@@ -155,12 +155,21 @@ def main_for_aligned(
     else:
         keys = [key_class1, key_class2]
     keys_compare = [key_class1, key_class2]
+    adatas = list(adatas)
+    if isinstance(do_normalize, bool):
+        do_normalize = [do_normalize] * 2
+    if do_normalize[0]:
+        adatas[0] = pp.normalize_default(
+                adatas[0], target_sum=norm_target_sum, force_return=True)
+    if do_normalize[1]:
+        adatas[1] = pp.normalize_default(
+                adatas[1], target_sum=norm_target_sum, force_return=True)
 
-    if do_normalize:
-        adatas = list(map(
-            lambda a: pp.normalize_default(
-                a, target_sum=norm_target_sum, force_return=True), 
-            adatas))
+        # if do_normalize:
+        # adatas = list(map(
+        #     lambda a: pp.normalize_default(
+        #         a, target_sum=norm_target_sum, force_return=True),
+        #     adatas))
 
     logging.info('Step 1: preparing DataPair object...')
     adpair = aligned_datapair_from_adatas(
@@ -218,6 +227,8 @@ def main_for_aligned(
     trainer.plot_cluster_index(fp=figdir / 'cluster_index.png')
 
     # ======================== Gather results ======================
+    if pred_batch_size == 'auto':
+        pred_batch_size = batch_size
     out_cell, df_probs, h_dict, predictor = gather_came_results(
         adpair,
         trainer,
@@ -226,7 +237,7 @@ def main_for_aligned(
         keys_compare=keys_compare,
         resdir=resdir,
         checkpoint='best',
-        batch_size=batch_size,
+        batch_size=pred_batch_size,
         save_hidden_list=save_hidden_list,
         save_dpair=save_dpair,
     )
@@ -294,7 +305,7 @@ def main_for_unaligned(
         batch_size: Optional[int] = None,
         pred_batch_size: Union[int, str, None] = 'auto',
         plot_results: bool = True,
-        norm_target_sum: Optional[float] = 1e4,
+        norm_target_sum: Optional[float] = None,
         save_hidden_list: bool = True,
         save_dpair: bool = True,
 ):
@@ -390,13 +401,21 @@ def main_for_unaligned(
     else:
         keys = [key_class1, key_class2]
     keys_compare = [key_class1, key_class2]
-
-    if do_normalize:
-        adatas = list(map(
-            lambda a: pp.normalize_default(
-                a, target_sum=norm_target_sum, force_return=True),
-            adatas
-        ))
+    adatas = list(adatas)
+    if isinstance(do_normalize, bool):
+        do_normalize = [do_normalize] * 2
+    if do_normalize[0]:
+        adatas[0] = pp.normalize_default(
+                adatas[0], target_sum=norm_target_sum, force_return=True)
+    if do_normalize[1]:
+        adatas[1] = pp.normalize_default(
+                adatas[1], target_sum=norm_target_sum, force_return=True)
+    # if do_normalize:
+    #     adatas = list(map(
+    #         lambda a: pp.normalize_default(
+    #             a, target_sum=norm_target_sum, force_return=True),
+    #         adatas
+    #     ))
     logging.info('preparing DataPair object...')
     dpair = datapair_from_adatas(
         adatas,
