@@ -4,6 +4,7 @@ Created on Sun Apr 11 19:15:45 2021
 
 @author: Xingyan Liu
 """
+import logging
 from pathlib import Path
 import os
 from typing import Sequence, Union, Mapping, Optional, List
@@ -90,7 +91,13 @@ def prepare4train(
         `cluster_labels`
     """
     if key_clust and cluster_labels is None:
-        cluster_labels = dpair.obs_dfs[1][key_clust].values
+        try:
+            cluster_labels = dpair.obs_dfs[1][key_clust].values
+        except KeyError:
+            logging.warning(
+                f"`cluster_labels` is None and `key_clust={key_clust}` is NOT"
+                f"found in `dpair.obs_dfs[1].columns`, so not cluster labels"
+                f"will be adopted!")
 
     feat_dict = dpair.get_feature_dict(scale=scale_within,
                                        unit_var=unit_var,
@@ -156,7 +163,7 @@ class Trainer(BaseTrainer):
             cluster_labels=cluster_labels,
             lr=lr,
             l2norm=l2norm,  # 1e-2 is tested for all datasets
-            use_cuda=use_cuda,
+            # use_cuda=use_cuda,
             dir_main=dir_main,
             **kwds  # for code compatibility (not raising error)
         )

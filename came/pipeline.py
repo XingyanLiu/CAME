@@ -171,17 +171,17 @@ def main_for_aligned(
         #         a, target_sum=norm_target_sum, force_return=True),
         #     adatas))
 
-    logging.info('Step 1: preparing DataPair object...')
-    adpair = aligned_datapair_from_adatas(
+    logging.info('Step 1: preparing AlignedDataPair object...')
+    dpair = aligned_datapair_from_adatas(
         adatas,
         vars_feat=vars_feat,
         vars_as_nodes=vars_as_nodes,
         oo_adjs=scnets,
         dataset_names=dataset_names,
     )
-    print(adpair)
+    print(dpair)
 
-    ENV_VARs = prepare4train(adpair, key_class=keys, batch_keys=batch_keys)
+    ENV_VARs = prepare4train(dpair, key_class=keys, batch_keys=batch_keys)
 
     logging.debug(ENV_VARs.keys())
     g = ENV_VARs['g']
@@ -191,7 +191,7 @@ def main_for_aligned(
     params_model = get_model_params(**params_model)
     params_model.update(
         g_or_canonical_etypes=g.canonical_etypes,
-        in_dim_dict={'cell': adpair.n_feats, 'gene': 0},
+        in_dim_dict={'cell': dpair.n_feats, 'gene': 0},
         out_dim=n_classes,
         layernorm_ntypes=g.ntypes,
     )
@@ -230,7 +230,7 @@ def main_for_aligned(
     if pred_batch_size == 'auto':
         pred_batch_size = batch_size
     out_cell, df_probs, h_dict, predictor = gather_came_results(
-        adpair,
+        dpair,
         trainer,
         classes=classes,
         keys=keys,
@@ -243,7 +243,7 @@ def main_for_aligned(
     )
     # ============= confusion matrix & heatmap plot ==============
     if plot_results:
-        obs = adpair.obs
+        obs = dpair.obs
         obs_ids1 = detach2numpy(trainer.train_idx)
         obs_ids2 = detach2numpy(trainer.test_idx)
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
@@ -275,7 +275,7 @@ def main_for_aligned(
             fp=figdir / f'heatmap_probas.pdf'
         )
     outputs = {
-        "dpair": adpair,
+        "dpair": dpair,
         "trainer": trainer,
         "h_dict": h_dict,
         "out_cell": out_cell,
@@ -603,8 +603,12 @@ def gather_came_results(
     # hidden states are stored in sc.AnnData to facilitated downstream analysis
     # h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
     h_dict = hidden_list[-1]
-
-    out_cell = trainer.get_current_outputs(batch_size=batch_size)['cell']
+    trainer.model.eval()
+    out_cell = trainer.model.cell_classifier.forward(
+        trainer.g,
+        {k: torch.Tensor(h, device=trainer.g.device) for k, h in h_dict.items()}
+    )['cell']
+    # out_cell = trainer.get_current_outputs(batch_size=batch_size)['cell']
     out_cell = out_cell.cpu().clone().detach().numpy()
 
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
