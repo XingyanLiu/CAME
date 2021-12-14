@@ -1291,7 +1291,7 @@ def normalize_log_then_total(
         adata = adata.copy()
     logging.info(
         'normalizing datasets with default settings (log1p first).'
-        f'target_sum = {target_sum:.1f}')
+        f'target_sum = {target_sum}')
     sc.pp.log1p(adata)  # x <- log(x + 1)
     sc.pp.normalize_total(adata, target_sum=target_sum)
     return adata if copy or force_return else None

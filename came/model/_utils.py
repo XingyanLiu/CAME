@@ -197,6 +197,7 @@ def get_attentions(
         g: dgl.DGLGraph,
         fuse='mean',
         from_scratch: bool = True,
+        is_train: bool = False,
 ) -> sparse.spmatrix:
     """
     compute cell-by-gene attention matrix from model
@@ -218,7 +219,7 @@ def get_attentions(
     # getting heterogeneous attention (convolutional) classifier
     HAC = model.cell_classifier.conv.mods['expressed_by']
     feats = (h_dict['gene'], h_dict['cell'])
-    HAC.train(False)  # semi-supervised
+    HAC.train(is_train)
     _out_dict, attn0 = HAC(g_sub, feats, return_attn=True)
 
     # constructing attention matrix
