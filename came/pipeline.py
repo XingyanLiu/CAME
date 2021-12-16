@@ -197,8 +197,7 @@ def main_for_aligned(
     )
     save_json_dict(params_model, resdir / 'model_params.json')
 
-    # TODO: save model parameters, json file (whether eval?)
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = CGCNet(**params_model)
 
     params_lossfunc = get_loss_params(**params_lossfunc)
@@ -209,11 +208,11 @@ def main_for_aligned(
             n_epochs=n_epochs,
             params_lossfunc=params_lossfunc,
             batch_size=batch_size,
-            n_pass=n_pass, )
+            n_pass=n_pass, device=device)
     else:
         trainer.train(n_epochs=n_epochs,
                       params_lossfunc=params_lossfunc,
-                      n_pass=n_pass, )
+                      n_pass=n_pass, device=device)
     trainer.save_model_weights()
     # ========================== record results ========================
     trainer.write_train_logs()
@@ -450,11 +449,11 @@ def main_for_unaligned(
             n_epochs=n_epochs,
             params_lossfunc=params_lossfunc,
             batch_size=batch_size,
-            n_pass=n_pass, )
+            n_pass=n_pass, device=device)
     else:
         trainer.train(n_epochs=n_epochs,
                       params_lossfunc=params_lossfunc,
-                      n_pass=n_pass, )
+                      n_pass=n_pass, device=device)
     trainer.save_model_weights()
     # ========================== record results ========================
     trainer.write_train_logs()
