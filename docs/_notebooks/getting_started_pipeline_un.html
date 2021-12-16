@@ -484,7 +484,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">came</span>
+<span></span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;E:/lxy_pro/004/CAME&quot;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">came</span>
 <span class="kn">from</span> <span class="nn">came</span> <span class="kn">import</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">pp</span><span class="p">,</span> <span class="n">pl</span>
 
 <span class="n">ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>  <span class="c1"># set root</span>
@@ -536,7 +537,7 @@ Using backend: pytorch
 <div class="highlight"><pre>
 dict_keys([&#39;adatas&#39;, &#39;varmap&#39;, &#39;varmap_1v1&#39;, &#39;dataset_names&#39;, &#39;key_class&#39;])
 a new directory made:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs
 </pre></div></div>
 </div>
 </div>
@@ -560,8 +561,8 @@ a new directory made:
 </div>
 <p>Load scRNA-seq datasets.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ========= load data =========</span>
-<span class="n">df_varmap_1v1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_varmap_1v1</span><span class="p">)</span> <span class="k">if</span> <span class="n">path_varmap_1v1</span> <span class="k">else</span> <span class="kc">None</span>
 <span class="n">df_varmap</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_varmap</span><span class="p">)</span>
+<span class="n">df_varmap_1v1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_varmap_1v1</span><span class="p">)</span> <span class="k">if</span> <span class="n">path_varmap_1v1</span> <span class="k">else</span> <span class="n">came</span><span class="o">.</span><span class="n">take_1v1_matches</span><span class="p">(</span><span class="n">df_varmap</span><span class="p">)</span>
 
 <span class="n">adata_raw1</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">path_rawdata1</span><span class="p">)</span>
 <span class="n">adata_raw2</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">path_rawdata2</span><span class="p">)</span>
@@ -728,7 +729,7 @@ a new directory made:
 <span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">300</span>
 
 <span class="c1"># the training batch size</span>
-<span class="c1"># When the GPU memory is limited, set 8192 or more if possible.</span>
+<span class="c1"># When the GPU memory is limited, set 1024 or more if possible.</span>
 <span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="c1"># the number of epochs to skip for checkpoint backup</span>
@@ -789,15 +790,15 @@ a new directory made:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[leiden] Time used:  0.3653 s
+[leiden] Time used:  0.2723 s
 650 genes before taking unique
 taking total of 501 unique differential expressed genes
 400 genes before taking unique
 taking total of 345 unique differential expressed genes
 already exists:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs
 already exists:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)
 [*] Setting dataset names:
         0--&gt;Baron_human
         1--&gt;Baron_mouse
@@ -821,25 +822,14 @@ Graph(num_nodes={&#39;cell&#39;: 10455, &#39;gene&#39;: 6313},
 second-order connection: False
 self-loops for observation-nodes: True
 self-loops for variable-nodes: True
-pancreatic acinar cell       958
-type B pancreatic cell      3419
-pancreatic D cell            819
-pancreatic stellate cell     518
-pancreatic ductal cell      1352
-pancreatic A cell           2517
-pancreatic epsilon cell       18
-pancreatic PP cell           296
-endothelial cell             391
-macrophage                    91
-Schwann cell                  19
-mast cell                     25
-T cell                        14
-unknown                       18
-dtype: int64
+DataPair with 10455 obs- and 6313 var-nodes
+obs1 x var1 (Baron_human): 8569 x 3332
+obs2 x var2 (Baron_mouse): 1886 x 2981
+Dimensions of the obs-node-features: 547
 a new directory made:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\_models
-main directory: ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)
-model directory: ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\_models
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\_models
+main directory: _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)
+model directory: _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\_models
 ============== start training (device=&#39;cuda&#39;) ==============
 </pre></div></div>
 </div>
@@ -857,95 +847,101 @@ C:\Users\Administrator\AppData\Roaming\Python\Python38\site-packages\torch\nn\mo
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Epoch 0000 | Train Acc: 0.0029 | Test: 0.0000 (max=0.0000) | AMI=-0.0000 | Time: 0.5485
-Epoch 0005 | Train Acc: 0.2947 | Test: 0.4740 (max=0.4740) | AMI=-0.0000 | Time: 0.3310
-Epoch 0010 | Train Acc: 0.4190 | Test: 0.2985 (max=0.4740) | AMI=0.1834 | Time: 0.3100
-Epoch 0015 | Train Acc: 0.4620 | Test: 0.2328 (max=0.4740) | AMI=0.4665 | Time: 0.3022
-Epoch 0020 | Train Acc: 0.4144 | Test: 0.1988 (max=0.4740) | AMI=0.4498 | Time: 0.2979
-Epoch 0025 | Train Acc: 0.7363 | Test: 0.5827 (max=0.5827) | AMI=0.4694 | Time: 0.2960
-Epoch 0030 | Train Acc: 0.8023 | Test: 0.7248 (max=0.7248) | AMI=0.5577 | Time: 0.2945
-Epoch 0035 | Train Acc: 0.7862 | Test: 0.7428 (max=0.7428) | AMI=0.6054 | Time: 0.2932
-Epoch 0040 | Train Acc: 0.8628 | Test: 0.7466 (max=0.7672) | AMI=0.6028 | Time: 0.2940
-Epoch 0045 | Train Acc: 0.8736 | Test: 0.7540 (max=0.7858) | AMI=0.6017 | Time: 0.2935
-Epoch 0050 | Train Acc: 0.9106 | Test: 0.8171 (max=0.8282) | AMI=0.6443 | Time: 0.2931
-Epoch 0055 | Train Acc: 0.9227 | Test: 0.8780 (max=0.8780) | AMI=0.6878 | Time: 0.2927
-Epoch 0060 | Train Acc: 0.9324 | Test: 0.8266 (max=0.8780) | AMI=0.6244 | Time: 0.2934
-Epoch 0065 | Train Acc: 0.9480 | Test: 0.8643 (max=0.8780) | AMI=0.6585 | Time: 0.2929
-Epoch 0070 | Train Acc: 0.9586 | Test: 0.8865 (max=0.8865) | AMI=0.7082 | Time: 0.2929
-Epoch 0075 | Train Acc: 0.9643 | Test: 0.9062 (max=0.9062) | AMI=0.7174 | Time: 0.2927
-Epoch 0080 | Train Acc: 0.9741 | Test: 0.8505 (max=0.9062) | AMI=0.6674 | Time: 0.2959
-Epoch 0085 | Train Acc: 0.9735 | Test: 0.8881 (max=0.9226) | AMI=0.7134 | Time: 0.2954
-Epoch 0090 | Train Acc: 0.9730 | Test: 0.9088 (max=0.9279) | AMI=0.7294 | Time: 0.2950
-Epoch 0095 | Train Acc: 0.9762 | Test: 0.9321 (max=0.9321) | AMI=0.7551 | Time: 0.2947
+Epoch 0000 | Train Acc: 0.0533 | Test: 0.0323 (max=0.0323) | AMI=-0.0000 | Time: 0.4114
+Epoch 0005 | Train Acc: 0.2948 | Test: 0.4740 (max=0.4804) | AMI=0.0435 | Time: 0.1553
+Epoch 0010 | Train Acc: 0.5011 | Test: 0.4899 (max=0.4899) | AMI=0.4180 | Time: 0.1315
+Epoch 0015 | Train Acc: 0.4372 | Test: 0.6193 (max=0.6193) | AMI=0.4547 | Time: 0.1239
+Epoch 0020 | Train Acc: 0.7186 | Test: 0.7174 (max=0.7174) | AMI=0.5456 | Time: 0.1194
+Epoch 0025 | Train Acc: 0.7508 | Test: 0.7216 (max=0.7301) | AMI=0.5801 | Time: 0.1166
+Epoch 0030 | Train Acc: 0.8419 | Test: 0.7937 (max=0.7937) | AMI=0.6283 | Time: 0.1149
+Epoch 0035 | Train Acc: 0.8615 | Test: 0.8165 (max=0.8165) | AMI=0.6809 | Time: 0.1134
+Epoch 0040 | Train Acc: 0.8743 | Test: 0.7773 (max=0.8165) | AMI=0.6177 | Time: 0.1124
+Epoch 0045 | Train Acc: 0.8766 | Test: 0.7927 (max=0.8340) | AMI=0.6383 | Time: 0.1117
+Epoch 0050 | Train Acc: 0.9152 | Test: 0.8208 (max=0.8340) | AMI=0.6644 | Time: 0.1110
+Epoch 0055 | Train Acc: 0.9121 | Test: 0.8160 (max=0.8574) | AMI=0.6521 | Time: 0.1105
+Epoch 0060 | Train Acc: 0.9420 | Test: 0.8627 (max=0.9067) | AMI=0.6900 | Time: 0.1101
+Epoch 0065 | Train Acc: 0.9455 | Test: 0.8425 (max=0.9120) | AMI=0.6644 | Time: 0.1097
+Epoch 0070 | Train Acc: 0.9531 | Test: 0.9067 (max=0.9120) | AMI=0.7347 | Time: 0.1096
+Epoch 0075 | Train Acc: 0.9585 | Test: 0.9152 (max=0.9337) | AMI=0.7561 | Time: 0.1092
+Epoch 0080 | Train Acc: 0.9639 | Test: 0.9268 (max=0.9337) | AMI=0.7646 | Time: 0.1091
+Epoch 0085 | Train Acc: 0.9679 | Test: 0.9194 (max=0.9337) | AMI=0.7552 | Time: 0.1088
+Epoch 0090 | Train Acc: 0.9722 | Test: 0.9290 (max=0.9358) | AMI=0.7685 | Time: 0.1088
+Epoch 0095 | Train Acc: 0.9537 | Test: 0.9051 (max=0.9358) | AMI=0.7701 | Time: 0.1086
 [current best] model weights backup
-Epoch 0099 | Train Acc: 0.9792 | Test: 0.8993 (max=0.9321) | AMI=0.6950 | Time: 0.2945
+Epoch 0099 | Train Acc: 0.9673 | Test: 0.9099 (max=0.9358) | AMI=0.7497 | Time: 0.1088
 [current best] model weights backup
-Epoch 0100 | Train Acc: 0.9784 | Test: 0.9231 (max=0.9321) | AMI=0.7247 | Time: 0.2946
+Epoch 0100 | Train Acc: 0.9781 | Test: 0.9168 (max=0.9358) | AMI=0.7655 | Time: 0.1088
 [current best] model weights backup
-Epoch 0101 | Train Acc: 0.9772 | Test: 0.9152 (max=0.9321) | AMI=0.7316 | Time: 0.2946
-Epoch 0105 | Train Acc: 0.9779 | Test: 0.9141 (max=0.9321) | AMI=0.7122 | Time: 0.2945
-Epoch 0110 | Train Acc: 0.9795 | Test: 0.9093 (max=0.9321) | AMI=0.7152 | Time: 0.2943
-Epoch 0115 | Train Acc: 0.9819 | Test: 0.9205 (max=0.9321) | AMI=0.7265 | Time: 0.2940
+Epoch 0101 | Train Acc: 0.9718 | Test: 0.9300 (max=0.9358) | AMI=0.7725 | Time: 0.1091
 [current best] model weights backup
-Epoch 0118 | Train Acc: 0.9774 | Test: 0.9236 (max=0.9321) | AMI=0.7350 | Time: 0.2940
-Epoch 0120 | Train Acc: 0.9823 | Test: 0.9088 (max=0.9321) | AMI=0.7128 | Time: 0.2939
+Epoch 0104 | Train Acc: 0.9805 | Test: 0.9300 (max=0.9358) | AMI=0.7765 | Time: 0.1090
+Epoch 0105 | Train Acc: 0.9798 | Test: 0.9231 (max=0.9358) | AMI=0.7519 | Time: 0.1090
 [current best] model weights backup
-Epoch 0125 | Train Acc: 0.9839 | Test: 0.9226 (max=0.9321) | AMI=0.7372 | Time: 0.2936
+Epoch 0106 | Train Acc: 0.9791 | Test: 0.9316 (max=0.9358) | AMI=0.7855 | Time: 0.1090
 [current best] model weights backup
-Epoch 0126 | Train Acc: 0.9814 | Test: 0.9189 (max=0.9321) | AMI=0.7375 | Time: 0.2938
+Epoch 0107 | Train Acc: 0.9807 | Test: 0.9300 (max=0.9358) | AMI=0.7866 | Time: 0.1090
 [current best] model weights backup
-Epoch 0129 | Train Acc: 0.9838 | Test: 0.9295 (max=0.9321) | AMI=0.7492 | Time: 0.2937
-Epoch 0130 | Train Acc: 0.9842 | Test: 0.9252 (max=0.9321) | AMI=0.7413 | Time: 0.2936
-Epoch 0135 | Train Acc: 0.9852 | Test: 0.9194 (max=0.9321) | AMI=0.7354 | Time: 0.2935
-Epoch 0140 | Train Acc: 0.9844 | Test: 0.9311 (max=0.9321) | AMI=0.7425 | Time: 0.2936
-Epoch 0145 | Train Acc: 0.9869 | Test: 0.9056 (max=0.9321) | AMI=0.7160 | Time: 0.2936
-Epoch 0150 | Train Acc: 0.9877 | Test: 0.9030 (max=0.9321) | AMI=0.7050 | Time: 0.2943
-Epoch 0155 | Train Acc: 0.9890 | Test: 0.9115 (max=0.9321) | AMI=0.7249 | Time: 0.2951
+Epoch 0109 | Train Acc: 0.9791 | Test: 0.9300 (max=0.9358) | AMI=0.7885 | Time: 0.1091
+Epoch 0110 | Train Acc: 0.9793 | Test: 0.9210 (max=0.9358) | AMI=0.7842 | Time: 0.1090
+Epoch 0115 | Train Acc: 0.9831 | Test: 0.9337 (max=0.9358) | AMI=0.7743 | Time: 0.1089
+Epoch 0120 | Train Acc: 0.9835 | Test: 0.9295 (max=0.9358) | AMI=0.7763 | Time: 0.1088
 [current best] model weights backup
-Epoch 0156 | Train Acc: 0.9882 | Test: 0.9327 (max=0.9327) | AMI=0.7626 | Time: 0.2951
-Epoch 0160 | Train Acc: 0.9890 | Test: 0.9258 (max=0.9327) | AMI=0.7414 | Time: 0.2956
-[current best] model weights backup
-Epoch 0165 | Train Acc: 0.9886 | Test: 0.9348 (max=0.9348) | AMI=0.7659 | Time: 0.2959
-[current best] model weights backup
-Epoch 0166 | Train Acc: 0.9901 | Test: 0.9390 (max=0.9390) | AMI=0.7742 | Time: 0.2960
-[current best] model weights backup
-Epoch 0169 | Train Acc: 0.9898 | Test: 0.9427 (max=0.9427) | AMI=0.7765 | Time: 0.2966
-Epoch 0170 | Train Acc: 0.9898 | Test: 0.9364 (max=0.9427) | AMI=0.7524 | Time: 0.2966
+Epoch 0123 | Train Acc: 0.9830 | Test: 0.9332 (max=0.9358) | AMI=0.8002 | Time: 0.1088
+Epoch 0125 | Train Acc: 0.9828 | Test: 0.9014 (max=0.9358) | AMI=0.7312 | Time: 0.1088
 model weights backup
-Epoch 0172 | Train Acc: 0.9907 | Test: 0.9199 (max=0.9427) | AMI=0.7340 | Time: 0.2965
-Epoch 0175 | Train Acc: 0.9907 | Test: 0.9327 (max=0.9427) | AMI=0.7604 | Time: 0.2965
+Epoch 0129 | Train Acc: 0.9842 | Test: 0.9284 (max=0.9358) | AMI=0.7831 | Time: 0.1088
+Epoch 0130 | Train Acc: 0.9821 | Test: 0.9364 (max=0.9364) | AMI=0.7930 | Time: 0.1088
+Epoch 0135 | Train Acc: 0.9867 | Test: 0.9295 (max=0.9364) | AMI=0.7676 | Time: 0.1088
+Epoch 0140 | Train Acc: 0.9837 | Test: 0.9252 (max=0.9401) | AMI=0.7799 | Time: 0.1087
+Epoch 0145 | Train Acc: 0.9869 | Test: 0.9321 (max=0.9401) | AMI=0.7796 | Time: 0.1087
+Epoch 0150 | Train Acc: 0.9882 | Test: 0.9247 (max=0.9401) | AMI=0.7689 | Time: 0.1086
 [current best] model weights backup
-Epoch 0178 | Train Acc: 0.9894 | Test: 0.9427 (max=0.9427) | AMI=0.7811 | Time: 0.2964
-Epoch 0180 | Train Acc: 0.9916 | Test: 0.8971 (max=0.9427) | AMI=0.7053 | Time: 0.2964
-Epoch 0185 | Train Acc: 0.9914 | Test: 0.9247 (max=0.9427) | AMI=0.7483 | Time: 0.2966
-Epoch 0190 | Train Acc: 0.9915 | Test: 0.9279 (max=0.9427) | AMI=0.7433 | Time: 0.2967
-Epoch 0195 | Train Acc: 0.9917 | Test: 0.9173 (max=0.9427) | AMI=0.7396 | Time: 0.2965
-Epoch 0200 | Train Acc: 0.9924 | Test: 0.9141 (max=0.9427) | AMI=0.7260 | Time: 0.2965
-Epoch 0205 | Train Acc: 0.9918 | Test: 0.9199 (max=0.9427) | AMI=0.7446 | Time: 0.2964
-Epoch 0210 | Train Acc: 0.9928 | Test: 0.8971 (max=0.9427) | AMI=0.7115 | Time: 0.2965
+Epoch 0152 | Train Acc: 0.9888 | Test: 0.9401 (max=0.9401) | AMI=0.8028 | Time: 0.1086
+Epoch 0155 | Train Acc: 0.9893 | Test: 0.9374 (max=0.9401) | AMI=0.7850 | Time: 0.1086
+Epoch 0160 | Train Acc: 0.9895 | Test: 0.9311 (max=0.9401) | AMI=0.7703 | Time: 0.1085
+Epoch 0165 | Train Acc: 0.9894 | Test: 0.9337 (max=0.9401) | AMI=0.7990 | Time: 0.1084
+[current best] model weights backup
+Epoch 0167 | Train Acc: 0.9891 | Test: 0.9406 (max=0.9406) | AMI=0.8053 | Time: 0.1085
+Epoch 0170 | Train Acc: 0.9895 | Test: 0.9369 (max=0.9406) | AMI=0.7956 | Time: 0.1085
 model weights backup
-Epoch 0215 | Train Acc: 0.9926 | Test: 0.9194 (max=0.9443) | AMI=0.7390 | Time: 0.2963
-Epoch 0220 | Train Acc: 0.9932 | Test: 0.9226 (max=0.9443) | AMI=0.7394 | Time: 0.2962
-Epoch 0225 | Train Acc: 0.9932 | Test: 0.9411 (max=0.9443) | AMI=0.7723 | Time: 0.2961
-Epoch 0230 | Train Acc: 0.9938 | Test: 0.9411 (max=0.9443) | AMI=0.7653 | Time: 0.2959
-Epoch 0235 | Train Acc: 0.9942 | Test: 0.9295 (max=0.9443) | AMI=0.7625 | Time: 0.2957
-Epoch 0240 | Train Acc: 0.9944 | Test: 0.9401 (max=0.9443) | AMI=0.7707 | Time: 0.2956
-Epoch 0245 | Train Acc: 0.9928 | Test: 0.8966 (max=0.9443) | AMI=0.7164 | Time: 0.2955
-Epoch 0250 | Train Acc: 0.9952 | Test: 0.9364 (max=0.9443) | AMI=0.7670 | Time: 0.2954
-Epoch 0255 | Train Acc: 0.9944 | Test: 0.9290 (max=0.9443) | AMI=0.7642 | Time: 0.2953
+Epoch 0172 | Train Acc: 0.9894 | Test: 0.9464 (max=0.9464) | AMI=0.7894 | Time: 0.1086
+Epoch 0175 | Train Acc: 0.9897 | Test: 0.9427 (max=0.9464) | AMI=0.7962 | Time: 0.1085
+[current best] model weights backup
+Epoch 0178 | Train Acc: 0.9869 | Test: 0.9385 (max=0.9464) | AMI=0.8072 | Time: 0.1085
+Epoch 0180 | Train Acc: 0.9893 | Test: 0.9417 (max=0.9464) | AMI=0.8058 | Time: 0.1085
+Epoch 0185 | Train Acc: 0.9911 | Test: 0.9300 (max=0.9464) | AMI=0.7838 | Time: 0.1084
+Epoch 0190 | Train Acc: 0.9908 | Test: 0.9364 (max=0.9464) | AMI=0.7876 | Time: 0.1084
+Epoch 0195 | Train Acc: 0.9911 | Test: 0.9343 (max=0.9464) | AMI=0.7741 | Time: 0.1084
+Epoch 0200 | Train Acc: 0.9895 | Test: 0.9369 (max=0.9464) | AMI=0.8005 | Time: 0.1083
+Epoch 0205 | Train Acc: 0.9896 | Test: 0.9411 (max=0.9464) | AMI=0.7990 | Time: 0.1082
+Epoch 0210 | Train Acc: 0.9907 | Test: 0.9183 (max=0.9464) | AMI=0.7845 | Time: 0.1082
 model weights backup
-Epoch 0258 | Train Acc: 0.9942 | Test: 0.9258 (max=0.9443) | AMI=0.7385 | Time: 0.2953
-Epoch 0260 | Train Acc: 0.9950 | Test: 0.9221 (max=0.9443) | AMI=0.7408 | Time: 0.2952
-Epoch 0265 | Train Acc: 0.9952 | Test: 0.9099 (max=0.9443) | AMI=0.7405 | Time: 0.2951
-Epoch 0270 | Train Acc: 0.9958 | Test: 0.9178 (max=0.9443) | AMI=0.7351 | Time: 0.2950
-Epoch 0275 | Train Acc: 0.9960 | Test: 0.9242 (max=0.9443) | AMI=0.7625 | Time: 0.2950
-Epoch 0280 | Train Acc: 0.9965 | Test: 0.9305 (max=0.9443) | AMI=0.7702 | Time: 0.2949
-Epoch 0285 | Train Acc: 0.9964 | Test: 0.9109 (max=0.9443) | AMI=0.7312 | Time: 0.2949
-Epoch 0290 | Train Acc: 0.9975 | Test: 0.9189 (max=0.9443) | AMI=0.7470 | Time: 0.2947
-Epoch 0295 | Train Acc: 0.9971 | Test: 0.9003 (max=0.9443) | AMI=0.7283 | Time: 0.2946
+Epoch 0215 | Train Acc: 0.9916 | Test: 0.9343 (max=0.9464) | AMI=0.7855 | Time: 0.1082
+Epoch 0220 | Train Acc: 0.9918 | Test: 0.9390 (max=0.9475) | AMI=0.7800 | Time: 0.1082
+Epoch 0225 | Train Acc: 0.9924 | Test: 0.9422 (max=0.9475) | AMI=0.7965 | Time: 0.1082
+Epoch 0230 | Train Acc: 0.9932 | Test: 0.9443 (max=0.9475) | AMI=0.8003 | Time: 0.1082
+[current best] model weights backup
+Epoch 0235 | Train Acc: 0.9915 | Test: 0.9422 (max=0.9475) | AMI=0.8147 | Time: 0.1082
+Epoch 0240 | Train Acc: 0.9900 | Test: 0.9284 (max=0.9475) | AMI=0.8111 | Time: 0.1081
+Epoch 0245 | Train Acc: 0.9925 | Test: 0.9374 (max=0.9475) | AMI=0.7860 | Time: 0.1081
+[current best] model weights backup
+Epoch 0249 | Train Acc: 0.9914 | Test: 0.9475 (max=0.9475) | AMI=0.8221 | Time: 0.1081
+Epoch 0250 | Train Acc: 0.9925 | Test: 0.9332 (max=0.9475) | AMI=0.7768 | Time: 0.1081
+Epoch 0255 | Train Acc: 0.9936 | Test: 0.9385 (max=0.9475) | AMI=0.7926 | Time: 0.1080
+model weights backup
+Epoch 0258 | Train Acc: 0.9939 | Test: 0.9401 (max=0.9475) | AMI=0.7941 | Time: 0.1080
+Epoch 0260 | Train Acc: 0.9946 | Test: 0.9449 (max=0.9475) | AMI=0.8087 | Time: 0.1080
+Epoch 0265 | Train Acc: 0.9938 | Test: 0.9417 (max=0.9475) | AMI=0.8002 | Time: 0.1080
+Epoch 0270 | Train Acc: 0.9935 | Test: 0.9390 (max=0.9491) | AMI=0.7870 | Time: 0.1079
+[current best] model weights backup
+Epoch 0275 | Train Acc: 0.9945 | Test: 0.9449 (max=0.9491) | AMI=0.8241 | Time: 0.1079
+Epoch 0280 | Train Acc: 0.9951 | Test: 0.9454 (max=0.9491) | AMI=0.8111 | Time: 0.1079
+Epoch 0285 | Train Acc: 0.9933 | Test: 0.9459 (max=0.9491) | AMI=0.8047 | Time: 0.1078
+Epoch 0290 | Train Acc: 0.9954 | Test: 0.9486 (max=0.9491) | AMI=0.8155 | Time: 0.1078
+Epoch 0295 | Train Acc: 0.9950 | Test: 0.9454 (max=0.9491) | AMI=0.8052 | Time: 0.1078
 figure has been saved into:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\cluster_index.png
-states loaded from: ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\_models\weights_epoch178.pt
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\cluster_index.png
+states loaded from: _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\_models\weights_epoch275.pt
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -962,37 +958,22 @@ C:\Users\Administrator\AppData\Roaming\Python\Python38\site-packages\torch\nn\mo
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-pancreatic acinar cell       958
-type B pancreatic cell      3419
-pancreatic D cell            819
-pancreatic stellate cell     518
-pancreatic ductal cell      1352
-pancreatic A cell           2517
-pancreatic epsilon cell       18
-pancreatic PP cell           296
-endothelial cell             391
-macrophage                    91
-Schwann cell                  19
-mast cell                     25
-T cell                        14
-unknown                       18
-dtype: int64
 object saved into:
-         ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\datapair_init.pickle
+         _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\datapair_init.pickle
 Re-order the rows
 figure has been saved into:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\contingency_matrix(acc94.3%).png
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\contingency_matrix(acc94.5%).png
 figure has been saved into:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\contingency_matrix-train.png
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\contingency_matrix-train.png
 figure has been saved into:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\heatmap_probas.pdf
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\heatmap_probas.pdf
 </pre></div></div>
 </div>
 <div class="section" id="Laod-other-checkpont-(optional)">
 <h3>Laod other checkpont (optional)<a class="headerlink" href="#Laod-other-checkpont-(optional)" title="Permalink to this headline">¶</a></h3>
 <p>You can load other model checkpoint if the default model is not satisfying.</p>
 <p>For example, load the last checkpoint and compute the results of it:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">out_cell</span><span class="p">,</span> <span class="n">df_probs</span><span class="p">,</span> <span class="n">h_dict</span><span class="p">,</span> <span class="n">predictor</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">gather_came_results</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">outputs</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">gather_came_results</span><span class="p">(</span>
     <span class="n">dpair</span><span class="p">,</span>
     <span class="n">trainer</span><span class="p">,</span>
     <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">,</span>
@@ -1020,7 +1001,25 @@ figure has been saved into:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[100, 101, 118, 125, 126, 129, 156, 165, 166, 169, 172, 178, 215, 258, 299, 99]
+[100,
+ 101,
+ 104,
+ 106,
+ 107,
+ 109,
+ 123,
+ 129,
+ 152,
+ 167,
+ 172,
+ 178,
+ 215,
+ 235,
+ 249,
+ 258,
+ 275,
+ 299,
+ 99]
 </pre></div></div>
 </div>
 </div>
@@ -1050,7 +1049,7 @@ figure has been saved into:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 figure has been saved into:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\contingency_mat.png
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\contingency_mat.png
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1092,7 +1091,7 @@ figure has been saved into:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 figure has been saved into:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\heatmap_probas.pdf
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\heatmap_probas.pdf
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1169,7 +1168,7 @@ name, dataset, done!
 ... storing &#39;REF&#39; as categorical
 ... storing &#39;celltype&#39; as categorical
 ... storing &#39;predicted&#39; as categorical
-WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\umap-dataset.pdf
+WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\umap-dataset.pdf
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1184,7 +1183,7 @@ WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\umap-ctype.pdf
+WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\umap-ctype.pdf
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1297,7 +1296,7 @@ WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\umap_module-Baron_human.pdf
+WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\umap_module-Baron_human.pdf
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1312,7 +1311,7 @@ WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\umap_module-Baron_human.pdf
+WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\umap_module-Baron_human.pdf
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1357,10 +1356,6 @@ WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse
     <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pp</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">avg_expr1</span><span class="p">,</span> <span class="n">avg_expr2</span><span class="p">)</span>
 <span class="p">))</span>
 
-<span class="c1"># add annos</span>
-<span class="n">pp</span><span class="o">.</span><span class="n">add_obs_annos</span><span class="p">(</span><span class="n">gadt1</span><span class="p">,</span> <span class="n">avg_expr_add1</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">pp</span><span class="o">.</span><span class="n">add_obs_annos</span><span class="p">(</span><span class="n">gadt2</span><span class="p">,</span> <span class="n">avg_expr_add2</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
 <span class="n">gadt1</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;adt_hidden_gene1.h5ad&#39;</span><span class="p">)</span>
 <span class="n">gadt2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;adt_hidden_gene2.h5ad&#39;</span><span class="p">)</span>
 </pre></div>
@@ -1372,22 +1367,7 @@ WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Computing averages grouped by cell_ontology_class
-Calculating feature averages for 13 groups
-[&#39;Schwann cell&#39; &#39;T cell&#39; &#39;endothelial cell&#39; &#39;macrophage&#39; &#39;mast cell&#39;
- &#39;pancreatic A cell&#39; &#39;pancreatic D cell&#39; &#39;pancreatic PP cell&#39;
- &#39;pancreatic acinar cell&#39; &#39;pancreatic ductal cell&#39;
- &#39;pancreatic epsilon cell&#39; &#39;pancreatic stellate cell&#39;
- &#39;type B pancreatic cell&#39;]
 Computing averages grouped by cell_ontology_class
-Calculating feature averages for 12 groups
-[&#39;B cell&#39; &#39;Schwann cell&#39; &#39;T cell&#39; &#39;endothelial cell&#39; &#39;leukocyte&#39;
- &#39;macrophage&#39; &#39;pancreatic A cell&#39; &#39;pancreatic D cell&#39; &#39;pancreatic PP cell&#39;
- &#39;pancreatic ductal cell&#39; &#39;pancreatic stellate cell&#39;
- &#39;type B pancreatic cell&#39;]
-adding columns to `adata.obs` (ignore_index=True):
-Schwann cell, T cell, endothelial cell, macrophage, mast cell, pancreatic A cell, pancreatic D cell, pancreatic PP cell, pancreatic acinar cell, pancreatic ductal cell, pancreatic epsilon cell, pancreatic stellate cell, type B pancreatic cell, done!
-adding columns to `adata.obs` (ignore_index=True):
-B cell, Schwann cell, T cell, endothelial cell, leukocyte, macrophage, pancreatic A cell, pancreatic D cell, pancreatic PP cell, pancreatic ductal cell, pancreatic stellate cell, type B pancreatic cell, done!
 </pre></div></div>
 </div>
 <p>plot cell type gene-profiles (plot all the cell types) on UMAP</p>
@@ -1396,60 +1376,72 @@ B cell, Schwann cell, T cell, endothelial cell, leukocyte, macrophage, pancreati
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
-
-<span class="n">ctypes1</span> <span class="o">=</span> <span class="n">avg_expr1</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">ctypes2</span> <span class="o">=</span> <span class="n">avg_expr2</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">cmap_expr</span> <span class="o">=</span> <span class="s1">&#39;RdYlBu_r&#39;</span>
+<span></span><span class="n">cmap_expr</span> <span class="o">=</span> <span class="s1">&#39;RdYlBu_r&#39;</span>
 <span class="n">vmax</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">vmin</span> <span class="o">=</span> <span class="o">-</span> <span class="mf">1.5</span>
-<span class="n">plkwds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color_map</span><span class="o">=</span><span class="n">cmap_expr</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="p">)</span>
+<span class="n">plkwds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap_expr</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="p">)</span>
 
-<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">gadt1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">ctypes1</span><span class="p">,</span>
-           <span class="c1"># edges=True, size=50,</span>
-           <span class="n">save</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;_exprAvgs-</span><span class="si">{</span><span class="n">dsnames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">-all.png&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plkwds</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">gadt2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">ctypes2</span><span class="p">,</span>
-           <span class="c1"># edges=True, size=50,</span>
-           <span class="n">save</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;_exprAvgs-</span><span class="si">{</span><span class="n">dsnames</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">-all.png&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plkwds</span><span class="p">)</span>
-
+<span class="n">fig1</span><span class="p">,</span> <span class="n">axs1</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">adata_embed_with_values</span><span class="p">(</span>
+    <span class="n">gadt1</span><span class="p">,</span> <span class="n">avg_expr_add1</span><span class="p">,</span> <span class="n">axscale</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">fp</span><span class="o">=</span><span class="n">figdir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;umap_exprAvgs-</span><span class="si">{</span><span class="n">dsnames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">-all.png&#39;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">plkwds</span><span class="p">)</span>
+<span class="n">fig2</span><span class="p">,</span> <span class="n">axs2</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">adata_embed_with_values</span><span class="p">(</span>
+    <span class="n">gadt2</span><span class="p">,</span> <span class="n">avg_expr_add2</span><span class="p">,</span> <span class="n">axscale</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">fp</span><span class="o">=</span><span class="n">figdir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;umap_exprAvgs-</span><span class="si">{</span><span class="n">dsnames</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">-all.png&#39;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">plkwds</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\umap_exprAvgs-Baron_human-all.png
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_37_1.png" src="../_images/_notebooks_getting_started_pipeline_un_37_1.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING: saving figure to file ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\umap_exprAvgs-Baron_mouse-all.png
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_37_3.png" src="../_images/_notebooks_getting_started_pipeline_un_37_3.png" />
+<div class="highlight"><pre>
+figure has been saved into:
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\umap_exprAvgs-Baron_human-all.png
+figure has been saved into:
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\umap_exprAvgs-Baron_mouse-all.png
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_notebooks_getting_started_pipeline_un_38_0.png" src="../_images/_notebooks_getting_started_pipeline_un_38_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig2</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_notebooks_getting_started_pipeline_un_39_0.png" src="../_images/_notebooks_getting_started_pipeline_un_39_0.png" />
 </div>
 </div>
 </div>
 <div class="section" id="2.4-Abstracted-graph">
 <h3>2.4 Abstracted graph<a class="headerlink" href="#2.4-Abstracted-graph" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1487,8 +1479,8 @@ Edges with weights lower than 0 were cut out.
 2801
 2801 2801
 ---&gt; aggregating edges...
-unique labels of rows: [&#39;1&#39; &#39;6&#39; &#39;2&#39; &#39;8&#39; &#39;4&#39; &#39;7&#39; &#39;0&#39; &#39;3&#39; &#39;5&#39; &#39;10&#39; &#39;9&#39;]
-unique labels of columns: [&#39;0&#39; &#39;1&#39; &#39;4&#39; &#39;6&#39; &#39;2&#39; &#39;5&#39; &#39;9&#39; &#39;3&#39; &#39;8&#39; &#39;7&#39; &#39;10&#39;]
+unique labels of rows: [&#39;5&#39; &#39;1&#39; &#39;2&#39; &#39;4&#39; &#39;6&#39; &#39;0&#39; &#39;9&#39; &#39;3&#39; &#39;7&#39; &#39;8&#39; &#39;10&#39;]
+unique labels of columns: [&#39;6&#39; &#39;2&#39; &#39;0&#39; &#39;7&#39; &#39;8&#39; &#39;9&#39; &#39;3&#39; &#39;5&#39; &#39;1&#39; &#39;4&#39; &#39;10&#39;]
 grouping elements (edges)
 shape of the one-hot-labels: (3332, 11) (2981, 11)
 Re-order the rows
@@ -1498,14 +1490,14 @@ Re-order the columns
 2801
 2801 2801
 ---&gt; aggregating edges...
-unique labels of rows: [&#39;1&#39; &#39;6&#39; &#39;2&#39; &#39;8&#39; &#39;4&#39; &#39;7&#39; &#39;0&#39; &#39;3&#39; &#39;5&#39; &#39;10&#39; &#39;9&#39;]
-unique labels of columns: [&#39;0&#39; &#39;1&#39; &#39;4&#39; &#39;6&#39; &#39;2&#39; &#39;5&#39; &#39;9&#39; &#39;3&#39; &#39;8&#39; &#39;7&#39; &#39;10&#39;]
+unique labels of rows: [&#39;5&#39; &#39;1&#39; &#39;2&#39; &#39;4&#39; &#39;6&#39; &#39;0&#39; &#39;9&#39; &#39;3&#39; &#39;7&#39; &#39;8&#39; &#39;10&#39;]
+unique labels of columns: [&#39;6&#39; &#39;2&#39; &#39;0&#39; &#39;7&#39; &#39;8&#39; &#39;9&#39; &#39;3&#39; &#39;5&#39; &#39;1&#39; &#39;4&#39; &#39;10&#39;]
 grouping elements (edges)
 shape of the one-hot-labels: (3332, 11) (2981, 11)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1526,19 +1518,19 @@ shape of the one-hot-labels: (3332, 11) (2981, 11)
 <div class="highlight"><pre>
 [13, 11, 11, 12]
 figure has been saved into:
-        ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\figs\abstracted_graph-module-cut0.0-zs.pdf
+        _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\abstracted_graph-module-cut0.0-zs.pdf
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_40_1.png" src="../_images/_notebooks_getting_started_pipeline_un_40_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_42_1.png" src="../_images/_notebooks_getting_started_pipeline_un_42_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1553,7 +1545,7 @@ figure has been saved into:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 object saved into:
-         ..\_temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(10-07 23.18.42)\abs_graph.pickle
+         _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\abs_graph.pickle
 </pre></div></div>
 </div>
 </div>

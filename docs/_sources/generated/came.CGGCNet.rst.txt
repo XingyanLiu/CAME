@@ -27,9 +27,14 @@ came.CGGCNet
       ~CGGCNet.float
       ~CGGCNet.forward
       ~CGGCNet.get_attentions
+      ~CGGCNet.get_buffer
       ~CGGCNet.get_classification_loss
+      ~CGGCNet.get_extra_state
       ~CGGCNet.get_hidden_states
       ~CGGCNet.get_out_logits
+      ~CGGCNet.get_parameter
+      ~CGGCNet.get_sampler
+      ~CGGCNet.get_submodule
       ~CGGCNet.half
       ~CGGCNet.load_state_dict
       ~CGGCNet.modules
@@ -45,9 +50,11 @@ came.CGGCNet
       ~CGGCNet.register_full_backward_hook
       ~CGGCNet.register_parameter
       ~CGGCNet.requires_grad_
+      ~CGGCNet.set_extra_state
       ~CGGCNet.share_memory
       ~CGGCNet.state_dict
       ~CGGCNet.to
+      ~CGGCNet.to_empty
       ~CGGCNet.train
       ~CGGCNet.type
       ~CGGCNet.xpu
