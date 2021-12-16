@@ -606,7 +606,7 @@ def gather_came_results(
         trainer.g, from_scratch=False, is_train=False, return_logits=True,
         device=trainer.g.device
     )
-
+    sparse.save_npz(f"{resdir}/attentions.npz", attn_mat)
     out_cell = detach2numpy(out_cell)
 
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
@@ -647,6 +647,7 @@ def gather_came_results(
         "out_cell": out_cell,
         "predictor": predictor,
         "df_probs": df_probs,
+        "attentions": attn_mat,
     }
     return outputs
 
