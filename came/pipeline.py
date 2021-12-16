@@ -31,7 +31,7 @@ from . import (
 from .PARAMETERS import (
     get_model_params,
     get_loss_params,
-    get_preprocess_params
+    # get_preprocess_params
 )
 from . import (
     Predictor, DataPair, AlignedDataPair,
@@ -41,7 +41,7 @@ from . import (
 from .utils.train import prepare4train, Trainer
 
 PARAMS_MODEL = get_model_params()
-PARAMS_PRE = get_preprocess_params()
+# PARAMS_PRE = get_preprocess_params()
 PARAMS_LOSS = get_loss_params()
 
 # In[] Main Functions
@@ -229,7 +229,7 @@ def main_for_aligned(
     # ======================== Gather results ======================
     if pred_batch_size == 'auto':
         pred_batch_size = batch_size
-    out_cell, df_probs, h_dict, predictor = gather_came_results(
+    outputs = gather_came_results(
         dpair,
         trainer,
         classes=classes,
@@ -267,6 +267,7 @@ def main_for_aligned(
         )
 
         # heatmap of predicted probabilities
+        df_probs = outputs['df_probs']
         gs = pl.wrapper_heatmap_scores(
             df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
             col_label='celltype', col_pred='predicted',
@@ -274,13 +275,6 @@ def main_for_aligned(
             cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
             fp=figdir / f'heatmap_probas.pdf'
         )
-    outputs = {
-        "dpair": dpair,
-        "trainer": trainer,
-        "h_dict": h_dict,
-        "out_cell": out_cell,
-        "predictor": predictor
-    }
     return outputs
 
 
@@ -475,7 +469,8 @@ def main_for_unaligned(
     # ======================== Gather results ======================
     if pred_batch_size == 'auto':
         pred_batch_size = batch_size
-    out_cell, df_probs, h_dict, predictor = gather_came_results(
+    # out_cell, df_probs, h_dict, predictor = gather_came_results(
+    outputs = gather_came_results(
         dpair,
         trainer,
         classes=classes,
@@ -512,6 +507,7 @@ def main_for_unaligned(
         )
 
         # heatmap of predicted probabilities
+        df_probs = outputs['df_probs']
         gs = pl.wrapper_heatmap_scores(
             df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
             col_label='celltype', col_pred='predicted',
@@ -519,13 +515,7 @@ def main_for_unaligned(
             cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
             fp=figdir / f'heatmap_probas.pdf'
         )
-    outputs = {
-        "dpair": dpair,
-        "trainer": trainer,
-        "h_dict": h_dict,
-        "out_cell": out_cell,
-        "predictor": predictor
-    }
+
     return outputs
 
 
@@ -594,22 +584,30 @@ def gather_came_results(
             f'got {checkpoint}'
         )
     # all hidden states
-    from .model import get_all_hidden_states
+    from .model import get_all_hidden_states, get_attentions
     hidden_list = get_all_hidden_states(
         trainer.model, trainer.feat_dict, trainer.g, batch_size=batch_size)
     if save_hidden_list:
         from . import save_hidden_states
         save_hidden_states(hidden_list, resdir / 'hidden_list.h5')
-    # hidden states are stored in sc.AnnData to facilitated downstream analysis
-    # h_dict = trainer.model.get_hidden_states()  # trainer.feat_dict, trainer.g)
+    # hidden states are stored to facilitated downstream analysis
     h_dict = hidden_list[-1]
-    trainer.model.eval()
-    out_cell = trainer.model.cell_classifier.forward(
-        trainer.g,
-        {k: torch.Tensor(h, device=trainer.g.device) for k, h in h_dict.items()}
-    )['cell']
-    # out_cell = trainer.get_current_outputs(batch_size=batch_size)['cell']
-    out_cell = out_cell.cpu().clone().detach().numpy()
+    # if batch_size:
+    #     out_cell = trainer.get_current_outputs(batch_size=batch_size)['cell']
+    # else:
+    # trainer.model.eval()
+    # out_cell = trainer.model.cell_classifier.forward(
+    #     trainer.g,
+    #     {k: torch.Tensor(h).to(trainer.g.device) for k, h in h_dict.items()}
+    # )['cell']
+    attn_mat, out_cell = get_attentions(
+        trainer.model,
+        {k: torch.Tensor(h) for k, h in h_dict.items()},
+        trainer.g, from_scratch=False, is_train=False, return_logits=True,
+        device=trainer.g.device
+    )
+
+    out_cell = detach2numpy(out_cell)
 
     pd.DataFrame(out_cell[dpair.obs_ids1], columns=classes).to_csv(resdir / "df_logits1.csv")
     pd.DataFrame(out_cell[dpair.obs_ids2], columns=classes).to_csv(resdir / "df_logits2.csv")
@@ -641,7 +639,16 @@ def gather_came_results(
     gcnt = pp.group_value_counts(dpair.obs, 'celltype', group_by='dataset')
     logging.info(str(gcnt))
     gcnt.to_csv(resdir / 'group_counts.csv')
-    return out_cell, df_probs, h_dict, predictor
+    # return out_cell, df_probs, h_dict, predictor
+    outputs = {
+        "dpair": dpair,
+        "trainer": trainer,
+        "h_dict": h_dict,
+        "out_cell": out_cell,
+        "predictor": predictor,
+        "df_probs": df_probs,
+    }
+    return outputs
 
 
 def preprocess_aligned(

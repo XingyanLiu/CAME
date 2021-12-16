@@ -178,7 +178,7 @@ def get_all_hidden_states(
 
                 h = model.rgcn(mfgs[1:], h, **other_inputs)
                 # h_list.append(idx_hetero(h, output_subids))
-                # TODO: not stroring hidden states
+                # TODO: not storing hidden states
                 _h_list.extend([idx_hetero(_h, output_subids)
                                for _h in model.rgcn.hidden_states])
                 batch_output_list.append(_h_list)
@@ -198,29 +198,41 @@ def get_attentions(
         fuse='mean',
         from_scratch: bool = True,
         is_train: bool = False,
-) -> sparse.spmatrix:
+        return_logits: bool = False,
+        device=None,
+):
     """
     compute cell-by-gene attention matrix from model
 
     Returns
     -------
-    sparse.spmatrix
+    attn_mat: sparse.spmatrix
         cell-by-gene attention matrix (sparse)
+    out_cell: Tensor (if return_logits is True)
     """
+    if device is None:
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    # if batch_size is None: TODO: consider batch_size
+    feat_dict = to_device(feat_dict, device=device)
+
     if from_scratch:
+        model = model.to(device)
         h_dict = model.get_hidden_states(
-            feat_dict=feat_dict, g=g, detach2np=False)
+            feat_dict=feat_dict,
+            g=g.to(device), detach2np=False)
     else:
         h_dict = feat_dict
 
     # getting subgraph and the hidden states
-    g_sub = g['gene', 'expressed_by', 'cell']
+    g_sub = g['gene', 'expressed_by', 'cell'].to(device)
 
     # getting heterogeneous attention (convolutional) classifier
-    HAC = model.cell_classifier.conv.mods['expressed_by']
+    cell_classifier = model.cell_classifier.to(device)
+    HAC = cell_classifier.conv.mods['expressed_by']
     feats = (h_dict['gene'], h_dict['cell'])
     HAC.train(is_train)
-    _out_dict, attn0 = HAC(g_sub, feats, return_attn=True)
+    _out_cell, attn0 = HAC(g_sub, feats, return_attn=True)
 
     # constructing attention matrix
     if fuse == 'max':
@@ -235,7 +247,9 @@ def get_attentions(
     n_vnodes, n_obs = g.num_nodes('gene'), g.num_nodes('cell')
     attn_mat = sparse.coo_matrix(
         (attn, (ig, ic)), shape=(n_vnodes, n_obs)).tocsc().T
-
+    if return_logits:
+        out_cell = cell_classifier.apply_out({'cell': _out_cell})['cell']
+        return attn_mat, out_cell
     return attn_mat
 
 

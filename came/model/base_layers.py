@@ -150,6 +150,19 @@ class BaseMixConvLayer(nn.Module):
         inputs_src = inputs_dst = inputs
         hs = self.conv(g, (inputs_src, inputs_dst), **kwds)
 
+        # def _apply(ntype, h):
+        #     if self.use_layernorm:
+        #         h = self.norm_layers[ntype](h)
+        #     if self.bias:
+        #         h = h + self.h_bias[ntype]
+        #     if self.activation:
+        #         h = self.activation(h)
+        #     return self.dropout(h)
+        #
+        # return {ntype: _apply(ntype, h) for ntype, h in hs.items()}
+        return self.apply_out(hs)
+
+    def apply_out(self, h_dict):
         def _apply(ntype, h):
             if self.use_layernorm:
                 h = self.norm_layers[ntype](h)
@@ -158,8 +171,7 @@ class BaseMixConvLayer(nn.Module):
             if self.activation:
                 h = self.activation(h)
             return self.dropout(h)
-
-        return {ntype: _apply(ntype, h) for ntype, h in hs.items()}
+        return {ntype: _apply(ntype, h) for ntype, h in h_dict.items()}
 
     def build_layernorm(self, layernorm_ntypes=None, elementwise_affine=True, ):
         if layernorm_ntypes is not None:

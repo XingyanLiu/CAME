@@ -584,6 +584,133 @@ def wrapper_heatmap_scores(
     return gs
 
 
+# scatter plots
+def sorted_scatter(
+        x, y, v, s=1.5,
+        title=None,
+        ax=None, cmap='RdYlBu_r',
+        marker='.',
+        vmin=None, vmax=None,
+        xlabel=None, ylabel=None,
+        with_cbar=True,
+        fontsize_cbar=9,
+        fontsize_axlabels=9,
+        fontsize_title=9,
+        **kwargs
+):
+    """scatter plot colored with continuous values"""
+
+    if v is not None:
+        # points with high values will be put on the top
+        x, y, v = list(zip(*sorted(zip(x, y, v), key=lambda xyv: xyv[-1])))
+        x, y, v = np.array(x), np.array(y), np.array(v)
+
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    cax = ax.scatter(
+        x, y, c=v, s=s,
+        cmap=cmap, marker=marker,
+        vmax=vmax, vmin=vmin, **kwargs)
+    ax.grid(False)
+    # remove y and x ticks
+    ax.set_yticks([])
+    ax.set_xticks([])
+    if xlabel is not None:
+        ax.set_xlabel(xlabel, fontsize=fontsize_axlabels)
+    if ylabel is not None:
+        ax.set_ylabel(ylabel, fontsize=fontsize_axlabels)
+    if title:
+        ax.set_title(title, fontsize=fontsize_title)
+
+    ax.set_aspect('equal', adjustable='datalim')
+    if with_cbar and v is not None:
+        cbar = plt.colorbar(cax, ax=ax, pad=0.01, fraction=0.08, aspect=30, )
+        for t in cbar.ax.get_yticklabels():
+            t.set_fontsize(fontsize_cbar)
+    return ax
+
+
+def embed_with_values(
+        xy: np.ndarray, values: Union[pd.Series, Mapping],
+        s=1.5, ncols=5, axscale=2.5,
+        name_xy='UMAP', with_cbar=True,
+        cmap='RdYlBu_r',
+        vmin=None, vmax=None,
+        **kwargs
+):
+    """ Visualize the given x-y coordinates, colored by the given (dict of) values
+
+    Parameters
+    ----------
+    xy: np.array
+        coordinates of each points, of shape (n_points, 2)
+    values: Mapping, pd.DataFrame or pd.Series
+        where the keys will be the title of subplots and the values
+        should be of the length equal to xy.shape[0]
+    """
+    x, y = xy[:, 0], xy[:, 1]
+    if isinstance(values, pd.Series):
+        values = {values.name: list(values)}
+
+    cnames = values.keys()
+    n_plots = len(cnames)
+    nrows = n_plots // ncols + min(n_plots % ncols, 1)
+    fig, axs = plt.subplots(
+        nrows, ncols, figsize=(ncols * axscale * 1.1, nrows * axscale),
+        subplot_kw=dict(aspect='equal'))
+
+    xlabel = f'{name_xy}1'
+    ylabel = f'{name_xy}2'
+    for ax, cname in zip(axs.flatten(), cnames):
+        v = list(values[cname])
+        sorted_scatter(x, y, v, s=s, ax=ax,
+                       title=cname,
+                       cmap=cmap,
+                       vmin=vmin, vmax=vmax,
+                       with_cbar=with_cbar,
+                       xlabel=xlabel, ylabel=ylabel, **kwargs)
+    for ax in axs.flatten()[n_plots:]:
+        ax.set_frame_on(False)
+        ax.grid(False)
+        # remove y and x ticks
+        ax.set_yticks([])
+        ax.set_xticks([])
+
+    return fig, axs
+
+
+def adata_embed_with_values(
+        adata: sc.AnnData, values: Union[pd.Series, Mapping],
+        embed_key='UMAP', fp=None, figsize_save=None, **kwargs):
+    """
+    This function can also be used to visualize the average expressions of some
+    cell types on gene embedding, in which case, each observation in
+    `adata` represents a genes.
+
+    Parameters
+    ----------
+    adata
+    values: Mapping, pd.DataFrame or pd.Series
+        where the keys will be the title of subplots and the values
+        should be of the length equal to adata.shape[0]
+    embed_key
+    fp: Path or str
+        path to save figure
+    figsize_save: (int, int)
+
+    Returns
+    -------
+    fig, axs
+    """
+    obsm_embed_key = 'X_{}'.format(embed_key.lower())
+    xy = adata.obsm[obsm_embed_key]  # n_pts x 2
+    fig, axs = embed_with_values(xy, values, name_xy=embed_key, **kwargs)
+    if fp:
+        _save_with_adjust(fig, fp, figsize=figsize_save)
+    return fig, axs
+
+
 # In[]
 def _get_affine_mat(angle_x=30, angle_y=150):
     """ rotate x and y axis to mock 3D projection

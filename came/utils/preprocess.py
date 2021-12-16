@@ -256,9 +256,12 @@ def make_adata(mat: Union[np.ndarray, sparse.spmatrix],
     return adata
 
 
-def merge_metas(adatas, obs_keys):
-    obs_keys = [obs_keys] if isinstance(obs_keys, str) else obs_keys
-    obss = [adt.obs[obs_keys] for adt in adatas]
+def merge_metas(adatas, obs_keys=None):
+    if obs_keys:
+        obs_keys = [obs_keys] if isinstance(obs_keys, str) else obs_keys
+        obss = [adt.obs[obs_keys] for adt in adatas]
+    else:
+        obss = [adt.obs for adt in adatas]
     return pd.concat(obss, axis=0)
 
 
@@ -314,16 +317,16 @@ def merge_adatas(
     mats, genes = merge_named_matrices(mats, genes, union=union)
     merged_mat = sparse.vstack(mats, )  # dtype = mats[0].dtype)
     genes = pd.DataFrame(index=genes)
-    print(genes.head())
+    logging.debug(genes.head())
 
-    if obs_keys is None:
-        obs = pd.DataFrame(index=np.concatenate(bcds, axis=0))
-    else:
-        print("merging metadata...")
-        obs = merge_metas(_adatas, obs_keys)
+    # if obs_keys is None:
+    #     obs = pd.DataFrame(index=np.concatenate(bcds, axis=0))
+    # else:
+    logging.info("merging metadata...")
+    obs = merge_metas(_adatas, obs_keys)
     if key_dsname is not None:
         obs[key_dsname] = pd.Categorical(lbs_datasets, categories=dsnames)
-    print(obs.head())
+    logging.debug(obs.head())
     return make_adata(merged_mat, obs=obs, var=genes)
 
 
@@ -1638,7 +1641,7 @@ def group_value_counts(df, count_on, group_by, split=True, **kwds):
 def group_mean(X: Union[np.ndarray, sparse.spmatrix],
                labels: Sequence,
                binary=False, classes=None, features=None,
-               print_groups=True):
+               print_groups=False):
     """
     This function may work with more efficiency than `df.groupby().mean()` 
     when handling sparse matrix.
@@ -1658,13 +1661,13 @@ def group_mean(X: Union[np.ndarray, sparse.spmatrix],
     classes = np.unique(labels, ) if classes is None else classes
     if binary:
         X = (X > 0)  # .astype('float')
-        print('Binarized...the results will be the expression proportions.')
+        logging.info('Binarized; the results will be expression proportions')
 
     if len(classes) == 1:
         grp_mean = X.mean(axis=0).T
     else:
         lb1hot = label_binarize_each(labels, classes=classes, sparse_out=True)
-        print(f'Calculating feature averages for {len(classes)} groups')
+        logging.info(f'Calculating feature averages for {len(classes)} groups')
         if print_groups:
             print(classes)
         grp_mean = X.T.dot(lb1hot) / lb1hot.sum(axis=0)
@@ -1826,7 +1829,7 @@ def quick_preprocess(
 
 def quick_pre_vis(adata, hvgs=None,
                   normalize_data=True,
-                  target_sum=1e4,
+                  target_sum=None,
                   batch_key=None,
                   n_pcs=30, nneigh=10,
                   vis='umap',

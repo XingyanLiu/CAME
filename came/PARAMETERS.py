@@ -19,22 +19,22 @@ Examples
 """
 import copy
 
-_params_pre = dict(
-    remove_rare=False,  # True for benchmarking; False for case study
-    min_samples=10,
-    ###
-    norm__rev=False,  # False by default
-    norm__log_only=False,  # False by default
-    ###
-    scale_within=True,  # True by default
-    unit_var=True,  # True by default
-    clip=not True, clip_range=(-3, 5),  # False by default
-    ###
-    use_degs=True,
-    only_1v1homo=False,  # False by default
-    target_sum='auto',  # auto --> 1e4
-    with_single_vnodes=not True,
-)
+# _params_pre = dict(
+#     remove_rare=False,  # True for benchmarking; False for case study
+#     min_samples=10,
+#     ###
+#     norm__rev=False,  # False by default
+#     norm__log_only=False,  # False by default
+#     ###
+#     scale_within=True,  # True by default
+#     unit_var=True,  # True by default
+#     clip=not True, clip_range=(-3, 5),  # False by default
+#     ###
+#     use_degs=True,
+#     only_1v1homo=False,  # False by default
+#     target_sum='auto',  # auto --> 1e4
+#     with_single_vnodes=not True,
+# )
 
 _params_model = dict(
     h_dim=128,
@@ -63,7 +63,7 @@ _params_model = dict(
 
 _params_lossfunc = dict(
     smooth_eps=0.1, reduction='mean',
-    beta=0.5,  # balance factor for multi-label loss
+    beta=1,  # balance factor for multi-label loss
     alpha=0,  # for R-drop, setting it larger than zero
 )
 
@@ -75,8 +75,8 @@ def _get_parameter_dict(default={}, **kwds) -> dict:
     return params
 
 
-def get_preprocess_params(**kwds) -> dict:
-    return _get_parameter_dict(_params_pre, **kwds)
+# def get_preprocess_params(**kwds) -> dict:
+#     return _get_parameter_dict(_params_pre, **kwds)
 
 
 def get_loss_params(**kwds) -> dict:
