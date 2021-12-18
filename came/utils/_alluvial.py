@@ -74,7 +74,7 @@ class AlluvialTool:
         return self.input
 
     def read_input(self):
-        print(type(self.input))
+        # print(type(self.input))
         if isinstance(self.input, dict):
             return self.read_input_from_dict()
         else:
@@ -96,11 +96,11 @@ class AlluvialTool:
         _ = kwargs
         a_members = sorted(
             {a_item for a_item in self.data_dic}, key=lambda x: self.item_widths_dic[x]
-        ) if not a_sort else a_sort
+        ) if a_sort is None else a_sort
         b_members = sorted(
             {b_item for b_item_counter in self.data_dic.values() for b_item in b_item_counter},
             key=lambda x: self.item_widths_dic[x]
-        ) if not b_sort else b_sort
+        ) if b_sort is None else b_sort
         return a_members, b_members
 
     def get_group_widths(self):

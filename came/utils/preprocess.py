@@ -826,7 +826,7 @@ def label_binarize_each(labels, classes, sparse_out=True):
 
 def agg_group_edges(adj, labels1, labels2=None,
                     groups1=None, groups2=None,
-                    asdf=True, verbose=True):
+                    asdf=True, verbose=False):
     """
     Parameters
     ----------
@@ -923,10 +923,10 @@ def _order_contingency_array(mat, axis=1):
     """
     order = np.argsort(np.argmax(mat, axis=axis))
     if axis == 1:
-        print('Re-order the rows')
+        logging.debug('Re-order the rows')
         return mat[order, :]
     else:
-        print('Re-order the columns')
+        logging.debug('Re-order the columns')
         return mat[:, order]
 
 
@@ -937,10 +937,10 @@ def _order_contingency_df(df: pd.DataFrame, axis=1):
     """
     order = np.argsort(np.argmax(df.values, axis=axis))
     if axis == 1:
-        print('Re-order the rows')
+        logging.debug('Re-order the rows')
         return df.iloc[order, :]
     else:
-        print('Re-order the columns')
+        logging.debug('Re-order the columns')
         return df.iloc[:, order]
 
 
@@ -1524,7 +1524,7 @@ def normalize_row(X, scale_factor=1, by='sum'):
         X_new = np.diag(norm_).dot(X)
 
     if isinstance(X, pd.DataFrame):
-        X_new.columns = X.columns
+        X_new = pd.DataFrame(X_new, columns = X.columns)
     return X_new
 
 

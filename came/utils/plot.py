@@ -7,6 +7,7 @@ Created on Fri Oct 23 12:31:28 2020
 from typing import Union, Mapping, Sequence, Optional
 from pathlib import Path
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 from scipy import sparse
@@ -113,42 +114,65 @@ def diy_cmap_grey_bg(name_fg='RdPu', low=0.15, rm_high=0.01, n=100):
 # Visualization of group correspondences on an alluvial plot
 
 
-def _alluvial_dict_from_confusdf(df: pd.DataFrame, vals_ignore=[0, np.nan]):
+def _alluvial_dict_from_confusdf(
+        df: pd.DataFrame, vals_ignore=(0, np.nan), tag=''):
+    """
+
+    Parameters
+    ----------
+    df:
+        might be the confusion matrix
+    vals_ignore
+    tag: str
+        used to make avoid name collisions in each side
+
+    Returns
+    -------
+
+    """
     dct = {}
     rowsum = df.sum(1)
 
     for i, idx in enumerate(df.index):
-        #        print(i, idx, type(rowsum[idx]), rowsum[idx])
+        # print(i, idx, type(rowsum[idx]), rowsum[idx])
         if rowsum[idx] in vals_ignore:
             continue
         dct[idx] = {}
         for col in df.columns:
             val = df.loc[idx, col]
             if val > 0:
-                dct[idx][col + ' '] = val  # make sure no collisions for names in each side
+                # avoid name collisions in each side
+                dct[idx][col + tag] = val
     return dct
 
 
-def alluvial_plot(confsdf: pd.DataFrame,
-                  labels=['', ''],  # ['true', 'predicted'],
-                  label_shift=0,  # -18
-                  title='alluvial plot',
-                  alpha=0.75,
-                  cmap_name='tab20_r',
-                  shuffle_colors=True,
-                  fonsize_title=11,
-                  figsize=(5, 5),
-                  fname=None,
-                  **kwds):
+def alluvial_plot(
+        confsdf: pd.DataFrame,
+        labels=['', ''],  # ['true', 'predicted'],
+        label_shift=0,  # -18
+        title='alluvial plot',
+        alpha=0.75,
+        cmap_name='tab20_r',
+        shuffle_colors=True,
+        fonsize_title=11,
+        figsize=(5, 5),
+        fname=None,
+        a_sort=None, b_sort=None,
+        **kwds):
     """ visualizing confusion matrix using alluvial plot
+
+    a_sort, b_sort: sorted group names on the left and the right side
     """
-    input_dct = _alluvial_dict_from_confusdf(confsdf)
+    input_dct = _alluvial_dict_from_confusdf(confsdf, tag=' ')
+    if b_sort is not None:
+        b_sort = [s + ' ' for s in b_sort]
     cmap = mpl.cm.get_cmap(cmap_name)
     ax = _alluvial.plot(input_dct, labels=labels,
                         label_shift=label_shift,
                         cmap=cmap, alpha=alpha,
                         shuffle_colors=shuffle_colors,
                         figsize=figsize,
+                        a_sort=a_sort, b_sort=b_sort,
                         **kwds)
     ax.set_title(title, fontsize=fonsize_title)
     fig = ax.get_figure()
@@ -430,7 +454,8 @@ def heatmap_probas(
 
     # setting class-labels (x-ticks)
     classes = pd.unique(lbs)
-    cut_loc = np.hstack([[0], np.flatnonzero(np.diff(lbs.codes)), [len(lbs)]])  # // 2
+    cut_loc = np.hstack(
+        [[0], np.flatnonzero(np.diff(lbs.codes)), [len(lbs)]])  # // 2
     x_loc = cut_loc[:-1] + np.diff(cut_loc) // 2
     ax2.set_xticks(x_loc)
     if xrotation:
@@ -573,7 +598,7 @@ def wrapper_heatmap_scores(
         indices = df_lbs.index
     cols_ordered = [c for c in sorted(df_lbs[col_pred].unique())
                     if c in df_score.columns]
-    
+
     df_data = df_score.loc[indices][cols_ordered].copy()
     lbs = df_lbs[col_label].loc[indices]
 
@@ -586,7 +611,7 @@ def wrapper_heatmap_scores(
 
 # scatter plots
 def sorted_scatter(
-        x, y, v, s=1.5,
+        x, y, v=None, s=1.5,
         title=None,
         ax=None, cmap='RdYlBu_r',
         marker='.',
@@ -633,6 +658,7 @@ def sorted_scatter(
 
 def embed_with_values(
         xy: np.ndarray, values: Union[pd.Series, Mapping],
+        do_zscore: bool = False,
         s=1.5, ncols=5, axscale=2.5,
         name_xy='UMAP', with_cbar=True,
         cmap='RdYlBu_r',
@@ -646,16 +672,24 @@ def embed_with_values(
     xy: np.array
         coordinates of each points, of shape (n_points, 2)
     values: Mapping, pd.DataFrame or pd.Series
-        where the keys will be the title of subplots and the values
-        should be of the length equal to xy.shape[0]
+        where the keys will be the title of subplots and each of the values
+        should be a vector of the length equal to xy.shape[0]
     """
     x, y = xy[:, 0], xy[:, 1]
     if isinstance(values, pd.Series):
         values = {values.name: list(values)}
-
+    elif do_zscore:  # pd.DataFrame or Mapping[str, Sequence]
+        from sklearn.preprocessing import StandardScaler
+        keys = list(values.keys())
+        arr = np.array([list(values[k]) for k in keys])
+        values = pd.DataFrame(
+            StandardScaler(with_mean=True).fit_transform(arr).T, columns=keys)
     cnames = values.keys()
     n_plots = len(cnames)
-    nrows = n_plots // ncols + min(n_plots % ncols, 1)
+    if ncols >= n_plots:
+        nrows, ncols = 1, n_plots
+    else:
+        nrows = n_plots // ncols + min(n_plots % ncols, 1)
     fig, axs = plt.subplots(
         nrows, ncols, figsize=(ncols * axscale * 1.1, nrows * axscale),
         subplot_kw=dict(aspect='equal'))
@@ -708,6 +742,7 @@ def adata_embed_with_values(
     fig, axs = embed_with_values(xy, values, name_xy=embed_key, **kwargs)
     if fp:
         _save_with_adjust(fig, fp, figsize=figsize_save)
+    fig.show()
     return fig, axs
 
 
@@ -716,7 +751,8 @@ def _get_affine_mat(angle_x=30, angle_y=150):
     """ rotate x and y axis to mock 3D projection
     if angle_x=0, angle_y=90, an identity matrix will be returned.
     """
-    angle_x, angle_y = tuple(map(lambda x: (x / 180) * np.pi, (angle_x, angle_y)))
+    angle_x, angle_y = tuple(
+        map(lambda x: (x / 180) * np.pi, (angle_x, angle_y)))
     _transmat = np.array([[np.cos(angle_x), np.sin(angle_x)],
                           [np.cos(angle_y), np.sin(angle_y)]
                           ])
@@ -792,10 +828,12 @@ def plot_mapped_graph(
         plot_edges_by_adj(adj1, xy1, ax=ax, zorder=0.9, **_kwds_edge)
     if adj2 is not None:
         plot_edges_by_adj(adj2, xy2, ax=ax, zorder=0.9, **_kwds_edge)
-    plot_edges_by_adj(mapping, np.vstack([xy1, xy2]), ax=ax, zorder=1, **_kwds_edge)
+    plot_edges_by_adj(mapping, np.vstack([xy1, xy2]), ax=ax, zorder=1,
+                      **_kwds_edge)
 
     cmap_pt = cmap_pt if isinstance(cmap_pt, (list, tuple)) else [cmap_pt] * 2
-    ax.scatter(x1, y1, marker='.', c=pt_color1, s=pt_size, cmap=cmap_pt[0], zorder=2.5)
+    ax.scatter(x1, y1, marker='.', c=pt_color1, s=pt_size, cmap=cmap_pt[0],
+               zorder=2.5)
     ax.scatter(x2, y2, marker='.', c=pt_color2, s=pt_size, cmap=cmap_pt[1])
     ax.set_axis_off()
 
@@ -848,12 +886,13 @@ def embedding_mock3d(
     else:
         pt_color = None
     if ax is None:
-        fig, ax = plt.subplots(figsize=figsize) # w*h
+        fig, ax = plt.subplots(figsize=figsize)  # w*h
     if edges:
         nn_key = f'{neighbor_key}_connectivities' if neighbor_key else 'connectivities'
         adj = adata.obsp[nn_key]
         plot_edges_by_adj(adj, xy, ax=ax, zorder=0.9, **kwds_edge)
-    ax.scatter(x, y, marker='.', c=pt_color, s=pt_size, cmap=cmap_pt, zorder=2.5)
+    ax.scatter(x, y, marker='.', c=pt_color, s=pt_size, cmap=cmap_pt,
+               zorder=2.5)
     ax.set_axis_off()
     if fp: _save_with_adjust(ax.figure, fp, dpi=400)
     return ax
@@ -1010,7 +1049,8 @@ def umap_with_annotates(
         fig, ax = plt.subplots()
     sc.pl.umap(adt, color=color, ax=ax, show=False, **plkwds)
     # annotation
-    _texts = [ax.text(x, y, t, {'fontsize': anno_fontsize}) for x, y, t in zip(xs, ys, texts)]
+    _texts = [ax.text(x, y, t, {'fontsize': anno_fontsize}) for x, y, t in
+              zip(xs, ys, texts)]
     adjust_text(_texts, ax=ax, arrowprops=dict(arrowstyle='-', color='k'))
     _save_with_adjust(fig, fp)
     return ax
@@ -1077,8 +1117,6 @@ def plot_multipartite_graph(
         subset_key='subset',
         weight_key='weight',
         nodelb_key='original name',
-        nodesz_key='size',
-        node_color='lightblue',
         alpha=0.85,
         figsize=(10, 8), fp=None,
         xscale=1.5, yscale=1.1,
@@ -1087,13 +1125,15 @@ def plot_multipartite_graph(
         node_size_min=100,
         node_size_max=1800,
         with_labels=True,
+        colors=None,
         **kwds):
     import networkx as nx
     if node_list is None: node_list = list(g)
 
     pos = multipartite_layout(g, subset_key=subset_key, )
 
-    edge_vals = [v * edge_scale for v in nx.get_edge_attributes(g, weight_key).values()]
+    edge_vals = [v * edge_scale for v in
+                 nx.get_edge_attributes(g, weight_key).values()]
     fig, ax = plt.subplots(figsize=figsize)
 
     ax.set_axis_off()
@@ -1102,10 +1142,10 @@ def plot_multipartite_graph(
     nx.draw_networkx_edges(
         g, pos,
         width=edge_vals,
-        #            edge_color='grey',
+        # edge_color='grey',
         edge_color=edge_vals, edge_cmap=_cut_cmap('Greys', ),
         alpha=alpha, )
-    nodedf = _prepare_for_nxplot(g, **kwds)
+    nodedf = _prepare_for_nxplot(g, colors=colors, **kwds)
 
     #    node_sizes = np.array([nx.get_node_attributes(g, nodesz_key)[nd] for nd in node_list])
     node_sizes = np.maximum(nodedf['plt_size'] * node_scale, node_size_min)
@@ -1129,10 +1169,12 @@ def plot_multipartite_graph(
 def _prepare_for_nxplot(
         g, names=('cell group', 'gene module'),
         sizes=(1800, 900, 900, 1800),
-        colors=('pink', 'lightblue', 'lightblue', 'pink')):
+        colors=None):
     """
     g: a multipartite graph with 4 layers
     """
+    if colors is None:
+        colors = ('pink', 'lightblue', 'lightblue', 'pink')
     nodedf = pd.DataFrame(g.nodes.values(), index=g.nodes.keys())
     nodedf['ntype'] = nodedf['subset'].apply(
         lambda x: names[0] if x in [0, 3] else names[1]
@@ -1140,7 +1182,8 @@ def _prepare_for_nxplot(
     nodedf['plt_color'] = nodedf['subset'].apply(
         lambda x: colors[x]
     )
-    nodedf['plt_size'] = nodedf.groupby('ntype')['size'].apply(lambda x: x / x.max())
+    nodedf['plt_size'] = nodedf.groupby('ntype')['size'].apply(
+        lambda x: x / x.max())
 
     for isubset, size_scale in enumerate(sizes):
         inds_sub = nodedf['subset'] == isubset

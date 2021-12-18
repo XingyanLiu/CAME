@@ -1110,25 +1110,29 @@ def abstract_ov_edges(
         tag_var='',
         tag_obs='',
         cut=0.,
+        norm_first: bool = True,
         global_adjust: bool = False,
-        return_full_adj=False):
+        return_full_adj=False,
+):
     """
     Parameters
     ----------
     avg_expr: pd.DataFrame
-        each column represent the average expressoions
+        each column represent the average expressions
         for each observation group, and each row as a variable.
     norm_method:
         one of {None, 'zs', 'maxmin', 'max'}
     """
     df = avg_expr.copy()
-    if norm_method is not None:
+    if norm_method is not None and norm_first:
         df = pp.wrapper_normalize(df, method=norm_method, axis=norm_axis)
 
     # averaged by varible-groups
     df[groupby_var] = var_labels
     df_avg = df.groupby(groupby_var).mean()
     df_avg.dropna(inplace=True)
+    if norm_method and not norm_first:
+        df_avg = pp.wrapper_normalize(df_avg, method=norm_method, axis=norm_axis)
     df_avg0 = df_avg.copy()
 
     df_avg.index = [f'{tag_var}{i}' for i in df_avg.index]
