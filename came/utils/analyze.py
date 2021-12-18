@@ -1114,7 +1114,6 @@ def abstract_ov_edges(
         var_labels,
         norm_method=None,
         norm_axis=1,
-        groupby_var='__temp_labels__',  # 'module',
         tag_var='',
         tag_obs='',
         cut=0.,
@@ -1136,6 +1135,7 @@ def abstract_ov_edges(
         df = pp.wrapper_normalize(df, method=norm_method, axis=norm_axis)
 
     # averaged by varible-groups
+    groupby_var = '__temp_labels__'
     df[groupby_var] = var_labels
     df_avg = df.groupby(groupby_var).mean()
     df_avg.dropna(inplace=True)
