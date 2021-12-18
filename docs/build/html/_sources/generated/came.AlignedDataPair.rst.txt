@@ -21,6 +21,7 @@ came.AlignedDataPair
       ~AlignedDataPair.get_obs_ids
       ~AlignedDataPair.get_obs_labels
       ~AlignedDataPair.get_whole_net
+      ~AlignedDataPair.load
       ~AlignedDataPair.make_ov_adj
       ~AlignedDataPair.make_whole_net
       ~AlignedDataPair.save_init

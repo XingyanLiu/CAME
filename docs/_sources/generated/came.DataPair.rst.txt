@@ -24,6 +24,7 @@ came.DataPair
       ~DataPair.get_vnode_ids_by_name
       ~DataPair.get_vnode_names
       ~DataPair.get_whole_net
+      ~DataPair.load
       ~DataPair.make_ov_adj
       ~DataPair.make_whole_net
       ~DataPair.save_init
