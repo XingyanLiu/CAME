@@ -1047,9 +1047,9 @@ def aggregate_links(
     if keys_link is not None:
         df_links = df_links.set_index(keys_link)
 
-    #    print(key_weight, df_links, sep='\n')
+    # print(key_weight, df_links, sep='\n')
     _data = df_links[key_weight] if key_weight in df_links.columns else None
-    #    print(_data)
+    # print(_data)
     adj_var, rnames, cnames = pp.pivot_to_sparse(
         rows=df_links.index.get_level_values(0),
         cols=df_links.index.get_level_values(1),
@@ -1058,7 +1058,7 @@ def aggregate_links(
     # make sure the labels are correctly ordered
     lbs1 = np.array([labels1[r] for r in rnames])  # var_labels1[rnames]
     lbs2 = np.array([labels2[c] for c in cnames])
-    #    print(pd.value_counts(lbs1, dropna=False))
+    # print(pd.value_counts(lbs1, dropna=False))
     aggregated = pp.agg_group_edges(
         adj_var, lbs1, lbs2, groups1=None, groups2=None, )
 
