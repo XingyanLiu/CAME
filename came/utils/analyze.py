@@ -178,10 +178,14 @@ def weight_linked_vars(
         the metric to quantify the similarities of the given vectors (embeddings)
     sort
         whether to sort by the resulting weights
+    index_names
+        a pair of names for the multi-index of the resulting DataFrame.
+        e.g., a pair of dataset or species names (in cross-species scenario)
     
     Returns
     -------
-    a pd.DataFrame with columns [``names[0]``, ``names[1]``, "distance", "weight"]
+    a pd.DataFrame with columns
+    [``index_names[0]``, ``index_names[1]``, "distance", "weight"]
     """
     adj = sparse.triu(adj).tocoo()
 
