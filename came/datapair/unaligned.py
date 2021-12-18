@@ -274,6 +274,17 @@ class DataPair(object):
         ])
         return s
 
+    @staticmethod
+    def load(fp):
+        """ load object
+        fp:
+            file path to ``DataPair`` object, e.g., 'datapair_init.pickle'
+        """
+        import pickle
+        with open(fp, 'rb') as f:
+            element_dict = pickle.load(f)
+        return DataPair(**element_dict)
+
     def save_init(self, path='datapair_init.pickle'):
         """
         save object for reloading

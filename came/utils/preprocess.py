@@ -173,9 +173,9 @@ def add_columns(
         copy=True, **kwannos):
     def _set_values(_df, k, v, ignore_index=ignore_index):
         if k in _df.columns:
-            print(f'NOTE that column "{k}" will be covered by new values')
+            logging.warning(f'NOTE that column "{k}" will be covered by new values')
         _df[k] = list(v) if ignore_index else v
-        print(k, end=', ')
+        # print(k, end=', ')
 
     if copy: df0 = df0.copy()
     if df is not None:
@@ -190,7 +190,7 @@ def add_columns(
         for k, v in kwannos.items():
             # be careful of the index mismatching problems!!!
             _set_values(df0, k, v)
-    print('done!')
+    # print('done!')
     return df0 if copy else None
 
 
@@ -547,7 +547,7 @@ def get_homologues(df_match: pd.DataFrame,
     homos = pd.concat(homos, axis=0, ignore_index=True)
     # homos = _df_match.loc[vals, col_to]
     if len(null) >= 1:
-        print(f'the following have no homologies:\n{null}')
+        logging.warning(f'the following have no homologies:\n{null}')
     if uniquelist:
         homos = pd.unique(homos[col_to].values)
         return list(homos) + null if with_null else homos
@@ -794,7 +794,7 @@ def pivot_to_sparse(rows: Sequence, cols: Sequence,
         if rownames is not None:
             tmp = set(rownames)
             r_kept = list(map(lambda x: x in tmp, rows))
-            print(sum(r_kept))
+            logging.debug(sum(r_kept))
         else:
             r_kept = np.ones_like(rows).astype(bool)
         if colnames is not None:
@@ -803,7 +803,7 @@ def pivot_to_sparse(rows: Sequence, cols: Sequence,
         else:
             c_kept = np.ones_like(rows).astype(bool)
         kept = np.minimum(r_kept, c_kept)
-        print(len(kept), sum(kept))
+        logging.debug(len(kept), sum(kept))
         rows, cols, data = rows[kept], cols[kept], data[kept]
 
     (rownames, ii), (colnames, jj) = list(map(

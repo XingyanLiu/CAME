@@ -4,6 +4,7 @@ Created on Fri Oct 23 12:31:28 2020
 
 @author: Xingyan Liu
 """
+import logging
 from typing import Union, Mapping, Sequence, Optional
 from pathlib import Path
 
@@ -1284,7 +1285,7 @@ def multipartite_layout(
         layers[layer] = [v] + layers.get(layer, [])
 
     nodes_per_layer = [len(item[1]) for item in layers.items()]
-    print(nodes_per_layer)
+    logging.info("nodes per layer: {nodes_per_layer}")
     max_nodes = max(nodes_per_layer)
     thd = max_nodes * int(spread_nodes)
     pos = None

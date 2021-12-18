@@ -347,14 +347,13 @@ def compute_group_eigens(X, labels, groups=None, whiten=False, **kwds):
     corrs = []
     for lb in groups:
         ind = labels == lb
-        #        print(ind)
         if sum(ind) == 1:
-            print(f'skipping class {lb} with only one sample.')
+            logging.info(f'skipping class {lb} with only one sample.')
             v = X[ind, :].flatten()
             corrs.append(np.array([1]))
             eigens[lb] = v
             continue
-        print(lb)
+        # print(lb)
         v, corr = _compute_svd_eigen_corr(X[ind, :], whiten=whiten, **kwds)
         eigens[lb] = v
         corrs.append(corr.flatten())
@@ -367,17 +366,21 @@ def compute_group_eigens(X, labels, groups=None, whiten=False, **kwds):
 
 # =================[ module extraction ]=================
 def _filter_for_abstract(
-        var_labels1, var_labels2,
-        avg_expr1, avg_expr2,
-        df_var_links,
+        var_labels1: pd.Series,
+        var_labels2: pd.Series,
+        avg_expr1: pd.DataFrame,
+        avg_expr2: pd.DataFrame,
+        df_var_links: pd.DataFrame,
         name=None):
     if name is None:
-        kept1, kept2 = tuple(map(pd.notna, (var_labels1, var_labels2)))
+        foo_filter = pd.notna
     else:
-        kept1, kept2 = tuple(map(
-            lambda x: x != name, (var_labels1, var_labels2)))
+        foo_filter = lambda x: x != name
+    kept1 = var_labels1.apply(foo_filter)# list(map(foo_filter, var_labels1))
+    kept2 = var_labels2.apply(foo_filter)#list(map(foo_filter, var_labels2))
 
     var_labels1, var_labels2 = var_labels1[kept1], var_labels2[kept2]
+    # var_labels1, var_labels2 = np.take(var_labels1, kept1), np.take(var_labels2, kept2)
     avg_expr1, avg_expr2 = avg_expr1[kept1], avg_expr2[kept2]
     vars1, vars2 = avg_expr1.index, avg_expr2.index
     kept_index = list(filter(
@@ -385,7 +388,7 @@ def _filter_for_abstract(
         df_var_links.index.values
     ))
     df_var_links = df_var_links.loc[kept_index, :]
-    print(kept1.sum(), kept2.sum())
+    # print(sum(kept1), sum(kept1))
     return var_labels1, var_labels2, avg_expr1, avg_expr2, df_var_links,
 
 
@@ -635,7 +638,7 @@ def nx_from_adata(
     g = nx.Graph()
     g.add_nodes_from(nodes)
     g.add_edges_from(edges)
-    print(nx.info(g))
+    logging.info(nx.info(g))
     return g
 
 
@@ -803,15 +806,18 @@ def write_graph_cyjs(g, fp='tmp.ctjs', return_dct=False, attrs=None, **kwds):
 
 
 def make_abstracted_graph(
-        obs_labels1, obs_labels2,
-        var_labels1, var_labels2,
-        avg_expr1, avg_expr2,
-        df_var_links,
+        obs_labels1: Sequence,
+        obs_labels2: Sequence,
+        var_labels1: pd.Series,
+        var_labels2: pd.Series,
+        avg_expr1: pd.DataFrame,
+        avg_expr2: pd.DataFrame,
+        df_var_links: pd.DataFrame,
         tags_obs=('', ''),
         tags_var=('', ''),
         key_weight: str = 'weight',
         # key_count='size',
-        key_identity: str = 'identity',
+        # key_identity: str = 'identity',
         cut_ov: float = 0.,  # 0.55,
         norm_mtd_ov: Optional[str] = 'zs',  # 'max',
         global_adjust_ov: bool = True,
@@ -834,6 +840,21 @@ def make_abstracted_graph(
 
     df_var_links
         the linkage-weights between homologous genes
+    tags_obs
+        a tuple of two strings, for specifying homologous cel-types from
+        different species.
+        For example, if set ``tags_obs=('human ', 'mouse ')``, the result
+        node names (for 'T cell') will be 'human T cell' and 'mouse T cell',
+        respectively.
+    tags_var
+        a tuple of two strings, for specifying gene modules from different
+        species.
+        For example, if set ``tags_obs=('human module ', 'mouse module ')``,
+        the result node names (for gene module '1') will be 'human module 1'
+        and 'mouse module 1', respectively.
+    key_weight
+        column name in ``df_var_links``, specifying weights between each pair
+         of variables.
     cut_ov
         the threshold to cut edges with values lower than it.
     norm_mtd_ov
@@ -915,21 +936,8 @@ def make_abstracted_graph(
         var_labels2, var_group_order2, tag=tag_var2,
         return_df=True)
 
-    df_vnodes1, df_vnodes2 = list(map(lambda x: x.set_index(key_identity),
-                                      [df_vnodes1, df_vnodes2]))
-
-    # var-weights abstraction #
-    edges_vv, adj_vv = abstract_vv_edges(
-        df_var_links,  # res.var_link_weights,
-        var_labels1,
-        var_labels2,
-        # norm_sizes=(df_vnodes1[key_count], df_vnodes2[key_count]),
-        return_full_adj=True,
-        global_adjust=global_adjust_vv,
-        key_weight=key_weight,
-        tag_var1=tag_var1,
-        tag_var2=tag_var2,
-        **kwds)
+    # df_vnodes1, df_vnodes2 = list(map(lambda x: x.set_index(key_identity),
+    #                                   [df_vnodes1, df_vnodes2]))
 
     # graph construction #
     g = nx_multipartite_graph(
@@ -1228,6 +1236,7 @@ def abstract_nodes(labels,  # df, groupby,
 
     """
     #    labels = df[groupby]
+    labels = pd.Series(labels)
     if group_ord is None:
         df_nodes = labels.value_counts().to_frame(key_count)
     else:
