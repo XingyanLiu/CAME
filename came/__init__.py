@@ -44,6 +44,7 @@ from .datapair import (
         AlignedDataPair,
 )
 from .PARAMETERS import get_model_params, get_loss_params
+from . import pipeline
 from .pipeline import __test1__, __test2__
 
 
