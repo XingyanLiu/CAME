@@ -229,7 +229,7 @@ class Trainer(BaseTrainer):
               use_class_weights=True,
               params_lossfunc={},
               n_pass=100,
-              eps=1e-4,
+              eps=5e-3,
               cat_class='cell',
               device=None,
               backup_stride: int = 43,

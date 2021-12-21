@@ -63,7 +63,7 @@ _params_model = dict(
 
 _params_lossfunc = dict(
     smooth_eps=0.1, reduction='mean',
-    beta=1,  # balance factor for multi-label loss
+    beta=1.,  # balance factor for multi-label loss
     alpha=0,  # for R-drop, setting it larger than zero
 )
 
