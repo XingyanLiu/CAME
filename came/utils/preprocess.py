@@ -2061,3 +2061,128 @@ def get_leiden_labels(adata, hvgs=None,
     lbs = adata.obs[key_added]
     logging.info("Leiden results:\n%s", lbs.value_counts())
     return lbs
+
+
+def augment_full_repeat(
+        x: np.ndarray,
+        y: np.ndarray = None,
+        n_add: int = 10,
+        seed: int = 1234,
+):
+    # This function do NOT consider the groups labeled in y
+    n0 = x.shape[0]
+    np.random.seed(seed)
+    ids_repeat = np.random.choice(n0, size=n_add, replace=True)
+    if sparse.issparse(x):
+        x_pseudo = x[ids_repeat, ]
+    else:
+        x_pseudo = np.take(x, ids_repeat, axis=0)
+    y_pseudo = np.take(y, ids_repeat, axis=0) if y is not None else None
+    return x_pseudo, y_pseudo
+
+
+def augment_balance_group_repeat(
+        x: np.ndarray,
+        y: np.ndarray,
+        n_tot_each: int = 1000,
+        groups: Optional[Sequence] = None,
+        concat: bool = True,
+        seed: int = 1234,
+):
+    # TODO: in case that y has multi-dimensions
+    # groups = np.unique(y, axis=0)
+    groups = set(groups) if groups else set(y)
+    groups = sorted(groups)
+    x_is_sparse = sparse.issparse(x)
+    if not x_is_sparse:
+        x = np.asarray(x)
+    y = np.asarray(y)
+    x_pseudo_all, y_pseudo_all = [], []
+    for lb in groups:
+        ids = np.flatnonzero(y == lb)
+        _n_add = n_tot_each - len(ids)
+        if _n_add <= 0:
+            continue
+        else:
+            logging.debug(lb)
+            _x = x[ids, ]
+            _y = np.take(y, ids, axis=0)
+            _x_pseudo, _y_pseudo = augment_full_repeat(
+                _x, _y, n_add=_n_add, seed=seed)
+        x_pseudo_all.append(_x_pseudo)
+        y_pseudo_all.append(_y_pseudo)
+    if len(x_pseudo_all) == 1:
+        logging.warning(f"Only one group {groups[0]} was found!")
+        x_pseudo_all = x_pseudo_all[0]
+        y_pseudo_all = y_pseudo_all[0]
+    else:
+        if x_is_sparse:
+            x_pseudo_all = sparse.vstack(x_pseudo_all)
+        else:
+            x_pseudo_all = np.concatenate(x_pseudo_all, axis=0)
+        y_pseudo_all = np.concatenate(y_pseudo_all, axis=0)
+    if concat:
+        x_aug, y_aug, is_pseudo = _concat_x_and_y(
+        [x, y], [x_pseudo_all, y_pseudo_all])
+        is_pseudo = is_pseudo.astype(bool)
+        return x_aug, y_aug, is_pseudo
+    else:
+        return x_pseudo_all, y_pseudo_all
+
+
+def _concat_x_and_y(xy1, xy2):
+    x1, y1 = xy1
+    x2, y2 = xy2
+    n1, n2 = x1.shape[0], x2.shape[0]
+    if sparse.issparse(x1):
+        x = sparse.vstack([x1, x2])
+    else:
+        x = np.concatenate([x1, x2], axis=0)
+    y = np.concatenate([y1, y2], axis=0)
+    is_pseudo = np.array([False] * n1 + [True] * n2)
+    return x, y, is_pseudo
+
+
+def augment_repeat_adata(
+        adata: sc.AnnData,
+        key_y: str or int,  # column name in adata.obs
+        n_tot_each: int = 1000,
+        groups: Optional[Sequence] = None,
+        concat: bool = True,
+        seed: int = 1234,
+        id_prefix: str = 'aug',
+):
+    x = adata.X
+    y = adata.obs[key_y].values  # group labels
+    key_pseudo = 'is_pseudo'
+    x_pseudo, y_pseudo = augment_balance_group_repeat(
+        x, y, n_tot_each, groups=groups, concat=False, seed=seed,
+    )
+    ids_pseudo = [f'{id_prefix}.{i}' for i in range(x_pseudo.shape[0])]
+    obs_pseudo = pd.DataFrame({
+        key_y: y_pseudo, key_pseudo: True,
+    }, index=ids_pseudo)
+
+    if concat:
+        adata.obs[key_pseudo] = False
+        return sc.AnnData(
+            sparse.vstack([x, x_pseudo]),
+            obs=pd.concat([adata.obs, obs_pseudo], axis=0),
+            var=adata.var, )
+    else:
+        return sc.AnnData(x_pseudo, obs=obs_pseudo, var=adata.var, )
+
+
+def __test__():
+    fp = '/Users/yanyan/PycharmProjects/CAME/came/sample_data/raw-Baron_mouse.h5ad'
+    adt = sc.read_h5ad(fp)
+    key = 'cell_ontology_class'
+    print(adt.obs[key].value_counts())
+    adt = augment_repeat_adata(
+        adt, key_y=key, n_tot_each=100,
+        # groups=None,
+        groups=['T cell'],
+    )
+    print(adt.obs[key].value_counts())
+    print(adt.obs['is_pseudo'].value_counts())
+
