@@ -2063,7 +2063,7 @@ def get_leiden_labels(adata, hvgs=None,
     return lbs
 
 
-def augment_full_repeat(
+def _augment_full_repeat(
         x: np.ndarray,
         y: np.ndarray = None,
         n_add: int = 10,
@@ -2081,7 +2081,7 @@ def augment_full_repeat(
     return x_pseudo, y_pseudo
 
 
-def augment_balance_group_repeat(
+def _augment_balance_group_repeat(
         x: np.ndarray,
         y: np.ndarray,
         n_tot_each: int = 1000,
@@ -2107,8 +2107,8 @@ def augment_balance_group_repeat(
             logging.debug(lb)
             _x = x[ids, ]
             _y = np.take(y, ids, axis=0)
-            _x_pseudo, _y_pseudo = augment_full_repeat(
-                _x, _y, n_add=_n_add, seed=seed)
+            _x_pseudo, _y_pseudo = _augment_full_repeat(_x, _y, n_add=_n_add,
+                                                        seed=seed)
         x_pseudo_all.append(_x_pseudo)
         y_pseudo_all.append(_y_pseudo)
     if len(x_pseudo_all) == 1:
@@ -2155,9 +2155,9 @@ def augment_repeat_adata(
     x = adata.X
     y = adata.obs[key_y].values  # group labels
     key_pseudo = 'is_pseudo'
-    x_pseudo, y_pseudo = augment_balance_group_repeat(
-        x, y, n_tot_each, groups=groups, concat=False, seed=seed,
-    )
+    x_pseudo, y_pseudo = _augment_balance_group_repeat(x, y, n_tot_each,
+                                                       groups=groups,
+                                                       concat=False, seed=seed)
     ids_pseudo = [f'{id_prefix}.{i}' for i in range(x_pseudo.shape[0])]
     obs_pseudo = pd.DataFrame({
         key_y: y_pseudo, key_pseudo: True,
