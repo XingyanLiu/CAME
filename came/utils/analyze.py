@@ -178,10 +178,14 @@ def weight_linked_vars(
         the metric to quantify the similarities of the given vectors (embeddings)
     sort
         whether to sort by the resulting weights
+    index_names
+        a pair of names for the multi-index of the resulting DataFrame.
+        e.g., a pair of dataset or species names (in cross-species scenario)
     
     Returns
     -------
-    a pd.DataFrame with columns [``names[0]``, ``names[1]``, "distance", "weight"]
+    a pd.DataFrame with columns
+    [``index_names[0]``, ``index_names[1]``, "distance", "weight"]
     """
     adj = sparse.triu(adj).tocoo()
 
@@ -1047,9 +1051,9 @@ def aggregate_links(
     if keys_link is not None:
         df_links = df_links.set_index(keys_link)
 
-    #    print(key_weight, df_links, sep='\n')
+    # print(key_weight, df_links, sep='\n')
     _data = df_links[key_weight] if key_weight in df_links.columns else None
-    #    print(_data)
+    # print(_data)
     adj_var, rnames, cnames = pp.pivot_to_sparse(
         rows=df_links.index.get_level_values(0),
         cols=df_links.index.get_level_values(1),
@@ -1058,7 +1062,7 @@ def aggregate_links(
     # make sure the labels are correctly ordered
     lbs1 = np.array([labels1[r] for r in rnames])  # var_labels1[rnames]
     lbs2 = np.array([labels2[c] for c in cnames])
-    #    print(pd.value_counts(lbs1, dropna=False))
+    # print(pd.value_counts(lbs1, dropna=False))
     aggregated = pp.agg_group_edges(
         adj_var, lbs1, lbs2, groups1=None, groups2=None, )
 
@@ -1114,7 +1118,6 @@ def abstract_ov_edges(
         var_labels,
         norm_method=None,
         norm_axis=1,
-        groupby_var='__temp_labels__',  # 'module',
         tag_var='',
         tag_obs='',
         cut=0.,
@@ -1136,6 +1139,7 @@ def abstract_ov_edges(
         df = pp.wrapper_normalize(df, method=norm_method, axis=norm_axis)
 
     # averaged by varible-groups
+    groupby_var = '__temp_labels__'
     df[groupby_var] = var_labels
     df_avg = df.groupby(groupby_var).mean()
     df_avg.dropna(inplace=True)
