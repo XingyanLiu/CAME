@@ -824,6 +824,7 @@ def make_abstracted_graph(
         # key_identity: str = 'identity',
         cut_ov: float = 0.,  # 0.55,
         norm_mtd_ov: Optional[str] = 'zs',  # 'max',
+        ov_norm_first: bool = True,
         global_adjust_ov: bool = True,
         global_adjust_vv: bool = True,
         vargroup_filtered='filtered',
@@ -886,6 +887,7 @@ def make_abstracted_graph(
         norm_method=norm_mtd_ov,
         cut=cut_ov,
         tag_var=tag_var1, tag_obs=tag_obs1,
+        norm_first=ov_norm_first,
         global_adjust=global_adjust_ov,
         return_full_adj=True)
     edges_ov2, avg_vo2 = abstract_ov_edges(
@@ -893,6 +895,7 @@ def make_abstracted_graph(
         norm_method=norm_mtd_ov,
         cut=cut_ov,
         tag_var=tag_var2, tag_obs=tag_obs2,
+        norm_first=ov_norm_first,
         global_adjust=global_adjust_ov,
         return_full_adj=True)
     # print('---> avg_vo1\n', avg_vo1)
@@ -1154,10 +1157,13 @@ def abstract_ov_edges(
         if isinstance(cut, Sequence):
             df_avg[df_avg <= cut[0]] = 0
             df_avg[df_avg > cut[1]] = cut[1]
-            print(f'Edges with weights out of range {cut} were cut out '
-                  f'or clipped')
+            logging.warning(
+                f'Edges with weights out of range {cut} were cut out '
+                f'or clipped')
         else:
             df_avg[df_avg <= cut] = 0
+            logging.warning(
+                f'Edges with weights lower than {cut} were cut out')
 
     if global_adjust:
         df_avg /= df_avg.max().max()
@@ -1201,11 +1207,13 @@ def adj_to_edges(
         if isinstance(cut, Sequence):
             df_edge = df_edge[df_edge[key_data] > cut[0]]
             df_edge[df_edge[key_data] > cut[1]] = cut[1]
-            print(f'Edges with weights out of range {cut} were cut out '
-                  f'or clipped')
+            logging.warning(
+                f'Edges with weights out of range {cut} were cut out '
+                f'or clipped')
         else:
             df_edge = df_edge[df_edge[key_data] > cut]
-            print(f'Edges with weights lower than {cut} were cut out.')
+            logging.warning(
+                f'Edges with weights lower than {cut} were cut out.')
     if as_attrs:
         edge_attrs = make_nx_input_from_df(df_edge, key_id=[key_row, key_col])
         return edge_attrs
