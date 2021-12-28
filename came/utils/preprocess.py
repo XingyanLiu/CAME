@@ -1688,6 +1688,7 @@ def group_mean_dense(
     tmp = pd.DataFrame(X)
     tmp[index_name] = list(labels)
     avgs = tmp.groupby(index_name).mean()
+    del tmp[index_name]
     # print(avgs.shape)
     return avgs.T[classes]  # each column as a group
 

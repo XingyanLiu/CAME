@@ -215,13 +215,16 @@ the feature dimensionality.</p></li>
 <li><p><strong>names</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – a sequence of names for rows of <cite>X</cite>, of shape (N,)</p></li>
 <li><p><strong>metric</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the metric to quantify the similarities of the given vectors (embeddings)</p></li>
 <li><p><strong>sort</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to sort by the resulting weights</p></li>
+<li><p><strong>index_names</strong> – a pair of names for the multi-index of the resulting DataFrame.
+e.g., a pair of dataset or species names (in cross-species scenario)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>a pd.DataFrame with columns [<code class="docutils literal notranslate"><span class="pre">names[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">names[1]</span></code>, “distance”, “weight”]</p>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>a pd.DataFrame with columns</em></p></li>
+<li><p>[<code class="docutils literal notranslate"><span class="pre">index_names[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">index_names[1]</span></code>, “distance”, “weight”]</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>

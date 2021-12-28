@@ -697,7 +697,11 @@ def embed_with_values(
 
     xlabel = f'{name_xy}1'
     ylabel = f'{name_xy}2'
-    for ax, cname in zip(axs.flatten(), cnames):
+    if hasattr(axs, 'flatten'):
+        axs_flatten = axs.flatten()
+    else:
+        axs_flatten = np.array([axs])
+    for ax, cname in zip(axs_flatten, cnames):
         v = list(values[cname])
         sorted_scatter(x, y, v, s=s, ax=ax,
                        title=cname,
@@ -705,7 +709,7 @@ def embed_with_values(
                        vmin=vmin, vmax=vmax,
                        with_cbar=with_cbar,
                        xlabel=xlabel, ylabel=ylabel, **kwargs)
-    for ax in axs.flatten()[n_plots:]:
+    for ax in axs_flatten[n_plots:]:
         ax.set_frame_on(False)
         ax.grid(False)
         # remove y and x ticks
