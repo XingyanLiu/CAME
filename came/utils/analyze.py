@@ -171,7 +171,8 @@ def weight_linked_vars(
         feature matrix of shape (N, M), where N is the number of sample and M is
         the feature dimensionality.
     adj: 
-        sparse.spmatrix; binary adjacent matrix of shape (N, N).
+        sparse.spmatrix; binary adjacent matrix of shape (N, N). Note that only
+        the upper triangle of the matrix will be considered!
     names: 
         a sequence of names for rows of `X`, of shape (N,)
     metric:
@@ -977,9 +978,7 @@ def abstract_vv_edges(
         in df_links.columns, indicating the edge columns. 
         Otherwise, the `df_links.index` should be `pd.MultiIndex` to indicate 
         the source and target edges.
-        This can also be output form ResultsAnalyzer.weight_linked_vars(), 
-        or the stored attribute `ResultsAnalyzer.var_link_weights`
-    
+
     keys_link:
         If `keys_edge` is provided, it should be a tuple of 2 column-names
         in df_links.columns, indicating the edge columns.
@@ -1034,9 +1033,7 @@ def aggregate_links(
         in df_links.columns, indicating the edge columns. 
         Otherwise, the `df_links.index` should be `pd.MultiIndex` to indicate 
         the source and target edges.
-        This can also be output form ResultsAnalyzer.weight_linked_vars(), 
-        or the stored attribute `ResultsAnalyzer.var_link_weights`
-    
+
     labels1, labels2:
         grouping labels for the rows and columns, respectively.
         

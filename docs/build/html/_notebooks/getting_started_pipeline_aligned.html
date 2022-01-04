@@ -556,7 +556,7 @@ a new directory made:
 <p>Load scRNA-seq datasets.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ========= load data =========</span>
 <span class="n">df_varmap</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_varmap</span><span class="p">)</span>
-<span class="n">df_varmap_1v1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_varmap_1v1</span><span class="p">)</span> <span class="k">if</span> <span class="n">path_varmap_1v1</span> <span class="k">else</span> <span class="n">came</span><span class="o">.</span><span class="n">take_1v1_matches</span><span class="p">(</span><span class="n">df_varmap</span><span class="p">)</span>
+<span class="n">df_varmap_1v1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_varmap_1v1</span><span class="p">)</span> <span class="k">if</span> <span class="n">path_varmap_1v1</span> <span class="k">else</span> <span class="n">came</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">take_1v1_matches</span><span class="p">(</span><span class="n">df_varmap</span><span class="p">)</span>
 
 <span class="n">adata_raw1</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">path_rawdata1</span><span class="p">)</span>
 <span class="n">adata_raw2</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">path_rawdata2</span><span class="p">)</span>
@@ -960,8 +960,8 @@ figure has been saved into:
         _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.13.20)\figs\heatmap_probas.pdf
 </pre></div></div>
 </div>
-<div class="section" id="Laod-other-checkpont-(optional)">
-<h3>Laod other checkpont (optional)<a class="headerlink" href="#Laod-other-checkpont-(optional)" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="Load-other-checkpoint-(optional)">
+<h3>Load other checkpoint (optional)<a class="headerlink" href="#Load-other-checkpoint-(optional)" title="Permalink to this headline">¶</a></h3>
 <p>You can load other model checkpoint if the default model is not satisfying.</p>
 <p>For example, load the last checkpoint and compute the results of it:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">outputs</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">gather_came_results</span><span class="p">(</span>
