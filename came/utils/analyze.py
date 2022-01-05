@@ -1393,8 +1393,10 @@ def wrapper_contingency_mat(y_true, y_pred,
     ...        y_true, y_pred, eps=eps, sparse=assparse)
     """
     if eps is not None and sparse:
-        raise ValueError("Cannot set 'eps' when sparse=True")
-
+        raise Warning("Cannot set 'eps' when sparse=True")
+    # to avoid mix-type error when taking unique, transform all labels to str
+    y_true = [str(x) for x in y_true]
+    y_pred = [str(x) for x in y_pred]
     classes, class_idx = np.unique(y_true, return_inverse=True)
     clusters, cluster_idx = np.unique(y_pred, return_inverse=True)
     n_classes = classes.shape[0]
