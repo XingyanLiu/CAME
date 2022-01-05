@@ -65,7 +65,7 @@ def main_for_aligned(
         n_pass: int = 100,
         batch_size: Optional[int] = None,
         pred_batch_size: Union[int, str, None] = 'auto',
-        plot_results: bool = True,
+        plot_results: bool = False,
         norm_target_sum: Optional[float] = None,
         save_hidden_list: bool = True,
         save_dpair: bool = True,
@@ -247,33 +247,24 @@ def main_for_aligned(
         obs_ids2 = detach2numpy(trainer.test_idx)
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
         if key_class2 == 'clust_lbs':
-            labels_cat = obs['celltype']
+            # labels_cat = obs['celltype']
+            key_true = 'celltype'
             acc_tag = ''
         else:
-            labels_cat = obs["REF"]
+            # labels_cat = obs["REF"]
+            key_true = 'REF'
             acc_tag = f'(acc{test_acc:.1%})'
-        cl_preds = obs['predicted']
+        # cl_preds = obs['predicted']
+        try:
+            plot_class_results(
+                obs, obs_ids1, obs_ids2,
+                key_true=key_true, key_pred='predicted',
+                figdir=figdir, acc_tag=acc_tag, classes=classes,
+                df_probs=outputs['df_probs']
+            )
+        except Exception as e:
+            logging.warning(f'An error occurred when plotting results: {e}')
 
-        # confusion matrix OR alluvial plot
-        sc.set_figure_params(fontsize=10)
-        ax, contmat = pl.plot_contingency_mat(
-            labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
-            fp=figdir / f'contingency_matrix{acc_tag}.png',
-        )
-        pl.plot_confus_mat(
-            labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
-            fp=figdir / f'contingency_matrix-train.png',
-        )
-
-        # heatmap of predicted probabilities
-        df_probs = outputs['df_probs']
-        gs = pl.wrapper_heatmap_scores(
-            df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
-            col_label='celltype', col_pred='predicted',
-            n_subsample=50,
-            cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
-            fp=figdir / f'heatmap_probas.pdf'
-        )
     return outputs
 
 
@@ -297,7 +288,7 @@ def main_for_unaligned(
         n_pass: int = 100,
         batch_size: Optional[int] = None,
         pred_batch_size: Union[int, str, None] = 'auto',
-        plot_results: bool = True,
+        plot_results: bool = False,
         norm_target_sum: Optional[float] = None,
         save_hidden_list: bool = True,
         save_dpair: bool = True,
@@ -487,26 +478,61 @@ def main_for_unaligned(
         obs_ids2 = detach2numpy(trainer.test_idx)
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
         if key_class2 == 'clust_lbs':
-            labels_cat = obs['celltype']
+            # labels_cat = obs['celltype']
+            key_true = 'celltype'
             acc_tag = ''
         else:
-            labels_cat = obs["REF"]
+            # labels_cat = obs["REF"]
+            key_true = 'REF'
             acc_tag = f'(acc{test_acc:.1%})'
-        cl_preds = obs['predicted']
+        # cl_preds = obs['predicted']
+        try:
+            plot_class_results(
+                obs, obs_ids1, obs_ids2,
+                key_true=key_true, key_pred='predicted',
+                figdir=figdir, acc_tag=acc_tag, classes=classes,
+                df_probs=outputs['df_probs']
+            )
+        except Exception as e:
+            logging.warning(f'An error occurred when plotting results: {e}')
 
-        # confusion matrix OR alluvial plot
-        sc.set_figure_params(fontsize=10)
-        ax, contmat = pl.plot_contingency_mat(
-            labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
-            fp=figdir / f'contingency_matrix{acc_tag}.png',
-        )
-        pl.plot_confus_mat(
-            labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
-            fp=figdir / f'contingency_matrix-train.png',
-        )
+    return outputs
 
-        # heatmap of predicted probabilities
-        df_probs = outputs['df_probs']
+
+def plot_class_results(
+        obs, obs_ids1, obs_ids2,
+        key_true='REF', key_pred='predicted',
+        figdir=Path('.'),
+        acc_tag: str = '',
+        classes: Sequence = None,
+        df_probs: pd.DataFrame = None,
+):
+    # obs_ids1 = detach2numpy(trainer.train_idx)
+    # obs_ids2 = detach2numpy(trainer.test_idx)
+    # test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
+    # if key_class2 == 'clust_lbs':
+    #     labels_cat = obs['celltype']
+    #     acc_tag = ''
+    # else:
+    #     labels_cat = obs["REF"]
+    #     acc_tag = f'(acc{test_acc:.1%})'
+    labels_cat = obs[key_true]
+    cl_preds = obs[key_pred]
+
+    # confusion matrix OR alluvial plot
+    sc.set_figure_params(fontsize=10)
+    ax, contmat = pl.plot_contingency_mat(
+        labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
+        fp=figdir / f'contingency_matrix{acc_tag}.png',
+    )
+    pl.plot_confus_mat(
+        labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
+        fp=figdir / f'contingency_matrix-train.png',
+    )
+
+    # heatmap of predicted probabilities
+    # df_probs = outputs['df_probs']
+    if df_probs is not None:
         gs = pl.wrapper_heatmap_scores(
             df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
             col_label='celltype', col_pred='predicted',
@@ -514,8 +540,6 @@ def main_for_unaligned(
             cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
             fp=figdir / f'heatmap_probas.pdf'
         )
-
-    return outputs
 
 
 def gather_came_results(
@@ -921,7 +945,8 @@ def __test1__(n_epochs: int = 5, batch_size=None, reverse=False):
         resdir=resdir,
         n_pass=100,
         params_model=dict(residual=False),
-        batch_size=batch_size
+        batch_size=batch_size,
+        plot_results=True,
     )
 
     del _
@@ -978,6 +1003,7 @@ def __test2__(n_epochs: int = 5, batch_size=None, reverse=False):
         n_pass=100,
         params_model=dict(residual=False),
         batch_size=batch_size,
+        plot_results=True,
     )
 
     del _

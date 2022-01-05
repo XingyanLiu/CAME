@@ -220,6 +220,8 @@ def plot_confus_mat(y_true, y_pred, classes_on=None,
                     **kwargs):
     """ by default, normalized by row (true classes)
     """
+    y_true = list(map(str, y_true))
+    y_pred = list(map(str, y_pred))
     if classes_on is None:
         classes_on = list(set(y_true).union(y_pred))
 
