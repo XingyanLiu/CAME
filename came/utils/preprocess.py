@@ -2015,7 +2015,7 @@ def compute_and_get_DEGs(adata: sc.AnnData,
     if not inplace:
         logging.info('making a copy')
         adata = adata.copy()
-
+    adata.obs[groupby] = adata.obs[groupby].astype('category')
     if force_redo or key_added not in adata.uns.keys():
         logging.info(f'computing differentially expressed genes using {method}')
         if do_normalize:
