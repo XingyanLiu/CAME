@@ -397,32 +397,6 @@ def _filter_for_abstract(
     return var_labels1, var_labels2, avg_expr1, avg_expr2, df_var_links,
 
 
-def module_scores(adata, groupby='module',
-                  neighbor_key=None,
-                  min_nodes=3, ):
-    _, conn = get_adata_neighbors(adata, neighbor_key)
-    labels = adata.obs[groupby]
-    degrees = (conn > 0).sum(1).A.flatten()
-    #    avg_degree = degrees.mean()
-    nets = dict()
-    density = dict()
-    memberships = np.zeros_like(degrees, dtype=float)  # .astype(float)
-    for lb in pd.unique(labels):
-        #        print(lb.center(80, '-'))
-        inds = np.flatnonzero(labels == lb)
-        subnet = conn[inds, :][:, inds]
-        nets[lb] = subnet
-        _degrees = degrees[inds]
-        memberships[inds] = subnet.sum(1).A.flatten() / _degrees  # [inds]
-
-        if len(inds) <= min_nodes:
-            density[lb] = -1
-        else:
-            density[lb] = subnet.nnz / _degrees.sum()
-
-    return density, memberships
-
-
 def _net_density(mat: sparse.spmatrix):
     n, m = mat.shape
     if n == m:
@@ -434,58 +408,6 @@ def _net_density(mat: sparse.spmatrix):
     else:
         nnz = (mat != 0).sum()
     return nnz / max_nnz
-
-
-def _extract_modules(
-        adata, nneigh=10,
-        metric='cosine', use_rep='X',
-        resolution=0.6, key_added='module',
-        method='leiden', copy=False,
-        force_redo=False,
-        **kwds):
-    """
-    build a KNN-graph, and detect modules using 'leiden' or 'louvain' algorithm.
-    * `use_rep='X'` indicates the `adata.X` should be the reducted embeddings.
-    * method should either be 'leiden' or 'louvain'
-    
-    output: 
-        mod: a pd.DataFrame indexed by `adata.obs_names` with columns: 
-            ['module', 'degree']
-        mod_conn: inter-module-connection
-    """
-    adata = adata.copy() if copy else adata
-    cluster_func = {'leiden': sc.tl.leiden,
-                    'louvain': sc.tl.louvain}[method]
-
-    if 'connectivities' not in adata.obsp.keys() or force_redo:
-        sc.pp.neighbors(adata, metric=metric,
-                        n_neighbors=nneigh, use_rep=use_rep)
-
-    cluster_func(adata, resolution=resolution,
-                 key_added=key_added,
-                 **kwds)
-
-    # compute 
-    dist, conn0 = get_adata_neighbors(adata, )
-    conn = pp._binarize_mat(conn0)
-
-    # inter-module-connection
-    lbs = adata.obs[key_added]
-    inter_mod_conn = pp.agg_group_edges(
-        conn0, lbs, lbs, groups1=None, groups2=None, )
-
-    # the degrees for each node
-    adata.obs['degree'] = conn.sum(1).A1.flatten()
-
-    mod = adata.obs[[key_added, 'degree']].copy()
-
-    # re-order the modules based on the inter-module connections
-    ordered_mod = order_by_similarities(inter_mod_conn)
-    _map = dict(list(zip(ordered_mod, np.arange(len(ordered_mod)))))
-    mod[key_added] = [_map[x] for x in list(mod[key_added])]
-
-    adata.uns['inter_mod_conn'] = inter_mod_conn
-    return mod, inter_mod_conn
 
 
 def _match_groups(mod_lbs1: Union[pd.Series, Mapping],
@@ -541,15 +463,6 @@ def _match_groups(mod_lbs1: Union[pd.Series, Mapping],
         new_mod_lbs2 = pd.Categorical(new_mod_lbs2, categories=new_cats2)
 
     return new_mod_lbs1, new_mod_lbs2, mod_conn
-
-
-def order_by_similarities(sims: pd.DataFrame):
-    """
-    sims: pd.DataFrame with the same index and columns
-    """
-
-    ordered = sims.index.tolist()
-    return ordered
 
 
 def _subgroup_edges(
@@ -764,28 +677,6 @@ def export_neighbor_subgraph_df(
 """
 
 
-def set_adata_obsm(adata, X_h, key_add='X_h', copy=False):
-    """
-    key_add: which key will be added to adata.obsm
-        probably be 'X_umap', 'X_h', 'X_pca', etc.
-        
-    Examples
-    --------
-    >>> set_adata_obsm(adata, h_cell, 'X_h')
-    >>> sc.pp.neighbors(adata, metric='cosine', n_neighbors=15, use_rep='X_h')
-    >>> sc.tl.umap(adata)
-    >>> sc.pl.umap(adata, color='cell_type')
-    """
-    if copy:
-        print('Making a copy.')
-        adata = adata.copy()
-    else:
-        print('No copy was made.')
-
-    adata.obsm[key_add] = X_h
-    return adata if copy else None
-
-
 def get_adata_neighbors(adata, key: Union[str, None] = None):
     """
     getting distances and connectivities from adata
@@ -797,17 +688,6 @@ def get_adata_neighbors(adata, key: Union[str, None] = None):
         key_conn = f'{key}_' + key_conn
 
     return adata.obsp[key_dist], adata.obsp[key_conn]
-
-
-def write_graph_cyjs(g, fp='tmp.ctjs', return_dct=False, attrs=None, **kwds):
-    """ Cytoscape Json format
-    """
-    from networkx.readwrite.json_graph import cytoscape_data
-
-    dct = cytoscape_data(g, attrs)
-    save_json_dict(dct, fp, **kwds)
-    logging.info(fp)
-    return dct if return_dct else None
 
 
 def make_abstracted_graph(

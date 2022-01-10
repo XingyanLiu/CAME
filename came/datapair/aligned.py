@@ -176,16 +176,16 @@ class AlignedDataPair(object):
         """ The graph structure, of type ``dgl.Heterograph`` """
         return self._g
 
-    @property
-    def _ov_adj(self, ):
-        return sparse.vstack(self._ov_adjs)
+    # @property
+    # def _ov_adj(self, ):
+    #     return sparse.vstack(self._ov_adjs)
 
     @property
     def ov_adj(self, ):
         """ merged adjacent matrix between observation and variable nodes
             (e.g. cell-gene adjacent matrix)
         """
-        return self._ov_adj
+        return sparse.vstack(self._ov_adjs)
 
     @property
     def oo_adj(self):
@@ -429,7 +429,7 @@ class AlignedDataPair(object):
     #        return gids
     # In[]
     def make_ov_adj(self, ):
-        return self._ov_adj
+        return self.ov_adj
 
     def make_whole_net(self, selfloop_o=True, selfloop_v=True, ):
         """
@@ -616,6 +616,7 @@ class AlignedDataPair(object):
             print('self-loops for variable-nodes: {}'.format(info['selfloop_v']))
         else:
             print("graph haven't been made, run `self.make_whole_net(...)` first!")
+        print()
 
     @staticmethod
     def _set_annos(df0, df=None, ignore_index=True,

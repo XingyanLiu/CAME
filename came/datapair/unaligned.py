@@ -201,16 +201,16 @@ class DataPair(object):
         """ The graph structure, of type ``dgl.Heterograph`` """
         return self._g
 
-    @property
-    def _ov_adj(self, ):
-        return sparse.block_diag(self._ov_adjs)
+    # @property
+    # def _ov_adj(self, ):
+    #     return sparse.block_diag(self._ov_adjs)
 
     @property
     def ov_adj(self, ):
         """ merged adjacent matrix between observation and variable nodes
         (e.g. cell-gene adjacent matrix)
         """
-        return self._ov_adj
+        return sparse.block_diag(self._ov_adjs)
 
     @property
     def vv_adj(self):
@@ -521,7 +521,7 @@ class DataPair(object):
     def make_ov_adj(self, link2ord=False):
         """ observation-variable bipartite network
         """
-        ov_adj = self._ov_adj.copy()
+        ov_adj = self.ov_adj.copy()
         if link2ord:
             print('computing the second-order neighbors')
             return ov_adj + ov_adj.dot(self._vv_adj.T)
@@ -667,7 +667,7 @@ class DataPair(object):
             elif obs.shape[0] != n_obs:
                 raise ValueError(f'the number of observations are not matched '
                                  f'expect {n_obs}, got {obs.shape[0]}.')
-            print(obs.columns)
+            logging.debug(obs.columns)
             return obs
 
         obs1 = _check_obs(obs1, self.n_obs1, )  # self.dataset_names[0]
@@ -744,6 +744,7 @@ class DataPair(object):
             print('self-loops for variable-nodes: {}'.format(info['selfloop_v']))
         else:
             print("graph haven't been made, call `self.make_whole_net(...)` first!")
+        print()
 
     @staticmethod
     def _set_annos(df0, df=None, ignore_index=True,
