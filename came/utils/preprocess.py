@@ -498,7 +498,7 @@ def change_names(names: Sequence,
     return list(map(foo_change, names, **kwargs))
 
 
-def get_homologues(df_match: pd.DataFrame,
+def get_homologies(df_match: pd.DataFrame,
                    vals: Sequence,
                    cols: Union[None, Sequence[str]] = None,  # [col_from, col_to]
                    reverse: bool = False,
