@@ -703,6 +703,7 @@ def embed_with_values(
         axs_flatten = axs.flatten()
     else:
         axs_flatten = np.array([axs])
+    s = 6000 / len(x) if s is None else s
     for ax, cname in zip(axs_flatten, cnames):
         v = list(values[cname])
         sorted_scatter(x, y, v, s=s, ax=ax,
