@@ -407,7 +407,7 @@ def weight_linked_vars_by_expr(
     # there may be species-specific genes with zero-expressions in the other species
     df_var_links_expr['weight'] = df_var_links_expr['weight'].fillna(0.)
     df_var_links_expr['distance'] = df_var_links_expr['distance'].fillna(1.)
-    return df_var_links_expr
+    return df_var_links_expr, avg
 
 
 def weight_linked_vars(
