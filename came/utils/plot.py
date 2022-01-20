@@ -1059,7 +1059,7 @@ def umap_with_annotates(
     _texts = [ax.text(x, y, t, {'fontsize': anno_fontsize}) for x, y, t in
               zip(xs, ys, texts)]
     adjust_text(_texts, ax=ax, arrowprops=dict(arrowstyle='-', color='k'))
-    _save_with_adjust(fig, fp)
+    _save_with_adjust(ax.figure, fp)
     return ax
 
 
