@@ -149,8 +149,265 @@ def _infer_ckpt(dirname) -> int:
     return ckpt
 
 
-# In[]
-""" link-weights between homologous gene pairs """
+def module_homo_weights(
+        var: Union[pd.DataFrame, Sequence[pd.DataFrame]],
+        df_links: pd.DataFrame,
+        module,
+        key_module='module',
+        key_split='dataset',
+        key_name='name',
+        include_private=False):
+    """ extract the weights between homologous genes in the given module
+
+    Parameters
+    ----------
+    var
+        a DataFrame or a pair of DataFrames storing the annotations of variables
+        (genes), should be with columns {`key_module`, `key_split`, `key_name`}
+    df_links
+        a DataFrame recording the weights between each pair of homologies.
+    module
+        module name, e.g. '0', '1', ...
+    key_module
+        column name in var, of which the module-identities are stored
+    key_split
+        a column name in var, to split by (if var is a single DataFrame).
+    key_name
+        a column name in var, storing gene names
+    include_private
+        whether to include the weights (filled by zeros) between
+        dataset/species-specific genes
+
+    Returns
+    -------
+    a list of weights between homologous genes in the given module.
+    """
+    if isinstance(var, pd.DataFrame):
+        if isinstance(module, str):
+            var[key_module] = var[key_module].astype(str)
+        from .base import split_df
+        var1, var2 = split_df(var, by=key_split)
+    elif isinstance(var, Sequence):
+        var1, var2 = var
+    else:
+        raise ValueError(
+            "`var` should be either a pd.DataFrame or a pair of DataFrames")
+    genes1 = var1[var1[key_module] == module][key_name]
+    genes2 = var2[var2[key_module] == module][key_name]
+    if isinstance(df_links.index, pd.MultiIndex):
+        df_links = df_links.reset_index()
+    df_sub = pp.subset_matches(df_links, genes1, genes2)
+    weights = df_sub['weight'].tolist()
+
+    if include_private:
+        genes_private1 = [g for g in genes1 if g not in df_sub.iloc[:, 0]]
+        genes_private2 = [g for g in genes2 if g not in df_sub.iloc[:, 1]]
+        print(len(weights), len(genes_private1), len(genes_private2))
+        weights = weights + [0.] * (len(genes_private1) + len(genes_private2))
+
+    return weights
+
+
+def compute_common_private(
+        genes1: Sequence,  # Union[Sequence, Mapping[str, Sequence]],
+        genes2: Sequence,  # Union[Sequence, Mapping[str, Sequence]],
+        gmap: pd.DataFrame, ):
+    """
+
+    Parameters
+    ----------
+    genes1, genes2
+        gene sets
+    gmap
+        a DataFrame with at least two columns, storing homologous gene mappings
+
+    Returns
+    -------
+    record: dict
+    """
+    # genes1 = dct_deg1[cl]
+    # genes2 = dct_deg2[cl]
+    # deg1homo = pp.get_homologies(gmap, dct_deg1[cl], )
+    # common = sorted(set(deg1homo).intersection(genes2))  # wrong way!
+    record = {}
+    gmap_1v1 = pp.take_1v1_matches(gmap)
+    if len(gmap_1v1) != len(gmap):
+        subdf_varmap_1v1 = pp.subset_matches(gmap_1v1, genes1, genes2)
+        record.update({
+            "common1v1": subdf_varmap_1v1.apply(tuple, axis=1).tolist()
+        })
+    subdf_varmap = pp.subset_matches(gmap, genes1, genes2)
+    deg_common1 = subdf_varmap.iloc[:, 0].tolist()
+    deg_common2 = subdf_varmap.iloc[:, 1].tolist()
+
+    private1 = [g for g in genes1 if genes1 not in deg_common1]
+    private2 = [g for g in genes2 if genes2 not in deg_common2]
+    record.update({
+        # 'common1v1': subdf_varmap_1v1.apply(tuple, axis=1).tolist(),
+        'common1': deg_common1,
+        'common2': deg_common2,
+        'private1': private1,
+        'private2': private2,
+    })
+    return record
+
+
+def arrange_modules(
+        mod_labels1, mod_labels2,
+        df_var_links,
+        avg_scaled=None,
+        # key_module='module'
+):
+    """
+    Compute common and private genes in each gene module.
+    If `avg_scaled` is provided, the module genes enriched in each cell-type
+    will be computed and compared.
+    """
+    # mod_labels1 = gadt1.obs[key_module]
+    # mod_labels2 = gadt2.obs[key_module]
+    all_modules = sorted(
+        set(mod_labels1).union(mod_labels2),
+        key=lambda x: int(x))
+    record = {}
+    for mod in all_modules:
+        genes1 = mod_labels1[mod_labels1 == mod].index
+        genes2 = mod_labels2[mod_labels2 == mod].index
+        df_sub = pp.subset_matches(df_var_links.reset_index(), genes1, genes2)
+        print(f'module {mod}:', len(genes1), len(genes2))
+
+        genes_common01 = df_sub.iloc[:, 0]
+        genes_common02 = df_sub.iloc[:, 1]
+        record[mod] = {
+            'genes1': genes1.tolist(),
+            'genes2': genes2.tolist(),
+            # there may be duplicated genes
+            'genes_common1': genes_common01.tolist(),
+            'genes_common2': genes_common02.tolist(),
+            'weights_common': df_sub['weight'].tolist(),
+        }
+        if isinstance(avg_scaled, pd.DataFrame):
+            record_each_cl = module_enrichment_for_classes(
+                avg_scaled, genes1, genes2,
+                genes_common1=genes_common01,
+                genes_common2=genes_common02)
+            # record[mod].update(record_each_cl)
+            record[mod]['cls'] = record_each_cl
+    return record
+
+
+def module_enrichment_for_classes(
+        avg_scaled,
+        mod_genes1, mod_genes2,
+        genes_common1=None, genes_common2=None,
+        gmap=None,
+        **kwargs
+):
+    """
+    For each (cell-)type and the given gene set (module) of two species,
+    calculate the relatively highly expressed genes, and find those genes that
+    are highly expressed in both species, and species-specific gene.
+
+    Note that `genes_common1` and `genes_common2` should be of the same length
+    """
+    classes = avg_scaled.columns
+    avg_scaled1 = avg_scaled.loc[mod_genes1]
+    avg_scaled2 = avg_scaled.loc[mod_genes2]
+
+    record = {}
+    for cl in classes:
+        # expr1 = avg_scaled.loc[mod_genes1, cl]
+        # expr2 = avg_scaled.loc[mod_genes2, cl]
+        expr1, expr2 = avg_scaled1[cl], avg_scaled2[cl]
+
+        cl_genes1 = expr1[expr1 >= 1.].index
+        cl_genes2 = expr2[expr2 >= 1.].index
+
+        expr_common1 = avg_scaled.loc[genes_common1, cl].values
+        expr_common2 = avg_scaled.loc[genes_common2, cl].values
+
+        indicator = (expr_common1 >= 1.) & (expr_common2 >= 1.)  # 同时高表达的基因
+        cl_genes_common1 = genes_common1[indicator].tolist()
+        cl_genes_common2 = genes_common2[indicator].tolist()
+
+        genes_private1 = sorted(set(cl_genes1).difference(cl_genes_common1))
+        genes_private2 = sorted(set(cl_genes2).difference(cl_genes_common2))
+        record[cl] = {
+            'cl_genes_common1': cl_genes_common1,
+            'cl_genes_common2': cl_genes_common2,
+            'genes_private1': genes_private1,
+            'genes_private2': genes_private2,
+        }
+    return record
+
+
+def weight_linked_vars_by_expr(
+        dpair: DataPair,
+        labels_or_probs: Union[tuple, np.ndarray, pd.DataFrame],
+):
+    """ Compute the weights between homologies by their average expressions
+    across (cell) groups.
+
+    Parameters
+    ----------
+    dpair
+        the ``DataPair`` object
+    labels_or_probs
+        group (cell-type) labels or soft assignments (probabilities)
+
+    Returns
+    -------
+    df_var_links_expr: pd.DataFrame
+        the weights between each pair of homologous genes
+    avg: pd.DataFrame
+        concatenated average expressions
+
+    """
+    index_names = dpair.dataset_names
+    if not isinstance(labels_or_probs, pd.DataFrame):
+        # using the original labels
+        # labels1 = adt.obs['celltype'][dpair.obs_ids1]
+        # labels2 = adt.obs['celltype'][dpair.obs_ids2]
+        if isinstance(labels_or_probs, tuple) and len(labels_or_probs) == 2:
+            labels1, labels2 = labels_or_probs
+        else:
+            labels = labels_or_probs
+            labels1, labels2 = labels[dpair.obs_ids1], labels[dpair.obs_ids2]
+        _avg1 = pp.group_mean(dpair._ov_adjs[0], labels1,
+                              features=dpair.vnode_names1)
+        _avg2 = pp.group_mean(dpair._ov_adjs[1], labels2,
+                              features=dpair.vnode_names2)
+        avg = pd.concat([_avg1, _avg2], axis=0).fillna(0.)
+
+        classes_common = sorted(set(_avg1.columns).intersection(_avg2.columns))
+        avg = avg[classes_common]
+    else:
+        logging.info("Compute average expression by soft group-assignment")
+        df_probs = labels_or_probs
+        probs = df_probs.values
+        classes = df_probs.columns
+        # probs = came.as_probabilities(out_cell, mode='softmax')
+        _avg_soft1 = pd.DataFrame(
+            dpair._ov_adjs[0].T.dot(probs[dpair.obs_ids1]) / probs[
+                dpair.obs_ids1].sum(axis=0),
+            index=dpair.vnode_names1, columns=classes
+        )
+        _avg_soft2 = pd.DataFrame(
+            dpair._ov_adjs[1].T.dot(probs[dpair.obs_ids2]) / probs[
+                dpair.obs_ids2].sum(axis=0),
+            index=dpair.vnode_names2, columns=classes
+        )
+
+        avg = pd.concat([_avg_soft1, _avg_soft2], axis=0)  # .fillna(0)
+
+    df_var_links_expr = weight_linked_vars(
+        avg.values,
+        dpair._vv_adj, names=dpair.get_vnode_names(),
+        matric='correlation', index_names=index_names,
+    )
+    # there may be species-specific genes with zero-expressions in the other species
+    df_var_links_expr['weight'] = df_var_links_expr['weight'].fillna(0.)
+    df_var_links_expr['distance'] = df_var_links_expr['distance'].fillna(1.)
+    return df_var_links_expr
 
 
 def weight_linked_vars(
@@ -162,7 +419,7 @@ def weight_linked_vars(
         sigma: Optional[float] = None,
         sort: bool = True,
         index_names=(0, 1),
-        **kwds):
+        **ignored) -> pd.DataFrame:
     """ Computes the similarity of each linked (homologous) pair of variables.
 
     Parameters
@@ -185,8 +442,8 @@ def weight_linked_vars(
     
     Returns
     -------
-    a pd.DataFrame with columns
-    [``index_names[0]``, ``index_names[1]``, "distance", "weight"]
+    df: pd.DataFrame
+        with columns [``index_names[0]``, ``index_names[1]``, "distance", "weight"]
     """
     adj = sparse.triu(adj).tocoo()
 
@@ -402,7 +659,8 @@ def nx_from_adata(
     """ nx.Graph from the KNN graph of `adata`
     """
     node_data = adata.obs if keys_attr is None else adata.obs[keys_attr]
-    edges = edges_from_adata(adata, 'conn', as_attrs=True)
+    edges = edges_from_adata(
+        adata, 'conn', key_neigh=key_neigh, as_attrs=True)
     nodes = make_nx_input_from_df(node_data)
     g = nx.Graph()
     g.add_nodes_from(nodes)

@@ -36,6 +36,25 @@ def _capital_strs(strs):
     return [s.capitalize() for s in strs]
 
 
+def split_df(df: pd.DataFrame, by: str):
+    """ Split a DataFrame into multiple ones by the given column
+
+    Parameters
+    ----------
+    df
+        the DataFrame to split
+    by
+        a column name in df, to group and split by.
+
+    >>> var1, var2 = split_df(var, 'dataset')
+    """
+    res = []
+    labels = df[by].unique()
+    for lb in labels:
+        res.append(df[df[by] == lb].copy())
+    return res
+
+
 def save_pickle(obj, fpath):
     """ save the object into a .pickle file
     """
@@ -62,6 +81,15 @@ def check_dirs(path):
     else:
         os.makedirs(path)
         print('a new directory made:\n\t%s' % path)
+
+
+def dict_struct(d, pref='|-',):
+    """visualize the structure of a dict"""
+    if not hasattr(d, 'items'):
+        return
+    for k, v in d.items():
+        print(f'{pref}{k}')
+        dict_struct(v, '  ' + pref)
 
 
 def write_info(fn, **dicts):
