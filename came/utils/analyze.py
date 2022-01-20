@@ -255,13 +255,19 @@ def compute_common_private(
 def arrange_modules(
         mod_labels1, mod_labels2,
         df_var_links,
-        avg_scaled=None,
+        avg_scaled: Optional[Sequence[pd.DataFrame]] = None,
         # key_module='module'
 ):
     """
     Compute common and private genes in each gene module.
     If `avg_scaled` is provided, the module genes enriched in each cell-type
     will be computed and compared.
+
+    avg_scaled:
+        if provided, should be a pair of DataFrame storing the average
+        expressions for each dataset (species), and the index should be
+        the gene names.
+
     """
     # mod_labels1 = gadt1.obs[key_module]
     # mod_labels2 = gadt2.obs[key_module]
@@ -273,7 +279,7 @@ def arrange_modules(
         genes1 = mod_labels1[mod_labels1 == mod].index
         genes2 = mod_labels2[mod_labels2 == mod].index
         df_sub = pp.subset_matches(df_var_links.reset_index(), genes1, genes2)
-        print(f'module {mod}:', len(genes1), len(genes2))
+        logging.info(f'module {mod}: {len(genes1)}, {len(genes2)}')
 
         genes_common01 = df_sub.iloc[:, 0]
         genes_common02 = df_sub.iloc[:, 1]
@@ -285,9 +291,10 @@ def arrange_modules(
             'genes_common2': genes_common02.tolist(),
             'weights_common': df_sub['weight'].tolist(),
         }
-        if isinstance(avg_scaled, pd.DataFrame):
+        if avg_scaled is not None:
+            avg_scaled1, avg_scaled2 = avg_scaled
             record_each_cl = module_enrichment_for_classes(
-                avg_scaled, genes1, genes2,
+                avg_scaled1, avg_scaled2, genes1, genes2,
                 genes_common1=genes_common01,
                 genes_common2=genes_common02)
             # record[mod].update(record_each_cl)
@@ -296,10 +303,9 @@ def arrange_modules(
 
 
 def module_enrichment_for_classes(
-        avg_scaled,
+        avg_scaled1, avg_scaled2,
         mod_genes1, mod_genes2,
-        genes_common1=None, genes_common2=None,
-        gmap=None,
+        genes_common1, genes_common2,
         **kwargs
 ):
     """
@@ -309,9 +315,11 @@ def module_enrichment_for_classes(
 
     Note that `genes_common1` and `genes_common2` should be of the same length
     """
-    classes = avg_scaled.columns
-    avg_scaled1 = avg_scaled.loc[mod_genes1]
-    avg_scaled2 = avg_scaled.loc[mod_genes2]
+    # concatenated avg_scaled should be split, for there may be gene-name
+    # collisions that will raise error when indexing by names.
+    classes = sorted(set(avg_scaled1.columns).union(avg_scaled2.columns))
+    avg_scaled1 = avg_scaled1.loc[mod_genes1]
+    avg_scaled2 = avg_scaled2.loc[mod_genes2]
 
     record = {}
     for cl in classes:
@@ -322,8 +330,8 @@ def module_enrichment_for_classes(
         cl_genes1 = expr1[expr1 >= 1.].index
         cl_genes2 = expr2[expr2 >= 1.].index
 
-        expr_common1 = avg_scaled.loc[genes_common1, cl].values
-        expr_common2 = avg_scaled.loc[genes_common2, cl].values
+        expr_common1 = avg_scaled1.loc[genes_common1, cl].values
+        expr_common2 = avg_scaled2.loc[genes_common2, cl].values
 
         indicator = (expr_common1 >= 1.) & (expr_common2 >= 1.)  # 同时高表达的基因
         cl_genes_common1 = genes_common1[indicator].tolist()
