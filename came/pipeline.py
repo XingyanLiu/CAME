@@ -683,7 +683,7 @@ def preprocess_aligned(
         n_pcs: int = 30,
         nneigh_scnet: int = 5,
         nneigh_clust: int = 20,
-        ntop_deg: int = 50,
+        ntop_deg: Optional[int] = 50,
         key_clust: str = 'clust_lbs',
         node_source: str = 'hvg,deg'
 ):
@@ -799,7 +799,7 @@ def preprocess_unaligned(
         n_pcs: int = 30,
         nneigh_scnet: int = 5,
         nneigh_clust: int = 20,
-        ntop_deg: int = 50,
+        ntop_deg: Optional[int] = 50,
         key_clust: str = 'clust_lbs',
         node_source: str = 'hvg,deg',
 ):
@@ -933,6 +933,7 @@ def __test1__(n_epochs: int = 5, batch_size=None, reverse=False):
         key_class=key_class,
         df_varmap_1v1=df_varmap_1v1,
         node_source='deg,hvg',
+        ntop_deg=50,
     )
 
     _ = main_for_aligned(
@@ -988,6 +989,7 @@ def __test2__(n_epochs: int = 5, batch_size=None, reverse=False):
         adatas,
         key_class=key_class,
         node_source='deg,hvg',
+        ntop_deg=50,
     )
 
     _ = main_for_unaligned(

@@ -1939,8 +1939,10 @@ def get_hvgs(adata, force_redo=False, batch_key=None,
     return list(all_vars[is_hvg])
 
 
-def get_marker_info_table(adata, groups=None,
-                          key='rank_genes_groups'):
+def get_marker_info_table(
+        adata, groups=None, key='rank_genes_groups',
+        cut_padj: float = 0.01,
+):
     result = adata.uns[key]
     if groups is None:
         groups = result['names'].dtype.names
@@ -1952,8 +1954,10 @@ def get_marker_info_table(adata, groups=None,
             key: result[key][group] for key in cols
         })
         _df['group'] = group
+        if cut_padj is not None:
+            _df = _df[_df['pvals_adj'] <= cut_padj].copy()
         dfs.append(_df[['group'] + cols])
-    df = pd.concat(dfs, axis=0)
+    df = pd.concat(dfs, axis=0, keys=groups)
     return df
 
 
@@ -1991,9 +1995,19 @@ def top_markers_from_df(marker_df, n=5, groups=None, unique=True, ):
 def top_markers_from_adata(adata: sc.AnnData,
                            n=5, groups=None,
                            unique=True,
+                           cut_padj=0.05,
                            key='rank_genes_groups'):
-    df = get_marker_name_table(adata, key=key)
-    return top_markers_from_df(df, n=n, groups=groups, unique=unique)
+    df_info = get_marker_info_table(adata, groups, key=key, cut_padj=cut_padj)
+
+    if n is None:
+        if unique:
+            return df_info['names'].unique().tolist()
+        return df_info['names'].tolist()
+    else:
+        names = df_info.groupby('group').apply(lambda x: x.head(n))['names']
+        return names.unique().tolist() if unique else names.tolist()
+        # df = get_marker_name_table(adata, key=key)
+        # return top_markers_from_df(df, n=n, groups=groups, unique=unique)
 
 
 def compute_and_get_DEGs(adata: sc.AnnData,
