@@ -5,7 +5,7 @@ Created on Fri Oct 23 12:31:28 2020
 @author: Xingyan Liu
 """
 import logging
-from typing import Union, Mapping, Sequence, Optional
+from typing import Union, Mapping, Sequence, Optional, Callable
 from pathlib import Path
 
 import networkx as nx
@@ -183,10 +183,57 @@ def alluvial_plot(
     return ax
 
 
-# In[]
+def plot_stacked_bar(
+        df, norm=True, figsize=(6, 4),
+        colors=None,
+        cmap: Union[str, Callable] = 'tab20b',
+        legend_loc=(1.02, 0.01),
+):
+    """ helper function for visualizing the group compositions (e.g., in
+    each stage).
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+    norm: bool
+        whether to normalize each row to unit-sum.
+    figsize: tuple
+    colors: Sequence
+    cmap: Union[str, Callable]
+        color-map function or color-map name
+    legend_loc: tuple
+        legend location
+    Returns
+    -------
+
+    """
+    if norm:
+        df = df.apply(lambda x: x / x.sum(), axis=1)
+
+    groups = list(df.columns)
+    x = list(df.index)
+    if colors is None:
+        if cmap is None:
+            cmap_func = plt.cm.get_cmap(cmap, len(groups))
+        elif hasattr(cmap, '__call__'):
+            cmap_func = cmap
+        else:
+            raise ValueError('cmap should be either Callable or str')
+        colors = [cmap_func(i) for i, _ in enumerate(groups)]
+
+    fig, ax = plt.subplots(figsize=figsize)
+    bott = df[groups[0]]
+    ax.bar(x, bott, label=groups[0], color=colors[0])
+    for i, c in enumerate(groups[1:]):
+        height = df[c].fillna(0.)
+        ax.bar(x, height, bottom=bott, label=c, color=colors[i + 1])
+        bott += height
+
+    ax.legend(loc=legend_loc)
+    return ax
+
+
 # functions for plotting confusion or contingency matrix
-
-
 def plot_contingency_mat(
         y_true, y_pred,
         norm_axis=1,
