@@ -789,6 +789,7 @@ def datapair_from_adatas(
         union_node_feats: Union[str, bool] = 'auto',
         dataset_names: Sequence[str] = ('reference', 'query'),
         with_single_vnodes: bool = True,
+        node_feat_duplicate: bool = False,
         **kwds
 ) -> DataPair:
     """
@@ -868,10 +869,13 @@ def datapair_from_adatas(
 
     # --- deal with variable mapping dataframe
     if df_varmap_1v1 is None:
-        logging.info(
-            '1-to-1 mapping between variables (`df_varmap_1v1`) is not '
-            'provided, extracting from `df_varmap`')
-        df_varmap_1v1 = utp.take_1v1_matches(df_varmap)
+        if not node_feat_duplicate:
+            logging.info(
+                '1-to-1 mapping between variables (`df_varmap_1v1`) is not '
+                'provided, extracting from `df_varmap`')
+            df_varmap_1v1 = utp.take_1v1_matches(df_varmap)
+        else:
+            df_varmap_1v1 = df_varmap
     # --- connection between variables from 2 datasets
     vars_all1, vars_all2 = adata_raw1.var_names, adata_raw2.var_names
     submaps = utp.subset_matches(df_varmap, vars_nodes1, vars_nodes2, union=True)
@@ -893,7 +897,9 @@ def datapair_from_adatas(
     var2 = adata2.var.copy().loc[vnodes2, :]
 
     # --- node features
-    if union_node_feats == 'auto' and sum(map(len, vars_use)) < 3000:
+    submaps_1v1_commom = utp.subset_matches(
+        df_varmap_1v1, vars_use1, vars_use2, union=False)
+    if union_node_feats == 'auto' and submaps_1v1_commom.shape[0] < 100:
         union_node_feats = True
     else:
         union_node_feats = False
@@ -906,8 +912,9 @@ def datapair_from_adatas(
         # print("TEST", submaps_1v1.shape)
     else:
         # (intersection of 1-1 matched features)
-        submaps_1v1 = utp.subset_matches(
-            df_varmap_1v1, vars_use1, vars_use2, union=False)
+        submaps_1v1 = submaps_1v1_commom
+        # submaps_1v1 = utp.subset_matches(
+        #     df_varmap_1v1, vars_use1, vars_use2, union=False)
     vnames_feat1, vnames_feat2 = list(zip(*submaps_1v1.values[:, :2]))
 
     try:

@@ -275,6 +275,7 @@ def main_for_unaligned(
         df_varmap: pd.DataFrame,
         df_varmap_1v1: Optional[pd.DataFrame] = None,
         scnets: Optional[Sequence[sparse.spmatrix]] = None,
+        node_feat_duplicate: bool = False,
         dataset_names: Sequence[str] = ('reference', 'query'),
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
@@ -410,6 +411,7 @@ def main_for_unaligned(
         vars_as_nodes=vars_as_nodes,
         union_node_feats='auto',
         dataset_names=dataset_names,
+        node_feat_duplicate=node_feat_duplicate,
     )
     print(dpair)
 
