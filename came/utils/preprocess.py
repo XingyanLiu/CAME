@@ -1241,7 +1241,7 @@ def _filter_mito(lst):
 
 
 def normalize_default(adata: sc.AnnData,
-                      target_sum=1e4,
+                      target_sum=None,
                       copy: bool = False,
                       log_only: bool = False,
                       force_return: bool = False, ):
@@ -1942,6 +1942,7 @@ def get_hvgs(adata, force_redo=False, batch_key=None,
 def get_marker_info_table(
         adata, groups=None, key='rank_genes_groups',
         cut_padj: float = 0.01,
+        cut_logfc: float = 0.25,
 ):
     result = adata.uns[key]
     if groups is None:
@@ -1956,6 +1957,8 @@ def get_marker_info_table(
         _df['group'] = group
         if cut_padj is not None:
             _df = _df[_df['pvals_adj'] <= cut_padj].copy()
+        if cut_logfc is not None:
+            _df = _df[_df['logfoldchanges'] >= cut_logfc].copy()
         dfs.append(_df[['group'] + cols])
     df = pd.concat(dfs, axis=0, keys=groups)
     return df

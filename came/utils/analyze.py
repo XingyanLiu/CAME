@@ -252,16 +252,22 @@ def compute_common_private(
     return record
 
 
-def arrange_modules(
+def compare_modules(
         mod_labels1, mod_labels2,
         df_var_links,
         avg_scaled: Optional[Sequence[pd.DataFrame]] = None,
         # key_module='module'
 ):
     """
-    Compute common and private genes in each gene module.
+    Compute common and private genes (cross-species) in each gene module.
     If `avg_scaled` is provided, the module genes enriched in each cell-type
     will be computed and compared.
+
+    Parameters
+    ----------
+    mod_labels1, mod_labels2: pd.Series
+        module labels
+    df_var_links: pd.DataFrame
 
     avg_scaled:
         if provided, should be a pair of DataFrame storing the average
@@ -344,6 +350,177 @@ def module_enrichment_for_classes(
             'cl_genes_common2': cl_genes_common2,
             'genes_private1': genes_private1,
             'genes_private2': genes_private2,
+        }
+    return record
+
+
+def compare_degs_seurat(
+        df_deg1, df_deg2,
+        df_map: Optional[pd.DataFrame] = None,
+        cut_padj: float = None,
+        ntop: Optional[int] = None,
+        key_group = 'cluster',
+        key_gene = 'gene',
+        key_pval = 'p_val_adj',
+):
+    """ Compare DEGs of common cell-types/clusters across datasets (or species)
+
+    Parameters
+    ----------
+    df_deg1
+        DEG table output from Seurat's function FindAllMarkers(), with columns
+        'p_val', 'avg_logFC', 'pct.1', 'pct.2', 'p_val_adj', 'cluster', 'gene'
+    df_deg2
+        DEG table output from Seurat's function FindAllMarkers(), with the same
+        format with ``df_deg1``
+    df_map
+        homologous gene mappings.
+        If not given, genes will mapped by their names (case sensitive).
+    cut_padj
+        filter genes with adjusted-p-values lower than this value
+    ntop: Optional
+        if specified, take only top-{ntop} DEGs to compare
+
+    Returns
+    -------
+    dict of dicts
+
+    Examples
+    --------
+
+    # compute intersections and privates
+    >>> record = compare_degs_adata(df_deg1, df_deg2, df_map, cut_padj=0.05)
+    # inspect the results
+    >>> pd.DataFrame(record)
+    >>> pd.DataFrame(record).applymap(lambda x: len(set(x)))
+
+    """
+    # sorted by p-values
+    df_deg1 = df_deg1.groupby(key_group).apply(
+        lambda x: x.sort_values(key_pval)).reset_index(drop=True)
+    df_deg2 = df_deg2.groupby(key_group).apply(
+        lambda x: x.sort_values(key_pval)).reset_index(drop=True)
+
+    # filter DEGs that are not significant enough
+    df_deg1 = df_deg1[df_deg1[key_pval] <= cut_padj]
+    df_deg2 = df_deg2[df_deg2[key_pval] <= cut_padj]
+
+    if ntop is None:
+        dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(list).to_dict()
+        dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(list).to_dict()
+    else:
+        dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(
+            lambda x: x.head(ntop).tolist()).to_dict()
+        dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(
+            lambda x: x.head(ntop).tolist()).to_dict()
+    return compare_deg_dicts(dct_deg1, dct_deg2, df_map)
+
+
+def compare_degs_adata(
+        adata1: sc.AnnData, adata2: sc.AnnData,
+        df_map: Optional[pd.DataFrame] = None,
+        cut_padj=0.05,
+        cut_logfc=0.25,
+        ntop: Optional[int] = None,
+        key_group: str = 'group',
+        key_gene: str = 'names',
+):
+    """ Compare DEGs of common cell-types/clusters across datasets (or species)
+
+    Parameters
+    ----------
+    adata1, adata2: ``sc.AnnData`` objects whose DEGs to be compared
+    df_map
+        homologous gene mappings
+    cut_padj
+        filter genes with adjusted-p-values lower than this value
+    cut_logfc
+        filter genes with long-fold-changes higher than this value
+    ntop: Optional
+        if specified, take only top-{ntop} DEGs to compare
+    key_group
+    key_gene
+
+    Returns
+    -------
+    dict of dicts
+
+    Examples
+    --------
+    # normalize data
+    >>> pp.normalize_default(adata1)
+    >>> pp.normalize_default(adata2)
+    # compute DEGs
+    >>> sc.tl.rank_genes_groups(adata1, groupby='cell_ontology_class')
+    >>> sc.tl.rank_genes_groups(adata2, groupby='cell_ontology_class')
+    # compute intersections and privates
+    >>> record = compare_degs_adata(adata1, adata2, df_map, cut_padj=0.05)
+    # inspect the results
+    >>> pd.DataFrame(record)
+    >>> pd.DataFrame(record).applymap(lambda x: len(set(x)))
+
+    """
+    df_deg1 = pp.get_marker_info_table(
+        adata1, cut_padj=cut_padj, cut_logfc=cut_logfc)
+    df_deg2 = pp.get_marker_info_table(
+        adata2, cut_padj=cut_padj, cut_logfc=cut_logfc)
+
+    if ntop is None:
+        dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(list).to_dict()
+        dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(list).to_dict()
+    else:
+        dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(
+            lambda x: x.head(ntop).tolist()).to_dict()
+        dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(
+            lambda x: x.head(ntop).tolist()).to_dict()
+
+    return compare_deg_dicts(dct_deg1, dct_deg2, df_map)
+
+
+def compare_deg_dicts(
+        dct_deg1, dct_deg2,
+        df_map: Optional[pd.DataFrame] = None):
+    """
+
+    Parameters
+    ----------
+    dct_deg1: Dict[Any, Sequence]
+        a dict of DEG lists, where each key corresponds to a cell group.
+    dct_deg2: Dict[Any, Sequence]
+        a dict of DEG lists, where each key corresponds to a cell group.
+    df_map:
+        homologous gene mappings
+    Returns
+    -------
+    record: dict
+    """
+    common_types = sorted(set(dct_deg1.keys()).intersection(dct_deg2.keys()))
+    # gmap = df_varmap if tag_1v1 == '' else df_varmap_1v1
+
+    record = {}
+    for cl in common_types:
+        deg1 = dct_deg1[cl]
+        deg2 = dct_deg2[cl]
+        if df_map is None:
+            common1v1 = set(deg1).intersection(deg2)
+            deg_common1 = deg_common2 = common1v1
+        else:
+            subdf_varmap_1v1 = pp.subset_matches(
+                pp.take_1v1_matches(df_map), deg1, deg2)
+            common1v1 = subdf_varmap_1v1.apply(tuple, axis=1).tolist()
+
+            subdf_varmap = pp.subset_matches(df_map, deg1, deg2)
+            deg_common1 = subdf_varmap.iloc[:, 0].tolist()
+            deg_common2 = subdf_varmap.iloc[:, 1].tolist()
+
+        private1 = [g for g in deg1 if deg1 not in deg_common1]
+        private2 = [g for g in deg2 if deg2 not in deg_common2]
+        record[cl] = {
+            'common1v1': common1v1,
+            'common1': deg_common1,
+            'common2': deg_common2,
+            'private1': private1,
+            'private2': private2,
         }
     return record
 
