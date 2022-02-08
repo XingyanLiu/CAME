@@ -505,8 +505,8 @@ def heatmap_probas(
     # setting class-labels (x-ticks)
     classes = pd.unique(lbs)
     cut_loc = np.hstack(
-        [[0], np.flatnonzero(np.diff(lbs.codes))])
-    x_loc = cut_loc + np.diff(cut_loc) // 2
+        [[0], np.flatnonzero(np.diff(lbs.codes)), [len(lbs)]])
+    x_loc = cut_loc[:-1] + np.diff(cut_loc) // 2
     ax2.set_xticks(x_loc)
     if xrotation:
         ax2.set_xticklabels(classes, rotation=xrotation, ha='right')
