@@ -292,6 +292,7 @@ def subsample_each_group(
     if isinstance(group_labels, pd.Series):
         ids_all = group_labels.index
     else:
+        group_labels = np.array(group_labels)
         ids_all = np.arange(len(group_labels))
     res_ids = []
     groups = pd.unique(group_labels) if groups is None else groups
