@@ -505,8 +505,8 @@ def heatmap_probas(
     # setting class-labels (x-ticks)
     classes = pd.unique(lbs)
     cut_loc = np.hstack(
-        [[0], np.flatnonzero(np.diff(lbs.codes)), [len(lbs)]])  # // 2
-    x_loc = cut_loc[:-1] + np.diff(cut_loc) // 2
+        [[0], np.flatnonzero(np.diff(lbs.codes))])
+    x_loc = cut_loc + np.diff(cut_loc) // 2
     ax2.set_xticks(x_loc)
     if xrotation:
         ax2.set_xticklabels(classes, rotation=xrotation, ha='right')
@@ -640,17 +640,18 @@ def wrapper_heatmap_scores(
     if ignore_index:
         df_lbs = df_lbs.copy()
         df_lbs.index = df_score.index
+    # sort samples by labels
     df_lbs = df_lbs.sort_values(cols_anno)
     if n_subsample:
         from .base import subsample_each_group
         indices = subsample_each_group(df_lbs[col_label], n_out=n_subsample)
     else:
         indices = df_lbs.index
-    cols_ordered = [c for c in sorted(df_lbs[col_pred].unique())
+    cols_ordered = [c for c in sorted(set(df_lbs[col_pred]))
                     if c in df_score.columns]
 
-    df_data = df_score.loc[indices][cols_ordered].copy()
-    lbs = df_lbs[col_label].loc[indices]
+    df_data = df_score.loc[indices, cols_ordered].copy()
+    lbs = df_lbs.loc[indices, col_label]
 
     gs = heatmap_probas(
         df_data.T, lbs, name_label=name_label,

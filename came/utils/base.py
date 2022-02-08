@@ -269,12 +269,23 @@ def subsample_each_group(
         group_labels,
         n_out=50,
         seed=0,
+        groups=None,
 ):
     """
     randomly sample indices from each group, labeled by `group_labels`.
-    and return the sampled indices.
-    
-    n_out: number of samples for each group
+    and return the sampled indices (original-order-kept).
+
+    Parameters
+    ----------
+    group_labels
+        group labels of each point
+    n_out: int
+        number of samples for each group
+    seed
+        the random seed
+    groups
+        groups to be subsampled and returned.
+        If None, all groups in `group_labels` will be subsampled
     
     """
     np.random.seed(seed)
@@ -283,8 +294,8 @@ def subsample_each_group(
     else:
         ids_all = np.arange(len(group_labels))
     res_ids = []
-
-    for lb in pd.unique(group_labels):
+    groups = pd.unique(group_labels) if groups is None else groups
+    for lb in groups:
         ids = np.flatnonzero(group_labels == lb)
         if len(ids) <= n_out:
             ids_sub = ids
