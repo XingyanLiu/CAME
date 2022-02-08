@@ -309,4 +309,4 @@ def subsample_each_group(
     #    print(list(map(len, res_ids)))
     res_ids = np.hstack(res_ids)
 
-    return np.take(ids_all, sorted(res_ids))
+    return np.take(ids_all, sorted(res_ids))  # similar to .iloc[]
