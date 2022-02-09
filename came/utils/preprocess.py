@@ -1687,10 +1687,13 @@ def group_mean_dense(
                      'proportions.')
     tmp = pd.DataFrame(X)
     tmp[index_name] = list(labels)
-    avgs = tmp.groupby(index_name).mean()
+    avgs = tmp.groupby(index_name).mean().T
     del tmp[index_name]
     # print(avgs.shape)
-    return avgs.T[classes]  # each column as a group
+    for c in classes:
+        if c not in avgs.columns:
+            avgs[c] = 0.
+    return avgs[classes]  # each column as a group
 
 
 def group_median_dense(
