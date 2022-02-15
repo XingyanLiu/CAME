@@ -1962,7 +1962,7 @@ def get_marker_info_table(
         })
         _df['group'] = group
         if cut_pts is not None and ('pts' in cols):
-            _df = _df[_df['pts'] <= cut_pts].copy()
+            _df = _df[_df['pts'] >= cut_pts].copy()
         if cut_padj is not None:
             _df = _df[_df['pvals_adj'] <= cut_padj].copy()
         if cut_logfc is not None:
