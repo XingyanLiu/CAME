@@ -1944,20 +1944,25 @@ def get_hvgs(adata, force_redo=False, batch_key=None,
 
 def get_marker_info_table(
         adata, groups=None, key='rank_genes_groups',
-        cut_padj: float = 0.01,
-        cut_logfc: float = 0.25,
+        cut_padj: Optional[float] = 0.05,
+        cut_logfc: Optional[float] = 0.25,
+        cut_pts: Optional[float] = None,
 ):
     result = adata.uns[key]
     if groups is None:
         groups = result['names'].dtype.names
 
     dfs = []
-    cols = ['names', 'logfoldchanges', 'pvals', 'pvals_adj', 'scores']
+    cols = ['names', 'logfoldchanges', 'pvals', 'pvals_adj', 'scores',
+            'pts', 'pts_rest', ]
+    cols = [c for c in cols if c in result.keys()]
     for group in groups:
         _df = pd.DataFrame({
             key: result[key][group] for key in cols
         })
         _df['group'] = group
+        if cut_pts is not None and ('pts' in cols):
+            _df = _df[_df['pts'] >= cut_pts].copy()
         if cut_padj is not None:
             _df = _df[_df['pvals_adj'] <= cut_padj].copy()
         if cut_logfc is not None:
@@ -2048,6 +2053,7 @@ def compute_and_get_DEGs(adata: sc.AnnData,
             adata = remove_adata_small_groups(adata, key=groupby, min_samples=1)
         sc.tl.rank_genes_groups(adata, groupby=groupby,
                                 key_added=key_added,
+                                pts=True,
                                 method=method,
                                 **kwds)
     return top_markers_from_adata(adata, n=n,
