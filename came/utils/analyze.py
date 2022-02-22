@@ -256,6 +256,7 @@ def compare_modules(
         mod_labels1, mod_labels2,
         df_var_links,
         avg_scaled: Optional[Sequence[pd.DataFrame]] = None,
+        zscore_cut: float = 1.,
         # key_module='module'
 ):
     """
@@ -270,9 +271,12 @@ def compare_modules(
     df_var_links: pd.DataFrame
 
     avg_scaled:
-        if provided, should be a pair of DataFrame storing the average
+        If provided, should be a pair of DataFrame storing the average
         expressions for each dataset (species), and the index should be
         the gene names.
+    zscore_cut
+        Cut-off of expression z-scores. This will be ignored if ``avg_scaled``
+        is not provided.
 
     Returns
     -------
@@ -306,7 +310,9 @@ def compare_modules(
             record_each_cl = module_enrichment_for_classes(
                 avg_scaled1, avg_scaled2, genes1, genes2,
                 genes_common1=genes_common01,
-                genes_common2=genes_common02)
+                genes_common2=genes_common02,
+                zscore_cut=zscore_cut,
+            )
             # record[mod].update(record_each_cl)
             record[mod]['cls'] = record_each_cl
     return record
@@ -316,6 +322,7 @@ def module_enrichment_for_classes(
         avg_scaled1, avg_scaled2,
         mod_genes1, mod_genes2,
         genes_common1, genes_common2,
+        zscore_cut: float = 1.,
         **kwargs
 ):
     """
@@ -337,8 +344,8 @@ def module_enrichment_for_classes(
         # expr2 = avg_scaled.loc[mod_genes2, cl]
         expr1, expr2 = avg_scaled1[cl], avg_scaled2[cl]
 
-        cl_genes1 = expr1[expr1 >= 1.].index
-        cl_genes2 = expr2[expr2 >= 1.].index
+        cl_genes1 = expr1[expr1 >= zscore_cut].index
+        cl_genes2 = expr2[expr2 >= zscore_cut].index
 
         expr_common1 = avg_scaled1.loc[genes_common1, cl].values
         expr_common2 = avg_scaled2.loc[genes_common2, cl].values
