@@ -56,7 +56,7 @@ Preprocessing ``came.pp.*``
    make_bipartite_adj
    take_1v1_matches
    subset_matches
-   get_homologues
+   get_homologies
    take_adata_groups
    remove_adata_groups
    merge_adata_groups

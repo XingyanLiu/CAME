@@ -48,7 +48,7 @@ KET_CLUSTER = 'clust_lbs'
 
 
 def main_for_aligned(
-        adatas: sc.AnnData,
+        adatas: Sequence[sc.AnnData],
         vars_feat: Sequence,
         vars_as_nodes: Optional[Sequence] = None,
         scnets: Optional[Sequence[sparse.spmatrix]] = None,
@@ -269,7 +269,7 @@ def main_for_aligned(
 
 
 def main_for_unaligned(
-        adatas: sc.AnnData,
+        adatas: Sequence[sc.AnnData],
         vars_feat: Sequence[Sequence],
         vars_as_nodes: Sequence[Sequence],
         df_varmap: pd.DataFrame,
@@ -277,7 +277,7 @@ def main_for_unaligned(
         scnets: Optional[Sequence[sparse.spmatrix]] = None,
         union_node_feats: bool = True,
         keep_non1v1_feats: bool = False,
-        non1v1_trans_to: int = 0,  # only in {0, 1}
+        non1v1_trans_to: int = 0,  # should only be in {0, 1}
         dataset_names: Sequence[str] = ('reference', 'query'),
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
@@ -285,7 +285,7 @@ def main_for_unaligned(
         batch_keys=None,
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
-        tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
+        tag_data: Optional[str] = None,
         params_model: dict = {},
         params_lossfunc: dict = {},
         n_pass: int = 100,
@@ -304,12 +304,12 @@ def main_for_unaligned(
     adatas
         A pair of ``sc.AnnData`` objects, the reference and query raw data
     vars_feat
-        a list or tuple of 2 variable name-lists.
+        A list or tuple of 2 variable name-lists.
         for example, differential expressed genes, highly variable features.
     vars_as_nodes: list or tuple of 2
         variables to be taken as the graph nodes
     df_varmap
-        pd.DataFrame with (at least) 2 columns.
+        A ``pd.DataFrame`` with (at least) 2 columns.
         relationships between features in 2 datasets, for making the
         adjacent matrix (`vv_adj`) between variables from these 2 datasets.
     df_varmap_1v1: None, pd.DataFrame; optional.
@@ -317,6 +317,15 @@ def main_for_unaligned(
         in 2 datasets, if not provided, it will be inferred from `df_varmap`
     scnets
         two single-cell-networks or a merged one
+    union_node_feats: bool
+        whether to take the union of the cell-node features
+    keep_non1v1_feats: bool
+        whether to take into account the non-1v1 variables as the node features.
+    non1v1_trans_to: int
+        the direction to transform non-1v1 features, should either be 0 or 1.
+        Set as 0 to transform query data to the reference (default),
+        1 to transform the reference data to the query.
+        If set ``keep_non1v1_feats=False``, this parameter will be ignored.
     dataset_names
         a tuple of two names for reference and query, respectively
     key_class1
@@ -339,7 +348,7 @@ def main_for_unaligned(
     resdir
         directory for saving results output by CAME
     tag_data
-        a tag for auto-creating result directory
+        a tag for auto-creating the result directory ``resdir``
     params_model
         the model parameters
     params_lossfunc

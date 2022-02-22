@@ -274,6 +274,10 @@ def compare_modules(
         expressions for each dataset (species), and the index should be
         the gene names.
 
+    Returns
+    -------
+    record
+
     """
     # mod_labels1 = gadt1.obs[key_module]
     # mod_labels2 = gadt2.obs[key_module]

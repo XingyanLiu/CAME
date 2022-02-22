@@ -115,7 +115,7 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.make_bipartite_adj.html">came.utils.preprocess.make_bipartite_adj</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.take_1v1_matches.html">came.utils.preprocess.take_1v1_matches</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.subset_matches.html">came.utils.preprocess.subset_matches</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.get_homologues.html">came.utils.preprocess.get_homologues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.get_homologies.html">came.utils.preprocess.get_homologies</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.take_adata_groups.html">came.utils.preprocess.take_adata_groups</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.remove_adata_groups.html">came.utils.preprocess.remove_adata_groups</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/came.utils.preprocess.merge_adata_groups.html">came.utils.preprocess.merge_adata_groups</a></li>
@@ -272,7 +272,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.pipeline.main_for_aligned.html#came.pipeline.main_for_aligned" title="came.pipeline.main_for_aligned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_for_aligned</span></code></a>(adatas, vars_feat[, …])</p></td>
 <td><p>Run the main process of CAME (model training), for integrating 2 datasets of aligned features.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/came.pipeline.main_for_unaligned.html#came.pipeline.main_for_unaligned" title="came.pipeline.main_for_unaligned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_for_unaligned</span></code></a>(adatas, vars_use, …[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.pipeline.main_for_unaligned.html#came.pipeline.main_for_unaligned" title="came.pipeline.main_for_unaligned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_for_unaligned</span></code></a>(adatas, vars_feat, …[, …])</p></td>
 <td><p>Run the main process of CAME (model training), for integrating 2 datasets of unaligned features.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.pipeline.preprocess_aligned.html#came.pipeline.preprocess_aligned" title="came.pipeline.preprocess_aligned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_aligned</span></code></a>(adatas, key_class[, …])</p></td>
@@ -322,7 +322,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.preprocess.subset_matches.html#came.utils.preprocess.subset_matches" title="came.utils.preprocess.subset_matches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset_matches</span></code></a>(df_match, left, right[, …])</p></td>
 <td><p>Take a subset of token matches (e.g., gene homologies)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.preprocess.get_homologues.html#came.utils.preprocess.get_homologues" title="came.utils.preprocess.get_homologues"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_homologues</span></code></a>(df_match, vals[, cols, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.preprocess.get_homologies.html#came.utils.preprocess.get_homologies" title="came.utils.preprocess.get_homologies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_homologies</span></code></a>(df_match, vals[, cols, …])</p></td>
 <td><p>Get the homologous gene of input ones based on the homology-mappings</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.preprocess.take_adata_groups.html#came.utils.preprocess.take_adata_groups" title="came.utils.preprocess.take_adata_groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">take_adata_groups</span></code></a>(adata, key, group_names[, …])</p></td>
@@ -351,7 +351,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.aligned_datapair_from_adatas.html#came.aligned_datapair_from_adatas" title="came.aligned_datapair_from_adatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aligned_datapair_from_adatas</span></code></a>(adatas, vars_feat)</p></td>
 <td><p>Build <code class="docutils literal notranslate"><span class="pre">AlignedDataPair</span></code> object from a pair of adatas.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/came.datapair_from_adatas.html#came.datapair_from_adatas" title="came.datapair_from_adatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datapair_from_adatas</span></code></a>(adatas, vars_use, df_varmap)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.datapair_from_adatas.html#came.datapair_from_adatas" title="came.datapair_from_adatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datapair_from_adatas</span></code></a>(adatas, vars_feat, …)</p></td>
 <td><p>Build <code class="docutils literal notranslate"><span class="pre">DataPair</span></code> object from a pair of adatas.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/came.AlignedDataPair.html#came.AlignedDataPair" title="came.AlignedDataPair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AlignedDataPair</span></code></a>(features, ov_adjs[, …])</p></td>
@@ -439,7 +439,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>
