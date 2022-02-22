@@ -561,6 +561,9 @@ def get_homologies(df_match: pd.DataFrame,
         return (homos, null) if with_null else homos
 
 
+get_homologues = get_homologies
+
+
 def subset_matches(df_match: pd.DataFrame,
                    left: Sequence,
                    right: Sequence,
@@ -2090,9 +2093,12 @@ def top_markers_from_info(
     """
     df_info: DEG-info table that can be take from `top_markers_from_adata`
     """
+    # if groups is not None:
+    #     df_info = df_info[df_info[col_group].isin(groups)]
+    subdf = df_info.groupby(col_group).apply(lambda x: x.head(n))
     if groups is not None:
-        df_info = df_info[df_info[col_group].isin(groups)]
-    names = df_info.groupby(col_group).apply(lambda x: x.head(n))[col_name]
+        subdf = subdf.loc[groups]  # filter, or keep the group orders
+    names = subdf[col_name]
     return names.unique().tolist() if unique else names.tolist()
 
 
@@ -2115,6 +2121,13 @@ def top_markers_from_adata(adata: sc.AnnData,
     else:
         # df = get_marker_name_table(adata, key=key)
         # return top_markers_from_df(df, n=n, groups=groups, unique=unique)
+        if groups is None:
+            _groupby = adata.uns[key]['params']['groupby']
+            try:
+                # to keep the group order
+                groups = adata.obs[_groupby].cat.categories
+            except:
+                pass
         return top_markers_from_info(df_info, n=n, groups=groups, unique=unique)
 
 

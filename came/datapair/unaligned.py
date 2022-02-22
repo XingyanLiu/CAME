@@ -787,7 +787,7 @@ def datapair_from_adatas(
         adatas: Sequence[sc.AnnData],
         vars_feat: Sequence[Sequence],
         df_varmap: pd.DataFrame,
-        df_varmap_1v1: Optional[pd.DataFrame] = None,
+        df_varmap_1v1: Optional[pd.DataFrame] = 'ignored',
         oo_adjs: Optional[Sequence[sparse.spmatrix]] = None,
         vars_as_nodes: Union[None, Sequence[Sequence]] = None,
         union_node_feats: bool = True,
@@ -872,15 +872,6 @@ def datapair_from_adatas(
     obs1 = adata1.obs.copy()
     obs2 = adata2.obs.copy()
 
-    # --- deal with variable mapping dataframe
-    # if df_varmap_1v1 is None:
-    #     if not node_feat_duplicate:
-    #         logging.info(
-    #             '1-to-1 mapping between variables (`df_varmap_1v1`) is not '
-    #             'provided, extracting from `df_varmap`')
-    #         df_varmap_1v1 = pp.take_1v1_matches(df_varmap)
-    #     else:
-    #         df_varmap_1v1 = df_varmap
     # --- connection between variables from 2 datasets
     vars_all1, vars_all2 = adata_raw1.var_names, adata_raw2.var_names
     submaps = pp.subset_matches(df_varmap, vars_nodes1, vars_nodes2, union=True)
@@ -953,18 +944,47 @@ def datapair_from_adatas(
 
 
 def make_features(
-        adatas, vars1, vars2,
+        adatas, vars1: Sequence, vars2: Sequence,
         df_varmap: pd.DataFrame,
         col_weight: Optional[str] = None,  # a column in ``df_varmap``
         union_node_feats: bool = True,
         keep_non1v1: bool = True,
         non1v1_trans_to: int = 0,
 ):
+    """ Decide and make a pair of aligned feature matrices for CAME input.
+
+    Parameters
+    ----------
+    adatas
+        a pair of ``sc.AnnData``
+    vars1
+        variable-names in adatas[0], as the candidates
+    vars2
+        variable-names in adatas[1], as the candidates
+    df_varmap
+        A ``pd.DataFrame`` with (at least) 2 columns.
+        variable mappings between features in the given pair of datasets.
+    col_weight
+        a column name in ``df_varmap``, used for weighted-average-transformation
+         of the non-1v1 features.
+    union_node_feats: bool
+        whether to take the union of the cell-node features
+    keep_non1v1: bool
+        whether to take into account the non-1v1 variables as the node features.
+    non1v1_trans_to: int
+        the direction to transform non-1v1 features, should either be 0 or 1.
+        Set as 0 to transform query data to the reference (default),
+        1 to transform the reference data to the query.
+        If set ``keep_non1v1_feats=False``, this parameter will be ignored.
+
+    Returns
+    -------
+    features: a tuple of length 2
+    trans: pp.AdjacentTrans
+    """
     df_varmap_1v1 = pp.take_1v1_matches(df_varmap)
 
     adata1, adata2 = adatas
-    # adata_raw1 = adata1.raw.to_adata() if adata1.raw is not None else adata1
-    # adata_raw2 = adata2.raw.to_adata() if adata2.raw is not None else adata2
     vars_all1 = pp.all_vars_of_adata(adata1)
     vars_all2 = pp.all_vars_of_adata(adata2)
     # submaps_1v1_commom = pp.subset_matches(
@@ -1003,9 +1023,11 @@ def make_features(
     trans = pp.AdjacentTrans(
         trans_adj, vars_use1, vars_use2, trans_to=non1v1_trans_to)
     if non1v1_trans_to == 0:
+        # transform to align the reference (seems tp perform better)
         feats1 = feats01
         feats2 = trans.reduce_to_align_features(feats02)
     else:
+        # transform to align the query
         feats1 = trans.reduce_to_align_features(feats01)
         feats2 = feats02
     # divide row-sums as averages
