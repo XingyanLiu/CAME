@@ -790,10 +790,11 @@ def datapair_from_adatas(
         df_varmap_1v1: Optional[pd.DataFrame] = None,
         oo_adjs: Optional[Sequence[sparse.spmatrix]] = None,
         vars_as_nodes: Union[None, Sequence[Sequence]] = None,
-        union_node_feats: Union[str, bool] = 'auto',
+        union_node_feats: bool = True,
         dataset_names: Sequence[str] = ('reference', 'query'),
         with_single_vnodes: bool = True,
         keep_non1v1_feats: bool = True,
+        non1v1_trans_to: int = 0,  # only in {0, 1}
         **kwds
 ) -> DataPair:
     """
@@ -827,7 +828,7 @@ def datapair_from_adatas(
     vars_as_nodes:
         list or tuple of 2; variables to be taken as the graph nodes
 
-    union_node_feats: bool or 'auto'
+    union_node_feats: bool
         whether to take the union of the variable-nodes
 
     dataset_names:
@@ -934,9 +935,10 @@ def datapair_from_adatas(
     # features = list(map(_check_sparse_toarray, [features1, features2]))
     features, trans = make_features(
         adatas, vars_use1, vars_use2, df_varmap, col_weight=None,
-        keep_non1v1=keep_non1v1_feats,
+        union_node_feats=union_node_feats,
+        keep_non1v1=keep_non1v1_feats, non1v1_trans_to=non1v1_trans_to,
     )
-    vnames_feat1, vnames_feat2 = trans.vars1, trans.reduce_to_align()
+    vnames_feat1, vnames_feat2 = trans.reduce_to_align()
     print("trans.shape=", trans.shape)
     return DataPair(features,
                     [ov_adjs1, ov_adjs2],
@@ -956,6 +958,7 @@ def make_features(
         col_weight: Optional[str] = None,  # a column in ``df_varmap``
         union_node_feats: bool = True,
         keep_non1v1: bool = True,
+        non1v1_trans_to: int = 0,
 ):
     df_varmap_1v1 = pp.take_1v1_matches(df_varmap)
 
@@ -964,38 +967,51 @@ def make_features(
     # adata_raw2 = adata2.raw.to_adata() if adata2.raw is not None else adata2
     vars_all1 = pp.all_vars_of_adata(adata1)
     vars_all2 = pp.all_vars_of_adata(adata2)
-
+    # submaps_1v1_commom = pp.subset_matches(
+    #     df_varmap_1v1, vars1, vars2, union=False)
+    # if union_node_feats == 'auto' and submaps_1v1_commom.shape[0] < 100:
+    #     union_node_feats = True
+    # else:
+    #     union_node_feats = False
     # union of 1v1 homologies
     submap_1v1 = pp.subset_matches(
         pp.subset_matches(df_varmap_1v1, vars_all1, vars_all2, union=False),
         vars1, vars2, union=union_node_feats,
     )
-    # non-1v1 intersections
-    submap_non = pp.subset_matches(
-        df_varmap,
-        [g for g in vars1 if g not in submap_1v1.values[:, 0]],
-        [g for g in vars2 if g not in submap_1v1.values[:, 1]],
-        union=False)
-    # put all variable-mappings together
     if keep_non1v1:
+        # non-1v1 intersections
+        submap_non = pp.subset_matches(
+            df_varmap,
+            [g for g in vars1 if g not in submap_1v1.values[:, 0]],
+            [g for g in vars2 if g not in submap_1v1.values[:, 1]],
+            union=False)
+        # put all variable-mappings together
         submap = pd.concat([submap_1v1, submap_non], axis=0)
     else:
         submap = submap_1v1
     trans_adj, vars_use1, vars_use2 = pp.pivot_df_to_sparse(
         submap, key_data=col_weight)
     try:
-        feats1 = adata1[:, vars_use1].X
-        feats2_orig = adata2[:, vars_use2].X
+        feats01 = adata1[:, vars_use1].X
+        feats02 = adata2[:, vars_use2].X
     except:  # KeyError
         logging.warning(
             '[NOTE] the node features will be extracted from `adata.raw`, '
             'please make sure that the values are normalized.\n')
-        feats1 = adata1.raw[:, vars_use1].X
-        feats2_orig = adata2.raw[:, vars_use2].X
+        feats01 = adata1.raw[:, vars_use1].X
+        feats02 = adata2.raw[:, vars_use2].X
+    trans = pp.AdjacentTrans(
+        trans_adj, vars_use1, vars_use2, trans_to=non1v1_trans_to)
+    if non1v1_trans_to == 0:
+        feats1 = feats01
+        feats2 = trans.reduce_to_align_features(feats02)
+    else:
+        feats1 = trans.reduce_to_align_features(feats01)
+        feats2 = feats02
     # divide row-sums as averages
-    feats2 = trans_adj.dot(feats2_orig.T) / trans_adj.sum(1)
-    feats2 = feats2.T
+    # feats2 = trans_adj.dot(feats02.T) / trans_adj.sum(1)
+    # feats2 = feats2.T
     assert feats1.shape[1] == feats2.shape[1]
     feats = list(map(_check_sparse_toarray, [feats1, feats2]))
     # TODO: other candidate outputs: trans_adj, submap
-    return feats, pp.AdjacentTrans(trans_adj, vars_use1, vars_use2)
+    return feats, trans

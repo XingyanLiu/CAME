@@ -821,12 +821,13 @@ def pivot_to_sparse(rows: Sequence, cols: Sequence,
 
 
 class AdjacentTrans(object):
-    def __init__(self, adj, vars1, vars2):
+    def __init__(self, adj, vars1, vars2, trans_to=0):
         assert adj.shape[0] == len(vars1)
         assert adj.shape[1] == len(vars2)
         self.adj = adj
         self.vars1 = vars1  # for rows
         self.vars2 = vars2  # for columns
+        self.trans_to = int(trans_to)  # 0 for `vars1` and 1 for `vars2`
 
     @property
     def shape(self):
@@ -839,7 +840,31 @@ class AdjacentTrans(object):
         return AdjacentTrans(adj, vars1, vars2)
 
     def reduce_to_align(self, sep='__'):
-        return reduce_to_align(self.adj, self.vars2, sep=sep)
+        trans_to = self.trans_to
+        logging.info(f"[AdjacentTrans] reduce to align, trans_to={trans_to}")
+        if trans_to == 0:
+            return self.vars1, reduce_to_align(self.adj, self.vars2, sep=sep)
+        else:
+            return reduce_to_align(self.adj.T, self.vars1, sep=sep), self.vars2
+
+    def reduce_to_align_features(self, feats):
+        """feats: a sample-by-vars matrix or (sparse) array"""
+        trans_to = self.trans_to
+        adj = self.adj
+        logging.info(
+            f"[AdjacentTrans] reduce features to align, trans_to={trans_to}")
+        if trans_to == 1:
+            adj = adj.T
+        assert feats.shape[1] == adj.shape[1]
+        feats = adj.dot(feats.T) / adj.sum(1)  # divide row-sums as averages
+        # if self.trans_to == 0:
+        #     assert feats.shape[1] == adj.shape[1]
+        #     feats = adj.dot(feats.T) / adj.sum(1)
+        # else:
+        #     adj = adj.T
+        #     assert feats.shape[1] == adj.shape[1]
+        #     feats = adj.T.dot(feats.T)
+        return feats.T
 
     def T(self):
         return AdjacentTrans(self.adj.T, self.vars2, self.vars1)
@@ -2061,7 +2086,7 @@ def top_markers_from_df(marker_df, n=5, groups=None, unique=True, ):
 def top_markers_from_info(
         df_info, n=5, groups=None, unique=True,
         col_group='group',
-        col_name='names'):
+        col_name='names') -> list:
     """
     df_info: DEG-info table that can be take from `top_markers_from_adata`
     """
@@ -2088,11 +2113,9 @@ def top_markers_from_adata(adata: sc.AnnData,
             return df_info['names'].unique().tolist()
         return df_info['names'].tolist()
     else:
-        return top_markers_from_info(df_info, n=n, groups=groups, unique=unique)
-        # names = df_info.groupby('group').apply(lambda x: x.head(n))['names']
-        # return names.unique().tolist() if unique else names.tolist()
         # df = get_marker_name_table(adata, key=key)
         # return top_markers_from_df(df, n=n, groups=groups, unique=unique)
+        return top_markers_from_info(df_info, n=n, groups=groups, unique=unique)
 
 
 def compute_and_get_DEGs(adata: sc.AnnData,
