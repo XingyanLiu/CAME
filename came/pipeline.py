@@ -275,7 +275,9 @@ def main_for_unaligned(
         df_varmap: pd.DataFrame,
         df_varmap_1v1: Optional[pd.DataFrame] = None,
         scnets: Optional[Sequence[sparse.spmatrix]] = None,
+        union_node_feats: bool = True,
         keep_non1v1_feats: bool = False,
+        non1v1_trans_to: int = 0,  # only in {0, 1}
         dataset_names: Sequence[str] = ('reference', 'query'),
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
@@ -406,9 +408,11 @@ def main_for_unaligned(
                                  df_varmap=df_varmap,
                                  df_varmap_1v1=df_varmap_1v1, oo_adjs=scnets,
                                  vars_as_nodes=vars_as_nodes,
-                                 union_node_feats=True,
+                                 union_node_feats=union_node_feats,
                                  dataset_names=dataset_names,
-                                 keep_non1v1_feats=keep_non1v1_feats)
+                                 keep_non1v1_feats=keep_non1v1_feats,
+                                 non1v1_trans_to=non1v1_trans_to,
+                                 )
     print(dpair)
 
     ENV_VARs = prepare4train(dpair, key_class=keys, batch_keys=batch_keys,)
@@ -1077,6 +1081,8 @@ def __test2__(n_epochs: int = 5, batch_size=None, reverse=False):
         key_class1=key_class,
         key_class2=key_class,
         do_normalize=True,
+        keep_non1v1_feats=True,
+        non1v1_trans_to=1,
         n_epochs=n_epochs,
         resdir=resdir,
         n_pass=100,
