@@ -974,7 +974,7 @@ def make_features(
     submap_non = pp.subset_matches(
         df_varmap,
         [g for g in vars1 if g not in submap_1v1.values[:, 0]],
-        [g for g in vars2 if g not in submap_1v1.values[:, 2]],
+        [g for g in vars2 if g not in submap_1v1.values[:, 1]],
         union=False)
     # put all variable-mappings together
     if keep_non1v1:
