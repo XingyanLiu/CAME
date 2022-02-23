@@ -790,6 +790,7 @@ def datapair_from_adatas(
         df_varmap_1v1: Optional[pd.DataFrame] = 'ignored',
         oo_adjs: Optional[Sequence[sparse.spmatrix]] = None,
         vars_as_nodes: Union[None, Sequence[Sequence]] = None,
+        union_var_nodes: bool = True,
         union_node_feats: bool = True,
         dataset_names: Sequence[str] = ('reference', 'query'),
         with_single_vnodes: bool = True,
@@ -829,8 +830,11 @@ def datapair_from_adatas(
     vars_as_nodes:
         list or tuple of 2; variables to be taken as the graph nodes
 
-    union_node_feats: bool
+    union_var_nodes: bool
         whether to take the union of the variable-nodes
+
+    union_node_feats: bool
+        whether to take the union of the observation-node-features
 
     dataset_names:
         list or tuple of 2. names to discriminate data source,
@@ -887,7 +891,8 @@ def datapair_from_adatas(
 
     # --- connection between variables from 2 datasets
     vars_all1, vars_all2 = adata_raw1.var_names, adata_raw2.var_names
-    submaps = pp.subset_matches(df_varmap, vars_nodes1, vars_nodes2, union=True)
+    submaps = pp.subset_matches(df_varmap, vars_nodes1, vars_nodes2,
+                                union=union_var_nodes)
     submaps = pp.subset_matches(submaps, vars_all1, vars_all2, union=False)
 
     if with_single_vnodes:
@@ -1022,6 +1027,13 @@ def make_features(
         submap = pd.concat([submap_1v1, submap_non], axis=0)
     else:
         submap = submap_1v1
+        if submap.shape[0] < 100:
+            logging.warning(
+                f"There are less than 100 1v1 homologous features between "
+                f"two datasets, in which case the cell-type mapping results may"
+                f" be un-satisfying. "
+                f"Consider setting the parameter `keep_non1v1` or "
+                f"`keep_non1v1_feats` as `True`!")
     trans_adj, vars_use1, vars_use2 = pp.pivot_df_to_sparse(
         submap, key_data=col_weight)
     try:
