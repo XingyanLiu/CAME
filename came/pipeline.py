@@ -275,6 +275,7 @@ def main_for_unaligned(
         df_varmap: pd.DataFrame,
         df_varmap_1v1: Optional[pd.DataFrame] = None,
         scnets: Optional[Sequence[sparse.spmatrix]] = None,
+        union_var_nodes: bool = True,
         union_node_feats: bool = True,
         keep_non1v1_feats: bool = False,
         col_weight: Optional[str] = None,
@@ -318,10 +319,13 @@ def main_for_unaligned(
         in 2 datasets, if not provided, it will be inferred from `df_varmap`
     scnets
         two single-cell-networks or a merged one
+    union_var_nodes: bool
+        whether to take the union of the variable-nodes
     union_node_feats: bool
-        whether to take the union of the cell-node features
+        whether to take the union of the observation(cell)-node features
     keep_non1v1_feats: bool
         whether to take into account the non-1v1 variables as the node features.
+        If most of the homologies are non-1v1, better set this as True!
     col_weight
         A column in ``df_varmap`` specifying the weights between homologies.
     non1v1_trans_to: int
@@ -420,6 +424,7 @@ def main_for_unaligned(
                                  df_varmap=df_varmap,
                                  df_varmap_1v1=df_varmap_1v1, oo_adjs=scnets,
                                  vars_as_nodes=vars_as_nodes,
+                                 union_var_nodes=union_var_nodes,
                                  union_node_feats=union_node_feats,
                                  dataset_names=dataset_names,
                                  keep_non1v1_feats=keep_non1v1_feats,
