@@ -277,6 +277,7 @@ def main_for_unaligned(
         scnets: Optional[Sequence[sparse.spmatrix]] = None,
         union_node_feats: bool = True,
         keep_non1v1_feats: bool = False,
+        col_weight: Optional[str] = None,
         non1v1_trans_to: int = 0,  # should only be in {0, 1}
         dataset_names: Sequence[str] = ('reference', 'query'),
         key_class1: str = 'cell_ontology_class',
@@ -309,7 +310,7 @@ def main_for_unaligned(
     vars_as_nodes: list or tuple of 2
         variables to be taken as the graph nodes
     df_varmap
-        A ``pd.DataFrame`` with (at least) 2 columns.
+        A ``pd.DataFrame`` with (at least) 2 columns; required.
         relationships between features in 2 datasets, for making the
         adjacent matrix (`vv_adj`) between variables from these 2 datasets.
     df_varmap_1v1: None, pd.DataFrame; optional.
@@ -321,6 +322,8 @@ def main_for_unaligned(
         whether to take the union of the cell-node features
     keep_non1v1_feats: bool
         whether to take into account the non-1v1 variables as the node features.
+    col_weight
+        A column in ``df_varmap`` specifying the weights between homologies.
     non1v1_trans_to: int
         the direction to transform non-1v1 features, should either be 0 or 1.
         Set as 0 to transform query data to the reference (default),
@@ -421,6 +424,7 @@ def main_for_unaligned(
                                  dataset_names=dataset_names,
                                  keep_non1v1_feats=keep_non1v1_feats,
                                  non1v1_trans_to=non1v1_trans_to,
+                                 col_weight=col_weight,
                                  )
     print(dpair)
 

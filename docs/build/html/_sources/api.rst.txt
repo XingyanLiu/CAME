@@ -108,7 +108,7 @@ Analysis
 
 
 Plotting Functions ``came.pl.*``
--------------------------------
+--------------------------------
 
 .. module:: came.utils.plot
 .. :currentmodule:: came
