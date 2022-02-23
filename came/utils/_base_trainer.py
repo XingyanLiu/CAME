@@ -20,6 +20,7 @@ SUBDIR_MODEL = '_models'
 
 
 def get_checkpoint_list(dirname):
+    """Get all saved checkpoint numbers (in the given directory)"""
     all_ckpts = [
         int(_fn.strip('weights_epoch.pt'))
         for _fn in os.listdir(dirname) if _fn.endswith('.pt')

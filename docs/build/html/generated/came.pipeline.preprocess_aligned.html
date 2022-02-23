@@ -107,6 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#plotting-functions-came-pl">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
@@ -223,7 +224,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adatas</strong> (<em>(</em><em>&lt;class 'anndata._core.anndata.AnnData'&gt;</em><em>, </em><em>&lt;class 'anndata._core.anndata.AnnData'&gt;</em><em>)</em>) – A pair of <code class="docutils literal notranslate"><span class="pre">sc.AnnData</span></code> objects, the reference and query raw data</p></li>
+<li><p><strong>adatas</strong> (<em>[</em><em>&lt;class 'anndata._core.anndata.AnnData'&gt;</em><em>, </em><em>&lt;class 'anndata._core.anndata.AnnData'&gt;</em><em>]</em>) – A pair of <code class="docutils literal notranslate"><span class="pre">sc.AnnData</span></code> objects, the reference and query raw data</p></li>
 <li><p><strong>key_class</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the key to the type-labels, should be a column name of <code class="docutils literal notranslate"><span class="pre">adatas[0].obs</span></code></p></li>
 <li><p><strong>df_varmap_1v1</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – dataframe containing only 1-to-1 correspondence between features
 in <code class="docutils literal notranslate"><span class="pre">adatas</span></code>; if not provided, map the variables of their original names.</p></li>
@@ -231,12 +232,17 @@ in <code class="docutils literal notranslate"><span class="pre">adatas</span></c
 <li><p><strong>n_pcs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the number of PCs for computing the single-cell-network</p></li>
 <li><p><strong>nneigh_scnet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the number of nearest neighbors to account for the single-cell-network</p></li>
 <li><p><strong>nneigh_clust</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the number of nearest neighbors to account for pre-clustering</p></li>
-<li><p><strong>deg_cuts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – dict with keys ‘cut_padj’, ‘cut_pts’, and ‘cut_logfc’</p></li>
+<li><p><strong>deg_cuts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – dict with keys ‘cut_padj’, ‘cut_pts’, and ‘cut_logfc’, used for
+filtering DEGs.</p></li>
 <li><p><strong>ntop_deg</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – the number of top DEGs to take as the node-features</p></li>
 <li><p><strong>ntop_deg_nodes</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – the number of top DEGs to take as the graph nodes</p></li>
 <li><p><strong>key_clust</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – where to add the per-clustering labels to the query data, i.e.,
 <code class="docutils literal notranslate"><span class="pre">adatas[1].obs</span></code>. By default, it’s set as <code class="docutils literal notranslate"><span class="pre">came.pipeline.KEY_CLUSTER</span></code></p></li>
 <li><p><strong>node_source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – source of the node genes, using both DEGs and HVGs by default</p></li>
+<li><p><strong>ext_feats</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – extra variables (genes) to be added to the auto-selected ones as the
+<strong>observation(cell)-node features</strong>.</p></li>
+<li><p><strong>ext_nodes</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – extra variables (genes) to be added to the auto-selected ones as the
+<strong>variable(gene)-nodes</strong>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

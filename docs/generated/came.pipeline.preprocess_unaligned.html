@@ -107,6 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#plotting-functions-came-pl">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
@@ -234,6 +235,15 @@
 <li><p><strong>key_clust</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – where to add the per-clustering labels to the query data, i.e.,
 <code class="docutils literal notranslate"><span class="pre">adatas[1].obs</span></code></p></li>
 <li><p><strong>node_source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – source of the node genes, using both DEGs and HVGs by default</p></li>
+<li><p><strong>ext_feats</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]]) – <p>A tuple of two lists of variable names.
+Extra variables (genes) to be added to the auto-selected ones as the</p>
+<blockquote>
+<div><p><strong>observation(cell)-node features</strong>.</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>ext_nodes</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]]) – A tuple of two lists of variable names.
+Extra variables (genes) to be added to the auto-selected ones as the
+<strong>variable(gene)-nodes</strong>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

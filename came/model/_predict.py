@@ -15,7 +15,8 @@ import torch
 from scipy.special import softmax, expit
 from scipy import stats
 from . import detach2numpy, onehot_encode
-from ..utils.analyze import load_dpair_and_model, load_json_dict, save_json_dict
+from ..utils.analyze import load_dpair_and_model
+from ..utils.base import save_json_dict, load_json_dict
 
 
 def sigmoid(x: np.ndarray):
