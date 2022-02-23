@@ -794,6 +794,7 @@ def datapair_from_adatas(
         dataset_names: Sequence[str] = ('reference', 'query'),
         with_single_vnodes: bool = True,
         keep_non1v1_feats: bool = True,
+        col_weight: Optional[str] = None,
         non1v1_trans_to: int = 0,  # only in {0, 1}
         **kwds
 ) -> DataPair:
@@ -838,6 +839,18 @@ def datapair_from_adatas(
     with_single_vnodes
         whether to include the varibales (node) that are ocurred in only one of
         the datasets
+
+    keep_non1v1_feats: bool
+        whether to take into account the non-1v1 variables as the node features.
+
+    col_weight
+        A column in ``df_varmap`` specifying the weights between homologies.
+
+    non1v1_trans_to: int
+        the direction to transform non-1v1 features, should either be 0 or 1.
+        Set as 0 to transform query data to the reference (default),
+        1 to transform the reference data to the query.
+        If set ``keep_non1v1_feats=False``, this parameter will be ignored.
 
     Returns
     -------
@@ -925,7 +938,7 @@ def datapair_from_adatas(
     #
     # features = list(map(_check_sparse_toarray, [features1, features2]))
     features, trans = make_features(
-        adatas, vars_use1, vars_use2, df_varmap, col_weight=None,
+        adatas, vars_use1, vars_use2, df_varmap, col_weight=col_weight,
         union_node_feats=union_node_feats,
         keep_non1v1=keep_non1v1_feats, non1v1_trans_to=non1v1_trans_to,
     )
