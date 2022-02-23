@@ -567,7 +567,7 @@ def gather_came_results(
 ):
     """ Packed function for pipeline as follows:
 
-    1. load the 'best' or given model weights
+    1. load the 'best' or the given checkpoint (model)
     2. get the predictions for cells, including probabilities (from logits)
     3. get and the hidden states for both cells and genes
     4. make a predictor
@@ -595,7 +595,8 @@ def gather_came_results(
     resdir
         the result directory
     checkpoint
-        specify which checkpoint to adopt
+        specify which checkpoint to adopt.
+        candidates are 'best', 'last', or an integer.
     batch_size
         specify it when your GPU memory is limited
     save_hidden_list
@@ -733,7 +734,8 @@ def preprocess_aligned(
     nneigh_clust
         the number of nearest neighbors to account for pre-clustering
     deg_cuts
-        dict with keys 'cut_padj', 'cut_pts', and 'cut_logfc'
+        dict with keys 'cut_padj', 'cut_pts', and 'cut_logfc', used for
+        filtering DEGs.
     ntop_deg
         the number of top DEGs to take as the node-features
     ntop_deg_nodes
@@ -743,6 +745,12 @@ def preprocess_aligned(
         ``adatas[1].obs``. By default, it's set as ``came.pipeline.KEY_CLUSTER``
     node_source
         source of the node genes, using both DEGs and HVGs by default
+    ext_feats
+        extra variables (genes) to be added to the auto-selected ones as the
+        **observation(cell)-node features**.
+    ext_nodes
+        extra variables (genes) to be added to the auto-selected ones as the
+        **variable(gene)-nodes**.
 
     Returns
     -------
@@ -799,7 +807,8 @@ def preprocess_aligned(
         ext_feats = set()
     vars_feat = sorted(set(
         pp.top_markers_from_info(deg_info1, ntop_deg)).union(
-        pp.top_markers_from_info(deg_info2, ntop_deg)).union(ext_feats))
+        pp.top_markers_from_info(deg_info2, ntop_deg)).union(
+        ext_feats))
     # params_deg = dict(n=ntop_deg, force_redo=False,
     #                   inplace=True, do_normalize=False)
     # # adata1&2 have already been normalized before
@@ -890,6 +899,14 @@ def preprocess_unaligned(
         ``adatas[1].obs``
     node_source
         source of the node genes, using both DEGs and HVGs by default
+    ext_feats
+        A tuple of two lists of variable names.
+        Extra variables (genes) to be added to the auto-selected ones as the
+         **observation(cell)-node features**.
+    ext_nodes
+        A tuple of two lists of variable names.
+        Extra variables (genes) to be added to the auto-selected ones as the
+        **variable(gene)-nodes**.
 
     Returns
     -------

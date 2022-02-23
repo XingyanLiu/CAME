@@ -870,6 +870,7 @@ class AdjacentTrans(object):
         return feats.T
 
     def T(self):
+        """Transpose"""
         return AdjacentTrans(self.adj.T, self.vars2, self.vars1)
 
 
@@ -1709,10 +1710,47 @@ def group_value_counts(df, count_on, group_by, split=True, **kwds):
     return vcnt
 
 
-def group_mean(X: Union[np.ndarray, sparse.spmatrix],
-               labels: Sequence,
-               binary=False, classes=None, features=None,
-               print_groups=False):
+def group_mean(
+        X: Union[np.ndarray, sparse.spmatrix],
+        labels: Sequence,
+        binary: bool = False,
+        classes=None, features=None,
+        **kwds
+):
+    """ compute the group averaged features
+
+    Parameters
+    ----------
+    X: np.ndarray or sparse.spmatrix
+        shape (n_samples, n_features)
+    labels:
+        shape (n_samples, )
+    binary
+        if True, the results will be the non-zero proportions
+    classes:
+        optional, names of groups
+    features:
+        optional, names of features
+
+    Returns
+    -------
+    average_mat: pd.DataFrame
+    """
+    if sparse.issparse(X):
+        return group_mean_sparse(
+            X, labels, binary=binary, classes=classes, features=features, **kwds
+        )
+    else:
+        return group_mean_dense(
+            X, labels, binary=binary, classes=classes, features=features, **kwds
+        )
+
+
+def group_mean_sparse(
+        X: sparse.spmatrix,
+        labels: Sequence,
+        binary=False, classes=None, features=None,
+        print_groups=False):
     """
     This function may work with more efficiency than `df.groupby().mean()` 
     when handling sparse matrix.
@@ -1732,7 +1770,7 @@ def group_mean(X: Union[np.ndarray, sparse.spmatrix],
     classes = np.unique(labels, ) if classes is None else classes
     if binary:
         X = (X > 0)  # .astype('float')
-        logging.info('Binarized; the results will be expression proportions')
+        logging.info('Binarized; the results will be non-zero proportions')
 
     if len(classes) == 1:
         grp_mean = X.mean(axis=0).T
@@ -1750,13 +1788,14 @@ def group_mean_dense(
         X, labels, binary=False,
         index_name='group',
         classes=None,
+        features=None,
 ):
     classes = np.unique(labels, ) if classes is None else classes
     if binary:
         X = (X > 0)  # .astype('float')
-        logging.info('Binarized...the results will be the expression '
+        logging.info('Binarized...the results will be the non-zero '
                      'proportions.')
-    tmp = pd.DataFrame(X)
+    tmp = pd.DataFrame(X, columns=features)
     tmp[index_name] = list(labels)
     avgs = tmp.groupby(index_name).mean().T
     del tmp[index_name]

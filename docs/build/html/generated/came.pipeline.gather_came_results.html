@@ -107,6 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#plotting-functions-came-pl">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
@@ -210,7 +211,7 @@
 <span class="sig-prename descclassname"><span class="pre">came.pipeline.</span></span><span class="sig-name descname"><span class="pre">gather_came_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dpair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_compare</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_hidden_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpair</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.pipeline.gather_came_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Packed function for pipeline as follows:</p>
 <ol class="arabic simple">
-<li><p>load the ‘best’ or given model weights</p></li>
+<li><p>load the ‘best’ or the given checkpoint (model)</p></li>
 <li><p>get the predictions for cells, including probabilities (from logits)</p></li>
 <li><p>get and the hidden states for both cells and genes</p></li>
 <li><p>make a predictor</p></li>
@@ -232,7 +233,8 @@ These labels will be extracted and stored in the column ‘REF’ of
 These labels will be extracted and stored in the column ‘celltype’
 of <code class="docutils literal notranslate"><span class="pre">dpair.obs</span></code>.</p></li>
 <li><p><strong>resdir</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – the result directory</p></li>
-<li><p><strong>checkpoint</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – specify which checkpoint to adopt</p></li>
+<li><p><strong>checkpoint</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – specify which checkpoint to adopt.
+candidates are ‘best’, ‘last’, or an integer.</p></li>
 <li><p><strong>batch_size</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – specify it when your GPU memory is limited</p></li>
 <li><p><strong>save_hidden_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to save the hidden states into <cite>{resdir}/hidden_list.h5</cite></p></li>
 <li><p><strong>save_dpair</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to save the dpair elements into <cite>{resdir}/datapair_init.pickle</cite></p></li>

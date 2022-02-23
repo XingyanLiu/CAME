@@ -26,11 +26,10 @@ from . import preprocess as pp
 from ..model import CGGCNet, CGCNet
 from . import _knn
 from .base import (
-    make_nowtime_tag,
     make_pairs_from_lists,
     load_pickle,
     load_json_dict,
-    save_json_dict,
+    # save_json_dict,
 )
 
 
