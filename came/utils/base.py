@@ -36,6 +36,25 @@ def _capital_strs(strs):
     return [s.capitalize() for s in strs]
 
 
+def split_df(df: pd.DataFrame, by: str):
+    """ Split a DataFrame into multiple ones by the given column
+
+    Parameters
+    ----------
+    df
+        the DataFrame to split
+    by
+        a column name in df, to group and split by.
+
+    >>> var1, var2 = split_df(var, 'dataset')
+    """
+    res = []
+    labels = df[by].unique()
+    for lb in labels:
+        res.append(df[df[by] == lb].copy())
+    return res
+
+
 def save_pickle(obj, fpath):
     """ save the object into a .pickle file
     """
@@ -62,6 +81,15 @@ def check_dirs(path):
     else:
         os.makedirs(path)
         print('a new directory made:\n\t%s' % path)
+
+
+def dict_struct(d, pref='|-',):
+    """visualize the structure of a dict"""
+    if not hasattr(d, 'items'):
+        return
+    for k, v in d.items():
+        print(f'{pref}{k}')
+        dict_struct(v, '  ' + pref)
 
 
 def write_info(fn, **dicts):
@@ -241,22 +269,34 @@ def subsample_each_group(
         group_labels,
         n_out=50,
         seed=0,
+        groups=None,
 ):
     """
     randomly sample indices from each group, labeled by `group_labels`.
-    and return the sampled indices.
-    
-    n_out: number of samples for each group
+    and return the sampled indices (original-order-kept).
+
+    Parameters
+    ----------
+    group_labels
+        group labels of each point
+    n_out: int
+        number of samples for each group
+    seed
+        the random seed
+    groups
+        groups to be subsampled and returned.
+        If None, all groups in `group_labels` will be subsampled
     
     """
     np.random.seed(seed)
     if isinstance(group_labels, pd.Series):
         ids_all = group_labels.index
     else:
+        group_labels = np.array(group_labels)
         ids_all = np.arange(len(group_labels))
     res_ids = []
-
-    for lb in pd.unique(group_labels):
+    groups = pd.unique(group_labels) if groups is None else groups
+    for lb in groups:
         ids = np.flatnonzero(group_labels == lb)
         if len(ids) <= n_out:
             ids_sub = ids
@@ -269,4 +309,4 @@ def subsample_each_group(
     #    print(list(map(len, res_ids)))
     res_ids = np.hstack(res_ids)
 
-    return np.take(ids_all, sorted(res_ids))
+    return np.take(ids_all, sorted(res_ids))  # similar to .iloc[]

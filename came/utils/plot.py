@@ -5,7 +5,7 @@ Created on Fri Oct 23 12:31:28 2020
 @author: Xingyan Liu
 """
 import logging
-from typing import Union, Mapping, Sequence, Optional
+from typing import Union, Mapping, Sequence, Optional, Callable
 from pathlib import Path
 
 import networkx as nx
@@ -63,13 +63,14 @@ def view_color_map(cmap='viridis', n=None, figsize=(6, 2), s=150, k=20,
     
     Examples
     --------
-    import funx as fx
-    colors = ['Set1', 'viridis', 'Spectral']
-    fx.view_color_map(colors[-1], n=20)
-    
-    cmap = sc.pl.palettes.zeileis_26
-    cmap = sc.pl.palettes.default_64
-    fx.view_color_map(cmap, k=16)    
+
+    >>> colors = ['Set1', 'viridis', 'Spectral']
+    >>> view_color_map(colors[-1], n=20)
+
+    >>> import scanpy as sc
+    >>> cmap = sc.pl.palettes.zeileis_26
+    >>> cmap = sc.pl.palettes.default_64
+    >>> view_color_map(cmap, k=16)
     """
     if not isinstance(cmap, (np.ndarray, list)):
         #        from matplotlib import cm
@@ -183,10 +184,59 @@ def alluvial_plot(
     return ax
 
 
-# In[]
+def plot_stacked_bar(
+        df, norm=True, figsize=(6, 4),
+        colors=None,
+        cmap: Union[str, Callable] = 'tab20b',
+        legend_loc=(1.02, 0.01),
+):
+    """ helper function for visualizing the group compositions (e.g., in
+    each stage or condition).
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        the values in each row will be display as one stacked bar.
+    norm: bool
+        whether to normalize each row to unit-sum.
+    figsize: tuple
+    colors: Sequence
+    cmap: Union[str, Callable]
+        color-map function or color-map name
+    legend_loc: tuple
+        the legend location
+
+    Returns
+    -------
+    ax
+    """
+    if norm:
+        df = df.apply(lambda x: x / x.sum(), axis=1)
+
+    groups = list(df.columns)
+    x = list(df.index)
+    if colors is None:
+        if cmap is None:
+            cmap_func = plt.cm.get_cmap(cmap, len(groups))
+        elif hasattr(cmap, '__call__'):
+            cmap_func = cmap
+        else:
+            raise ValueError('cmap should be either Callable or str')
+        colors = [cmap_func(i) for i, _ in enumerate(groups)]
+
+    fig, ax = plt.subplots(figsize=figsize)
+    bott = df[groups[0]]
+    ax.bar(x, bott, label=groups[0], color=colors[0])
+    for i, c in enumerate(groups[1:]):
+        height = df[c].fillna(0.)
+        ax.bar(x, height, bottom=bott, label=c, color=colors[i + 1])
+        bott += height
+
+    ax.legend(loc=legend_loc)
+    return ax
+
+
 # functions for plotting confusion or contingency matrix
-
-
 def plot_contingency_mat(
         y_true, y_pred,
         norm_axis=1,
@@ -198,6 +248,7 @@ def plot_contingency_mat(
         fp: Union[Path, str, None] = None,
         **kwds
 ):
+    """function for plotting the contingency matrix"""
     from .analyze import wrapper_contingency_mat
     contmat = wrapper_contingency_mat(
         y_true, y_pred, normalize_axis=norm_axis,
@@ -218,8 +269,11 @@ def plot_confus_mat(y_true, y_pred, classes_on=None,
                     figsize: tuple = (4, 3),
                     ax=None, fp=None,
                     **kwargs):
-    """ by default, normalized by row (true classes)
+    """function for plotting the contingency matrix
+    by default, the values will be normalized by row (true classes)
     """
+    y_true = list(map(str, y_true))
+    y_pred = list(map(str, y_pred))
     if classes_on is None:
         classes_on = list(set(y_true).union(y_pred))
 
@@ -412,13 +466,40 @@ def heatmap(df_hmap: pd.DataFrame,
 
 def heatmap_probas(
         df_data, lbs,  # sort_lbs=False,
-        name_label=None,
+        name_label='Group',
         cmap_heat='magma_r', cmap_lb='tab20',
         figsize=(8, 4),
         vmax=1, vmin=0,
         xrotation=30,
         fp=None):
-    """ heatmap showing probabilities
+    """ Heatmap of the prediction probabilities
+
+    Parameters
+    ----------
+    df_data
+        A DataFrame of shape ``(n_samples, n_ref_classes)``.
+        Note that the samples should be sorted by the (query) group labels,
+        i.e., ``lbs``.
+    lbs
+        the (query) group labels
+    name_label
+        the name of the group labels
+    cmap_heat
+        the color-map of the heatmap
+    cmap_lb
+        the color-map of the group labels (``lbs``).
+    figsize
+        the figure size
+    vmax, vmin
+        the maximum and the minimum of the heatmap
+    xrotation
+        rotation of the x-tick-labels
+    fp
+        file-path for saving the plot
+
+    Returns
+    -------
+    gs (gridspec)
     """
     lbs = pd.Categorical(lbs, )
     pix_lbs = np.vstack([lbs.codes] * 2)
@@ -456,7 +537,7 @@ def heatmap_probas(
     # setting class-labels (x-ticks)
     classes = pd.unique(lbs)
     cut_loc = np.hstack(
-        [[0], np.flatnonzero(np.diff(lbs.codes)), [len(lbs)]])  # // 2
+        [[0], np.flatnonzero(np.diff(lbs.codes)), [len(lbs)]])
     x_loc = cut_loc[:-1] + np.diff(cut_loc) // 2
     ax2.set_xticks(x_loc)
     if xrotation:
@@ -585,23 +666,25 @@ def wrapper_heatmap_scores(
         fp=None,
         **kwds
 ):
-    """ sort columns and rows, plot heatmap of celltype scores """
+    """ sort columns and rows, plot heatmap of cell-type scores
+    """
     cols_anno = [col_label, col_pred]
     df_lbs = obs[cols_anno]
     if ignore_index:
         df_lbs = df_lbs.copy()
         df_lbs.index = df_score.index
+    # sort samples by labels
     df_lbs = df_lbs.sort_values(cols_anno)
     if n_subsample:
         from .base import subsample_each_group
         indices = subsample_each_group(df_lbs[col_label], n_out=n_subsample)
     else:
         indices = df_lbs.index
-    cols_ordered = [c for c in sorted(df_lbs[col_pred].unique())
+    cols_ordered = [c for c in sorted(set(df_lbs[col_pred]))
                     if c in df_score.columns]
 
-    df_data = df_score.loc[indices][cols_ordered].copy()
-    lbs = df_lbs[col_label].loc[indices]
+    df_data = df_score.loc[indices, cols_ordered].copy()
+    lbs = df_lbs.loc[indices, col_label]
 
     gs = heatmap_probas(
         df_data.T, lbs, name_label=name_label,
@@ -624,7 +707,24 @@ def sorted_scatter(
         fontsize_title=9,
         **kwargs
 ):
-    """scatter plot colored with continuous values"""
+    """ scatter plot colored with continuous values, with points of the higher
+    values on the top.
+
+    Parameters
+    ----------
+    x
+        the x coordinates
+    y
+        the y coordinates
+    v
+        the values for each point
+    s
+        the size of the scatters
+
+    Returns
+    -------
+    ax
+    """
 
     if v is not None:
         # points with high values will be put on the top
@@ -660,7 +760,8 @@ def sorted_scatter(
 def embed_with_values(
         xy: np.ndarray, values: Union[pd.Series, Mapping],
         do_zscore: bool = False,
-        s=1.5, ncols=5, axscale=2.5,
+        s: Union[int, None] = 1.5,
+        ncols=5, axscale=2.5,
         name_xy='UMAP', with_cbar=True,
         cmap='RdYlBu_r',
         vmin=None, vmax=None,
@@ -675,6 +776,23 @@ def embed_with_values(
     values: Mapping, pd.DataFrame or pd.Series
         where the keys will be the title of subplots and each of the values
         should be a vector of the length equal to xy.shape[0]
+    do_zscore
+        whether to calculate and display the z-scores instead of the original
+        values. (False)
+    s
+        the size of the scatters / points (1.5)
+    ncols
+        the number of columns for multiple-subplots (5)
+    axscale
+        adjust the size of the figures (2.5)
+    with_cbar
+        whether to display the color bars (True)
+    cmap
+        the colormap
+    vmin, vmax
+        the minimum and the maximum of the values
+    kwargs
+        Other Parameters for ``sorted_scatter``
     """
     x, y = xy[:, 0], xy[:, 1]
     if isinstance(values, pd.Series):
@@ -701,6 +819,7 @@ def embed_with_values(
         axs_flatten = axs.flatten()
     else:
         axs_flatten = np.array([axs])
+    s = 6000 / len(x) if s is None else s
     for ax, cname in zip(axs_flatten, cnames):
         v = list(values[cname])
         sorted_scatter(x, y, v, s=s, ax=ax,
@@ -730,14 +849,16 @@ def adata_embed_with_values(
     Parameters
     ----------
     adata
+        the ``AnnData`` object
     values: Mapping, pd.DataFrame or pd.Series
         where the keys will be the title of subplots and the values
         should be of the length equal to adata.shape[0]
     embed_key
+        the type of the embeddings, e.g., "UMAP" or "TSNE"
     fp: Path or str
         path to save figure
     figsize_save: (int, int)
-
+        the figure size of the saved plot.
     Returns
     -------
     fig, axs
@@ -1013,13 +1134,17 @@ def _get_value_index_list(lst, vals, return_vals=False):
     lst = list(lst)
     ids = []
     _vals = []
+    missed = []
     for v in vals:
         try:
             i = lst.index(v)
             ids.append(i)
             _vals.append(v)
         except ValueError:
+            missed.append(v)
             continue
+    if len(missed) >= 1:
+        logging.warning(f"{missed} is/are not in the list")
     if return_vals:
         return ids, _vals
     return ids
@@ -1036,6 +1161,37 @@ def umap_with_annotates(
         ax=None,
         fp=None,
         **plkwds):
+    """ Plot the UMAP embeddings and annotate the names of the given points
+
+    Parameters
+    ----------
+    adt
+    text_ids
+        ids of the points to be annotated, corresponding to
+        ``anno_df.index`` or ``anno_df[index_col]`` (if ``index_col`` is given)
+    color
+        a column name in ``adt.obs``
+    anno_df
+        use ``adt.obs`` as the default annotations.
+    text_col
+        used as the annotation texts.
+        if specifies, should be a column name in ``anno_df``.
+    index_col
+        used for index the points, corresponding to ``text_ids``
+        if specifies, should be a column name in ``anno_df``.
+    anno_fontsize
+        the fontsize of the annotations
+    ax
+        the plot ax
+    fp
+        file path for saving the plot.
+    plkwds
+        other key-word-args for ``sc.pl.umap``
+
+    Returns
+    -------
+    ax
+    """
     from adjustText import adjust_text
     anno_df = adt.obs if anno_df is None else anno_df
 
@@ -1044,11 +1200,9 @@ def umap_with_annotates(
         index_all, text_ids, return_vals=True)  # only the first one
     # subsetting xumap and df
     xumap = adt.obsm['X_umap'][idnums, :]
-    #    anno_df = anno_df.iloc[idnums, :]
     xs = xumap[:, 0]
     ys = xumap[:, 1]
     texts = _text_ids if text_col is None else anno_df[text_col][idnums]
-    #    print(texts)
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -1057,7 +1211,7 @@ def umap_with_annotates(
     _texts = [ax.text(x, y, t, {'fontsize': anno_fontsize}) for x, y, t in
               zip(xs, ys, texts)]
     adjust_text(_texts, ax=ax, arrowprops=dict(arrowstyle='-', color='k'))
-    _save_with_adjust(fig, fp)
+    _save_with_adjust(ax.figure, fp)
     return ax
 
 
@@ -1118,7 +1272,7 @@ def _adjust_ylims(ax, scale=1.):
 
 def plot_multipartite_graph(
         g,
-        node_list=None,
+        # node_list=None,
         subset_key='subset',
         weight_key='weight',
         nodelb_key='original name',
@@ -1132,8 +1286,12 @@ def plot_multipartite_graph(
         with_labels=True,
         colors=None,
         **kwds):
+    """display the abstracted multipartite graph
+    (cellType - geneModules - geneModules - cellTypes)
+
+    """
     import networkx as nx
-    if node_list is None: node_list = list(g)
+    # if node_list is None: node_list = list(g)
 
     pos = multipartite_layout(g, subset_key=subset_key, )
 

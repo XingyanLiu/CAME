@@ -31,7 +31,7 @@ conda activate env_came
 ```shell
 pip install "scanpy[leiden]"
 pip install torch  # >=1.8 
-pip install dgl  
+pip install dgl  # tested on 0.7.2
 ```
 
 See [Scanpy](https://scanpy.readthedocs.io/en/stable/), 
@@ -88,6 +88,8 @@ if __name__ == '__main__':
 ```shell
 python test_pipeline.py 
 ```
+
+如果测试过程中没有报错，那就放心使用CAME吧～
 
 ### Contribute
 

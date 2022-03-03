@@ -44,11 +44,11 @@ PARAMS_MODEL = get_model_params()
 # PARAMS_PRE = get_preprocess_params()
 PARAMS_LOSS = get_loss_params()
 
-# In[] Main Functions
+KET_CLUSTER = 'clust_lbs'
 
 
 def main_for_aligned(
-        adatas: sc.AnnData,
+        adatas: Sequence[sc.AnnData],
         vars_feat: Sequence,
         vars_as_nodes: Optional[Sequence] = None,
         scnets: Optional[Sequence[sparse.spmatrix]] = None,
@@ -65,7 +65,7 @@ def main_for_aligned(
         n_pass: int = 100,
         batch_size: Optional[int] = None,
         pred_batch_size: Union[int, str, None] = 'auto',
-        plot_results: bool = True,
+        plot_results: bool = False,
         norm_target_sum: Optional[float] = None,
         save_hidden_list: bool = True,
         save_dpair: bool = True,
@@ -150,7 +150,7 @@ def main_for_aligned(
             key_class2 = key_class1
             keys = [key_class1, key_class2]
         else:
-            key_class2 = 'clust_lbs'
+            key_class2 = KET_CLUSTER
             keys = [key_class1, None]
     else:
         keys = [key_class1, key_class2]
@@ -246,44 +246,40 @@ def main_for_aligned(
         obs_ids1 = detach2numpy(trainer.train_idx)
         obs_ids2 = detach2numpy(trainer.test_idx)
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
-        if key_class2 == 'clust_lbs':
-            labels_cat = obs['celltype']
+        if key_class2 == KET_CLUSTER:
+            # labels_cat = obs['celltype']
+            key_true = 'celltype'
             acc_tag = ''
         else:
-            labels_cat = obs["REF"]
+            # labels_cat = obs["REF"]
+            key_true = 'REF'
             acc_tag = f'(acc{test_acc:.1%})'
-        cl_preds = obs['predicted']
+        # cl_preds = obs['predicted']
+        try:
+            plot_class_results(
+                obs, obs_ids1, obs_ids2,
+                key_true=key_true, key_pred='predicted',
+                figdir=figdir, acc_tag=acc_tag, classes=classes,
+                df_probs=outputs['df_probs']
+            )
+        except Exception as e:
+            logging.warning(f'An error occurred when plotting results: {e}')
 
-        # confusion matrix OR alluvial plot
-        sc.set_figure_params(fontsize=10)
-        ax, contmat = pl.plot_contingency_mat(
-            labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
-            fp=figdir / f'contingency_matrix{acc_tag}.png',
-        )
-        pl.plot_confus_mat(
-            labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
-            fp=figdir / f'contingency_matrix-train.png',
-        )
-
-        # heatmap of predicted probabilities
-        df_probs = outputs['df_probs']
-        gs = pl.wrapper_heatmap_scores(
-            df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
-            col_label='celltype', col_pred='predicted',
-            n_subsample=50,
-            cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
-            fp=figdir / f'heatmap_probas.pdf'
-        )
     return outputs
 
 
 def main_for_unaligned(
-        adatas: sc.AnnData,
-        vars_use: Sequence[Sequence],
+        adatas: Sequence[sc.AnnData],
+        vars_feat: Sequence[Sequence],
         vars_as_nodes: Sequence[Sequence],
         df_varmap: pd.DataFrame,
         df_varmap_1v1: Optional[pd.DataFrame] = None,
         scnets: Optional[Sequence[sparse.spmatrix]] = None,
+        union_var_nodes: bool = True,
+        union_node_feats: bool = True,
+        keep_non1v1_feats: bool = False,
+        col_weight: Optional[str] = None,
+        non1v1_trans_to: int = 0,  # should only be in {0, 1}
         dataset_names: Sequence[str] = ('reference', 'query'),
         key_class1: str = 'cell_ontology_class',
         key_class2: Optional[str] = None,
@@ -291,13 +287,13 @@ def main_for_unaligned(
         batch_keys=None,
         n_epochs: int = 350,
         resdir: Union[Path, str] = None,
-        tag_data: Optional[str] = None,  # for autometically deciding `resdir` for results saving
+        tag_data: Optional[str] = None,
         params_model: dict = {},
         params_lossfunc: dict = {},
         n_pass: int = 100,
         batch_size: Optional[int] = None,
         pred_batch_size: Union[int, str, None] = 'auto',
-        plot_results: bool = True,
+        plot_results: bool = False,
         norm_target_sum: Optional[float] = None,
         save_hidden_list: bool = True,
         save_dpair: bool = True,
@@ -309,13 +305,13 @@ def main_for_unaligned(
     ----------
     adatas
         A pair of ``sc.AnnData`` objects, the reference and query raw data
-    vars_use
-        a list or tuple of 2 variable name-lists.
+    vars_feat
+        A list or tuple of 2 variable name-lists.
         for example, differential expressed genes, highly variable features.
     vars_as_nodes: list or tuple of 2
         variables to be taken as the graph nodes
     df_varmap
-        pd.DataFrame with (at least) 2 columns.
+        A ``pd.DataFrame`` with (at least) 2 columns; required.
         relationships between features in 2 datasets, for making the
         adjacent matrix (`vv_adj`) between variables from these 2 datasets.
     df_varmap_1v1: None, pd.DataFrame; optional.
@@ -323,6 +319,20 @@ def main_for_unaligned(
         in 2 datasets, if not provided, it will be inferred from `df_varmap`
     scnets
         two single-cell-networks or a merged one
+    union_var_nodes: bool
+        whether to take the union of the variable-nodes
+    union_node_feats: bool
+        whether to take the union of the observation(cell)-node features
+    keep_non1v1_feats: bool
+        whether to take into account the non-1v1 variables as the node features.
+        If most of the homologies are non-1v1, better set this as True!
+    col_weight
+        A column in ``df_varmap`` specifying the weights between homologies.
+    non1v1_trans_to: int
+        the direction to transform non-1v1 features, should either be 0 or 1.
+        Set as 0 to transform query data to the reference (default),
+        1 to transform the reference data to the query.
+        If set ``keep_non1v1_feats=False``, this parameter will be ignored.
     dataset_names
         a tuple of two names for reference and query, respectively
     key_class1
@@ -345,7 +355,7 @@ def main_for_unaligned(
     resdir
         directory for saving results output by CAME
     tag_data
-        a tag for auto-creating result directory
+        a tag for auto-creating the result directory ``resdir``
     params_model
         the model parameters
     params_lossfunc
@@ -389,7 +399,7 @@ def main_for_unaligned(
             key_class2 = key_class1
             keys = [key_class1, key_class2]
         else:
-            key_class2 = 'clust_lbs'
+            key_class2 = KET_CLUSTER
             keys = [key_class1, None]
     else:
         keys = [key_class1, key_class2]
@@ -410,16 +420,17 @@ def main_for_unaligned(
     #         adatas
     #     ))
     logging.info('preparing DataPair object...')
-    dpair = datapair_from_adatas(
-        adatas,
-        vars_use=vars_use,
-        df_varmap=df_varmap,
-        df_varmap_1v1=df_varmap_1v1,
-        oo_adjs=scnets,
-        vars_as_nodes=vars_as_nodes,
-        union_node_feats='auto',
-        dataset_names=dataset_names,
-    )
+    dpair = datapair_from_adatas(adatas, vars_feat=vars_feat,
+                                 df_varmap=df_varmap,
+                                 df_varmap_1v1=df_varmap_1v1, oo_adjs=scnets,
+                                 vars_as_nodes=vars_as_nodes,
+                                 union_var_nodes=union_var_nodes,
+                                 union_node_feats=union_node_feats,
+                                 dataset_names=dataset_names,
+                                 keep_non1v1_feats=keep_non1v1_feats,
+                                 non1v1_trans_to=non1v1_trans_to,
+                                 col_weight=col_weight,
+                                 )
     print(dpair)
 
     ENV_VARs = prepare4train(dpair, key_class=keys, batch_keys=batch_keys,)
@@ -486,27 +497,62 @@ def main_for_unaligned(
         obs_ids1 = detach2numpy(trainer.train_idx)
         obs_ids2 = detach2numpy(trainer.test_idx)
         test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
-        if key_class2 == 'clust_lbs':
-            labels_cat = obs['celltype']
+        if key_class2 == KET_CLUSTER:
+            # labels_cat = obs['celltype']
+            key_true = 'celltype'
             acc_tag = ''
         else:
-            labels_cat = obs["REF"]
+            # labels_cat = obs["REF"]
+            key_true = 'REF'
             acc_tag = f'(acc{test_acc:.1%})'
-        cl_preds = obs['predicted']
+        # cl_preds = obs['predicted']
+        try:
+            plot_class_results(
+                obs, obs_ids1, obs_ids2,
+                key_true=key_true, key_pred='predicted',
+                figdir=figdir, acc_tag=acc_tag, classes=classes,
+                df_probs=outputs['df_probs']
+            )
+        except Exception as e:
+            logging.warning(f'An error occurred when plotting results: {e}')
 
-        # confusion matrix OR alluvial plot
-        sc.set_figure_params(fontsize=10)
-        ax, contmat = pl.plot_contingency_mat(
-            labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
-            fp=figdir / f'contingency_matrix{acc_tag}.png',
-        )
-        pl.plot_confus_mat(
-            labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
-            fp=figdir / f'contingency_matrix-train.png',
-        )
+    return outputs
 
-        # heatmap of predicted probabilities
-        df_probs = outputs['df_probs']
+
+def plot_class_results(
+        obs, obs_ids1, obs_ids2,
+        key_true='REF', key_pred='predicted',
+        figdir=Path('.'),
+        acc_tag: str = '',
+        classes: Sequence = None,
+        df_probs: pd.DataFrame = None,
+):
+    # obs_ids1 = detach2numpy(trainer.train_idx)
+    # obs_ids2 = detach2numpy(trainer.test_idx)
+    # test_acc = trainer.test_acc[trainer._cur_epoch_adopted]
+    # if key_class2 == KET_CLUSTER:
+    #     labels_cat = obs['celltype']
+    #     acc_tag = ''
+    # else:
+    #     labels_cat = obs["REF"]
+    #     acc_tag = f'(acc{test_acc:.1%})'
+    labels_cat = obs[key_true]
+    cl_preds = obs[key_pred]
+
+    # confusion matrix OR alluvial plot
+    sc.set_figure_params(fontsize=10)
+    ax, contmat = pl.plot_contingency_mat(
+        labels_cat[obs_ids2], cl_preds[obs_ids2], norm_axis=1,
+        fp=figdir / f'contingency_matrix{acc_tag}.png',
+    )
+    pl.plot_confus_mat(
+        labels_cat[obs_ids1], cl_preds[obs_ids1], classes_on=classes,
+        fp=figdir / f'contingency_matrix-train.png',
+    )
+
+    # heatmap of predicted probabilities
+    # df_probs = outputs['df_probs']
+    if df_probs is not None:
         gs = pl.wrapper_heatmap_scores(
             df_probs.iloc[obs_ids2], obs.iloc[obs_ids2], ignore_index=True,
             col_label='celltype', col_pred='predicted',
@@ -514,8 +560,6 @@ def main_for_unaligned(
             cmap_heat='magma_r',  # if prob_func == 'softmax' else 'RdBu_r'
             fp=figdir / f'heatmap_probas.pdf'
         )
-
-    return outputs
 
 
 def gather_came_results(
@@ -532,7 +576,7 @@ def gather_came_results(
 ):
     """ Packed function for pipeline as follows:
 
-    1. load the 'best' or given model weights
+    1. load the 'best' or the given checkpoint (model)
     2. get the predictions for cells, including probabilities (from logits)
     3. get and the hidden states for both cells and genes
     4. make a predictor
@@ -560,7 +604,8 @@ def gather_came_results(
     resdir
         the result directory
     checkpoint
-        specify which checkpoint to adopt
+        specify which checkpoint to adopt.
+        candidates are 'best', 'last', or an integer.
     batch_size
         specify it when your GPU memory is limited
     save_hidden_list
@@ -659,9 +704,13 @@ def preprocess_aligned(
         n_pcs: int = 30,
         nneigh_scnet: int = 5,
         nneigh_clust: int = 20,
-        ntop_deg: int = 50,
-        key_clust: str = 'clust_lbs',
-        node_source: str = 'hvg,deg'
+        deg_cuts: dict = {},
+        ntop_deg: Optional[int] = 50,
+        ntop_deg_nodes: Optional[int] = 50,
+        key_clust: str = KET_CLUSTER,  # 'clust_lbs'
+        node_source: str = 'hvg,deg',
+        ext_feats: Optional[Sequence] = None,
+        ext_nodes: Optional[Sequence] = None,
 ):
     """
     Packed function for process adatas with aligned features
@@ -693,13 +742,24 @@ def preprocess_aligned(
         the number of nearest neighbors to account for the single-cell-network
     nneigh_clust
         the number of nearest neighbors to account for pre-clustering
+    deg_cuts
+        dict with keys 'cut_padj', 'cut_pts', and 'cut_logfc', used for
+        filtering DEGs.
     ntop_deg
         the number of top DEGs to take as the node-features
+    ntop_deg_nodes
+        the number of top DEGs to take as the graph nodes
     key_clust
         where to add the per-clustering labels to the query data, i.e.,
-        ``adatas[1].obs``
+        ``adatas[1].obs``. By default, it's set as ``came.pipeline.KEY_CLUSTER``
     node_source
         source of the node genes, using both DEGs and HVGs by default
+    ext_feats
+        extra variables (genes) to be added to the auto-selected ones as the
+        **observation(cell)-node features**.
+    ext_nodes
+        extra variables (genes) to be added to the auto-selected ones as the
+        **variable(gene)-nodes**.
 
     Returns
     -------
@@ -740,24 +800,53 @@ def preprocess_aligned(
         copy=False
     )
     adatas[1].obs[key_clust] = clust_lbs2
-
-    params_deg = dict(n=ntop_deg, force_redo=False,
-                      inplace=True, do_normalize=False)
+    # DEGs
+    params_deg = dict(
+        n=ntop_deg, cuts=deg_cuts,
+        force_redo=False, inplace=True, do_normalize=False,
+        return_info=True,
+    )
     # adata1&2 have already been normalized before
-    degs1 = pp.compute_and_get_DEGs(
+    deg_info1 = pp.compute_and_get_DEGs(
         adata1, key_class, **params_deg)
-    degs2 = pp.compute_and_get_DEGs(
+    deg_info2 = pp.compute_and_get_DEGs(
         adata2, key_clust, **params_deg)
-    ###
-    vars_feat = list(set(degs1).union(degs2))
 
-    node_source = node_source.lower()
-    if 'hvg' in node_source and 'deg' in node_source:
-        vars_node = list(set(hvgs1).union(hvgs2).union(vars_feat))
-    elif 'hvg' in node_source:
-        vars_node = list(set(hvgs1).union(hvgs2))
+    if ext_feats is None:
+        ext_feats = set()
+    vars_feat = sorted(set(
+        pp.top_markers_from_info(deg_info1, ntop_deg)).union(
+        pp.top_markers_from_info(deg_info2, ntop_deg)).union(
+        ext_feats))
+    # params_deg = dict(n=ntop_deg, force_redo=False,
+    #                   inplace=True, do_normalize=False)
+    # # adata1&2 have already been normalized before
+    # degs1 = pp.compute_and_get_DEGs(
+    #     adata1, key_class, **params_deg)
+    # degs2 = pp.compute_and_get_DEGs(
+    #     adata2, key_clust, **params_deg)
+    # ###
+    # vars_feat = list(set(degs1).union(degs2))
+    if ext_nodes is None:
+        vars_node = set()
     else:
-        vars_node = vars_feat
+        vars_node = set(ext_nodes)
+    node_source = node_source.lower()
+    if 'deg' in node_source:
+        degs_nd1 = pp.top_markers_from_info(deg_info1, ntop_deg_nodes)
+        degs_nd2 = pp.top_markers_from_info(deg_info2, ntop_deg_nodes)
+        vars_node.update(degs_nd1)
+        vars_node.update(degs_nd2)
+    if 'hvg' in node_source:
+        vars_node.update(hvgs1)
+        vars_node.update(hvgs2)
+    vars_node = sorted(vars_node)
+    # if 'hvg' in node_source and 'deg' in node_source:
+    #     vars_node = sorted(set(hvgs1).union(hvgs2).union(vars_feat))
+    # elif 'hvg' in node_source:
+    #     vars_node = sorted(set(hvgs1).union(hvgs2))
+    # else:
+    #     vars_node = vars_feat
 
     dct = dict(
         adatas=adatas,
@@ -775,9 +864,13 @@ def preprocess_unaligned(
         n_pcs: int = 30,
         nneigh_scnet: int = 5,
         nneigh_clust: int = 20,
-        ntop_deg: int = 50,
-        key_clust: str = 'clust_lbs',
+        deg_cuts: dict = {},
+        ntop_deg: Optional[int] = 50,
+        ntop_deg_nodes: Optional[int] = 50,
+        key_clust: str = KET_CLUSTER,  # 'clust_lbs'
         node_source: str = 'hvg,deg',
+        ext_feats: Optional[Sequence[Sequence]] = None,
+        ext_nodes: Optional[Sequence[Sequence]] = None,
 ):
     """
     Packed function for process adatas with un-aligned features.
@@ -804,13 +897,26 @@ def preprocess_unaligned(
         the number of nearest neighbors to account for the single-cell-network
     nneigh_clust
         the number of nearest neighbors to account for pre-clustering
+    deg_cuts
+        dict with keys 'cut_padj', 'cut_pts', and 'cut_logfc'
     ntop_deg
         the number of top DEGs to take as the node-features
+    ntop_deg_nodes
+        the number of top DEGs to take as the graph nodes, which can be
+        directly displayed on the UMAP plot.
     key_clust
         where to add the per-clustering labels to the query data, i.e.,
         ``adatas[1].obs``
     node_source
         source of the node genes, using both DEGs and HVGs by default
+    ext_feats
+        A tuple of two lists of variable names.
+        Extra variables (genes) to be added to the auto-selected ones as the
+         **observation(cell)-node features**.
+    ext_nodes
+        A tuple of two lists of variable names.
+        Extra variables (genes) to be added to the auto-selected ones as the
+        **variable(gene)-nodes**.
 
     Returns
     -------
@@ -849,27 +955,62 @@ def preprocess_unaligned(
     )
     adatas[1].obs[key_clust] = clust_lbs2
 
-    params_deg = dict(n=ntop_deg, force_redo=False,
-                      inplace=True, do_normalize=False)
+    # DEGs
+    params_deg = dict(
+        n=ntop_deg, cuts=deg_cuts,
+        force_redo=False, inplace=True, do_normalize=False,
+        return_info=True,
+    )
     # adata1&2 have already been normalized before
-    degs1 = pp.compute_and_get_DEGs(
-        adata1, key_class, **params_deg)
-    degs2 = pp.compute_and_get_DEGs(
-        adata2, key_clust, **params_deg)
-
-    vars_use = [degs1, degs2]
-    node_source = node_source.lower()
-    if 'hvg' in node_source and 'deg' in node_source:
-        vars_as_nodes = [np.unique(np.hstack([hvgs1, degs1])),
-                         np.unique(np.hstack([hvgs2, degs2]))]
-    elif 'hvg' in node_source:
-        vars_as_nodes = [hvgs1, hvgs2]
+    deg_info1 = pp.compute_and_get_DEGs(adata1, key_class, **params_deg)
+    deg_info2 = pp.compute_and_get_DEGs(adata2, key_clust, **params_deg)
+    # ======== Node-Features ========
+    if ext_feats is None:
+        vars_feat1, vars_feat2 = set(), set()
     else:
-        vars_as_nodes = [degs1, degs2]
+        vars_feat1, vars_feat2 = set(ext_feats[0]), set(ext_feats[1])
+    vars_feat1.update(pp.top_markers_from_info(deg_info1, ntop_deg))
+    vars_feat2.update(pp.top_markers_from_info(deg_info2, ntop_deg))
+    vars_feat = [sorted(vars_feat1), sorted(vars_feat2)]
+    # vars_feat = [pp.top_markers_from_info(deg_info1, ntop_deg),
+    #              pp.top_markers_from_info(deg_info2, ntop_deg), ]
+    # ======== VAR-Nodes ========
+    if ext_nodes is None:
+        nodes1, nodes2 = set(), set()
+    else:
+        nodes1, nodes2 = set(ext_nodes[0]), set(ext_nodes[1])
+    node_source = node_source.lower()
+    if 'deg' in node_source:
+        nodes1.update(pp.top_markers_from_info(deg_info1, ntop_deg_nodes))
+        nodes2.update(pp.top_markers_from_info(deg_info2, ntop_deg_nodes))
+    if 'hvg' in node_source:
+        nodes1.update(hvgs1)
+        nodes2.update(hvgs2)
+    vars_as_nodes = [sorted(nodes1), sorted(nodes2)]
+    # ========== V1
+    # if 'deg' in node_source:
+    #     degs_nd1 = pp.top_markers_from_info(deg_info1, ntop_deg_nodes)
+    #     degs_nd2 = pp.top_markers_from_info(deg_info2, ntop_deg_nodes)
+    #     if 'hvg' in node_source:
+    #         vars_as_nodes = [
+    #             np.unique(np.hstack([hvgs1, degs_nd1])),
+    #             np.unique(np.hstack([hvgs2, degs_nd2]))]
+    #     else:
+    #         vars_as_nodes = [degs_nd1, degs_nd2]
+    # else:
+    #     vars_as_nodes = [hvgs1, hvgs2]
+    # ========= V0
+    # if 'hvg' in node_source and 'deg' in node_source:
+    #     vars_as_nodes = [np.unique(np.hstack([hvgs1, degs1])),
+    #                      np.unique(np.hstack([hvgs2, degs2]))]
+    # elif 'hvg' in node_source:
+    #     vars_as_nodes = [hvgs1, hvgs2]
+    # else:
+    #     vars_as_nodes = [degs1, degs2]
 
     dct = dict(
         adatas=adatas,
-        vars_use=vars_use,
+        vars_feat=vars_feat,
         vars_as_nodes=vars_as_nodes,
         scnets=scnets,
     )
@@ -909,6 +1050,7 @@ def __test1__(n_epochs: int = 5, batch_size=None, reverse=False):
         key_class=key_class,
         df_varmap_1v1=df_varmap_1v1,
         node_source='deg,hvg',
+        ntop_deg=50,
     )
 
     _ = main_for_aligned(
@@ -921,7 +1063,8 @@ def __test1__(n_epochs: int = 5, batch_size=None, reverse=False):
         resdir=resdir,
         n_pass=100,
         params_model=dict(residual=False),
-        batch_size=batch_size
+        batch_size=batch_size,
+        plot_results=True,
     )
 
     del _
@@ -963,6 +1106,7 @@ def __test2__(n_epochs: int = 5, batch_size=None, reverse=False):
         adatas,
         key_class=key_class,
         node_source='deg,hvg',
+        ntop_deg=50,
     )
 
     _ = main_for_unaligned(
@@ -973,11 +1117,14 @@ def __test2__(n_epochs: int = 5, batch_size=None, reverse=False):
         key_class1=key_class,
         key_class2=key_class,
         do_normalize=True,
+        keep_non1v1_feats=True,
+        non1v1_trans_to=1,
         n_epochs=n_epochs,
         resdir=resdir,
         n_pass=100,
         params_model=dict(residual=False),
         batch_size=batch_size,
+        plot_results=True,
     )
 
     del _

@@ -14,7 +14,7 @@ from scipy import sparse
 import torch as th
 import dgl
 
-from ..utils import preprocess as utp
+from ..utils import preprocess as pp
 from ..utils.base import save_pickle
 
 
@@ -201,16 +201,16 @@ class DataPair(object):
         """ The graph structure, of type ``dgl.Heterograph`` """
         return self._g
 
-    @property
-    def _ov_adj(self, ):
-        return sparse.block_diag(self._ov_adjs)
+    # @property
+    # def _ov_adj(self, ):
+    #     return sparse.block_diag(self._ov_adjs)
 
     @property
     def ov_adj(self, ):
         """ merged adjacent matrix between observation and variable nodes
         (e.g. cell-gene adjacent matrix)
         """
-        return self._ov_adj
+        return sparse.block_diag(self._ov_adjs)
 
     @property
     def vv_adj(self):
@@ -321,11 +321,11 @@ class DataPair(object):
                 batch_keys = [None, None]
             for X, _df, bch_key in zip(features, self.obs_dfs, batch_keys):
                 if bch_key is None:
-                    feats.append(utp.zscore(X, with_mean=True, scale=unit_var))
+                    feats.append(pp.zscore(X, with_mean=True, scale=unit_var))
                 else:
                     bch_lbs = _df[bch_key]
                     feats.append(
-                        utp.group_zscore(X, bch_lbs, with_mean=True, scale=unit_var)
+                        pp.group_zscore(X, bch_lbs, with_mean=True, scale=unit_var)
                     )
             features = feats
 
@@ -521,7 +521,7 @@ class DataPair(object):
     def make_ov_adj(self, link2ord=False):
         """ observation-variable bipartite network
         """
-        ov_adj = self._ov_adj.copy()
+        ov_adj = self.ov_adj.copy()
         if link2ord:
             print('computing the second-order neighbors')
             return ov_adj + ov_adj.dot(self._vv_adj.T)
@@ -555,7 +555,7 @@ class DataPair(object):
             ] += sparse.eye(self.n_vnodes)
             # print('TEST:', edge_dict)
         # for compatibility with the new version of DGL
-        edge_dict = utp.scipy_edge_dict_for_dgl(edge_dict, foo=th.LongTensor)
+        edge_dict = pp.scipy_edge_dict_for_dgl(edge_dict, foo=th.LongTensor)
         self._g = dgl.heterograph(edge_dict, )
 
         self._net_info = dict(
@@ -593,8 +593,12 @@ class DataPair(object):
 
             if varnames_feat is None:
                 varnames_feat = [list(range(self.n_feats)), list(range(self.n_feats))]
-            feats = list(zip(*map(list, varnames_feat)))
-            self._varnames_feat = pd.DataFrame(feats, columns=self.dataset_names)
+            self._varnames_feat = pd.DataFrame({
+                self.dataset_names[0]: varnames_feat[0],
+                self.dataset_names[1]: varnames_feat[1],
+            })
+            # feats = list(zip(*map(list, varnames_feat)))
+            # self._varnames_feat = pd.DataFrame(feats, columns=self.dataset_names)
         else:
             raise ValueError('`features` should be a list or tuple of length 2!')
 
@@ -648,7 +652,7 @@ class DataPair(object):
         if varnames_node is None:
             varnames_node = (np.arange(self.n_vnodes1),
                              np.arange(self.n_vnodes1, self.n_vnodes))
-        self._var_id2name, self._n2i_dict = utp.make_id_name_maps(*varnames_node)
+        self._var_id2name, self._n2i_dict = pp.make_id_name_maps(*varnames_node)
 
     def set_var_dfs(self, var1, var2):
         pass  # TODO! maybe unnecessary
@@ -667,7 +671,7 @@ class DataPair(object):
             elif obs.shape[0] != n_obs:
                 raise ValueError(f'the number of observations are not matched '
                                  f'expect {n_obs}, got {obs.shape[0]}.')
-            print(obs.columns)
+            logging.debug(obs.columns)
             return obs
 
         obs1 = _check_obs(obs1, self.n_obs1, )  # self.dataset_names[0]
@@ -716,7 +720,7 @@ class DataPair(object):
 
     def set_ntypes(self, ntypes: Dict[str, str] or None):
         if ntypes is not None:
-            if utp.dict_has_keys(ntypes, 'o', 'v'):
+            if pp.dict_has_keys(ntypes, 'o', 'v'):
                 self.ntypes = ntypes
             else:
                 raise KeyError(
@@ -725,7 +729,7 @@ class DataPair(object):
 
     def set_etypes(self, etypes: Dict[str, str] or None):
         if etypes is not None:
-            if utp.dict_has_keys(etypes, 'ov', 'vo', 'vv'):
+            if pp.dict_has_keys(etypes, 'ov', 'vo', 'vv'):
                 self.etypes = etypes
             else:
                 raise KeyError('the dict for `etypes` should have 3 keys:',
@@ -744,6 +748,7 @@ class DataPair(object):
             print('self-loops for variable-nodes: {}'.format(info['selfloop_v']))
         else:
             print("graph haven't been made, call `self.make_whole_net(...)` first!")
+        print()
 
     @staticmethod
     def _set_annos(df0, df=None, ignore_index=True,
@@ -780,14 +785,18 @@ def _check_array_tosparse(mat, scilent=True):
 
 def datapair_from_adatas(
         adatas: Sequence[sc.AnnData],
-        vars_use: Sequence[Sequence],
+        vars_feat: Sequence[Sequence],
         df_varmap: pd.DataFrame,
-        df_varmap_1v1: Optional[pd.DataFrame] = None,
+        df_varmap_1v1: Optional[pd.DataFrame] = 'ignored',
         oo_adjs: Optional[Sequence[sparse.spmatrix]] = None,
         vars_as_nodes: Union[None, Sequence[Sequence]] = None,
-        union_node_feats: Union[str, bool] = 'auto',
+        union_var_nodes: bool = True,
+        union_node_feats: bool = True,
         dataset_names: Sequence[str] = ('reference', 'query'),
         with_single_vnodes: bool = True,
+        keep_non1v1_feats: bool = True,
+        col_weight: Optional[str] = None,
+        non1v1_trans_to: int = 0,  # only in {0, 1}
         **kwds
 ) -> DataPair:
     """
@@ -802,7 +811,7 @@ def datapair_from_adatas(
     adatas: list or tuple
         a list or tuple of 2 sc.AnnData objects.
     
-    vars_use:
+    vars_feat:
         a list or tuple of 2 variable name-lists.
         for example, differential expressed genes, highly variable features.
     
@@ -821,8 +830,11 @@ def datapair_from_adatas(
     vars_as_nodes:
         list or tuple of 2; variables to be taken as the graph nodes
 
-    union_node_feats: bool or 'auto'
+    union_var_nodes: bool
         whether to take the union of the variable-nodes
+
+    union_node_feats: bool
+        whether to take the union of the observation-node-features
 
     dataset_names:
         list or tuple of 2. names to discriminate data source,
@@ -832,6 +844,18 @@ def datapair_from_adatas(
         whether to include the varibales (node) that are ocurred in only one of
         the datasets
 
+    keep_non1v1_feats: bool
+        whether to take into account the non-1v1 variables as the node features.
+
+    col_weight
+        A column in ``df_varmap`` specifying the weights between homologies.
+
+    non1v1_trans_to: int
+        the direction to transform non-1v1 features, should either be 0 or 1.
+        Set as 0 to transform query data to the reference (default),
+        1 to transform the reference data to the query.
+        If set ``keep_non1v1_feats=False``, this parameter will be ignored.
+
     Returns
     -------
     dpair: DataPair
@@ -840,10 +864,10 @@ def datapair_from_adatas(
     --------
     >>> dpair = datapair_from_adatas(
     ...     [adata1, adata2],
-    ...     vars_use = [hvgs1, hvgs2],
-    ...     df_varmap = homo_gene_matches,
-    ...     dataset_names = ['reference', 'query']
-    ...     )
+    ...     vars_feat=[hvgs1, hvgs2],
+    ...     df_varmap=homo_gene_matches,
+    ...     vars_as_nodes=[],
+    ...     dataset_names=['reference', 'query'])
 
     See Also
     --------
@@ -857,32 +881,27 @@ def datapair_from_adatas(
     adata_raw2 = adata2.raw.to_adata() if adata2.raw is not None else adata2
 
     if vars_as_nodes is None:
-        vars_as_nodes = vars_use
+        vars_as_nodes = vars_feat
     # features selected for modeling. (e.g. DEGs, HVGs)
-    vars_use1, vars_use2 = vars_use
+    vars_use1, vars_use2 = vars_feat
     vars_nodes1, vars_nodes2 = vars_as_nodes
     # --- obs. annotation dataframes
     obs1 = adata1.obs.copy()
     obs2 = adata2.obs.copy()
 
-    # --- deal with variable mapping dataframe
-    if df_varmap_1v1 is None:
-        logging.info(
-            '1-to-1 mapping between variables (`df_varmap_1v1`) is not '
-            'provided, extracting from `df_varmap`')
-        df_varmap_1v1 = utp.take_1v1_matches(df_varmap)
     # --- connection between variables from 2 datasets
     vars_all1, vars_all2 = adata_raw1.var_names, adata_raw2.var_names
-    submaps = utp.subset_matches(df_varmap, vars_nodes1, vars_nodes2, union=True)
-    submaps = utp.subset_matches(submaps, vars_all1, vars_all2, union=False)
+    submaps = pp.subset_matches(df_varmap, vars_nodes1, vars_nodes2,
+                                union=union_var_nodes)
+    submaps = pp.subset_matches(submaps, vars_all1, vars_all2, union=False)
 
     if with_single_vnodes:
-        vv_adj, vnodes1, vnodes2 = utp.make_bipartite_adj(
+        vv_adj, vnodes1, vnodes2 = pp.make_bipartite_adj(
             submaps, vars_nodes1, vars_nodes2,
             with_singleton=True, symmetric=True,
         )
     else:
-        vv_adj, vnodes1, vnodes2 = utp.make_bipartite_adj(
+        vv_adj, vnodes1, vnodes2 = pp.make_bipartite_adj(
             submaps, with_singleton=False, symmetric=True,
         )
     # --- ov_adjs (unaligned features, for making `ov_adj`)
@@ -892,35 +911,44 @@ def datapair_from_adatas(
     var2 = adata2.var.copy().loc[vnodes2, :]
 
     # --- node features
-    if union_node_feats == 'auto' and sum(map(len, vars_use)) < 3000:
-        union_node_feats = True
-    else:
-        union_node_feats = False
-    if union_node_feats:
-        # make sure that all the features are detected in both datasets
-        submaps_1v1 = utp.subset_matches(
-            df_varmap_1v1, vars_all1, vars_all2, union=False)
-        submaps_1v1 = utp.subset_matches(
-            submaps_1v1, vars_use1, vars_use2, union=True)
-        # print("TEST", submaps_1v1.shape)
-    else:
-        # (intersection of 1-1 matched features)
-        submaps_1v1 = utp.subset_matches(
-            df_varmap_1v1, vars_use1, vars_use2, union=False)
-    vnames_feat1, vnames_feat2 = list(zip(*submaps_1v1.values[:, :2]))
-
-    try:
-        features1 = adata1[:, vnames_feat1].X
-        features2 = adata2[:, vnames_feat2].X
-    except:
-        logging.warning(
-            '[NOTE]\nthe node features will be extracted from `adata.raw`, '
-            'please make sure that the values are normalized.\n')
-        features1 = adata_raw1[:, vnames_feat1].X
-        features2 = adata_raw2[:, vnames_feat2].X
-
-    features = list(map(_check_sparse_toarray, [features1, features2]))
-
+    # submaps_1v1_commom = pp.subset_matches(
+    #     df_varmap_1v1, vars_use1, vars_use2, union=False)
+    # if union_node_feats == 'auto' and submaps_1v1_commom.shape[0] < 100:
+    #     union_node_feats = True
+    # else:
+    #     union_node_feats = False
+    # if union_node_feats:
+    #     # make sure that all the features are detected in both datasets
+    #     submaps_1v1 = pp.subset_matches(
+    #         df_varmap_1v1, vars_all1, vars_all2, union=False)
+    #     submaps_1v1 = pp.subset_matches(
+    #         submaps_1v1, vars_use1, vars_use2, union=True)
+    #     # print("TEST", submaps_1v1.shape)
+    # else:
+    #     # (intersection of 1-1 matched features)
+    #     submaps_1v1 = submaps_1v1_commom
+    #     # submaps_1v1 = pp.subset_matches(
+    #     #     df_varmap_1v1, vars_use1, vars_use2, union=False)
+    # vnames_feat1, vnames_feat2 = list(zip(*submaps_1v1.values[:, :2]))
+    #
+    # try:
+    #     features1 = adata1[:, vnames_feat1].X
+    #     features2 = adata2[:, vnames_feat2].X
+    # except:
+    #     logging.warning(
+    #         '[NOTE] the node features will be extracted from `adata.raw`, '
+    #         'please make sure that the values are normalized.\n')
+    #     features1 = adata_raw1[:, vnames_feat1].X
+    #     features2 = adata_raw2[:, vnames_feat2].X
+    #
+    # features = list(map(_check_sparse_toarray, [features1, features2]))
+    features, trans = make_features(
+        adatas, vars_use1, vars_use2, df_varmap, col_weight=col_weight,
+        union_node_feats=union_node_feats,
+        keep_non1v1=keep_non1v1_feats, non1v1_trans_to=non1v1_trans_to,
+    )
+    vnames_feat1, vnames_feat2 = trans.reduce_to_align()
+    print("trans.shape=", trans.shape)
     return DataPair(features,
                     [ov_adjs1, ov_adjs2],
                     vv_adj=vv_adj,
@@ -932,3 +960,105 @@ def datapair_from_adatas(
                     dataset_names=dataset_names,
                     **kwds)
 
+
+def make_features(
+        adatas, vars1: Sequence, vars2: Sequence,
+        df_varmap: pd.DataFrame,
+        col_weight: Optional[str] = None,  # a column in ``df_varmap``
+        union_node_feats: bool = True,
+        keep_non1v1: bool = True,
+        non1v1_trans_to: int = 0,
+):
+    """ Decide and make a pair of aligned feature matrices for CAME input.
+
+    Parameters
+    ----------
+    adatas
+        a pair of ``sc.AnnData``
+    vars1
+        variable-names in adatas[0], as the candidates
+    vars2
+        variable-names in adatas[1], as the candidates
+    df_varmap
+        A ``pd.DataFrame`` with (at least) 2 columns.
+        variable mappings between features in the given pair of datasets.
+    col_weight
+        a column name in ``df_varmap``, used for weighted-average-transformation
+         of the non-1v1 features.
+    union_node_feats: bool
+        whether to take the union of the cell-node features
+    keep_non1v1: bool
+        whether to take into account the non-1v1 variables as the node features.
+    non1v1_trans_to: int
+        the direction to transform non-1v1 features, should either be 0 or 1.
+        Set as 0 to transform query data to the reference (default),
+        1 to transform the reference data to the query.
+        If set ``keep_non1v1_feats=False``, this parameter will be ignored.
+
+    Returns
+    -------
+    features: a tuple of length 2
+    trans: pp.AdjacentTrans
+    """
+    df_varmap_1v1 = pp.take_1v1_matches(df_varmap)
+
+    adata1, adata2 = adatas
+    vars_all1 = pp.all_vars_of_adata(adata1)
+    vars_all2 = pp.all_vars_of_adata(adata2)
+    # submaps_1v1_commom = pp.subset_matches(
+    #     df_varmap_1v1, vars1, vars2, union=False)
+    # if union_node_feats == 'auto' and submaps_1v1_commom.shape[0] < 100:
+    #     union_node_feats = True
+    # else:
+    #     union_node_feats = False
+    # union of 1v1 homologies
+    submap_1v1 = pp.subset_matches(
+        pp.subset_matches(df_varmap_1v1, vars_all1, vars_all2, union=False),
+        vars1, vars2, union=union_node_feats,
+    )
+    if keep_non1v1:
+        # non-1v1 intersections
+        submap_non = pp.subset_matches(
+            df_varmap,
+            [g for g in vars1 if g not in submap_1v1.values[:, 0]],
+            [g for g in vars2 if g not in submap_1v1.values[:, 1]],
+            union=False)
+        # put all variable-mappings together
+        submap = pd.concat([submap_1v1, submap_non], axis=0)
+    else:
+        submap = submap_1v1
+        if submap.shape[0] < 100:
+            logging.warning(
+                f"There are less than 100 1v1 homologous features between "
+                f"two datasets, in which case the cell-type mapping results may"
+                f" be un-satisfying. "
+                f"Consider setting the parameter `keep_non1v1` or "
+                f"`keep_non1v1_feats` as `True`!")
+    trans_adj, vars_use1, vars_use2 = pp.pivot_df_to_sparse(
+        submap, key_data=col_weight)
+    try:
+        feats01 = adata1[:, vars_use1].X
+        feats02 = adata2[:, vars_use2].X
+    except:  # KeyError
+        logging.warning(
+            '[NOTE] the node features will be extracted from `adata.raw`, '
+            'please make sure that the values are normalized.\n')
+        feats01 = adata1.raw[:, vars_use1].X
+        feats02 = adata2.raw[:, vars_use2].X
+    trans = pp.AdjacentTrans(
+        trans_adj, vars_use1, vars_use2, trans_to=non1v1_trans_to)
+    if non1v1_trans_to == 0:
+        # transform to align the reference (seems tp perform better)
+        feats1 = feats01
+        feats2 = trans.reduce_to_align_features(feats02)
+    else:
+        # transform to align the query
+        feats1 = trans.reduce_to_align_features(feats01)
+        feats2 = feats02
+    # divide row-sums as averages
+    # feats2 = trans_adj.dot(feats02.T) / trans_adj.sum(1)
+    # feats2 = feats2.T
+    assert feats1.shape[1] == feats2.shape[1]
+    feats = list(map(_check_sparse_toarray, [feats1, feats2]))
+    # TODO: other candidate outputs: trans_adj, submap
+    return feats, trans

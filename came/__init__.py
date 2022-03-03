@@ -42,10 +42,11 @@ from .datapair import (
         aligned_datapair_from_adatas,
         DataPair,
         AlignedDataPair,
+        make_features,
 )
 from .PARAMETERS import get_model_params, get_loss_params
 from . import pipeline
 from .pipeline import __test1__, __test2__
 
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"

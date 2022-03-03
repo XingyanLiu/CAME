@@ -232,7 +232,7 @@ class Trainer(BaseTrainer):
               eps=5e-3,
               cat_class='cell',
               device=None,
-              backup_stride: int = 43,
+              backup_stride: int = 111,
               **other_inputs):
         """ Main function for model training (whole-graph based)
 
@@ -332,10 +332,14 @@ class Trainer(BaseTrainer):
             if self._cur_epoch >= n_pass - 1:
                 self.ami_max = max(self.ami_max, ami)
                 if ami >= self.ami_max - eps > 0:
-                    self._cur_epoch_best = self._cur_epoch
+                    if ami >= self.ami_max:
+                        self._cur_epoch_best = self._cur_epoch
+                        _flag = 'current best'
+                    else:
+                        _flag = 'potential best'
                     self.save_model_weights()
                     backup = True
-                    print('[current best] model weights backup')
+                    print(f'[{_flag}] model weights backup')
                 elif self._cur_epoch % backup_stride == 0:
                     self.save_model_weights()
                     backup = True
@@ -386,7 +390,7 @@ class Trainer(BaseTrainer):
                         batch_size=128,
                         sampler=None,
                         device=None,
-                        backup_stride: int = 43,
+                        backup_stride: int = 111,
                         mod_info: int = 3,
                         **other_inputs):
         """ Main function for model training (based on mini-batches)
@@ -476,6 +480,7 @@ class Trainer(BaseTrainer):
             all_test_preds = []
             test_labels = []
             with tqdm.tqdm(test_dataloader) as tq, torch.no_grad():
+                model.eval()
                 for input_nodes, output_nodes, mfgs in tq:
                     inputs = to_device(idx_hetero(self.feat_dict, input_nodes), device)
                     mfgs = to_device(mfgs, device)
@@ -487,7 +492,7 @@ class Trainer(BaseTrainer):
                     )
                 all_test_preds = torch.cat(all_test_preds, dim=0)
                 test_labels = torch.cat(test_labels, dim=0)
-
+            model.train()
             # ========== evaluation (Acc.) ==========
             with torch.no_grad():
                 train_acc = accuracy(train_labels, all_train_preds)
@@ -507,11 +512,15 @@ class Trainer(BaseTrainer):
                 backup = False
                 if self._cur_epoch >= n_pass - 1:
                     self.ami_max = max(self.ami_max, ami)
-                    if ami > self.ami_max - eps > 0:
-                        self._cur_epoch_best = self._cur_epoch
+                    if ami >= self.ami_max - eps > 0:
+                        if ami >= self.ami_max:
+                            self._cur_epoch_best = self._cur_epoch
+                            _flag = 'current best'
+                        else:
+                            _flag = 'potential best'
                         self.save_model_weights()
                         backup = True
-                        print('[current best] model weights backup')
+                        print(f'[{_flag}] model weights backup')
                     elif self._cur_epoch % backup_stride == 0:
                         self.save_model_weights()
                         backup = True

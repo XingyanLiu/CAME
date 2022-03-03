@@ -15,7 +15,8 @@ import torch
 from scipy.special import softmax, expit
 from scipy import stats
 from . import detach2numpy, onehot_encode
-from ..utils.analyze import load_dpair_and_model, load_json_dict, save_json_dict
+from ..utils.analyze import load_dpair_and_model
+from ..utils.base import save_json_dict, load_json_dict
 
 
 def sigmoid(x: np.ndarray):
@@ -168,9 +169,11 @@ class Predictor(object):
             std_fg: Optional[Sequence] = None,
     ):
         if isinstance(classes, int):
-            self._classes = tuple(range(classes))
+            self._classes = list(range(classes))
         else:
-            self._classes = tuple(classes)
+            _unitype = lambda x: int(x) if isinstance(x, np.integer) else x
+            classes = [_unitype(c) for c in classes]
+            self._classes = classes
         self._mode = mode
         self._background_mean_std = None
         self._foreground_mean_std = None
@@ -186,7 +189,7 @@ class Predictor(object):
         return self._background_mean_std is not None
 
     @property
-    def classes(self) -> tuple:
+    def classes(self) -> list:
         return self._classes
 
     @property
@@ -203,7 +206,7 @@ class Predictor(object):
         mean, std = list(zip(*self._background_mean_std))
         
         dct = {
-            'classes': list(self.classes),
+            'classes': self.classes,
             'mode': self._mode,
             'mean': list(map(float, mean)),
             'std': list(map(float, std)),

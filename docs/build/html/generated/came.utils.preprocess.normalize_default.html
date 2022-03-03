@@ -100,12 +100,13 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.preprocess.normalize_default</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.quick_preprocess.html">came.utils.preprocess.quick_preprocess</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.group_mean.html">came.utils.preprocess.group_mean</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.group_mean_adata.html">came.utils.preprocess.group_mean_adata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.wrapper_scale.html">came.utils.preprocess.wrapper_scale</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.make_bipartite_adj.html">came.utils.preprocess.make_bipartite_adj</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.take_1v1_matches.html">came.utils.preprocess.take_1v1_matches</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.subset_matches.html">came.utils.preprocess.subset_matches</a></li>
-<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.get_homologues.html">came.utils.preprocess.get_homologues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.get_homologies.html">came.utils.preprocess.get_homologies</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.take_adata_groups.html">came.utils.preprocess.take_adata_groups</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.remove_adata_groups.html">came.utils.preprocess.remove_adata_groups</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.merge_adata_groups.html">came.utils.preprocess.merge_adata_groups</a></li>
@@ -116,6 +117,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
@@ -216,7 +218,7 @@
 <h1>came.utils.preprocess.normalize_default<a class="headerlink" href="#came-utils-preprocess-normalize-default" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.preprocess.normalize_default">
-<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">normalize_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_return</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.normalize_default" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">normalize_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_return</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.normalize_default" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalizing datasets with default settings (total-counts normalization
 followed by log(x+1) transform).</p>
 <dl class="field-list simple">
@@ -256,7 +258,7 @@ original object</p></li>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

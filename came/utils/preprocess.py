@@ -147,7 +147,8 @@ def adata_from_raw(dirname, backup_npz=True, name_mtx='matrix',
     elif f'{name_mtx}.mtx' in files:
         mat = load_sparse(dirname / f'{name_mtx}.mtx', backup_npz=backup_npz)
     else:
-        raise FileNotFoundError(f"None of file named `{name_mtx}.npz` or `{name_mtx}.mtx` exists!")
+        raise FileNotFoundError(
+            f"None of file named `{name_mtx}.npz` or `{name_mtx}.mtx` exists!")
     mat = sparse.csr_matrix(mat.T)
 
     params = dict(header=None, sep='\t', index_col=0)
@@ -173,7 +174,8 @@ def add_columns(
         copy=True, **kwannos):
     def _set_values(_df, k, v, ignore_index=ignore_index):
         if k in _df.columns:
-            logging.warning(f'NOTE that column "{k}" will be covered by new values')
+            logging.warning(
+                f'NOTE that column "{k}" will be covered by new values')
         _df[k] = list(v) if ignore_index else v
         # print(k, end=', ')
 
@@ -382,7 +384,8 @@ def merge_named_matrices(
         if not union and (dsnames is not None) and verbose:
             print('After {}: {} genes'.format(dsnames[idx], len(keep_genes)))
         if len(keep_genes) == 0:
-            raise ValueError('Error: No genes found in all datasets, exiting...')
+            raise ValueError(
+                'Error: No genes found in all datasets, exiting...')
     if verbose:
         print('Found {} genes among all datasets'
               .format(len(keep_genes)))
@@ -399,7 +402,8 @@ def merge_named_matrices(
             gene_to_idx = {gene: idx for idx, gene in enumerate(gene_lists[i])}
             for j, gene in enumerate(union_genes):
                 if gene in gene_to_idx:
-                    X_new[:, j] = X_old[:, gene_to_idx[gene]].toarray().flatten()
+                    X_new[:, j] = X_old[:,
+                                  gene_to_idx[gene]].toarray().flatten()
             mat_list[i] = sparse.csr_matrix(X_new)
         # print('TEST:', mat_list[i].data[:5])
         ret_genes = np.array(union_genes)
@@ -451,7 +455,8 @@ def align_adata_vars(adata1: sc.AnnData,  # better be raw data
     """
     vars_all1, vars_all2 = list(map(all_vars_of_adata, [adata1, adata2]))
     if df_varmap_1v1 is None:
-        vars1 = vars2 = list(set(adata1.var_names).intersection(adata2.var_names))
+        vars1 = vars2 = list(
+            set(adata1.var_names).intersection(adata2.var_names))
     else:
         submaps_1v1 = subset_matches(df_varmap_1v1, vars_all1, vars_all2,
                                      union=False)
@@ -498,9 +503,10 @@ def change_names(names: Sequence,
     return list(map(foo_change, names, **kwargs))
 
 
-def get_homologues(df_match: pd.DataFrame,
+def get_homologies(df_match: pd.DataFrame,
                    vals: Sequence,
-                   cols: Union[None, Sequence[str]] = None,  # [col_from, col_to]
+                   cols: Union[None, Sequence[str]] = None,
+                   # [col_from, col_to]
                    reverse: bool = False,
                    uniquelist: bool = True,
                    with_null=False):
@@ -553,6 +559,9 @@ def get_homologues(df_match: pd.DataFrame,
         return list(homos) + null if with_null else homos
     else:
         return (homos, null) if with_null else homos
+
+
+get_homologues = get_homologies
 
 
 def subset_matches(df_match: pd.DataFrame,
@@ -735,7 +744,7 @@ def make_bipartite_adj(df_map: pd.DataFrame,
     return bi_adj, nodes1, nodes2
 
 
-def pivot_df_to_sparse(df, row=0, col=1, key_data=None, **kwds):
+def pivot_df_to_sparse(df: pd.DataFrame, row=0, col=1, key_data=None, **kwds):
     """
     row, col:
         str or int, int for column index, and str for column name
@@ -812,6 +821,66 @@ def pivot_to_sparse(rows: Sequence, cols: Sequence,
     sparse_mat = sparse.coo_matrix(
         (data, (ii, jj)), shape=(len(rownames), len(colnames)))
     return sparse_mat, rownames, colnames
+
+
+class AdjacentTrans(object):
+    def __init__(self, adj, vars1, vars2, trans_to=0):
+        assert adj.shape[0] == len(vars1)
+        assert adj.shape[1] == len(vars2)
+        self.adj = adj
+        self.vars1 = vars1  # for rows
+        self.vars2 = vars2  # for columns
+        self.trans_to = int(trans_to)  # 0 for `vars1` and 1 for `vars2`
+
+    @property
+    def shape(self):
+        return self.adj.shape
+
+    @staticmethod
+    def from_edge_df(edge_df, col_weight=None):
+        # edge_df: the first column for rows and the second for columns
+        adj, vars1, vars2 = pivot_df_to_sparse(edge_df, key_data=col_weight)
+        return AdjacentTrans(adj, vars1, vars2)
+
+    def reduce_to_align(self, sep='__'):
+        trans_to = self.trans_to
+        logging.info(f"[AdjacentTrans] reduce to align, trans_to={trans_to}")
+        if trans_to == 0:
+            return self.vars1, reduce_to_align(self.adj, self.vars2, sep=sep)
+        else:
+            return reduce_to_align(self.adj.T, self.vars1, sep=sep), self.vars2
+
+    def reduce_to_align_features(self, feats):
+        """feats: a sample-by-vars matrix or (sparse) array"""
+        trans_to = self.trans_to
+        adj = self.adj
+        logging.info(
+            f"[AdjacentTrans] reduce features to align, trans_to={trans_to}")
+        if trans_to == 1:
+            adj = adj.T
+        assert feats.shape[1] == adj.shape[1]
+        feats = adj.dot(feats.T) / adj.sum(1)  # divide row-sums as averages
+        # if self.trans_to == 0:
+        #     assert feats.shape[1] == adj.shape[1]
+        #     feats = adj.dot(feats.T) / adj.sum(1)
+        # else:
+        #     adj = adj.T
+        #     assert feats.shape[1] == adj.shape[1]
+        #     feats = adj.T.dot(feats.T)
+        return feats.T
+
+    def T(self):
+        """Transpose"""
+        return AdjacentTrans(self.adj.T, self.vars2, self.vars1)
+
+
+def reduce_to_align(adj: sparse.spmatrix, names: Sequence, sep='__'):
+    """reduce column-names to align rows"""
+    assert adj.shape[1] == len(names)
+    adj = sparse.csr_matrix(adj)
+    # adj.indices.shape == adj.data.shape
+    return [sep.join(np.take(names, adj[i, :].indices).astype(str))
+            for i in range(adj.shape[0])]
 
 
 def label_binarize_each(labels, classes, sparse_out=True):
@@ -1078,7 +1147,8 @@ def take_adata_groups(adata: sc.AnnData,
     indicators = take_group_labels(adata.obs[key], group_names,
                                    indicate=True)
     if copy:
-        return adata[indicators, :].X.copy() if onlyx else adata[indicators, :].copy()
+        return adata[indicators, :].X.copy() if onlyx else adata[indicators,
+                                                           :].copy()
     else:
         return adata[indicators, :].X if onlyx else adata[indicators, :]
 
@@ -1241,7 +1311,7 @@ def _filter_mito(lst):
 
 
 def normalize_default(adata: sc.AnnData,
-                      target_sum=1e4,
+                      target_sum=None,
                       copy: bool = False,
                       log_only: bool = False,
                       force_return: bool = False, ):
@@ -1275,7 +1345,8 @@ def normalize_default(adata: sc.AnnData,
         logging.info('No copy was made, the input AnnData will be changed!')
     logging.info('normalizing datasets with default settings.')
     if not log_only:
-        logging.info(f'performing total-sum normalization, target_sum={target_sum}...')
+        logging.info(
+            f'performing total-sum normalization, target_sum={target_sum}...')
         sc.pp.normalize_total(adata, target_sum=target_sum)
     else:
         logging.info('skipping total-sum normalization')
@@ -1398,7 +1469,8 @@ def group_zscore_adata(adt: sc.AnnData,
     """
     labels = adt.obs[groupby]
     if key == 'counts':
-        logging.info('Z-score scaling on count matrix, transformed into a dense array')
+        logging.info(
+            'Z-score scaling on count matrix, transformed into a dense array')
         if sparse.issparse(adt.X):
             X = adt.X.toarray()
         else:
@@ -1524,7 +1596,7 @@ def normalize_row(X, scale_factor=1, by='sum'):
         X_new = np.diag(norm_).dot(X)
 
     if isinstance(X, pd.DataFrame):
-        X_new = pd.DataFrame(X_new, columns = X.columns)
+        X_new = pd.DataFrame(X_new, columns=X.columns)
     return X_new
 
 
@@ -1638,10 +1710,47 @@ def group_value_counts(df, count_on, group_by, split=True, **kwds):
     return vcnt
 
 
-def group_mean(X: Union[np.ndarray, sparse.spmatrix],
-               labels: Sequence,
-               binary=False, classes=None, features=None,
-               print_groups=False):
+def group_mean(
+        X: Union[np.ndarray, sparse.spmatrix],
+        labels: Sequence,
+        binary: bool = False,
+        classes=None, features=None,
+        **kwds
+):
+    """ compute the group averaged features
+
+    Parameters
+    ----------
+    X: np.ndarray or sparse.spmatrix
+        shape (n_samples, n_features)
+    labels:
+        shape (n_samples, )
+    binary
+        if True, the results will be the non-zero proportions
+    classes:
+        optional, names of groups
+    features:
+        optional, names of features
+
+    Returns
+    -------
+    average_mat: pd.DataFrame
+    """
+    if sparse.issparse(X):
+        return group_mean_sparse(
+            X, labels, binary=binary, classes=classes, features=features, **kwds
+        )
+    else:
+        return group_mean_dense(
+            X, labels, binary=binary, classes=classes, features=features, **kwds
+        )
+
+
+def group_mean_sparse(
+        X: sparse.spmatrix,
+        labels: Sequence,
+        binary=False, classes=None, features=None,
+        print_groups=False):
     """
     This function may work with more efficiency than `df.groupby().mean()` 
     when handling sparse matrix.
@@ -1661,7 +1770,7 @@ def group_mean(X: Union[np.ndarray, sparse.spmatrix],
     classes = np.unique(labels, ) if classes is None else classes
     if binary:
         X = (X > 0)  # .astype('float')
-        logging.info('Binarized; the results will be expression proportions')
+        logging.info('Binarized; the results will be non-zero proportions')
 
     if len(classes) == 1:
         grp_mean = X.mean(axis=0).T
@@ -1679,18 +1788,22 @@ def group_mean_dense(
         X, labels, binary=False,
         index_name='group',
         classes=None,
+        features=None,
 ):
     classes = np.unique(labels, ) if classes is None else classes
     if binary:
         X = (X > 0)  # .astype('float')
-        logging.info('Binarized...the results will be the expression '
+        logging.info('Binarized...the results will be the non-zero '
                      'proportions.')
-    tmp = pd.DataFrame(X)
+    tmp = pd.DataFrame(X, columns=features)
     tmp[index_name] = list(labels)
-    avgs = tmp.groupby(index_name).mean()
+    avgs = tmp.groupby(index_name).mean().T
     del tmp[index_name]
     # print(avgs.shape)
-    return avgs.T[classes]  # each column as a group
+    for c in classes:
+        if c not in avgs.columns:
+            avgs[c] = 0.
+    return avgs[classes]  # each column as a group
 
 
 def group_median_dense(
@@ -1764,8 +1877,9 @@ def group_mean_multiadata(adatas: Sequence[sc.AnnData],
         keys = [keys] * n
     tags = list(map(str, np.arange(n))) if tags is None else tags
     # within-group averages 
-    gmeans = [group_mean_adata(adt, ky, use_genes, binary=binary, use_raw=use_raw) \
-              for adt, ky in zip(adatas, keys)]
+    gmeans = [
+        group_mean_adata(adt, ky, use_genes, binary=binary, use_raw=use_raw) \
+        for adt, ky in zip(adatas, keys)]
     gmeans = pd.concat(gmeans, axis=1, keys=tags, sort=False)
     gmeans.fillna(0, inplace=True)
     # Make names
@@ -1906,6 +2020,7 @@ def get_scnet(adata: sc.AnnData):
 
 def get_hvgs(adata, force_redo=False, batch_key=None,
              n_top_genes=2000,
+             key_hvg: str = 'highly_variable',
              **hvg_kwds):
     """ packed function for computing and get HVGs from ``sc.AnnData`` object.
     if `force_redo` is True, data should be normalized and log-transformed.
@@ -1922,10 +2037,12 @@ def get_hvgs(adata, force_redo=False, batch_key=None,
     n_top_genes:
         Number of highly-variable genes to keep. 
         If specified, other parameters will be ignored.
+    key_hvg:
+        A column that should be in ``adata.var.columns``
     hvg_kwds:
         Other parameters, e.g. min_mean, max_mean, min_disp, max_disp
     """
-    key_hvg = 'highly_variable'
+    # key_hvg = 'highly_variable'
     if force_redo or key_hvg not in adata.var.columns:
         logging.info(
             f'performing HVG-selection...\n '
@@ -1939,22 +2056,42 @@ def get_hvgs(adata, force_redo=False, batch_key=None,
     return list(all_vars[is_hvg])
 
 
-def get_marker_info_table(adata, groups=None,
-                          key='rank_genes_groups'):
+def get_marker_info_table(
+        adata, groups=None, key='rank_genes_groups',
+        cut_padj: Optional[float] = 0.05,
+        cut_logfc: Optional[float] = 0.25,
+        cut_pts: Optional[float] = None,
+):
     result = adata.uns[key]
     if groups is None:
         groups = result['names'].dtype.names
 
     dfs = []
-    cols = ['names', 'logfoldchanges', 'pvals', 'pvals_adj', 'scores']
+    cols = ['names', 'logfoldchanges', 'pvals', 'pvals_adj', 'scores', ]
+    # cols = [c for c in cols if c in result.keys()]
+    flag_pts = 'pts' in result.keys()
+
     for group in groups:
         _df = pd.DataFrame({
             key: result[key][group] for key in cols
         })
         _df['group'] = group
-        dfs.append(_df[['group'] + cols])
-    df = pd.concat(dfs, axis=0)
-    return df
+
+        if flag_pts:
+            # expression proportions, avoid row mismatching
+            _df['pts'] = _df['names'].map(result['pts'][group])
+            _df['pts_rest'] = _df['names'].map(result['pts_rest'][group])
+            if cut_pts is not None:
+                _df = _df[_df['pts'] >= cut_pts]
+        if cut_padj is not None:
+            _df = _df[_df['pvals_adj'] <= cut_padj]
+        if cut_logfc is not None:
+            _df = _df[_df['logfoldchanges'] >= cut_logfc]
+        dfs.append(_df.copy())  # [['group'] + cols])
+    df = pd.concat(dfs, axis=0, keys=groups)
+    if flag_pts:
+        cols += ['pts', 'pts_rest']
+    return df[['group'] + cols]
 
 
 def get_marker_name_table(adata, key='rank_genes_groups'):
@@ -1988,12 +2125,49 @@ def top_markers_from_df(marker_df, n=5, groups=None, unique=True, ):
     return top
 
 
+def top_markers_from_info(
+        df_info, n=5, groups=None, unique=True,
+        col_group='group',
+        col_name='names') -> list:
+    """
+    df_info: DEG-info table that can be take from `top_markers_from_adata`
+    """
+    # if groups is not None:
+    #     df_info = df_info[df_info[col_group].isin(groups)]
+    subdf = df_info.groupby(col_group).apply(lambda x: x.head(n))
+    if groups is not None:
+        subdf = subdf.loc[groups]  # filter, or keep the group orders
+    names = subdf[col_name]
+    return names.unique().tolist() if unique else names.tolist()
+
+
 def top_markers_from_adata(adata: sc.AnnData,
-                           n=5, groups=None,
+                           n: Optional[int] = 5,
+                           groups: Optional[Sequence] = None,
                            unique=True,
+                           cut_padj=0.05,
+                           cut_logfc=0.25,
+                           cut_pts=0.1,
                            key='rank_genes_groups'):
-    df = get_marker_name_table(adata, key=key)
-    return top_markers_from_df(df, n=n, groups=groups, unique=unique)
+    df_info = get_marker_info_table(
+        adata, groups, key=key,
+        cut_padj=cut_padj, cut_logfc=cut_logfc, cut_pts=cut_pts)
+
+    if n is None:
+        if unique:
+            return df_info['names'].unique().tolist()
+        return df_info['names'].tolist()
+    else:
+        # df = get_marker_name_table(adata, key=key)
+        # return top_markers_from_df(df, n=n, groups=groups, unique=unique)
+        if groups is None:
+            _groupby = adata.uns[key]['params']['groupby']
+            try:
+                # to keep the group order
+                groups = adata.obs[_groupby].cat.categories
+            except:
+                pass
+        return top_markers_from_info(df_info, n=n, groups=groups, unique=unique)
 
 
 def compute_and_get_DEGs(adata: sc.AnnData,
@@ -2006,20 +2180,26 @@ def compute_and_get_DEGs(adata: sc.AnnData,
                          inplace=True,
                          do_normalize=False,
                          method='t-test',
+                         return_info=False,
+                         cuts={},
                          **kwds):
     """ Compute and get DEGs from ``sc.AnnData`` object
     
     By default, assume that the counts in adata has been normalized.
     If `force_redo`: re-compute DEGs and the original DEGs in adata will be ignored
+
+    cuts: dict with keys 'cut_padj', 'cut_pts', and 'cut_logfc'
+
     """
     if not inplace:
         logging.info('making a copy')
         adata = adata.copy()
-
+    adata.obs[groupby] = adata.obs[groupby].astype('category')
     if force_redo or key_added not in adata.uns.keys():
         logging.info(f'computing differentially expressed genes using {method}')
         if do_normalize:
-            normalize_default(adata, target_sum=1e4, )
+            # todo: ``target_sum`` used to be 1e4
+            normalize_default(adata, target_sum=None, )
         else:
             logging.info(
                 'computing differential expression genes using default settings'
@@ -2028,12 +2208,15 @@ def compute_and_get_DEGs(adata: sc.AnnData,
             adata = remove_adata_small_groups(adata, key=groupby, min_samples=1)
         sc.tl.rank_genes_groups(adata, groupby=groupby,
                                 key_added=key_added,
+                                pts=True,
                                 method=method,
                                 **kwds)
+    if return_info:
+        return get_marker_info_table(adata, key=key_added, **cuts)
     return top_markers_from_adata(adata, n=n,
                                   groups=groups,
                                   unique=unique,
-                                  key=key_added)
+                                  key=key_added, **cuts)
 
 
 @dec_timewrapper('leiden')
@@ -2075,7 +2258,7 @@ def _augment_full_repeat(
     np.random.seed(seed)
     ids_repeat = np.random.choice(n0, size=n_add, replace=True)
     if sparse.issparse(x):
-        x_pseudo = x[ids_repeat, ]
+        x_pseudo = x[ids_repeat,]
     else:
         x_pseudo = np.take(x, ids_repeat, axis=0)
     y_pseudo = np.take(y, ids_repeat, axis=0) if y is not None else None
@@ -2106,7 +2289,7 @@ def _augment_balance_group_repeat(
             continue
         else:
             logging.debug(lb)
-            _x = x[ids, ]
+            _x = x[ids,]
             _y = np.take(y, ids, axis=0)
             _x_pseudo, _y_pseudo = _augment_full_repeat(_x, _y, n_add=_n_add,
                                                         seed=seed)
@@ -2124,7 +2307,7 @@ def _augment_balance_group_repeat(
         y_pseudo_all = np.concatenate(y_pseudo_all, axis=0)
     if concat:
         x_aug, y_aug, is_pseudo = _concat_x_and_y(
-        [x, y], [x_pseudo_all, y_pseudo_all])
+            [x, y], [x_pseudo_all, y_pseudo_all])
         is_pseudo = is_pseudo.astype(bool)
         return x_aug, y_aug, is_pseudo
     else:
@@ -2186,4 +2369,3 @@ def __test__():
     )
     print(adt.obs[key].value_counts())
     print(adt.obs['is_pseudo'].value_counts())
-

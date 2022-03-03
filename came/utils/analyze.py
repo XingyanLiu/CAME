@@ -26,11 +26,10 @@ from . import preprocess as pp
 from ..model import CGGCNet, CGCNet
 from . import _knn
 from .base import (
-    make_nowtime_tag,
     make_pairs_from_lists,
     load_pickle,
     load_json_dict,
-    save_json_dict,
+    # save_json_dict,
 )
 
 
@@ -149,8 +148,461 @@ def _infer_ckpt(dirname) -> int:
     return ckpt
 
 
-# In[]
-""" link-weights between homologous gene pairs """
+def module_homo_weights(
+        var: Union[pd.DataFrame, Sequence[pd.DataFrame]],
+        df_links: pd.DataFrame,
+        module,
+        key_module='module',
+        key_split='dataset',
+        key_name='name',
+        include_private=False):
+    """ extract the weights between homologous genes in the given module
+
+    Parameters
+    ----------
+    var
+        a DataFrame or a pair of DataFrames storing the annotations of variables
+        (genes), should be with columns {`key_module`, `key_split`, `key_name`}
+    df_links
+        a DataFrame recording the weights between each pair of homologies.
+    module
+        module name, e.g. '0', '1', ...
+    key_module
+        column name in var, of which the module-identities are stored
+    key_split
+        a column name in var, to split by (if var is a single DataFrame).
+    key_name
+        a column name in var, storing gene names
+    include_private
+        whether to include the weights (filled by zeros) between
+        dataset/species-specific genes
+
+    Returns
+    -------
+    a list of weights between homologous genes in the given module.
+    """
+    if isinstance(var, pd.DataFrame):
+        if isinstance(module, str):
+            var[key_module] = var[key_module].astype(str)
+        from .base import split_df
+        var1, var2 = split_df(var, by=key_split)
+    elif isinstance(var, Sequence):
+        var1, var2 = var
+    else:
+        raise ValueError(
+            "`var` should be either a pd.DataFrame or a pair of DataFrames")
+    genes1 = var1[var1[key_module] == module][key_name]
+    genes2 = var2[var2[key_module] == module][key_name]
+    if isinstance(df_links.index, pd.MultiIndex):
+        df_links = df_links.reset_index()
+    df_sub = pp.subset_matches(df_links, genes1, genes2)
+    weights = df_sub['weight'].tolist()
+
+    if include_private:
+        genes_private1 = [g for g in genes1 if g not in df_sub.iloc[:, 0]]
+        genes_private2 = [g for g in genes2 if g not in df_sub.iloc[:, 1]]
+        print(len(weights), len(genes_private1), len(genes_private2))
+        weights = weights + [0.] * (len(genes_private1) + len(genes_private2))
+
+    return weights
+
+
+def compute_common_private(
+        genes1: Sequence,  # Union[Sequence, Mapping[str, Sequence]],
+        genes2: Sequence,  # Union[Sequence, Mapping[str, Sequence]],
+        gmap: pd.DataFrame, ):
+    """
+
+    Parameters
+    ----------
+    genes1, genes2
+        gene sets
+    gmap
+        a DataFrame with at least two columns, storing homologous gene mappings
+
+    Returns
+    -------
+    record: dict
+    """
+    # genes1 = dct_deg1[cl]
+    # genes2 = dct_deg2[cl]
+    # deg1homo = pp.get_homologies(gmap, dct_deg1[cl], )
+    # common = sorted(set(deg1homo).intersection(genes2))  # wrong way!
+    record = {}
+    gmap_1v1 = pp.take_1v1_matches(gmap)
+    if len(gmap_1v1) != len(gmap):
+        subdf_varmap_1v1 = pp.subset_matches(gmap_1v1, genes1, genes2)
+        record.update({
+            "common1v1": subdf_varmap_1v1.apply(tuple, axis=1).tolist()
+        })
+    subdf_varmap = pp.subset_matches(gmap, genes1, genes2)
+    deg_common1 = subdf_varmap.iloc[:, 0].tolist()
+    deg_common2 = subdf_varmap.iloc[:, 1].tolist()
+
+    private1 = [g for g in genes1 if genes1 not in deg_common1]
+    private2 = [g for g in genes2 if genes2 not in deg_common2]
+    record.update({
+        # 'common1v1': subdf_varmap_1v1.apply(tuple, axis=1).tolist(),
+        'common1': deg_common1,
+        'common2': deg_common2,
+        'private1': private1,
+        'private2': private2,
+    })
+    return record
+
+
+def compare_modules(
+        mod_labels1, mod_labels2,
+        df_var_links,
+        avg_scaled: Optional[Sequence[pd.DataFrame]] = None,
+        zscore_cut: float = 1.,
+        # key_module='module'
+):
+    """
+    Compute common and private genes (cross-species) in each gene module.
+    If `avg_scaled` is provided, the module genes enriched in each cell-type
+    will be computed and compared.
+
+    Parameters
+    ----------
+    mod_labels1, mod_labels2: pd.Series
+        module labels
+    df_var_links: pd.DataFrame
+
+    avg_scaled:
+        If provided, should be a pair of DataFrame storing the average
+        expressions for each dataset (species), and the index should be
+        the gene names.
+    zscore_cut
+        Cut-off of expression z-scores. This will be ignored if ``avg_scaled``
+        is not provided.
+
+    Returns
+    -------
+    record
+
+    """
+    # mod_labels1 = gadt1.obs[key_module]
+    # mod_labels2 = gadt2.obs[key_module]
+    all_modules = sorted(
+        set(mod_labels1).union(mod_labels2),
+        key=lambda x: int(x))
+    record = {}
+    for mod in all_modules:
+        genes1 = mod_labels1[mod_labels1 == mod].index
+        genes2 = mod_labels2[mod_labels2 == mod].index
+        df_sub = pp.subset_matches(df_var_links.reset_index(), genes1, genes2)
+        logging.info(f'module {mod}: {len(genes1)}, {len(genes2)}')
+
+        genes_common01 = df_sub.iloc[:, 0]
+        genes_common02 = df_sub.iloc[:, 1]
+        record[mod] = {
+            'genes1': genes1.tolist(),
+            'genes2': genes2.tolist(),
+            # there may be duplicated genes
+            'genes_common1': genes_common01.tolist(),
+            'genes_common2': genes_common02.tolist(),
+            'weights_common': df_sub['weight'].tolist(),
+        }
+        if avg_scaled is not None:
+            avg_scaled1, avg_scaled2 = avg_scaled
+            record_each_cl = module_enrichment_for_classes(
+                avg_scaled1, avg_scaled2, genes1, genes2,
+                genes_common1=genes_common01,
+                genes_common2=genes_common02,
+                zscore_cut=zscore_cut,
+            )
+            # record[mod].update(record_each_cl)
+            record[mod]['cls'] = record_each_cl
+    return record
+
+
+def module_enrichment_for_classes(
+        avg_scaled1, avg_scaled2,
+        mod_genes1, mod_genes2,
+        genes_common1, genes_common2,
+        zscore_cut: float = 1.,
+        **kwargs
+):
+    """
+    For each (cell-)type and the given gene set (module) of two species,
+    calculate the relatively highly expressed genes, and find those genes that
+    are highly expressed in both species, and species-specific gene.
+
+    Note that `genes_common1` and `genes_common2` should be of the same length
+    """
+    # concatenated avg_scaled should be split, for there may be gene-name
+    # collisions that will raise error when indexing by names.
+    classes = sorted(set(avg_scaled1.columns).union(avg_scaled2.columns))
+    avg_scaled1 = avg_scaled1.loc[mod_genes1]
+    avg_scaled2 = avg_scaled2.loc[mod_genes2]
+
+    record = {}
+    for cl in classes:
+        # expr1 = avg_scaled.loc[mod_genes1, cl]
+        # expr2 = avg_scaled.loc[mod_genes2, cl]
+        expr1, expr2 = avg_scaled1[cl], avg_scaled2[cl]
+
+        cl_genes1 = expr1[expr1 >= zscore_cut].index
+        cl_genes2 = expr2[expr2 >= zscore_cut].index
+
+        expr_common1 = avg_scaled1.loc[genes_common1, cl].values
+        expr_common2 = avg_scaled2.loc[genes_common2, cl].values
+
+        indicator = (expr_common1 >= 1.) & (expr_common2 >= 1.)  # 同时高表达的基因
+        cl_genes_common1 = genes_common1[indicator].tolist()
+        cl_genes_common2 = genes_common2[indicator].tolist()
+
+        genes_private1 = sorted(set(cl_genes1).difference(cl_genes_common1))
+        genes_private2 = sorted(set(cl_genes2).difference(cl_genes_common2))
+        record[cl] = {
+            'cl_genes_common1': cl_genes_common1,
+            'cl_genes_common2': cl_genes_common2,
+            'genes_private1': genes_private1,
+            'genes_private2': genes_private2,
+        }
+    return record
+
+
+def compare_degs_seurat(
+        df_deg1, df_deg2,
+        df_map: Optional[pd.DataFrame] = None,
+        cut_padj: float = None,
+        ntop: Optional[int] = None,
+        key_group = 'cluster',
+        key_gene = 'gene',
+        key_pval = 'p_val_adj',
+):
+    """ Compare DEGs of common cell-types/clusters across datasets (or species)
+
+    Parameters
+    ----------
+    df_deg1
+        DEG table output from Seurat's function FindAllMarkers(), with columns
+        'p_val', 'avg_logFC', 'pct.1', 'pct.2', 'p_val_adj', 'cluster', 'gene'
+    df_deg2
+        DEG table output from Seurat's function FindAllMarkers(), with the same
+        format with ``df_deg1``
+    df_map
+        homologous gene mappings.
+        If not given, genes will mapped by their names (case sensitive).
+    cut_padj
+        filter genes with adjusted-p-values lower than this value
+    ntop: Optional
+        if specified, take only top-{ntop} DEGs to compare
+
+    Returns
+    -------
+    dict of dicts
+
+    Examples
+    --------
+
+    # compute intersections and privates
+    >>> record = compare_degs_adata(df_deg1, df_deg2, df_map, cut_padj=0.05)
+    # inspect the results
+    >>> pd.DataFrame(record)
+    >>> pd.DataFrame(record).applymap(lambda x: len(set(x)))
+
+    """
+    # sorted by p-values
+    df_deg1 = df_deg1.groupby(key_group).apply(
+        lambda x: x.sort_values(key_pval)).reset_index(drop=True)
+    df_deg2 = df_deg2.groupby(key_group).apply(
+        lambda x: x.sort_values(key_pval)).reset_index(drop=True)
+
+    # filter DEGs that are not significant enough
+    df_deg1 = df_deg1[df_deg1[key_pval] <= cut_padj]
+    df_deg2 = df_deg2[df_deg2[key_pval] <= cut_padj]
+
+    if ntop is None:
+        dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(list).to_dict()
+        dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(list).to_dict()
+    else:
+        dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(
+            lambda x: x.head(ntop).tolist()).to_dict()
+        dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(
+            lambda x: x.head(ntop).tolist()).to_dict()
+    return compare_deg_dicts(dct_deg1, dct_deg2, df_map)
+
+
+def compare_degs_adata(
+        adata1: sc.AnnData, adata2: sc.AnnData,
+        df_map: Optional[pd.DataFrame] = None,
+        cut_padj=0.05,
+        cut_logfc=0.25,
+        ntop: Optional[int] = None,
+        key_group: str = 'group',
+        key_gene: str = 'names',
+):
+    """ Compare DEGs of common cell-types/clusters across datasets (or species)
+
+    Parameters
+    ----------
+    adata1, adata2: ``sc.AnnData`` objects whose DEGs to be compared
+    df_map
+        homologous gene mappings
+    cut_padj
+        filter genes with adjusted-p-values lower than this value
+    cut_logfc
+        filter genes with long-fold-changes higher than this value
+    ntop: Optional
+        if specified, take only top-{ntop} DEGs to compare
+    key_group
+    key_gene
+
+    Returns
+    -------
+    dict of dicts
+
+    Examples
+    --------
+    # normalize data
+    >>> pp.normalize_default(adata1)
+    >>> pp.normalize_default(adata2)
+    # compute DEGs
+    >>> sc.tl.rank_genes_groups(adata1, groupby='cell_ontology_class')
+    >>> sc.tl.rank_genes_groups(adata2, groupby='cell_ontology_class')
+    # compute intersections and privates
+    >>> record = compare_degs_adata(adata1, adata2, df_map, cut_padj=0.05)
+    # inspect the results
+    >>> pd.DataFrame(record)
+    >>> pd.DataFrame(record).applymap(lambda x: len(set(x)))
+
+    """
+    df_deg1 = pp.get_marker_info_table(
+        adata1, cut_padj=cut_padj, cut_logfc=cut_logfc)
+    df_deg2 = pp.get_marker_info_table(
+        adata2, cut_padj=cut_padj, cut_logfc=cut_logfc)
+
+    if ntop is None:
+        dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(list).to_dict()
+        dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(list).to_dict()
+    else:
+        dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(
+            lambda x: x.head(ntop).tolist()).to_dict()
+        dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(
+            lambda x: x.head(ntop).tolist()).to_dict()
+
+    return compare_deg_dicts(dct_deg1, dct_deg2, df_map)
+
+
+def compare_deg_dicts(
+        dct_deg1, dct_deg2,
+        df_map: Optional[pd.DataFrame] = None):
+    """
+
+    Parameters
+    ----------
+    dct_deg1: Dict[Any, Sequence]
+        a dict of DEG lists, where each key corresponds to a cell group.
+    dct_deg2: Dict[Any, Sequence]
+        a dict of DEG lists, where each key corresponds to a cell group.
+    df_map:
+        homologous gene mappings
+    Returns
+    -------
+    record: dict
+    """
+    common_types = sorted(set(dct_deg1.keys()).intersection(dct_deg2.keys()))
+    # gmap = df_varmap if tag_1v1 == '' else df_varmap_1v1
+
+    record = {}
+    for cl in common_types:
+        deg1 = dct_deg1[cl]
+        deg2 = dct_deg2[cl]
+        if df_map is None:
+            common1v1 = set(deg1).intersection(deg2)
+            deg_common1 = deg_common2 = common1v1
+        else:
+            subdf_varmap_1v1 = pp.subset_matches(
+                pp.take_1v1_matches(df_map), deg1, deg2)
+            common1v1 = subdf_varmap_1v1.apply(tuple, axis=1).tolist()
+
+            subdf_varmap = pp.subset_matches(df_map, deg1, deg2)
+            deg_common1 = subdf_varmap.iloc[:, 0].tolist()
+            deg_common2 = subdf_varmap.iloc[:, 1].tolist()
+
+        private1 = [g for g in deg1 if deg1 not in deg_common1]
+        private2 = [g for g in deg2 if deg2 not in deg_common2]
+        record[cl] = {
+            'common1v1': common1v1,
+            'common1': deg_common1,
+            'common2': deg_common2,
+            'private1': private1,
+            'private2': private2,
+        }
+    return record
+
+
+def weight_linked_vars_by_expr(
+        dpair: DataPair,
+        labels_or_probs: Union[tuple, np.ndarray, pd.DataFrame],
+):
+    """ Compute the weights between homologies by their average expressions
+    across (cell) groups.
+
+    Parameters
+    ----------
+    dpair
+        the ``DataPair`` object
+    labels_or_probs
+        group (cell-type) labels or soft assignments (probabilities)
+
+    Returns
+    -------
+    df_var_links_expr: pd.DataFrame
+        the weights between each pair of homologous genes
+    avg: pd.DataFrame
+        concatenated average expressions
+
+    """
+    index_names = dpair.dataset_names
+    if not isinstance(labels_or_probs, pd.DataFrame):
+        # using the original labels
+        # labels1 = adt.obs['celltype'][dpair.obs_ids1]
+        # labels2 = adt.obs['celltype'][dpair.obs_ids2]
+        if isinstance(labels_or_probs, tuple) and len(labels_or_probs) == 2:
+            labels1, labels2 = labels_or_probs
+        else:
+            labels = labels_or_probs
+            labels1, labels2 = labels[dpair.obs_ids1], labels[dpair.obs_ids2]
+        _avg1 = pp.group_mean(dpair._ov_adjs[0], labels1,
+                              features=dpair.vnode_names1)
+        _avg2 = pp.group_mean(dpair._ov_adjs[1], labels2,
+                              features=dpair.vnode_names2)
+        avg = pd.concat([_avg1, _avg2], axis=0).fillna(0.)
+
+        classes_common = sorted(set(_avg1.columns).intersection(_avg2.columns))
+        avg = avg[classes_common]
+    else:
+        logging.info("Compute average expression by soft group-assignment")
+        df_probs = labels_or_probs
+        probs = df_probs.values
+        classes = df_probs.columns
+        # probs = came.as_probabilities(out_cell, mode='softmax')
+        _avg_soft1 = pd.DataFrame(
+            dpair._ov_adjs[0].T.dot(probs[dpair.obs_ids1]) / probs[
+                dpair.obs_ids1].sum(axis=0),
+            index=dpair.vnode_names1, columns=classes
+        )
+        _avg_soft2 = pd.DataFrame(
+            dpair._ov_adjs[1].T.dot(probs[dpair.obs_ids2]) / probs[
+                dpair.obs_ids2].sum(axis=0),
+            index=dpair.vnode_names2, columns=classes
+        )
+
+        avg = pd.concat([_avg_soft1, _avg_soft2], axis=0)  # .fillna(0)
+
+    df_var_links_expr = weight_linked_vars(
+        avg.values,
+        dpair._vv_adj, names=dpair.get_vnode_names(),
+        matric='correlation', index_names=index_names,
+    )
+    # there may be species-specific genes with zero-expressions in the other species
+    df_var_links_expr['weight'] = df_var_links_expr['weight'].fillna(0.)
+    df_var_links_expr['distance'] = df_var_links_expr['distance'].fillna(1.)
+    return df_var_links_expr, avg
 
 
 def weight_linked_vars(
@@ -162,7 +614,7 @@ def weight_linked_vars(
         sigma: Optional[float] = None,
         sort: bool = True,
         index_names=(0, 1),
-        **kwds):
+        **ignored) -> pd.DataFrame:
     """ Computes the similarity of each linked (homologous) pair of variables.
 
     Parameters
@@ -171,7 +623,8 @@ def weight_linked_vars(
         feature matrix of shape (N, M), where N is the number of sample and M is
         the feature dimensionality.
     adj: 
-        sparse.spmatrix; binary adjacent matrix of shape (N, N).
+        sparse.spmatrix; binary adjacent matrix of shape (N, N). Note that only
+        the upper triangle of the matrix will be considered!
     names: 
         a sequence of names for rows of `X`, of shape (N,)
     metric:
@@ -184,8 +637,8 @@ def weight_linked_vars(
     
     Returns
     -------
-    a pd.DataFrame with columns
-    [``index_names[0]``, ``index_names[1]``, "distance", "weight"]
+    df: pd.DataFrame
+        with columns [``index_names[0]``, ``index_names[1]``, "distance", "weight"]
     """
     adj = sparse.triu(adj).tocoo()
 
@@ -219,155 +672,6 @@ def weight_linked_vars(
     return df
 
 
-def tf_cross_knn(
-        embedding: np.ndarray,
-        dpair: DataPair,
-        tflist1, tflist2,
-        k: int = 30,
-        metric='cosine',
-        algorithm='brute',
-):
-    """ search KNNs for given sets of variables (genes), based on embeddings
-
-    Parameters
-    ----------
-    embedding
-        low-dimensional embeddings for ALL the variable-nodes.
-    dpair
-        the ``DataPair`` object induced from two datasets
-    tflist1: Iterable
-        variable-names of interest (e.g. TFs), for the first dataset (species)
-         in ``dpair``
-    tflist2: Iterable
-        variable-names of interest (e.g. TFs), for the second dataset (species)
-        in ``dpair``
-    k: int
-        the number of nearest neighbor to search
-    metric
-        metric for distance
-    algorithm
-        KNN searching algorithm
-
-    Returns
-    -------
-    Two pd.DataFrame with columns {'TF_name', 'knn', 'knn_cross'}
-    """
-    from sklearn.neighbors import NearestNeighbors
-    var_ids1, var_ids2 = dpair.var_ids1, dpair.var_ids2
-    names1, names2 = dpair.vnode_names1, dpair.vnode_names2
-    tfids1, tfnames1 = dpair.get_vnode_ids_by_name(tflist1, 0, rm_unseen=True)
-    tfids2, tfnames2 = dpair.get_vnode_ids_by_name(tflist2, 1, rm_unseen=True)
-
-    # tfnames1 = dpair.get_vnode_names(tfids1)
-    # tfnames2 = dpair.get_vnode_names(tfids2)
-
-    # indexer
-    indexer1 = NearestNeighbors(
-        n_neighbors=k, algorithm=algorithm,
-        metric=metric,
-    ).fit(embedding[var_ids1, :])
-    indexer2 = NearestNeighbors(
-        n_neighbors=k, algorithm=algorithm,
-        metric=metric,
-    ).fit(embedding[var_ids2, :])
-
-    # TF-centered links
-    # ======== KNN for "1" ===========
-    knn_dists11, knn_indices11 = indexer1.kneighbors(
-        embedding[tfids1, :], n_neighbors=k, return_distance=True
-    )
-    knn_names11 = np.take(names1, knn_indices11)
-    knn_dists12, knn_indices12 = indexer2.kneighbors(
-        embedding[tfids1, :], n_neighbors=k, return_distance=True
-    )
-    knn_names12 = np.take(names2, knn_indices12)
-    # knn_indices12 = np.take(var_ids2, knn_indices12)
-    df_tf_targets1 = pd.DataFrame({
-        'TF_name': tfnames1,
-        'knn': list(knn_names11),
-        'knn_cross': list(knn_names12)
-    }).set_index('TF_name', drop=False)
-
-    # ======== KNN for "2" ===========
-    knn_dists21, knn_indices21 = indexer1.kneighbors(
-        embedding[tfids2, :], n_neighbors=k, return_distance=True
-    )
-    knn_names21 = np.take(names1, knn_indices21)
-
-    knn_dists22, knn_indices22 = indexer2.kneighbors(
-        embedding[tfids2, :], n_neighbors=k, return_distance=True
-    )
-    knn_names22 = np.take(names2, knn_indices22)
-    # knn_indices22 = np.take(var_ids2, knn_indices22)
-
-    df_tf_targets2 = pd.DataFrame({
-        'TF_name': tfnames2,
-        'knn': list(knn_names22),
-        'knn_cross': list(knn_names21)
-    }).set_index('TF_name', drop=False)
-
-    return df_tf_targets1, df_tf_targets2
-
-# In[]
-""" compute module eigen-vector
-"""
-
-
-def _compute_svd(X, k=1, only_comps=True, whiten=False, **kwds):
-    from sklearn.decomposition import PCA
-    pca = PCA(n_components=k, whiten=whiten, **kwds)
-    pca.fit_transform(X)
-
-    comps = pca.components_
-    if k == 1:
-        comps = comps[0]
-
-    if only_comps:
-        return comps
-    else:
-        return pca
-
-
-def _compute_svd_eigen_corr(X, whiten=False, **kwds):
-    """
-    compute the first eigen-vector and the correlations between each "sample"
-    (row of X) and the eigen-vector.
-    """
-    comps = _compute_svd(X, k=1, only_comps=True, whiten=whiten, **kwds)
-    corr = 1 - cdist(X, comps[None, :], metric='correlation')[:, 0]
-    #    corr = 1 - cdist(X, comps[None,:], metric='cosine')[:, 0]
-
-    return comps, corr
-
-
-def compute_group_eigens(X, labels, groups=None, whiten=False, **kwds):
-    """ compute eigen-vector for each group
-    groups:
-        if provided, compute only for these groups, with the order kept.
-    """
-    groups = np.unique(labels, ) if groups is None else groups
-
-    eigens = {}
-    corrs = []
-    for lb in groups:
-        ind = labels == lb
-        if sum(ind) == 1:
-            logging.info(f'skipping class {lb} with only one sample.')
-            v = X[ind, :].flatten()
-            corrs.append(np.array([1]))
-            eigens[lb] = v
-            continue
-        # print(lb)
-        v, corr = _compute_svd_eigen_corr(X[ind, :], whiten=whiten, **kwds)
-        eigens[lb] = v
-        corrs.append(corr.flatten())
-
-    eigen_df = pd.DataFrame(eigens)  # each column as a eigen-vector
-    memberships = np.hstack(corrs)
-
-    return eigen_df, memberships
-
-
 # =================[ module extraction ]=================
 def _filter_for_abstract(
         var_labels1: pd.Series,
@@ -396,32 +700,6 @@ def _filter_for_abstract(
     return var_labels1, var_labels2, avg_expr1, avg_expr2, df_var_links,
 
 
-def module_scores(adata, groupby='module',
-                  neighbor_key=None,
-                  min_nodes=3, ):
-    _, conn = get_adata_neighbors(adata, neighbor_key)
-    labels = adata.obs[groupby]
-    degrees = (conn > 0).sum(1).A.flatten()
-    #    avg_degree = degrees.mean()
-    nets = dict()
-    density = dict()
-    memberships = np.zeros_like(degrees, dtype=float)  # .astype(float)
-    for lb in pd.unique(labels):
-        #        print(lb.center(80, '-'))
-        inds = np.flatnonzero(labels == lb)
-        subnet = conn[inds, :][:, inds]
-        nets[lb] = subnet
-        _degrees = degrees[inds]
-        memberships[inds] = subnet.sum(1).A.flatten() / _degrees  # [inds]
-
-        if len(inds) <= min_nodes:
-            density[lb] = -1
-        else:
-            density[lb] = subnet.nnz / _degrees.sum()
-
-    return density, memberships
-
-
 def _net_density(mat: sparse.spmatrix):
     n, m = mat.shape
     if n == m:
@@ -433,58 +711,6 @@ def _net_density(mat: sparse.spmatrix):
     else:
         nnz = (mat != 0).sum()
     return nnz / max_nnz
-
-
-def _extract_modules(
-        adata, nneigh=10,
-        metric='cosine', use_rep='X',
-        resolution=0.6, key_added='module',
-        method='leiden', copy=False,
-        force_redo=False,
-        **kwds):
-    """
-    build a KNN-graph, and detect modules using 'leiden' or 'louvain' algorithm.
-    * `use_rep='X'` indicates the `adata.X` should be the reducted embeddings.
-    * method should either be 'leiden' or 'louvain'
-    
-    output: 
-        mod: a pd.DataFrame indexed by `adata.obs_names` with columns: 
-            ['module', 'degree']
-        mod_conn: inter-module-connection
-    """
-    adata = adata.copy() if copy else adata
-    cluster_func = {'leiden': sc.tl.leiden,
-                    'louvain': sc.tl.louvain}[method]
-
-    if 'connectivities' not in adata.obsp.keys() or force_redo:
-        sc.pp.neighbors(adata, metric=metric,
-                        n_neighbors=nneigh, use_rep=use_rep)
-
-    cluster_func(adata, resolution=resolution,
-                 key_added=key_added,
-                 **kwds)
-
-    # compute 
-    dist, conn0 = get_adata_neighbors(adata, )
-    conn = pp._binarize_mat(conn0)
-
-    # inter-module-connection
-    lbs = adata.obs[key_added]
-    inter_mod_conn = pp.agg_group_edges(
-        conn0, lbs, lbs, groups1=None, groups2=None, )
-
-    # the degrees for each node
-    adata.obs['degree'] = conn.sum(1).A1.flatten()
-
-    mod = adata.obs[[key_added, 'degree']].copy()
-
-    # re-order the modules based on the inter-module connections
-    ordered_mod = order_by_similarities(inter_mod_conn)
-    _map = dict(list(zip(ordered_mod, np.arange(len(ordered_mod)))))
-    mod[key_added] = [_map[x] for x in list(mod[key_added])]
-
-    adata.uns['inter_mod_conn'] = inter_mod_conn
-    return mod, inter_mod_conn
 
 
 def _match_groups(mod_lbs1: Union[pd.Series, Mapping],
@@ -540,15 +766,6 @@ def _match_groups(mod_lbs1: Union[pd.Series, Mapping],
         new_mod_lbs2 = pd.Categorical(new_mod_lbs2, categories=new_cats2)
 
     return new_mod_lbs1, new_mod_lbs2, mod_conn
-
-
-def order_by_similarities(sims: pd.DataFrame):
-    """
-    sims: pd.DataFrame with the same index and columns
-    """
-
-    ordered = sims.index.tolist()
-    return ordered
 
 
 def _subgroup_edges(
@@ -637,7 +854,8 @@ def nx_from_adata(
     """ nx.Graph from the KNN graph of `adata`
     """
     node_data = adata.obs if keys_attr is None else adata.obs[keys_attr]
-    edges = edges_from_adata(adata, 'conn', as_attrs=True)
+    edges = edges_from_adata(
+        adata, 'conn', key_neigh=key_neigh, as_attrs=True)
     nodes = make_nx_input_from_df(node_data)
     g = nx.Graph()
     g.add_nodes_from(nodes)
@@ -763,28 +981,6 @@ def export_neighbor_subgraph_df(
 """
 
 
-def set_adata_obsm(adata, X_h, key_add='X_h', copy=False):
-    """
-    key_add: which key will be added to adata.obsm
-        probably be 'X_umap', 'X_h', 'X_pca', etc.
-        
-    Examples
-    --------
-    >>> set_adata_obsm(adata, h_cell, 'X_h')
-    >>> sc.pp.neighbors(adata, metric='cosine', n_neighbors=15, use_rep='X_h')
-    >>> sc.tl.umap(adata)
-    >>> sc.pl.umap(adata, color='cell_type')
-    """
-    if copy:
-        print('Making a copy.')
-        adata = adata.copy()
-    else:
-        print('No copy was made.')
-
-    adata.obsm[key_add] = X_h
-    return adata if copy else None
-
-
 def get_adata_neighbors(adata, key: Union[str, None] = None):
     """
     getting distances and connectivities from adata
@@ -796,17 +992,6 @@ def get_adata_neighbors(adata, key: Union[str, None] = None):
         key_conn = f'{key}_' + key_conn
 
     return adata.obsp[key_dist], adata.obsp[key_conn]
-
-
-def write_graph_cyjs(g, fp='tmp.ctjs', return_dct=False, attrs=None, **kwds):
-    """ Cytoscape Json format
-    """
-    from networkx.readwrite.json_graph import cytoscape_data
-
-    dct = cytoscape_data(g, attrs)
-    save_json_dict(dct, fp, **kwds)
-    logging.info(fp)
-    return dct if return_dct else None
 
 
 def make_abstracted_graph(
@@ -977,9 +1162,7 @@ def abstract_vv_edges(
         in df_links.columns, indicating the edge columns. 
         Otherwise, the `df_links.index` should be `pd.MultiIndex` to indicate 
         the source and target edges.
-        This can also be output form ResultsAnalyzer.weight_linked_vars(), 
-        or the stored attribute `ResultsAnalyzer.var_link_weights`
-    
+
     keys_link:
         If `keys_edge` is provided, it should be a tuple of 2 column-names
         in df_links.columns, indicating the edge columns.
@@ -1034,9 +1217,7 @@ def aggregate_links(
         in df_links.columns, indicating the edge columns. 
         Otherwise, the `df_links.index` should be `pd.MultiIndex` to indicate 
         the source and target edges.
-        This can also be output form ResultsAnalyzer.weight_linked_vars(), 
-        or the stored attribute `ResultsAnalyzer.var_link_weights`
-    
+
     labels1, labels2:
         grouping labels for the rows and columns, respectively.
         
@@ -1396,8 +1577,10 @@ def wrapper_contingency_mat(y_true, y_pred,
     ...        y_true, y_pred, eps=eps, sparse=assparse)
     """
     if eps is not None and sparse:
-        raise ValueError("Cannot set 'eps' when sparse=True")
-
+        raise Warning("Cannot set 'eps' when sparse=True")
+    # to avoid mix-type error when taking unique, transform all labels to str
+    y_true = [str(x) for x in y_true]
+    y_pred = [str(x) for x in y_pred]
     classes, class_idx = np.unique(y_true, return_inverse=True)
     clusters, cluster_idx = np.unique(y_pred, return_inverse=True)
     n_classes = classes.shape[0]

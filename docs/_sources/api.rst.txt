@@ -51,12 +51,13 @@ Preprocessing ``came.pp.*``
    normalize_default
    quick_preprocess
    quick_pre_vis
+   group_mean
    group_mean_adata
    wrapper_scale
    make_bipartite_adj
    take_1v1_matches
    subset_matches
-   get_homologues
+   get_homologies
    take_adata_groups
    remove_adata_groups
    merge_adata_groups
@@ -71,6 +72,7 @@ DataPair and AlignedDataPair
 .. autosummary::
    :toctree: generated/
 
+   make_features
    aligned_datapair_from_adatas
    datapair_from_adatas
    AlignedDataPair
@@ -104,3 +106,22 @@ Analysis
    weight_linked_vars
    make_abstracted_graph
 
+
+Plotting Functions ``came.pl.*``
+--------------------------------
+
+.. module:: came.utils.plot
+.. :currentmodule:: came
+
+.. autosummary::
+   :toctree: generated/
+
+   plot_stacked_bar
+   heatmap_probas
+   wrapper_heatmap_scores
+   plot_confus_mat
+   plot_contingency_mat
+   embed_with_values
+   adata_embed_with_values
+   umap_with_annotates
+   plot_multipartite_graph

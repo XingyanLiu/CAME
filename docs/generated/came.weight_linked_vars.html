@@ -104,6 +104,7 @@
 <li class="toctree-l3"><a class="reference internal" href="came.make_abstracted_graph.html">came.make_abstracted_graph</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
@@ -204,14 +205,15 @@
 <h1>came.weight_linked_vars<a class="headerlink" href="#came-weight-linked-vars" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.weight_linked_vars">
-<span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">weight_linked_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cosine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_dist2weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.weight_linked_vars" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">weight_linked_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cosine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_dist2weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">ignored</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.weight_linked_vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the similarity of each linked (homologous) pair of variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<em>np.ndarray</em>) – feature matrix of shape (N, M), where N is the number of sample and M is
 the feature dimensionality.</p></li>
-<li><p><strong>adj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">spmatrix</span></code>) – sparse.spmatrix; binary adjacent matrix of shape (N, N).</p></li>
+<li><p><strong>adj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">spmatrix</span></code>) – sparse.spmatrix; binary adjacent matrix of shape (N, N). Note that only
+the upper triangle of the matrix will be considered!</p></li>
 <li><p><strong>names</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – a sequence of names for rows of <cite>X</cite>, of shape (N,)</p></li>
 <li><p><strong>metric</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the metric to quantify the similarities of the given vectors (embeddings)</p></li>
 <li><p><strong>sort</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to sort by the resulting weights</p></li>
@@ -220,11 +222,10 @@ e.g., a pair of dataset or species names (in cross-species scenario)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>a pd.DataFrame with columns</em></p></li>
-<li><p>[<code class="docutils literal notranslate"><span class="pre">index_names[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">index_names[1]</span></code>, “distance”, “weight”]</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>df</strong> – with columns [<code class="docutils literal notranslate"><span class="pre">index_names[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">index_names[1]</span></code>, “distance”, “weight”]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -245,7 +246,7 @@ e.g., a pair of dataset or species names (in cross-species scenario)</p></li>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

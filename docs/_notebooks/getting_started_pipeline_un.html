@@ -717,7 +717,7 @@ a new directory made:
 </div>
 <div class="section" id="1-The-default-pipeline-of-CAME">
 <h2>1 The default pipeline of CAME<a class="headerlink" href="#1-The-default-pipeline-of-CAME" title="Permalink to this headline">¶</a></h2>
-<p>Parameter setting:</p>
+<p>Parameter settings.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -728,7 +728,7 @@ a new directory made:
 <span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">300</span>
 
 <span class="c1"># the training batch size</span>
-<span class="c1"># When the GPU memory is limited, set 1024 or more if possible.</span>
+<span class="c1"># When the GPU memory is limited, set 4096 or more if possible.</span>
 <span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="c1"># the number of epochs to skip for checkpoint backup</span>
@@ -737,9 +737,16 @@ a new directory made:
 <span class="c1"># whether to use the single-cell networks</span>
 <span class="n">use_scnets</span> <span class="o">=</span> <span class="kc">True</span>
 
-<span class="c1"># node genes, use both DEGs and HVGs by default</span>
-<span class="n">node_source</span> <span class="o">=</span> <span class="s1">&#39;deg,hvg&#39;</span>
+<span class="c1"># the number of top DEGs to take as the node-features of each cells.</span>
 <span class="n">ntop_deg</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="c1"># the number of top DEGs to take as the graph nodes, which can be directly displayed on the UMAP plot.</span>
+<span class="n">ntop_deg_nodes</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="c1"># the source of the node genes, use both DEGs and HVGs by default</span>
+<span class="n">node_source</span> <span class="o">=</span> <span class="s1">&#39;deg,hvg&#39;</span>
+
+<span class="c1"># whether to take into account the non-1v1 variables as the node features.</span>
+<span class="c1"># Note that if most of the homologies are non-1v1, better set this as True!</span>
+<span class="n">keep_non1v1_feats</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
 </div>
 </div>
@@ -753,6 +760,7 @@ a new directory made:
     <span class="n">key_class</span><span class="o">=</span><span class="n">key_class1</span><span class="p">,</span>
     <span class="n">use_scnets</span><span class="o">=</span><span class="n">use_scnets</span><span class="p">,</span>
     <span class="n">ntop_deg</span><span class="o">=</span><span class="n">ntop_deg</span><span class="p">,</span>
+    <span class="n">ntop_deg_nodes</span><span class="o">=</span><span class="n">ntop_deg_nodes</span><span class="p">,</span>
     <span class="n">node_source</span><span class="o">=</span><span class="n">node_source</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -764,6 +772,7 @@ a new directory made:
     <span class="n">key_class1</span><span class="o">=</span><span class="n">key_class1</span><span class="p">,</span>
     <span class="n">key_class2</span><span class="o">=</span><span class="n">key_class2</span><span class="p">,</span>
     <span class="n">do_normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">keep_non1v1_feats</span><span class="o">=</span><span class="n">keep_non1v1_feats</span><span class="p">,</span>
     <span class="n">n_epochs</span><span class="o">=</span><span class="n">n_epochs</span><span class="p">,</span>
     <span class="n">resdir</span><span class="o">=</span><span class="n">resdir</span><span class="p">,</span>
     <span class="n">n_pass</span><span class="o">=</span><span class="n">n_pass</span><span class="p">,</span>
@@ -1559,7 +1568,7 @@ object saved into:
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>
