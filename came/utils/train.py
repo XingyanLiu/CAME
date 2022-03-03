@@ -232,7 +232,7 @@ class Trainer(BaseTrainer):
               eps=5e-3,
               cat_class='cell',
               device=None,
-              backup_stride: int = 73,
+              backup_stride: int = 111,
               **other_inputs):
         """ Main function for model training (whole-graph based)
 
@@ -390,7 +390,7 @@ class Trainer(BaseTrainer):
                         batch_size=128,
                         sampler=None,
                         device=None,
-                        backup_stride: int = 43,
+                        backup_stride: int = 111,
                         mod_info: int = 3,
                         **other_inputs):
         """ Main function for model training (based on mini-batches)

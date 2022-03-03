@@ -350,7 +350,7 @@
    "source": [
     "## 1 The default pipeline of CAME\n",
     "\n",
-    "Parameter setting:"
+    "Parameter settings. "
    ]
   },
   {
@@ -365,7 +365,7 @@
     "n_epochs = 300\n",
     "\n",
     "# the training batch size\n",
-    "# When the GPU memory is limited, set 1024 or more if possible.\n",
+    "# When the GPU memory is limited, set 4096 or more if possible.\n",
     "batch_size = None\n",
     "\n",
     "# the number of epochs to skip for checkpoint backup\n",
@@ -374,9 +374,16 @@
     "# whether to use the single-cell networks\n",
     "use_scnets = True\n",
     "\n",
-    "# node genes, use both DEGs and HVGs by default\n",
+    "# the number of top DEGs to take as the node-features of each cells.\n",
+    "ntop_deg = 50\n",
+    "# the number of top DEGs to take as the graph nodes, which can be directly displayed on the UMAP plot.\n",
+    "ntop_deg_nodes = 50  \n",
+    "# the source of the node genes, use both DEGs and HVGs by default\n",
     "node_source = 'deg,hvg'\n",
-    "ntop_deg = 50"
+    "\n",
+    "# whether to take into account the non-1v1 variables as the node features.\n",
+    "# Note that if most of the homologies are non-1v1, better set this as True!\n",
+    "keep_non1v1_feats = False"
    ]
   },
   {
@@ -571,6 +578,7 @@
     "    key_class=key_class1,\n",
     "    use_scnets=use_scnets,\n",
     "    ntop_deg=ntop_deg,\n",
+    "    ntop_deg_nodes=ntop_deg_nodes,\n",
     "    node_source=node_source,\n",
     ")\n",
     "\n",
@@ -582,6 +590,7 @@
     "    key_class1=key_class1,\n",
     "    key_class2=key_class2,\n",
     "    do_normalize=True,\n",
+    "    keep_non1v1_feats=keep_non1v1_feats,\n",
     "    n_epochs=n_epochs,\n",
     "    resdir=resdir,\n",
     "    n_pass=n_pass,\n",

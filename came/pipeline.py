@@ -902,7 +902,8 @@ def preprocess_unaligned(
     ntop_deg
         the number of top DEGs to take as the node-features
     ntop_deg_nodes
-        the number of top DEGs to take as the graph nodes
+        the number of top DEGs to take as the graph nodes, which can be
+        directly displayed on the UMAP plot.
     key_clust
         where to add the per-clustering labels to the query data, i.e.,
         ``adatas[1].obs``
