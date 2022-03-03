@@ -49,4 +49,4 @@ from . import pipeline
 from .pipeline import __test1__, __test2__
 
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"

@@ -13,7 +13,7 @@ the probabilities of cell types that exist in the reference species, which
 enables the identification of the unresolved cell states in the query data. 
 
 Besides, CAME gives the aligned cell and gene embeddings across species, which 
-facilitates low-dimensional visualization and joint gene module extraction.
+facilitates low-dimensional visualization and joint gene-module extraction.
 
 <img src="docs/_images/Fig1D.png" width="600"/>
 
@@ -32,7 +32,7 @@ Install required packages:
 ```shell
 pip install "scanpy[leiden]"
 pip install torch  # >=1.8 
-pip install dgl  
+pip install dgl  # tested on 0.7.2
 ```
 
 See [Scanpy](https://scanpy.readthedocs.io/en/stable/), 
