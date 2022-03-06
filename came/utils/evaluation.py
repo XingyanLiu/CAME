@@ -14,6 +14,7 @@ from ..model import detach2numpy
 
 
 def accuracy(logits: Tensor, labels: Tensor):
+    labels = labels.to(logits.device)
     if len(logits.shape) >= 2:
         _, preds = torch.max(logits, dim=1)
     else:
