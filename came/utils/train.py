@@ -149,34 +149,30 @@ class Trainer(BaseTrainer):
                  cluster_labels: Optional[Sequence] = None,
                  lr=1e-3,
                  l2norm=1e-2,  # 1e-2 is tested for all datasets
-                 use_cuda=True,
                  dir_main=Path('.'),
                  **kwds  # for code compatibility (not raising error)
                  ):
         super(Trainer, self).__init__(
             model,
-            feat_dict=feat_dict,
-            train_labels=train_labels,
-            test_labels=test_labels,
-            train_idx=train_idx,
-            test_idx=test_idx,
-            cluster_labels=cluster_labels,
             lr=lr,
             l2norm=l2norm,  # 1e-2 is tested for all datasets
-            # use_cuda=use_cuda,
             dir_main=dir_main,
-            **kwds  # for code compatibility (not raising error)
         )
+        self.feat_dict = feat_dict
+        self.train_labels = train_labels
+        self.test_labels = test_labels
+        self.train_idx = train_idx
+        self.test_idx = test_idx
+        self.cluster_labels = cluster_labels
 
         self.g = g
         self.set_class_weights()
         # infer n_classes
         self.n_classes = len(self.class_weights)
-        # for multi-label loss calculation
-        self.classes = infer_classes(detach2numpy(self.train_labels))  # if classes is None else classes
-        # self.train_labels_1hot = onehot_encode(
-        #     self.train_labels, sparse_output=False, astensor=True)
+        # for multi-label loss calculation, integer-codes
+        self.classes = infer_classes(detach2numpy(self.train_labels))
 
+        self.with_ground_truth = (test_labels is not None)
         _record_names = (
             'dur',
             'train_loss',
@@ -189,6 +185,9 @@ class Trainer(BaseTrainer):
             'weightedF1',
         )
         self.set_recorder(*_record_names)
+        self.ami_max = 0.
+        self.test_acc_max = 0.
+        self._cur_log = ''
 
     def set_class_weights(self, class_weights=None, foo=np.sqrt, n_add=0):
         if class_weights is None:
@@ -232,7 +231,8 @@ class Trainer(BaseTrainer):
               eps=5e-3,
               cat_class='cell',
               device=None,
-              backup_stride: int = 111,
+              info_stride: int = 5,
+              backup_stride: int = 222,
               **other_inputs):
         """ Main function for model training (whole-graph based)
 
@@ -253,6 +253,8 @@ class Trainer(BaseTrainer):
             node type for classification
         device:
             one of {'cpu', 'gpu', None}
+        info_stride: int
+            epoch-strides for printing out the training information
         backup_stride: int
             saving checkpoint after `backup_stride` epochs
         other_inputs:
@@ -265,10 +267,14 @@ class Trainer(BaseTrainer):
         # setting device to train
         if device is None:
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.g = self.g.to(device)
-        _, feat_dict, train_labels, test_labels, train_idx, test_idx = \
-            self.all_to_device(device)
-        # train_labels_1hot = self.train_labels_1hot.to(device)
+        g = self.g.to(device)
+        # _, feat_dict, train_labels, test_labels, train_idx, test_idx = \
+        #     self.all_to_device(device)
+        model = self.model.to(device)
+        feat_dict = to_device(self.feat_dict, device)
+        train_labels = self.train_labels.to(device)
+        train_idx = self.train_idx.to(device)
+        test_idx = self.test_idx.to(device)
         train_labels_1hot = onehot_encode(
             self.train_labels, self.classes,
             sparse_output=False, astensor=True).to(device)
@@ -277,21 +283,18 @@ class Trainer(BaseTrainer):
             class_weights = to_device(self.class_weights, device)
         else:
             class_weights = None
-        if not hasattr(self, 'ami_max'):
-            self.ami_max = 0.
-        if not hasattr(self, 'test_acc_max'):
-            self.test_acc_max = 0.
 
         print(f" start training (device='{device}') ".center(60, '='))
-        self.model.train()
-
+        model.train()
+        rcd = {}  # records
         for epoch in range(n_epochs):
             self._cur_epoch += 1
 
             self.optimizer.zero_grad()
             t0 = time.time()
-            logits = self.model(feat_dict, self.g, **other_inputs)[cat_class]
-            # logits2 = self.model(feat_dict, self.g, **other_inputs)[cat_class]
+            outputs = model(feat_dict, g, **other_inputs)
+            logits = outputs[cat_class]
+            # logits2 = model(feat_dict, g, **other_inputs)[cat_class]
             # loss = ce_loss_with_rdrop(
             #     logits, logits2, labels=train_labels,
             #     labels_1hot=train_labels_1hot,
@@ -308,76 +311,24 @@ class Trainer(BaseTrainer):
 
             # prediction 
             _, y_pred = torch.max(logits, dim=1)
-            y_pred_test = y_pred[test_idx]
 
             # ========== evaluation (Acc.) ==========
-            train_acc = accuracy(y_pred[train_idx], train_labels)
-            if test_labels is None:
-                # ground-truth unavailable
-                test_acc = microF1 = macroF1 = weightedF1 = -1.
-            else:
-                test_acc = accuracy(y_pred_test, test_labels)
-                # F1-scores
-                microF1 = get_F1_score(test_labels, y_pred_test, 'micro')
-                macroF1 = get_F1_score(test_labels, y_pred_test, 'macro')
-                weightedF1 = get_F1_score(test_labels, y_pred_test, 'weighted')
-
-            # unsupervised cluster index
-            if self.cluster_labels is not None:
-                ami = get_AMI(self.cluster_labels, y_pred_test)
-            else:
-                ami = -1.
-
-            backup = False
-            if self._cur_epoch >= n_pass - 1:
-                self.ami_max = max(self.ami_max, ami)
-                if ami >= self.ami_max - eps > 0:
-                    if ami >= self.ami_max:
-                        self._cur_epoch_best = self._cur_epoch
-                        _flag = 'current best'
-                    else:
-                        _flag = 'potential best'
-                    self.save_model_weights()
-                    backup = True
-                    print(f'[{_flag}] model weights backup')
-                elif self._cur_epoch % backup_stride == 0:
-                    self.save_model_weights()
-                    backup = True
-                    print('model weights backup')
+            # evaluation records
+            rcd = self.evaluate_metrics(y_pred[train_idx], y_pred[test_idx])
+            backup = self._decide_checkpoint_backup(
+                rcd['AMI'], n_pass, eps=eps, backup_stride=backup_stride)
 
             # backward AFTER the model being saved
             loss.backward()
             self.optimizer.step()
+
             t1 = time.time()
+            rcd.update(dur=t1 - t0, train_loss=loss.item(), )
+            self._record(**rcd)
+            self.log_info(**rcd,
+                          print_info=self._cur_epoch % info_stride == 0 or backup)
 
-            #  recording
-            self._record(dur=t1 - t0,
-                         train_loss=loss.item(),
-                         train_acc=train_acc,
-                         test_acc=test_acc,
-                         AMI=ami,
-                         microF1=microF1,
-                         macroF1=macroF1,
-                         weightedF1=weightedF1,
-                         )
-
-            dur_avg = np.average(self.dur)
-            self.test_acc_max = max(test_acc, self.test_acc_max)
-
-            if self.with_ground_truth:
-                logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
-                self._cur_log = logfmt.format(
-                    self._cur_epoch, train_acc, test_acc, self.test_acc_max,
-                    ami, dur_avg)
-            else:
-                logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
-                self._cur_log = logfmt.format(
-                    self._cur_epoch, train_acc, ami, self.ami_max,
-                    ami, dur_avg)
-
-            if self._cur_epoch % 5 == 0 or backup:
-                print(self._cur_log)
-
+        self.log_info(**rcd, print_info=True)
         self._cur_epoch_adopted = self._cur_epoch
         self.save_checkpoint_record()
 
@@ -391,7 +342,7 @@ class Trainer(BaseTrainer):
                         sampler=None,
                         device=None,
                         backup_stride: int = 111,
-                        mod_info: int = 3,
+                        info_stride: int = 3,
                         **other_inputs):
         """ Main function for model training (based on mini-batches)
         """
@@ -403,8 +354,6 @@ class Trainer(BaseTrainer):
         # train_labels, test_labels = self.train_labels, self.test_labels
         g = self.g
         model = self.model.to(device)
-        # self.g.nodes['cell'].data['ids'] = torch.arange(self.g.num_nodes('cell'))  # track the random shuffle
-        # self.g.nodes['cell'].data['label'] = labels  # at `prepare4train()`
         if use_class_weights:
             class_weights = to_device(self.class_weights, device)
         else:
@@ -430,12 +379,13 @@ class Trainer(BaseTrainer):
             shuffle=False, drop_last=False, num_workers=0
         )
         print(f" start training (device='{device}') ".center(60, '='))
-        model.train()
         for epoch in range(n_epochs):
+            model.train()
             self._cur_epoch += 1
+            
+            t0 = time.time()
             all_train_preds = []
             train_labels = []
-            t0 = time.time()
             # batch_rank = 0
             # with tqdm.tqdm(train_dataloader) as tq:
             for input_nodes, output_nodes, mfgs in tqdm.tqdm(train_dataloader):
@@ -443,8 +393,6 @@ class Trainer(BaseTrainer):
                 _labels = mfgs[-1].dstdata['label'][cat_class]
                 _feat_dict = to_device(idx_hetero(self.feat_dict, input_nodes), device)
                 mfgs = to_device(mfgs, device)
-                # _feat_dict = to_device(_feat_dict, device)
-                # mfgs = [blk.to(device) for blk in mfgs]
 
                 logits = model(_feat_dict, mfgs, **other_inputs)[cat_class]
                 # logits2 = model(_feat_dict, mfgs, **other_inputs)[cat_class]
@@ -477,86 +425,24 @@ class Trainer(BaseTrainer):
             train_labels = torch.cat(train_labels, dim=0)
 
             # ========== prediction (test data) ==========
-            all_test_preds = []
-            test_labels = []
-            with tqdm.tqdm(test_dataloader) as tq, torch.no_grad():
-                model.eval()
-                for input_nodes, output_nodes, mfgs in tq:
-                    inputs = to_device(idx_hetero(self.feat_dict, input_nodes), device)
-                    mfgs = to_device(mfgs, device)
-                    # mfgs = [blk.to(device) for blk in mfgs]
-                    test_labels.append(
-                        mfgs[-1].dstdata['label'][cat_class].cpu())
-                    all_test_preds.append(
-                        model(inputs, mfgs, )[cat_class].argmax(1).cpu()
-                    )
-                all_test_preds = torch.cat(all_test_preds, dim=0)
-                test_labels = torch.cat(test_labels, dim=0)
-            model.train()
+            test_preds = infer_for_nodes(
+                model, feat_dict=self.feat_dict,
+                dataloader=test_dataloader, ntype=cat_class, argmax_dim=1)
+
             # ========== evaluation (Acc.) ==========
-            with torch.no_grad():
-                train_acc = accuracy(train_labels, all_train_preds)
-                if self.with_ground_truth:
-                    test_acc = accuracy(test_labels, all_test_preds)
-                    # F1-scores
-                    microF1 = get_F1_score(test_labels, all_test_preds, average='micro')
-                    macroF1 = get_F1_score(test_labels, all_test_preds, average='macro')
-                    weightedF1 = get_F1_score(test_labels, all_test_preds, average='weighted')
-                else:
-                    test_acc = microF1 = macroF1 = weightedF1 = -1.
-                # unsupervised cluster index
-                if self.cluster_labels is not None:
-                    ami = get_AMI(self.cluster_labels, all_test_preds)
-                else:
-                    ami = -1.
-                backup = False
-                if self._cur_epoch >= n_pass - 1:
-                    self.ami_max = max(self.ami_max, ami)
-                    if ami >= self.ami_max - eps > 0:
-                        if ami >= self.ami_max:
-                            self._cur_epoch_best = self._cur_epoch
-                            _flag = 'current best'
-                        else:
-                            _flag = 'potential best'
-                        self.save_model_weights()
-                        backup = True
-                        print(f'[{_flag}] model weights backup')
-                    elif self._cur_epoch % backup_stride == 0:
-                        self.save_model_weights()
-                        backup = True
-                        print('model weights backup')
+            # evaluation records
+            rcd = self.evaluate_metrics(
+                all_train_preds, test_preds, train_labels,  # test_labels
+            )
+            backup = self._decide_checkpoint_backup(rcd['AMI'], n_pass, eps=eps)
 
-                t1 = time.time()
-
-                # recording
-                self._record(dur=t1 - t0,
-                             train_loss=loss.item(),
-                             train_acc=train_acc,
-                             test_acc=test_acc,
-                             AMI=ami,
-                             microF1=microF1,
-                             macroF1=macroF1,
-                             weightedF1=weightedF1,
-                             )
-
-                dur_avg = np.average(self.dur)
-                self.test_acc_max = max(test_acc, self.test_acc_max)
-
-                if self.with_ground_truth:
-                    logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
-                    self._cur_log = logfmt.format(
-                        self._cur_epoch, train_acc, test_acc, self.test_acc_max,
-                        ami, dur_avg)
-                else:
-                    logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
-                    self._cur_log = logfmt.format(
-                        self._cur_epoch, train_acc, ami, self.ami_max,
-                        ami, dur_avg)
-
-                if self._cur_epoch % mod_info == 0 or backup:
-                    print(self._cur_log)
-
-            self._cur_epoch_adopted = self._cur_epoch
+            t1 = time.time()
+            rcd.update(dur=t1 - t0, train_loss=loss.item(), )
+            self._record(**rcd)
+            self.log_info(
+                **rcd, print_info=self._cur_epoch % info_stride == 0 or backup)
+        self.log_info(**rcd, print_info=True)
+        self._cur_epoch_adopted = self._cur_epoch
 
     def get_current_outputs(self,
                             feat_dict=None,
@@ -578,4 +464,125 @@ class Trainer(BaseTrainer):
         )
         return outputs
 
+    def _decide_checkpoint_backup(
+            self, ami, n_pass, eps=1e-4, backup_stride=1000):
+
+        backup = False
+        if self._cur_epoch >= n_pass - 1:
+            self.ami_max = max(self.ami_max, ami)
+            if ami >= self.ami_max - eps > 0:
+                if ami >= self.ami_max:
+                    self._cur_epoch_best = self._cur_epoch
+                    _flag = 'current best'
+                else:
+                    _flag = 'potential best'
+                self.save_model_weights()
+                backup = True
+                print(f'[{_flag}] model weights backup')
+            elif self._cur_epoch % backup_stride == 0:
+                self.save_model_weights()
+                backup = True
+                print('model weights backup')
+        return backup
+
+    @torch.no_grad()
+    def evaluate_metrics(
+            self, train_preds, test_preds,
+            train_labels=None, test_labels=None):
+        if train_labels is None:
+            train_labels = self.train_labels
+        if test_labels is None:
+            test_labels = self.test_labels
+        from ..utils.evaluation import get_AMI, get_F1_score, accuracy
+        y_pred = detach2numpy(test_preds)
+        train_acc = accuracy(train_labels, train_preds)
+
+        if self.with_ground_truth:
+            test_acc = accuracy(test_labels, test_preds)
+            # F1-scores
+            y_true = detach2numpy(test_labels)
+            microF1 = get_F1_score(y_true, y_pred, average='micro')
+            macroF1 = get_F1_score(y_true, y_pred, average='macro')
+            weightedF1 = get_F1_score(y_true, y_pred,
+                                      average='weighted')
+        else:
+            test_acc = microF1 = macroF1 = weightedF1 = -1.
+        self.test_acc_max = max(test_acc, self.test_acc_max)
+
+        # unsupervised cluster index
+        if self.cluster_labels is not None:
+            ami = get_AMI(self.cluster_labels, y_pred)
+        else:
+            ami = -1.
+        metrics = dict(
+            # dur=t1 - t0,
+            # train_loss=loss.item(),
+            train_acc=train_acc,
+            test_acc=test_acc,
+            AMI=ami,
+            microF1=microF1,
+            macroF1=macroF1,
+            weightedF1=weightedF1,
+        )
+        return metrics
+
+    def log_info(self, train_acc, test_acc, ami=None, print_info=True, # dur=0.,
+                 **kwargs):
+        dur_avg = np.average(self.dur)
+        ami = kwargs.get('AMI', 'NaN') if ami is None else ami
+        if self.with_ground_truth:
+            logfmt = "Epoch {:04d} | Train Acc: {:.4f} | Test: {:.4f} (max={:.4f}) | AMI={:.4f} | Time: {:.4f}"
+            self._cur_log = logfmt.format(
+                self._cur_epoch, train_acc, test_acc, self.test_acc_max,
+                ami, dur_avg)
+        else:
+            logfmt = "Epoch {:04d} | Train Acc: {:.4f} | AMI: {:.4f} (max={:.4f}) | Time: {:.4f}"
+            self._cur_log = logfmt.format(
+                self._cur_epoch, train_acc, ami, self.ami_max, dur_avg)
+        # if self._cur_epoch % 5 == 0 or backup:
+        if print_info:
+            print(self._cur_log)
+
+
+def infer_for_nodes(
+        model, feat_dict, dataloader, ntype='cell', device=None,
+        reorder: bool = True, argmax_dim: Optional[int] = None,
+        is_training: bool = False,
+):
+    """"Assume that the model output is a dict of Tensors"""
+    if device is None:
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    all_test_preds = []
+    # test_labels = []
+    orig_ids = []
+    with tqdm.tqdm(dataloader) as tq, torch.no_grad():
+        model.train(is_training)
+        for input_nodes, output_nodes, mfgs in tq:
+            inputs = to_device(idx_hetero(feat_dict, input_nodes), device)
+            mfgs = to_device(mfgs, device)
+            # mfgs = [blk.to(device) for blk in mfgs]
+            # test_labels.append(
+            #     mfgs[-1].dstdata['label'][ntype].cpu())
+            orig_ids.append(
+                mfgs[-1].dstdata[dgl.NID][ntype].cpu())
+            all_test_preds.append(
+                model(inputs, mfgs, )[ntype].cpu()
+            )
+        all_test_preds = torch.cat(all_test_preds, dim=0)
+        orig_ids = torch.cat(orig_ids, dim=0)
+    if argmax_dim is not None:
+        all_test_preds = all_test_preds.argmax(argmax_dim)
+    if reorder:
+        return order_by_ids(all_test_preds, orig_ids)
+    return all_test_preds
+        
+
+def order_by_ids(x, ids):
+    """reorder by the original ids"""
+    # ids = np.argsort(ids)
+    # x_new = np.zeros_like(x, dtype=x.dtype)
+    ids = torch.argsort(ids)
+    x_new = torch.zeros_like(x, dtype=x.dtype)
+    x_new[ids] = x
+    return x_new
 

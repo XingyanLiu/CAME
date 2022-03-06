@@ -6,6 +6,7 @@
 @Project: CAME
 """
 import os
+import json
 from pathlib import Path
 from typing import Union, Optional, Sequence, Mapping, List
 import logging
@@ -13,10 +14,22 @@ import numpy as np
 import pandas as pd
 import torch
 from torch import Tensor
-from .base import check_dirs, save_json_dict
-from ..model import to_device, onehot_encode, multilabel_binary_cross_entropy
+# from .base import check_dirs, save_json_dict
+# from ..model import to_device, onehot_encode, multilabel_binary_cross_entropy
 
 SUBDIR_MODEL = '_models'
+
+
+def save_json_dict(dct, fname='test_json.json', encoding='utf-8'):
+    with open(fname, 'w', encoding=encoding) as jsfile:
+        json.dump(dct, jsfile, ensure_ascii=False)
+    logging.info(fname)
+
+
+def load_json_dict(fname, encoding='utf-8'):
+    with open(fname, encoding=encoding) as f:
+        dct = json.load(f)
+    return dct
 
 
 def get_checkpoint_list(dirname):
@@ -28,6 +41,42 @@ def get_checkpoint_list(dirname):
     return all_ckpts
 
 
+def plot_records_for_trainer(
+        trainer, record_names, start=0, end=None,
+        lbs=None, tt='training logs', fp=None,
+        **kwds):
+    if lbs is None:
+        lbs = record_names
+    if end is not None:
+        end = int(min([trainer._cur_epoch + 1, end]))
+    line_list = [getattr(trainer, nm)[start: end] for nm in record_names]
+
+    return plot_line_list(line_list, lbs=lbs, tt=tt, fp=fp, **kwds)
+
+
+def plot_line_list(ys, lbs=None,
+                   ax=None, figsize=(4.5, 3.5),
+                   tt=None, fp=None,
+                   legend_loc=(1.05, 0),
+                   **kwds):
+    """
+    ys: a list of lists, each sub-list is a set of curve-points to be plotted.
+    """
+    from matplotlib import pyplot as plt
+    if lbs is None:
+        lbs = list(map(str, range(len(ys))))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+    for i, y in enumerate(ys):
+        ax.plot(y, label=lbs[i], **kwds)
+    ax.legend(loc=legend_loc)
+    if tt is not None:
+        ax.set_title(tt)
+    ax.figure.savefig(fp, bbox_inches='tight',)
+
+    return ax
+
+
 class BaseTrainer(object):
     """
     DO NOT use it directly!
@@ -36,23 +85,12 @@ class BaseTrainer(object):
 
     def __init__(self,
                  model,
-                 feat_dict: Mapping,
-                 train_labels: Union[Tensor, List[Tensor]],
-                 test_labels: Union[Tensor, List[Tensor]],
-                 train_idx: Union[Tensor, List[Tensor]],
-                 test_idx: Union[Tensor, List[Tensor]],
-                 cluster_labels: Optional[Sequence] = None,
                  lr: float = 1e-3,
                  l2norm: float = 1e-2,  # 1e-2 is tested for all datasets
                  dir_main: Union[str, Path] = Path('.'),
-                 **kwds  # for code compatibility (not raising error)
+                 # **kwds  # for code compatibility (not raising error)
                  ):
-        self.model = None
-        self.feat_dict = None
-        self.train_labels = None
-        self.test_labels = None
-        self.train_idx = None
-        self.test_idx = None
+        self.model = model
         self.device = None
         self.dir_main = None
         self.dir_model = None
@@ -63,13 +101,13 @@ class BaseTrainer(object):
         self.with_ground_truth = None
 
         self.set_dir(dir_main)
-        self.set_inputs(
-            model, feat_dict,
-            train_labels, test_labels,
-            train_idx, test_idx,
-        )
+        # self.set_inputs(
+        #     model, feat_dict,
+        #     train_labels, test_labels,
+        #     train_idx, test_idx,
+        # )
 
-        self.cluster_labels = cluster_labels
+        # self.cluster_labels = cluster_labels
         self._set_train_params(
             lr=lr,
             l2norm=l2norm,
@@ -82,51 +120,10 @@ class BaseTrainer(object):
     def set_dir(self, dir_main=Path('.')):
         self.dir_main = Path(dir_main)
         self.dir_model = self.dir_main / SUBDIR_MODEL
-        check_dirs(self.dir_model)
+        os.makedirs(self.dir_model, exist_ok=True)
 
         print('main directory:', self.dir_main)
         print('model directory:', self.dir_model)
-
-    def set_inputs(
-            self, model: torch.nn.Module,
-            feat_dict: Mapping,
-            train_labels: Union[Tensor, List[Tensor]],
-            test_labels: Union[Tensor, List[Tensor], None],
-            train_idx: Union[Tensor, List[Tensor]],
-            test_idx: Union[Tensor, List[Tensor]],
-    ):
-        self.model = model
-        self.feat_dict = feat_dict
-        self.train_labels = train_labels
-        self.test_labels = test_labels
-        self.train_idx = train_idx
-        self.test_idx = test_idx
-        self.with_ground_truth = self.test_labels is not None
-        # inference device
-        try:
-            self.device = self.train_idx.device
-        except AttributeError:
-            self.device = self.train_idx[0].device
-
-    def all_to_device(self, device=None):
-        if device is None:
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.device = device
-        self.model.to(device)
-        self.feat_dict = to_device(self.feat_dict, device)
-        self.train_labels = to_device(self.train_labels, device)
-        if self.test_labels is not None:
-            self.test_labels = to_device(self.test_labels, device)
-        self.train_idx = to_device(self.train_idx, device)
-        self.test_idx = to_device(self.test_idx, device)
-        return (
-            self.model,
-            self.feat_dict,
-            self.train_labels,
-            self.test_labels,
-            self.train_idx,
-            self.test_idx
-        )
 
     def _set_train_params(self,
                           lr: float = 1e-3,
@@ -215,6 +212,15 @@ class BaseTrainer(object):
         save_json_dict(
             ckpt_dict, self.dir_model / 'checkpoint_dict.json')
         # load_json_dict(self.dir_model / 'checkpoint_dict.json')
+
+    def plot_record(self,
+                    record_names, start=0, end=None,
+                    lbs=None, tt=None, fp=None,
+                    **kwargs):
+        # lbs: the line labels (corresponding to the `record_names`)
+        return plot_records_for_trainer(
+            self, record_names, start, end=end, lbs=lbs,
+            tt=tt, fp=fp, **kwargs)
 
     def get_current_outputs(self, **other_inputs):
         """ get the current states of the model output
