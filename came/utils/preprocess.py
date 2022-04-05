@@ -1535,14 +1535,13 @@ def normalize_col(X, scale_factor=1., by='sum'):
         norms = X.max(axis=0)
     else:
         raise ValueError(f'`by` should be either "sum" or "max", got {by}')
-
+    if hasattr(norms, 'A'):
+        norms = norms.A.flatten()
     if scale_factor is None:
         is_zero = norms == 0
         scale_factor = np.median(norms[~ is_zero])
-    norms = norms / scale_factor
+    norms /= scale_factor
     # for those rows or columns that summed to 0, just do nothing
-    if hasattr(norms, 'A'):
-        norms = norms.A.flatten()
     norms[norms == 0] = 1
 
     norm_ = 1 / norms
