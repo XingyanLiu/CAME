@@ -24,7 +24,6 @@ import scanpy as sc
 from ..datapair import DataPair, AlignedDataPair
 from . import preprocess as pp
 from ..model import CGGCNet, CGCNet
-from . import _knn
 from .base import (
     make_pairs_from_lists,
     load_pickle,
@@ -1613,92 +1612,6 @@ def wrapper_contingency_mat(y_true, y_pred,
         if order_rows:
             mat = pp.order_contingency_mat(mat, 1)
     return mat
-
-
-# In[]
-"""     KNN searching with batch considered
-=====================================================
-"""
-
-
-def adata_neighbors(adata,
-                    n_neighbors=8,
-                    metric='cosine',
-                    exact=False,
-                    # algorithm = None, #'brute',
-                    use_rep='X',
-                    key_added=None,
-                    **kwds):
-    if use_rep == 'X':
-        X = adata.X
-    else:  # 'X_pca'
-        X = adata.obsm[use_rep]
-
-    if exact:
-        dist_mat, conn = _knn.find_neighbors(
-            X, n_neighbors=n_neighbors,
-            metric=metric, algorithm='brute', **kwds)
-        set_precomputed_neighbors(
-            adata, dist_mat, conn, n_neighbors=n_neighbors,
-            metric=metric, use_rep=use_rep, key_added=key_added)
-    else:
-        sc.pp.neighbors(adata, metric=metric,
-                        n_neighbors=n_neighbors, use_rep=use_rep,
-                        key_added=key_added)
-
-    return adata  # although chaneged inplace
-
-
-def paired_data_neighbors(
-        X1, X2,
-        adata: Union[sc.AnnData, None] = None,
-        ks=10, ks_inner=3,
-        binarize=False,
-        n_pcs: Optional[int] = None,
-        use_rep: Optional[str] = None,
-        random_state=0,
-        method='umap',
-        metric='cosine',
-        metric_kwds=None,
-        key_added: Union[None, str] = 'adjusted',
-        **kwds) -> sc.AnnData:
-    """
-    X1, X2: np.ndarray, shape = (n_obs1, n_var) and (n_obs2, n_var)
-    adata: if provided, should contain (n_obs1 + n_obs2) data observations, and
-        each columns should be matched with `X1` followed by `X2`!!!
-    
-    """
-    if adata is None:
-        X = np.vstack([X1, X2])
-        adata = sc.AnnData(X=X, )
-
-    distances, connectivities = _knn.pair_stitched_knn(
-        X1, X2,
-        ks=ks,
-        ks_inner=ks_inner,
-        metric=metric,
-        # func_norm = 'umap',
-        algorithm='auto',
-        metric_params=metric_kwds,
-        **kwds)
-    if binarize:
-        connectivities[connectivities > 0] = 1
-
-    n_neighbors = ks[0] if isinstance(ks, Sequence) else ks
-    set_precomputed_neighbors(
-        adata,
-        distances,
-        connectivities,
-        n_neighbors=n_neighbors,
-        metric=metric,
-        method=method,  # 'umap',
-        metric_kwds=metric_kwds,
-        use_rep=use_rep,
-        n_pcs=n_pcs,
-        key_added=key_added,
-    )
-
-    return adata  # Always return data
 
 
 def set_precomputed_neighbors(
