@@ -46,7 +46,7 @@ from .datapair import (
 )
 from .PARAMETERS import get_model_params, get_loss_params
 from . import pipeline
-from .pipeline import __test1__, __test2__
+from .pipeline import KET_CLUSTER, __test1__, __test2__
 
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"

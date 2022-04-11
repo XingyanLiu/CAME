@@ -474,7 +474,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>If you get trouble with installing CAME, you can download the source code from GitHub, and append the path to <code class="docutils literal notranslate"><span class="pre">sys.path</span></code>. For example:</p>
+<p>If you get trouble with installing CAME, you can download the source code from <a class="reference external" href="https://github.com/XingyanLiu/CAME.git">GitHub</a>, and append the path to <code class="docutils literal notranslate"><span class="pre">sys.path</span></code>.</p>
+<p>For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CAME_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;path/to/CAME&#39;</span><span class="p">)</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">CAME_ROOT</span><span class="p">))</span>
 </pre></div>
@@ -723,33 +724,40 @@ a new directory made:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># the numer of training epochs</span>
+<span></span><span class="c1"># The numer of training epochs</span>
 <span class="c1"># (a recommended setting is 200-400 for whole-graph training, and 80-200 for sub-graph training)</span>
 <span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">300</span>
 
-<span class="c1"># the training batch size</span>
+<span class="c1"># The training batch size</span>
 <span class="c1"># When the GPU memory is limited, set 4096 or more if possible.</span>
 <span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span>
 
-<span class="c1"># the number of epochs to skip for checkpoint backup</span>
+<span class="c1"># The number of epochs to skip for checkpoint backup</span>
 <span class="n">n_pass</span> <span class="o">=</span> <span class="mi">100</span>
 
-<span class="c1"># whether to use the single-cell networks</span>
+<span class="c1"># Whether to use the single-cell networks</span>
 <span class="n">use_scnets</span> <span class="o">=</span> <span class="kc">True</span>
 
-<span class="c1"># the number of top DEGs to take as the node-features of each cells.</span>
+<span class="c1"># The number of top DEGs to take as the node-features of each cells.</span>
+<span class="c1"># You set it 70-100 for distant species pairs.</span>
 <span class="n">ntop_deg</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="c1"># the number of top DEGs to take as the graph nodes, which can be directly displayed on the UMAP plot.</span>
+
+<span class="c1"># The number of top DEGs to take as the graph nodes, which can be directly displayed on the UMAP plot.</span>
 <span class="n">ntop_deg_nodes</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="c1"># the source of the node genes, use both DEGs and HVGs by default</span>
+<span class="c1"># The source of the node genes; use both DEGs and HVGs by default</span>
 <span class="n">node_source</span> <span class="o">=</span> <span class="s1">&#39;deg,hvg&#39;</span>
 
-<span class="c1"># whether to take into account the non-1v1 variables as the node features.</span>
-<span class="c1"># Note that if most of the homologies are non-1v1, better set this as True!</span>
-<span class="n">keep_non1v1_feats</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1"># Whether to take into account the non-1v1 variables as the node features.</span>
+<span class="n">keep_non1v1_feats</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 </div>
+<p>💡 An alternative choice for node genes is using only the DEGs:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ntop_deg_nodes</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">node_source</span> <span class="o">=</span> <span class="s1">&#39;deg&#39;</span>
+</pre></div>
+</div>
+<p>⚠️ Note that if most of the homologies are non-1v1, better set <code class="docutils literal notranslate"><span class="pre">keep_non1v1_feats</span></code> as <code class="docutils literal notranslate"><span class="pre">True</span></code>, and increase the number of DEGs used as features <code class="docutils literal notranslate"><span class="pre">ntop_deg</span></code></p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -1065,7 +1073,7 @@ figure has been saved into:
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_16_1.png" src="../_images/_notebooks_getting_started_pipeline_un_16_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_17_1.png" src="../_images/_notebooks_getting_started_pipeline_un_17_1.png" />
 </div>
 </div>
 </div>
@@ -1084,8 +1092,8 @@ figure has been saved into:
 <span class="n">gs</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">wrapper_heatmap_scores</span><span class="p">(</span>
         <span class="n">df_probs</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">obs_ids2</span><span class="p">],</span> <span class="n">obs</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">obs_ids2</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">col_label</span><span class="o">=</span><span class="s1">&#39;celltype&#39;</span><span class="p">,</span> <span class="n">col_pred</span><span class="o">=</span><span class="s1">&#39;predicted&#39;</span><span class="p">,</span>
-        <span class="n">n_subsample</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-        <span class="n">cmap_heat</span><span class="o">=</span><span class="s1">&#39;magma_r&#39;</span><span class="p">,</span>  <span class="c1"># if prob_func == &#39;softmax&#39; else &#39;RdBu_r&#39;</span>
+        <span class="n">n_subsample</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>  <span class="c1"># sampling 50 cells for each group</span>
+        <span class="n">cmap_heat</span><span class="o">=</span><span class="s1">&#39;magma_r&#39;</span><span class="p">,</span>
         <span class="n">fp</span><span class="o">=</span><span class="n">figdir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;heatmap_probas.pdf&#39;</span>
     <span class="p">)</span>
 
@@ -1107,7 +1115,7 @@ figure has been saved into:
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_18_1.png" src="../_images/_notebooks_getting_started_pipeline_un_18_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_19_1.png" src="../_images/_notebooks_getting_started_pipeline_un_19_1.png" />
 </div>
 </div>
 </div>
@@ -1183,7 +1191,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_22_1.png" src="../_images/_notebooks_getting_started_pipeline_un_22_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_23_1.png" src="../_images/_notebooks_getting_started_pipeline_un_23_1.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -1198,7 +1206,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_22_3.png" src="../_images/_notebooks_getting_started_pipeline_un_22_3.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_23_3.png" src="../_images/_notebooks_getting_started_pipeline_un_23_3.png" />
 </div>
 </div>
 <p>Store UMAP coordinates:</p>
@@ -1255,7 +1263,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_28_1.png" src="../_images/_notebooks_getting_started_pipeline_un_28_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_29_1.png" src="../_images/_notebooks_getting_started_pipeline_un_29_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1276,7 +1284,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_29_0.png" src="../_images/_notebooks_getting_started_pipeline_un_29_0.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_30_0.png" src="../_images/_notebooks_getting_started_pipeline_un_30_0.png" />
 </div>
 </div>
 <p>Visualize gene UMAPs:</p>
@@ -1311,7 +1319,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_31_1.png" src="../_images/_notebooks_getting_started_pipeline_un_31_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_32_1.png" src="../_images/_notebooks_getting_started_pipeline_un_32_1.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -1326,7 +1334,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_31_3.png" src="../_images/_notebooks_getting_started_pipeline_un_31_3.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_32_3.png" src="../_images/_notebooks_getting_started_pipeline_un_32_3.png" />
 </div>
 </div>
 <p>Compute the link-weights (embedding similarity) between homologous gene pairs:</p>
@@ -1419,7 +1427,7 @@ figure has been saved into:
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_38_0.png" src="../_images/_notebooks_getting_started_pipeline_un_38_0.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_39_0.png" src="../_images/_notebooks_getting_started_pipeline_un_39_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1436,7 +1444,7 @@ figure has been saved into:
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_39_0.png" src="../_images/_notebooks_getting_started_pipeline_un_39_0.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_40_0.png" src="../_images/_notebooks_getting_started_pipeline_un_40_0.png" />
 </div>
 </div>
 </div>
@@ -1528,7 +1536,7 @@ figure has been saved into:
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_notebooks_getting_started_pipeline_un_42_1.png" src="../_images/_notebooks_getting_started_pipeline_un_42_1.png" />
+<img alt="../_images/_notebooks_getting_started_pipeline_un_43_1.png" src="../_images/_notebooks_getting_started_pipeline_un_43_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">

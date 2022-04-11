@@ -705,6 +705,7 @@ def sorted_scatter(
         fontsize_cbar=9,
         fontsize_axlabels=9,
         fontsize_title=9,
+        lim_margin=0.1,
         **kwargs
 ):
     """ scatter plot colored with continuous values, with points of the higher
@@ -739,6 +740,10 @@ def sorted_scatter(
         cmap=cmap, marker=marker,
         vmax=vmax, vmin=vmin, **kwargs)
     ax.grid(False)
+    x_margin = (max(x) - min(x)) * lim_margin
+    ax.set_xlim(min(x) - x_margin, max(x) + x_margin)
+    y_margin = (max(y) - min(y)) * lim_margin
+    ax.set_ylim(min(y) - y_margin, max(y) + y_margin)
     # remove y and x ticks
     ax.set_yticks([])
     ax.set_xticks([])
@@ -819,7 +824,7 @@ def embed_with_values(
         axs_flatten = axs.flatten()
     else:
         axs_flatten = np.array([axs])
-    s = 6000 / len(x) if s is None else s
+    s = 12000 / len(x) if s is None else s
     for ax, cname in zip(axs_flatten, cnames):
         v = list(values[cname])
         sorted_scatter(x, y, v, s=s, ax=ax,

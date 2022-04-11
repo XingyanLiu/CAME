@@ -1535,14 +1535,13 @@ def normalize_col(X, scale_factor=1., by='sum'):
         norms = X.max(axis=0)
     else:
         raise ValueError(f'`by` should be either "sum" or "max", got {by}')
-
+    if hasattr(norms, 'A'):
+        norms = norms.A.flatten()
     if scale_factor is None:
         is_zero = norms == 0
         scale_factor = np.median(norms[~ is_zero])
-    norms = norms / scale_factor
+    norms /= scale_factor
     # for those rows or columns that summed to 0, just do nothing
-    if hasattr(norms, 'A'):
-        norms = norms.A.flatten()
     norms[norms == 0] = 1
 
     norm_ = 1 / norms
@@ -1578,13 +1577,13 @@ def normalize_row(X, scale_factor=1, by='sum'):
         norms = X.max(axis=1)
     else:
         raise ValueError(f'`by` should be either "sum" or "max", got {by}')
-
+    if hasattr(norms, 'A'):
+        norms = norms.A.flatten()
     if scale_factor is None:
         is_zero = norms == 0
         scale_factor = np.median(norms[~ is_zero])
-    norms = norms / scale_factor
+    norms /= scale_factor
     # for those rows or columns that summed to 0, just do nothing
-    if hasattr(norms, 'A'): norms = norms.A.flatten()
     norms[norms == 0] = 1
     norm_ = 1 / norms
 
@@ -1899,6 +1898,7 @@ def quick_preprocess(
         n_top_genes: int = 2000,
         n_pcs: int = 30,  # if None, stop before PCA step
         nneigh: int = 10,  # 20 was used for clustering
+        metric='cosine',
         copy: bool = True,
         **hvg_kwds):
     """
@@ -1936,7 +1936,7 @@ def quick_preprocess(
         do_pca = True
     # 5: k-nearest-neighbor graph
     if do_pca and nneigh is not None:
-        sc.pp.neighbors(_adata, n_pcs=n_pcs, n_neighbors=nneigh)
+        sc.pp.neighbors(_adata, n_pcs=n_pcs, n_neighbors=nneigh, metric=metric)
     # 6: leiden-clustering...(separated function)
 
     return _adata  # always return data
@@ -1949,6 +1949,7 @@ def quick_pre_vis(adata, hvgs=None,
                   n_pcs=30, nneigh=10,
                   vis='umap',
                   color=None,
+                  metric='cosine',
                   copy=True, **hvg_kwds):
     """ Go through the default pipeline and have a overall visualization of
     the data.
@@ -1960,6 +1961,7 @@ def quick_pre_vis(adata, hvgs=None,
         normalize_data=normalize_data,
         target_sum=target_sum,
         n_pcs=n_pcs, nneigh=nneigh,  # 20
+        metric=metric,
         copy=copy,
         **hvg_kwds)
 

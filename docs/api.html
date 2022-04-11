@@ -144,9 +144,12 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/came.load_pickle.html">came.load_pickle</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis">Analysis</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/came.weight_linked_vars.html">came.weight_linked_vars</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/came.make_abstracted_graph.html">came.make_abstracted_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-came.utils.analyze">Analysis <code class="docutils literal notranslate"><span class="pre">came.ana.*</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.analyze.weight_linked_vars.html">came.utils.analyze.weight_linked_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.analyze.weight_linked_vars_by_expr.html">came.utils.analyze.weight_linked_vars_by_expr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.analyze.make_abstracted_graph.html">came.utils.analyze.make_abstracted_graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.analyze.compare_modules.html">came.utils.analyze.compare_modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/came.utils.analyze.compute_common_private.html">came.utils.analyze.compute_common_private</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a><ul>
@@ -426,19 +429,28 @@
 </tbody>
 </table>
 </div>
-<div class="section" id="analysis">
-<h2>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-came.utils.analyze">
+<span id="analysis-came-ana"></span><h2>Analysis <code class="docutils literal notranslate"><span class="pre">came.ana.*</span></code><a class="headerlink" href="#module-came.utils.analyze" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.weight_linked_vars.html#came.weight_linked_vars" title="came.weight_linked_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weight_linked_vars</span></code></a>(X, adj[, names, metric, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.analyze.weight_linked_vars.html#came.utils.analyze.weight_linked_vars" title="came.utils.analyze.weight_linked_vars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weight_linked_vars</span></code></a>(X, adj[, names, metric, …])</p></td>
 <td><p>Computes the similarity of each linked (homologous) pair of variables.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/came.make_abstracted_graph.html#came.make_abstracted_graph" title="came.make_abstracted_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_abstracted_graph</span></code></a>(obs_labels1, …[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.analyze.weight_linked_vars_by_expr.html#came.utils.analyze.weight_linked_vars_by_expr" title="came.utils.analyze.weight_linked_vars_by_expr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weight_linked_vars_by_expr</span></code></a>(dpair, …)</p></td>
+<td><p>Compute the weights between homologies by their average expressions across (cell) groups.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.analyze.make_abstracted_graph.html#came.utils.analyze.make_abstracted_graph" title="came.utils.analyze.make_abstracted_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_abstracted_graph</span></code></a>(obs_labels1, …[, …])</p></td>
 <td><p>Compute and make the abstracted graph from expression matrices and the linkage weights between homologous genes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/came.utils.analyze.compare_modules.html#came.utils.analyze.compare_modules" title="came.utils.analyze.compare_modules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compare_modules</span></code></a>(mod_labels1, mod_labels2, …)</p></td>
+<td><p>Compute common and private genes (cross-species) in each gene module.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/came.utils.analyze.compute_common_private.html#came.utils.analyze.compute_common_private" title="came.utils.analyze.compute_common_private"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_common_private</span></code></a>(genes1, genes2, gmap)</p></td>
+<td><p>compute common and private genes based on a given gene mapping</p></td>
 </tr>
 </tbody>
 </table>

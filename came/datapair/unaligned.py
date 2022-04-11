@@ -911,36 +911,6 @@ def datapair_from_adatas(
     var2 = adata2.var.copy().loc[vnodes2, :]
 
     # --- node features
-    # submaps_1v1_commom = pp.subset_matches(
-    #     df_varmap_1v1, vars_use1, vars_use2, union=False)
-    # if union_node_feats == 'auto' and submaps_1v1_commom.shape[0] < 100:
-    #     union_node_feats = True
-    # else:
-    #     union_node_feats = False
-    # if union_node_feats:
-    #     # make sure that all the features are detected in both datasets
-    #     submaps_1v1 = pp.subset_matches(
-    #         df_varmap_1v1, vars_all1, vars_all2, union=False)
-    #     submaps_1v1 = pp.subset_matches(
-    #         submaps_1v1, vars_use1, vars_use2, union=True)
-    #     # print("TEST", submaps_1v1.shape)
-    # else:
-    #     # (intersection of 1-1 matched features)
-    #     submaps_1v1 = submaps_1v1_commom
-    #     # submaps_1v1 = pp.subset_matches(
-    #     #     df_varmap_1v1, vars_use1, vars_use2, union=False)
-    # vnames_feat1, vnames_feat2 = list(zip(*submaps_1v1.values[:, :2]))
-    #
-    # try:
-    #     features1 = adata1[:, vnames_feat1].X
-    #     features2 = adata2[:, vnames_feat2].X
-    # except:
-    #     logging.warning(
-    #         '[NOTE] the node features will be extracted from `adata.raw`, '
-    #         'please make sure that the values are normalized.\n')
-    #     features1 = adata_raw1[:, vnames_feat1].X
-    #     features2 = adata_raw2[:, vnames_feat2].X
-    #
     # features = list(map(_check_sparse_toarray, [features1, features2]))
     features, trans = make_features(
         adatas, vars_use1, vars_use2, df_varmap, col_weight=col_weight,
@@ -984,7 +954,7 @@ def make_features(
         variable mappings between features in the given pair of datasets.
     col_weight
         a column name in ``df_varmap``, used for weighted-average-transformation
-         of the non-1v1 features.
+        of the non-1v1 features.
     union_node_feats: bool
         whether to take the union of the cell-node features
     keep_non1v1: bool

@@ -24,7 +24,6 @@ import scanpy as sc
 from ..datapair import DataPair, AlignedDataPair
 from . import preprocess as pp
 from ..model import CGGCNet, CGCNet
-from . import _knn
 from .base import (
     make_pairs_from_lists,
     load_pickle,
@@ -211,14 +210,17 @@ def compute_common_private(
         genes1: Sequence,  # Union[Sequence, Mapping[str, Sequence]],
         genes2: Sequence,  # Union[Sequence, Mapping[str, Sequence]],
         gmap: pd.DataFrame, ):
-    """
+    """compute common and private genes based on a given gene mapping
+     (e.g.,homologous mapping)
 
     Parameters
     ----------
     genes1, genes2
-        gene sets
+        the two gene sets to compare
     gmap
-        a DataFrame with at least two columns, storing homologous gene mappings
+        a DataFrame with at least two columns, storing homologous gene mappings.
+        the first column corresponds to ``genes1``, and the second corresponds
+        to ``genes2``
 
     Returns
     -------
@@ -256,8 +258,7 @@ def compare_modules(
         df_var_links,
         avg_scaled: Optional[Sequence[pd.DataFrame]] = None,
         zscore_cut: float = 1.,
-        # key_module='module'
-):
+) -> Mapping[str, Mapping[str, list]]:
     """
     Compute common and private genes (cross-species) in each gene module.
     If `avg_scaled` is provided, the module genes enriched in each cell-type
@@ -279,7 +280,7 @@ def compare_modules(
 
     Returns
     -------
-    record
+    record: dict of dicts
 
     """
     # mod_labels1 = gadt1.obs[key_module]
@@ -318,18 +319,21 @@ def compare_modules(
 
 
 def module_enrichment_for_classes(
-        avg_scaled1, avg_scaled2,
-        mod_genes1, mod_genes2,
-        genes_common1, genes_common2,
+        avg_scaled1: pd.DataFrame, avg_scaled2: pd.DataFrame,
+        mod_genes1: Sequence, mod_genes2: Sequence,
+        genes_common1: Sequence, genes_common2: Sequence,
         zscore_cut: float = 1.,
-        **kwargs
+        **ignored
 ):
-    """
-    For each (cell-)type and the given gene set (module) of two species,
+    """ For each (cell-)type and the given gene set (module) of two species,
     calculate the relatively highly expressed genes, and find those genes that
     are highly expressed in both species, and species-specific gene.
 
-    Note that `genes_common1` and `genes_common2` should be of the same length
+    Note that `genes_common1` and `genes_common2` should be of the same length.
+
+    Returns
+    -------
+    record: dict of dicts
     """
     # concatenated avg_scaled should be split, for there may be gene-name
     # collisions that will raise error when indexing by names.
@@ -1044,7 +1048,7 @@ def make_abstracted_graph(
         and 'mouse module 1', respectively.
     key_weight
         column name in ``df_var_links``, specifying weights between each pair
-         of variables.
+        of variables.
     cut_ov
         the threshold to cut edges with values lower than it.
     norm_mtd_ov
@@ -1613,92 +1617,6 @@ def wrapper_contingency_mat(y_true, y_pred,
         if order_rows:
             mat = pp.order_contingency_mat(mat, 1)
     return mat
-
-
-# In[]
-"""     KNN searching with batch considered
-=====================================================
-"""
-
-
-def adata_neighbors(adata,
-                    n_neighbors=8,
-                    metric='cosine',
-                    exact=False,
-                    # algorithm = None, #'brute',
-                    use_rep='X',
-                    key_added=None,
-                    **kwds):
-    if use_rep == 'X':
-        X = adata.X
-    else:  # 'X_pca'
-        X = adata.obsm[use_rep]
-
-    if exact:
-        dist_mat, conn = _knn.find_neighbors(
-            X, n_neighbors=n_neighbors,
-            metric=metric, algorithm='brute', **kwds)
-        set_precomputed_neighbors(
-            adata, dist_mat, conn, n_neighbors=n_neighbors,
-            metric=metric, use_rep=use_rep, key_added=key_added)
-    else:
-        sc.pp.neighbors(adata, metric=metric,
-                        n_neighbors=n_neighbors, use_rep=use_rep,
-                        key_added=key_added)
-
-    return adata  # although chaneged inplace
-
-
-def paired_data_neighbors(
-        X1, X2,
-        adata: Union[sc.AnnData, None] = None,
-        ks=10, ks_inner=3,
-        binarize=False,
-        n_pcs: Optional[int] = None,
-        use_rep: Optional[str] = None,
-        random_state=0,
-        method='umap',
-        metric='cosine',
-        metric_kwds=None,
-        key_added: Union[None, str] = 'adjusted',
-        **kwds) -> sc.AnnData:
-    """
-    X1, X2: np.ndarray, shape = (n_obs1, n_var) and (n_obs2, n_var)
-    adata: if provided, should contain (n_obs1 + n_obs2) data observations, and
-        each columns should be matched with `X1` followed by `X2`!!!
-    
-    """
-    if adata is None:
-        X = np.vstack([X1, X2])
-        adata = sc.AnnData(X=X, )
-
-    distances, connectivities = _knn.pair_stitched_knn(
-        X1, X2,
-        ks=ks,
-        ks_inner=ks_inner,
-        metric=metric,
-        # func_norm = 'umap',
-        algorithm='auto',
-        metric_params=metric_kwds,
-        **kwds)
-    if binarize:
-        connectivities[connectivities > 0] = 1
-
-    n_neighbors = ks[0] if isinstance(ks, Sequence) else ks
-    set_precomputed_neighbors(
-        adata,
-        distances,
-        connectivities,
-        n_neighbors=n_neighbors,
-        metric=metric,
-        method=method,  # 'umap',
-        metric_kwds=metric_kwds,
-        use_rep=use_rep,
-        n_pcs=n_pcs,
-        key_added=key_added,
-    )
-
-    return adata  # Always return data
 
 
 def set_precomputed_neighbors(
