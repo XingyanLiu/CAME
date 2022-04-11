@@ -954,7 +954,7 @@ def make_features(
         variable mappings between features in the given pair of datasets.
     col_weight
         a column name in ``df_varmap``, used for weighted-average-transformation
-         of the non-1v1 features.
+        of the non-1v1 features.
     union_node_feats: bool
         whether to take the union of the cell-node features
     keep_non1v1: bool

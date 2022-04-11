@@ -210,14 +210,17 @@ def compute_common_private(
         genes1: Sequence,  # Union[Sequence, Mapping[str, Sequence]],
         genes2: Sequence,  # Union[Sequence, Mapping[str, Sequence]],
         gmap: pd.DataFrame, ):
-    """
+    """compute common and private genes based on a given gene mapping
+     (e.g.,homologous mapping)
 
     Parameters
     ----------
     genes1, genes2
-        gene sets
+        the two gene sets to compare
     gmap
-        a DataFrame with at least two columns, storing homologous gene mappings
+        a DataFrame with at least two columns, storing homologous gene mappings.
+        the first column corresponds to ``genes1``, and the second corresponds
+        to ``genes2``
 
     Returns
     -------
@@ -255,8 +258,7 @@ def compare_modules(
         df_var_links,
         avg_scaled: Optional[Sequence[pd.DataFrame]] = None,
         zscore_cut: float = 1.,
-        # key_module='module'
-):
+) -> Mapping[str, Mapping[str, list]]:
     """
     Compute common and private genes (cross-species) in each gene module.
     If `avg_scaled` is provided, the module genes enriched in each cell-type
@@ -278,7 +280,7 @@ def compare_modules(
 
     Returns
     -------
-    record
+    record: dict of dicts
 
     """
     # mod_labels1 = gadt1.obs[key_module]
@@ -317,18 +319,21 @@ def compare_modules(
 
 
 def module_enrichment_for_classes(
-        avg_scaled1, avg_scaled2,
-        mod_genes1, mod_genes2,
-        genes_common1, genes_common2,
+        avg_scaled1: pd.DataFrame, avg_scaled2: pd.DataFrame,
+        mod_genes1: Sequence, mod_genes2: Sequence,
+        genes_common1: Sequence, genes_common2: Sequence,
         zscore_cut: float = 1.,
-        **kwargs
+        **ignored
 ):
-    """
-    For each (cell-)type and the given gene set (module) of two species,
+    """ For each (cell-)type and the given gene set (module) of two species,
     calculate the relatively highly expressed genes, and find those genes that
     are highly expressed in both species, and species-specific gene.
 
-    Note that `genes_common1` and `genes_common2` should be of the same length
+    Note that `genes_common1` and `genes_common2` should be of the same length.
+
+    Returns
+    -------
+    record: dict of dicts
     """
     # concatenated avg_scaled should be split, for there may be gene-name
     # collisions that will raise error when indexing by names.
@@ -1043,7 +1048,7 @@ def make_abstracted_graph(
         and 'mouse module 1', respectively.
     key_weight
         column name in ``df_var_links``, specifying weights between each pair
-         of variables.
+        of variables.
     cut_ov
         the threshold to cut edges with values lower than it.
     norm_mtd_ov

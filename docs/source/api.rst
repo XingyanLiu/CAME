@@ -98,13 +98,19 @@ I/O Functions
    save_pickle
    load_pickle
 
-Analysis
---------
+Analysis ``came.ana.*``
+-----------------------
+.. module:: came.utils.analyze
+.. :currentmodule:: came
+
 .. autosummary::
    :toctree: generated/
 
    weight_linked_vars
+   weight_linked_vars_by_expr
    make_abstracted_graph
+   compare_modules
+   compute_common_private
 
 
 Plotting Functions ``came.pl.*``
