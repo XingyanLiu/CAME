@@ -49,4 +49,4 @@ from . import pipeline
 from .pipeline import KET_CLUSTER, __test1__, __test2__
 
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
