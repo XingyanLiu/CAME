@@ -2351,7 +2351,9 @@ def augment_repeat_adata(
     groups
         The cell groups to augment, should be in ``adata.obs[key_y]``
     concat
-        Whether to concatenate the original data and the augmented ones
+        Whether to concatenate the original data and the augmented ones. if
+        ``True`` the returned object will contain the input samples appended
+        with the augmented ones.
     seed
         The random seed
     id_prefix
@@ -2359,7 +2361,8 @@ def augment_repeat_adata(
 
     Returns
     -------
-
+    adata_new: AnnData
+        the AnnData object containing augmented samples (cells).
     """
     x = adata.X
     y = adata.obs[key_y].values  # group labels
