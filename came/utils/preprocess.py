@@ -2331,13 +2331,36 @@ def _concat_x_and_y(xy1, xy2):
 
 def augment_repeat_adata(
         adata: sc.AnnData,
-        key_y: str or int,  # column name in adata.obs
+        key_y: str or int,
         n_tot_each: int = 1000,
         groups: Optional[Sequence] = None,
         concat: bool = True,
         seed: int = 1234,
         id_prefix: str = 'aug',
 ):
+    """(repeated) augmentation of small groups in adata
+
+    Parameters
+    ----------
+    adata
+        The AnnData object
+    key_y
+        A column in ``adata.obs`` that stores the (cluster/cell-type) labels
+    n_tot_each
+        Target number of cells after (repeated) augmentation
+    groups
+        The cell groups to augment, should be in ``adata.obs[key_y]``
+    concat
+        Whether to concatenate the original data and the augmented ones
+    seed
+        The random seed
+    id_prefix
+        The name prefix of the augmented cells
+
+    Returns
+    -------
+
+    """
     x = adata.X
     y = adata.obs[key_y].values  # group labels
     key_pseudo = 'is_pseudo'
