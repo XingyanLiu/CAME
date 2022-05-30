@@ -147,7 +147,7 @@ class Trainer(BaseTrainer):
                  train_labels: Tensor,
                  test_labels: Optional[Tensor] = None,
                  cluster_labels: Optional[Sequence] = None,
-                 lr=1e-3,
+                 lr=1e-3 / 2,
                  l2norm=1e-2,  # 1e-2 is tested for all datasets
                  dir_main=Path('.'),
                  **kwds  # for code compatibility (not raising error)
