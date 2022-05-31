@@ -373,6 +373,7 @@ def compare_degs_seurat(
         df_map: Optional[pd.DataFrame] = None,
         cut_padj: float = None,
         ntop: Optional[int] = None,
+        product: bool = False,
         key_group = 'cluster',
         key_gene = 'gene',
         key_pval = 'p_val_adj',
@@ -427,7 +428,10 @@ def compare_degs_seurat(
             lambda x: x.head(ntop).tolist()).to_dict()
         dct_deg2 = df_deg2.groupby(key_group)[key_gene].apply(
             lambda x: x.head(ntop).tolist()).to_dict()
-    return compare_deg_dicts(dct_deg1, dct_deg2, df_map)
+    if product:
+        return compare_deg_dicts_product(dct_deg1, dct_deg2, df_map)
+    else:
+        return compare_deg_dicts(dct_deg1, dct_deg2, df_map)
 
 
 def compare_degs_adata(
