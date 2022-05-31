@@ -674,7 +674,8 @@ def wrapper_heatmap_scores(
     cols_anno = [col_label, col_pred]
     df_lbs = obs[cols_anno].copy()
     if type_order_true is not None:
-        type_order_true = dict(zip(type_order_true, range(len(type_order_true))))
+        type_order_true = sorted(set(df_lbs[col_label]))
+    type_order_true = dict(zip(type_order_true, range(len(type_order_true))))
     if type_order_pred is None:
         type_order_pred = sorted(set(df_lbs[col_pred]))
     type_order_pred = dict(zip(type_order_pred, range(len(type_order_pred))))
