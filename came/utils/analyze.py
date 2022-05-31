@@ -383,7 +383,7 @@ def compare_degs_seurat(
     ----------
     df_deg1
         DEG table output from Seurat's function FindAllMarkers(), with columns
-        'p_val', 'avg_logFC', 'pct.1', 'pct.2', 'p_val_adj', 'cluster', 'gene'
+        'p_val', 'avg_logFC'(or 'avg_log2FC'), 'pct.1', 'pct.2', 'p_val_adj', 'cluster', 'gene'
     df_deg2
         DEG table output from Seurat's function FindAllMarkers(), with the same
         format with ``df_deg1``
@@ -494,7 +494,7 @@ def compare_degs_adata(
 def compare_deg_dicts(
         dct_deg1, dct_deg2,
         df_map: Optional[pd.DataFrame] = None):
-    """
+    """compare two DEG dicts (only consider the keys in both dicts)
 
     Parameters
     ----------
@@ -504,6 +504,7 @@ def compare_deg_dicts(
         a dict of DEG lists, where each key corresponds to a cell group.
     df_map:
         homologous gene mappings
+
     Returns
     -------
     record: dict
@@ -536,6 +537,68 @@ def compare_deg_dicts(
             'private1': private1,
             'private2': private2,
         }
+    return record
+
+
+def compare_deg_dicts_product(
+        dct_deg1, dct_deg2,
+        df_map: Optional[pd.DataFrame] = None):
+    """compare two DEG dicts (in pairwise manner)
+
+    Parameters
+    ----------
+    dct_deg1: Dict[Any, Sequence]
+        a dict of DEG lists, where each key corresponds to a cell group.
+    dct_deg2: Dict[Any, Sequence]
+        a dict of DEG lists, where each key corresponds to a cell group.
+    df_map:
+        homologous gene mappings
+
+    Returns
+    -------
+    record: dict of 5 dicts
+    """
+    d_common1v1 = {}
+    d_deg_common1 = {}
+    d_deg_common2 = {}
+    d_private1 = {}
+    d_private2 = {}
+    for cl1 in sorted(dct_deg1.keys()):
+        d_common1v1[cl1] = {}
+        d_deg_common1[cl1] = {}
+        d_deg_common2[cl1] = {}
+        d_private1[cl1] = {}
+        d_private2[cl1] = {}
+        for cl2 in sorted(dct_deg2.keys()):
+            deg1 = dct_deg1[cl1]
+            deg2 = dct_deg2[cl2]
+            if df_map is None:
+                common1v1 = set(deg1).intersection(deg2)
+                deg_common1 = deg_common2 = common1v1
+            else:
+                subdf_varmap_1v1 = pp.subset_matches(
+                    pp.take_1v1_matches(df_map), deg1, deg2)
+                common1v1 = subdf_varmap_1v1.apply(tuple, axis=1).tolist()
+
+                subdf_varmap = pp.subset_matches(df_map, deg1, deg2)
+                deg_common1 = subdf_varmap.iloc[:, 0].tolist()
+                deg_common2 = subdf_varmap.iloc[:, 1].tolist()
+
+            private1 = [g for g in deg1 if deg1 not in deg_common1]
+            private2 = [g for g in deg2 if deg2 not in deg_common2]
+            d_common1v1[cl1][cl2] = common1v1
+            d_deg_common1[cl1][cl2] = deg_common1
+            d_deg_common2[cl1][cl2] = deg_common2
+            d_private1[cl1][cl2] = private1
+            d_private2[cl1][cl2] = private2
+
+    record = {
+        'common1v1': d_common1v1,
+        'common1': d_deg_common1,
+        'common2': d_deg_common2,
+        'private1': d_private1,
+        'private2': d_private2,
+    }
     return record
 
 
