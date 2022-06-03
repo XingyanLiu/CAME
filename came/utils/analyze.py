@@ -415,10 +415,10 @@ def compare_degs_seurat(
         lambda x: x.sort_values(key_pval)).reset_index(drop=True)
     df_deg2 = df_deg2.groupby(key_group).apply(
         lambda x: x.sort_values(key_pval)).reset_index(drop=True)
-
-    # filter DEGs that are not significant enough
-    df_deg1 = df_deg1[df_deg1[key_pval] <= cut_padj]
-    df_deg2 = df_deg2[df_deg2[key_pval] <= cut_padj]
+    if cut_padj is not None:
+        # filter DEGs that are not significant enough
+        df_deg1 = df_deg1[df_deg1[key_pval] <= cut_padj]
+        df_deg2 = df_deg2[df_deg2[key_pval] <= cut_padj]
 
     if ntop is None:
         dct_deg1 = df_deg1.groupby(key_group)[key_gene].apply(list).to_dict()
@@ -532,8 +532,8 @@ def compare_deg_dicts(
             deg_common1 = subdf_varmap.iloc[:, 0].tolist()
             deg_common2 = subdf_varmap.iloc[:, 1].tolist()
 
-        private1 = [g for g in deg1 if deg1 not in deg_common1]
-        private2 = [g for g in deg2 if deg2 not in deg_common2]
+        private1 = [g for g in deg1 if g not in deg_common1]
+        private2 = [g for g in deg2 if g not in deg_common2]
         record[cl] = {
             'common1v1': common1v1,
             'common1': deg_common1,
@@ -588,8 +588,8 @@ def compare_deg_dicts_product(
                 deg_common1 = subdf_varmap.iloc[:, 0].tolist()
                 deg_common2 = subdf_varmap.iloc[:, 1].tolist()
 
-            private1 = [g for g in deg1 if deg1 not in deg_common1]
-            private2 = [g for g in deg2 if deg2 not in deg_common2]
+            private1 = [g for g in deg1 if g not in deg_common1]
+            private2 = [g for g in deg2 if g not in deg_common2]
             d_common1v1[cl1][cl2] = common1v1
             d_deg_common1[cl1][cl2] = deg_common1
             d_deg_common2[cl1][cl2] = deg_common2
