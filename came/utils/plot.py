@@ -103,11 +103,11 @@ def get_colors(cmap='Spectral', n=5, to_hex=True):
         return colors
 
 
-def diy_cmap_grey_bg(name_fg='RdPu', low=0.15, rm_high=0.01, n=100):
+def diy_cmap_grey_bg(name_fg='RdPu', low=0.15, rm_high=0.01, n=100, bg='#d9d9d9'):
     s = int(n * low)
     t = max((1, int(n * rm_high)))
     print((s, t))
-    candi_colors = ['#d9d9d9'] * s + get_colors(name_fg, n)[s: -t]
+    candi_colors = [bg] * s + get_colors(name_fg, n)[s: -t]
     cmap = mcolors.ListedColormap(candi_colors)
     return cmap
 
