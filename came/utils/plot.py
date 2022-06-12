@@ -831,9 +831,11 @@ def embed_with_values(
     fig, axs = plt.subplots(
         nrows, ncols, figsize=(ncols * axscale * 1.1, nrows * axscale),
         subplot_kw=dict(aspect='equal'))
-
-    xlabel = f'{name_xy}1'
-    ylabel = f'{name_xy}2'
+    if name_xy is None:
+        xlabel = ylabel = ''
+    else:
+        xlabel = f'{name_xy}1'
+        ylabel = f'{name_xy}2'
     if hasattr(axs, 'flatten'):
         axs_flatten = axs.flatten()
     else:
