@@ -20,7 +20,7 @@ URL = 'https://github.com/XingyanLiu/CAME'
 EMAIL = '544568643@qq.com'
 AUTHOR = 'Xingyan Liu'
 REQUIRES_PYTHON = '>=3.8.0'
-VERSION = '0.1.8'
+VERSION = '0.1.9'
 
 REQUIRED = [
     'scanpy',
