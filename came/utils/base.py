@@ -179,7 +179,7 @@ def map_by_sme(
         pairs_sm,
         pairs_me,
         to_pairs=False) -> Union[dict, list]:
-    """ start - media - end homologous mapping transform
+    """ start - medium - end homologous mapping transform
 
     pairs_sm, pairs_me:
         a list of tuples
@@ -190,7 +190,7 @@ def map_by_sme(
 
     Examples
     --------
-    make pairs (List[Tuple]) from dfs, mapping by a media
+    make pairs (List[Tuple]) from dfs, mapping by a medium
     >>> pairs_sm = df1.iloc[:, :2].apply(tuple, axis=1).tolist()
     >>> pairs_me = df2.iloc[:, :2].apply(tuple, axis=1).tolist()
     >>> pairs_se = map_by_sme(pairs_sm, pairs_me, to_pairs=True)

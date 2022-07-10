@@ -103,11 +103,11 @@ def get_colors(cmap='Spectral', n=5, to_hex=True):
         return colors
 
 
-def diy_cmap_grey_bg(name_fg='RdPu', low=0.15, rm_high=0.01, n=100):
+def diy_cmap_grey_bg(name_fg='RdPu', low=0.15, rm_high=0.01, n=100, bg='#d9d9d9'):
     s = int(n * low)
     t = max((1, int(n * rm_high)))
     print((s, t))
-    candi_colors = ['#d9d9d9'] * s + get_colors(name_fg, n)[s: -t]
+    candi_colors = [bg] * s + get_colors(name_fg, n)[s: -t]
     cmap = mcolors.ListedColormap(candi_colors)
     return cmap
 
@@ -663,25 +663,39 @@ def wrapper_heatmap_scores(
         n_subsample: Optional[int] = 50,
         ignore_index: bool = False,
         name_label='Cell type',  # 'true label',
+        filter_null=True,
+        type_order_true: Sequence = None,
+        type_order_pred: Sequence = None,
         fp=None,
         **kwds
 ):
     """ sort columns and rows, plot heatmap of cell-type scores
     """
     cols_anno = [col_label, col_pred]
-    df_lbs = obs[cols_anno]
+    df_lbs = obs[cols_anno].copy()
+    if type_order_true is None:
+        type_order_true = sorted(set(df_lbs[col_label]))
+    type_order_true = dict(zip(type_order_true, range(len(type_order_true))))
+    if type_order_pred is None:
+        type_order_pred = sorted(set(df_lbs[col_pred]))
+    type_order_pred = dict(zip(type_order_pred, range(len(type_order_pred))))
     if ignore_index:
-        df_lbs = df_lbs.copy()
         df_lbs.index = df_score.index
+    df_lbs['lb_codes'] = df_lbs[col_label].map(type_order_true)
+    df_lbs['pred_codes'] = df_lbs[col_pred].map(type_order_pred)
     # sort samples by labels
-    df_lbs = df_lbs.sort_values(cols_anno)
+    # df_lbs = df_lbs.sort_values(cols_anno)
+    df_lbs = df_lbs.sort_values(['lb_codes', 'pred_codes'])
     if n_subsample:
         from .base import subsample_each_group
         indices = subsample_each_group(df_lbs[col_label], n_out=n_subsample)
     else:
         indices = df_lbs.index
-    cols_ordered = [c for c in sorted(set(df_lbs[col_pred]))
-                    if c in df_score.columns]
+    if filter_null:  # un-predicted types will not be displayed
+        cols_ordered = [c for c in type_order_pred.keys()
+                        if c in df_score.columns]
+    else:
+        cols_ordered = list(type_order_pred.keys())
 
     df_data = df_score.loc[indices, cols_ordered].copy()
     lbs = df_lbs.loc[indices, col_label]
@@ -817,9 +831,11 @@ def embed_with_values(
     fig, axs = plt.subplots(
         nrows, ncols, figsize=(ncols * axscale * 1.1, nrows * axscale),
         subplot_kw=dict(aspect='equal'))
-
-    xlabel = f'{name_xy}1'
-    ylabel = f'{name_xy}2'
+    if name_xy is None:
+        xlabel = ylabel = ''
+    else:
+        xlabel = f'{name_xy}1'
+        ylabel = f'{name_xy}2'
     if hasattr(axs, 'flatten'):
         axs_flatten = axs.flatten()
     else:
