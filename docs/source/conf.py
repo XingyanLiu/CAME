@@ -20,9 +20,9 @@ sys.path.insert(0, os.path.abspath(f'{os.path.dirname(__file__)}/../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'CAME'
+author = 'Xingyan Liu'
 _copyright = 'Academy of Mathematics and Systems Science, CAS'
 copyright = f'{datetime.now():%Y}, {_copyright}.'
-author = 'Xingyan Liu'
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,18 +35,25 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',  # different doc-styles (Google, Numpy)
-    'sphinx.ext.doctest',  
+    # 'myst_parser',  # use Markdown using MyST
+    "nbsphinx",  # notebooks
+    'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.githubpages',  # enable github-pages
     'sphinx_autodoc_typehints',  # needs to be after napoleon
-    "nbsphinx",  # notebooks
 ]
+autosummary_generate = True
+autodoc_member_order = 'bysource'
+napoleon_include_init_with_doc = False
+napoleon_use_rtype = True  # having a separate entry generally helps readability
+napoleon_use_param = True
+todo_include_todos = False
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-autosummary_generate = True
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -68,3 +75,10 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# source_suffix = '.rst'
+from recommonmark.parser import CommonMarkParser
+source_parsers = {
+    '.md': CommonMarkParser,
+}
+source_suffix = ['.rst', '.md']
