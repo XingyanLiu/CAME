@@ -1,0 +1,344 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "87aee5e2",
+   "metadata": {},
+   "source": [
+    "# Load pre-computed results\n",
+    "\n",
+    "Make sure that you have finished the model training process (CAME's pipeline) and had the results properly stored."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "4601ef4a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os\n",
+    "from pathlib import Path\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "from matplotlib import pyplot as plt\n",
+    "import seaborn as sns\n",
+    "\n",
+    "import scanpy as sc\n",
+    "from scipy import sparse\n",
+    "from scipy.special import softmax\n",
+    "\n",
+    "import networkx as nx\n",
+    "import torch"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "6aa12be9",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Using backend: pytorch\n"
+     ]
+    }
+   ],
+   "source": [
+    "import sys\n",
+    "sys.path.append('../')\n",
+    "\n",
+    "import came\n",
+    "from came import pipeline, pp, pl"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5e37f621",
+   "metadata": {},
+   "source": [
+    "## Load CAME results\n",
+    "\n",
+    "Three main objects are included:\n",
+    "\n",
+    "* dpair\n",
+    "* model\n",
+    "* predictor"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "1d0ff2ed",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[*] Setting dataset names:\n",
+      "\t0-->Baron_human\n",
+      "\t1-->Baron_mouse\n",
+      "[*] Setting aligned features for observation nodes (self._features)\n",
+      "[*] Setting un-aligned features (`self._ov_adjs`) for making links connecting observation and variable nodes\n",
+      "[*] Setting adjacent matrix connecting variables from these 2 datasets (`self._vv_adj`)\n",
+      "Index(['cell_ontology_class', 'cell_ontology_id', 'cell_type1', 'dataset_name',\n",
+      "       'donor', 'latent_1', 'latent_10', 'latent_2', 'latent_3', 'latent_4',\n",
+      "       'latent_5', 'latent_6', 'latent_7', 'latent_8', 'latent_9', 'library',\n",
+      "       'organ', 'organism', 'platform', 'tSNE1', 'tSNE2'],\n",
+      "      dtype='object')\n",
+      "Index(['cell_ontology_class', 'cell_ontology_id', 'cell_type1', 'dataset_name',\n",
+      "       'donor', 'latent_1', 'latent_10', 'latent_2', 'latent_3', 'latent_4',\n",
+      "       'latent_5', 'latent_6', 'latent_7', 'latent_8', 'latent_9', 'library',\n",
+      "       'organ', 'organism', 'platform', 'tSNE1', 'tSNE2', 'clust_lbs'],\n",
+      "      dtype='object')\n",
+      "-------------------- Summary of the DGL-Heterograph --------------------\n",
+      "Graph(num_nodes={'cell': 4028, 'gene': 6556},\n",
+      "      num_edges={('cell', 'express', 'gene'): 1513823, ('cell', 'self_loop_cell', 'cell'): 4028, ('cell', 'similar_to', 'cell'): 25908, ('gene', 'expressed_by', 'cell'): 1513823, ('gene', 'homolog_with', 'gene'): 12462},\n",
+      "      metagraph=[('cell', 'gene', 'express'), ('cell', 'cell', 'self_loop_cell'), ('cell', 'cell', 'similar_to'), ('gene', 'cell', 'expressed_by'), ('gene', 'gene', 'homolog_with')])\n",
+      "second-order connection: False\n",
+      "self-loops for observation-nodes: True\n",
+      "self-loops for variable-nodes: True\n"
+     ]
+    }
+   ],
+   "source": [
+    "# the result directory\n",
+    "came_resdir = Path(\"../_temp/('Baron_human', 'Baron_mouse')-(07-15 23.57.51)\")\n",
+    "\n",
+    "dpair, model = came.load_dpair_and_model(came_resdir)\n",
+    "predictor = came.Predictor.load(came_resdir / 'predictor.json')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "994828aa",
+   "metadata": {},
+   "source": [
+    "### Common variables that can be used in the downstream analysis\n",
+    "\n",
+    "Including:\n",
+    "\n",
+    "* The model inputs\n",
+    "    * the feature dict\n",
+    "    * the cell-gene heterogrnrous graph\n",
+    "* reference and query sample-ids\n",
+    "* reference classes (type space)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "18de5b6a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# the feature dict\n",
+    "feat_dict = dpair.get_feature_dict(scale=True)\n",
+    "\n",
+    "# the heterogrnrous cell-gene graph\n",
+    "g = dpair.get_whole_net()\n",
+    "\n",
+    "# reference and query sample-ids\n",
+    "obs_ids1, obs_ids2 = dpair.obs_ids1, dpair.obs_ids2\n",
+    "\n",
+    "# reference classes (type space)\n",
+    "classes = predictor.classes"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f5ff296d",
+   "metadata": {},
+   "source": [
+    "## Get hidden states\n",
+    "\n",
+    "The hidden states are saved as format like:\n",
+    "\n",
+    "    [dict0, dict1, dict2]\n",
+    "    \n",
+    "where `dict_i` is a dict with 'cell' and 'gene' as keys, and the \n",
+    "corresponding hidden state matrix as the values."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "7fde822e",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "3"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Load all hidden states (saved during CAME's pipeline)\n",
+    "hidden_list = came.load_hidden_states(resdir / 'hidden_list.h5')\n",
+    "len(hidden_list)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b62a91f4",
+   "metadata": {},
+   "source": [
+    "### The cell hidden-states\n",
+    "\n",
+    "The defaults are with reference and query concatenated"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "b58e4534",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "h2_cell1.shape=(2142, 128)\n",
+      "h2_cell2.shape=(1886, 128)\n"
+     ]
+    }
+   ],
+   "source": [
+    "# with reference and query concatenated\n",
+    "\n",
+    "# the embedding layer\n",
+    "embed_cell = hidden_list[0]['cell']\n",
+    "\n",
+    "# the first hidden layer\n",
+    "h1_cell = hidden_list[1]['cell']\n",
+    "\n",
+    "# the second hidden layer\n",
+    "h2_cell = hidden_list[2]['cell']\n",
+    "\n",
+    "# separate reference and query\n",
+    "h2_cell1 = h2_cell[obs_ids1]\n",
+    "h2_cell2 = h2_cell[obs_ids2]\n",
+    "\n",
+    "print(f\"h2_cell1.shape={h2_cell1.shape}\")\n",
+    "print(f\"h2_cell2.shape={h2_cell2.shape}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "807a7bc7",
+   "metadata": {},
+   "source": [
+    "### The gene hidden-states\n",
+    "\n",
+    "The defaults are with reference and query concatenated"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "5ebaa52d",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "h2_gene1.shape=(3421, 128)\n",
+      "h2_gene2.shape=(3135, 128)\n"
+     ]
+    }
+   ],
+   "source": [
+    "var_ids1, var_ids2 = dpair.get_vnode_ids(0), dpair.get_vnode_ids(1)\n",
+    "\n",
+    "# the embedding layer\n",
+    "embed_gene = hidden_list[0]['gene']\n",
+    "\n",
+    "# the first hidden layer\n",
+    "h1_gene = hidden_list[1]['gene']\n",
+    "\n",
+    "# the second hidden layer\n",
+    "h2_gene = hidden_list[2]['gene']\n",
+    "\n",
+    "# separate reference and query\n",
+    "h2_gene1 = h2_gene[var_ids1]\n",
+    "h2_gene2 = h2_gene[var_ids2]\n",
+    "\n",
+    "print(f\"h2_gene1.shape={h2_gene1.shape}\")\n",
+    "print(f\"h2_gene2.shape={h2_gene2.shape}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "82b9e074",
+   "metadata": {},
+   "source": [
+    "## Get cell-to-gene attentions\n",
+    "\n",
+    "format: n_cells x n_genes CSR sparse matrix"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "0cbdf91b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import came\n",
+    "attns = came.model.get_attentions(model, feat_dict, g)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "c99cc5f8",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<4028x6556 sparse matrix of type '<class 'numpy.float32'>'\n",
+       "\twith 1513823 stored elements in Compressed Sparse Row format>"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attns"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.11"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
