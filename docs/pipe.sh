@@ -5,6 +5,5 @@ then
 else
   make clean
   make html
-#  cp -r build/html/* .
   cp -r build/html/* .
 fi
