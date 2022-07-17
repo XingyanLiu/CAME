@@ -1,4 +1,5 @@
 # CAME
+[![DOI](https://zenodo.org/badge/367772907.svg)](https://zenodo.org/badge/latestdoi/367772907)
 
 [English](README.md) | **简体中文**
 
