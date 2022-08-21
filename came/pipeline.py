@@ -673,7 +673,7 @@ def gather_came_results(
          })
     obs['is_right'] = obs['predicted'] == obs['REF']
     df_probs = pd.DataFrame(probas_all, columns=classes)
-    dpair.set_common_obs_annos(obs)
+    dpair.set_common_obs_annos(obs, ignore_index=True)
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
     if save_dpair:
