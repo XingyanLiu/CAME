@@ -616,7 +616,7 @@ def gather_came_results(
     """
     resdir = Path(resdir)
     keys_compare = keys if keys_compare is None else keys_compare
-    if isinstance(checkpoint, int):
+    if checkpoint not in {'best', 'last'}:
         trainer.load_model_weights(checkpoint)
     elif 'best' in checkpoint.lower():
         trainer.load_model_weights()
@@ -673,7 +673,7 @@ def gather_came_results(
          })
     obs['is_right'] = obs['predicted'] == obs['REF']
     df_probs = pd.DataFrame(probas_all, columns=classes)
-    dpair.set_common_obs_annos(obs)
+    dpair.set_common_obs_annos(obs, ignore_index=True)
     dpair.set_common_obs_annos(df_probs, ignore_index=True)
     dpair.obs.to_csv(resdir / 'obs.csv')
     if save_dpair:
