@@ -1530,9 +1530,9 @@ def normalize_col(X, scale_factor=1., by='sum'):
 
     """
     if by == 'sum':
-        norms = X.sum(axis=0)
+        norms = X.sum(axis=0).astype(float)
     elif by == 'max':
-        norms = X.max(axis=0)
+        norms = X.max(axis=0).astype(float)
     else:
         raise ValueError(f'`by` should be either "sum" or "max", got {by}')
     if hasattr(norms, 'A'):
@@ -1572,9 +1572,9 @@ def normalize_row(X, scale_factor=1, by='sum'):
 
     """
     if by == 'sum':
-        norms = X.sum(axis=1)
+        norms = X.sum(axis=1).astype(float)
     elif by == 'max':
-        norms = X.max(axis=1)
+        norms = X.max(axis=1).astype(float)
     else:
         raise ValueError(f'`by` should be either "sum" or "max", got {by}')
     if hasattr(norms, 'A'):
