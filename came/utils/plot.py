@@ -1179,6 +1179,8 @@ def umap_with_annotates(
         text_col: Optional[str] = None,
         index_col: Optional[str] = None,
         anno_fontsize: int = 12,
+        anno_fontfamily: int = 'Arial',
+        anno_fontstyle: int = 'italic',
         ax=None,
         fp=None,
         **plkwds):
@@ -1229,7 +1231,10 @@ def umap_with_annotates(
         fig, ax = plt.subplots()
     sc.pl.umap(adt, color=color, ax=ax, show=False, **plkwds)
     # annotation
-    _texts = [ax.text(x, y, t, {'fontsize': anno_fontsize}) for x, y, t in
+    anno_kwargs = {'fontsize': anno_fontsize,
+                   'fontfamily': anno_fontfamily,
+                   'fontstyle': anno_fontstyle}
+    _texts = [ax.text(x, y, t, anno_kwargs) for x, y, t in
               zip(xs, ys, texts)]
     adjust_text(_texts, ax=ax, arrowprops=dict(arrowstyle='-', color='k'))
     _save_with_adjust(ax.figure, fp)
