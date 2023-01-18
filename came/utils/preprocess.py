@@ -437,7 +437,7 @@ def align_adata_vars(adata1: sc.AnnData,  # better be raw data
                      adata2: sc.AnnData,
                      df_varmap_1v1: Optional[pd.DataFrame] = None,
                      unify_names: bool = False,
-                     ) -> [sc.AnnData, sc.AnnData]:
+                     ) -> (sc.AnnData, sc.AnnData):
     """ Align the vaiables of two ``sc.AnnData`` objects
 
     Parameters
@@ -2130,7 +2130,7 @@ def top_markers_from_df(marker_df, n=5, groups=None, unique=True, ):
 def top_markers_from_info(
         df_info, n=5, groups=None, unique=True,
         col_group='group',
-        col_name='names') -> list:
+        col_name='names') -> List:
     """
     df_info: DEG-info table that can be take from `top_markers_from_adata`
     """

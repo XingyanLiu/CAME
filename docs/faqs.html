@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>FAQs &mdash; CAME  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Citation" href="citation.html" />
+    <link rel="prev" title="came.utils.plot.plot_multipartite_graph" href="generated/came.utils.plot.plot_multipartite_graph.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CAME
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API References</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FAQs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#about-the-input-format">About the input format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CAME</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>FAQs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/faqs.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="faqs">
+<h1>FAQs<a class="headerlink" href="#faqs" title="Permalink to this heading">¶</a></h1>
+<section id="about-the-input-format">
+<h2>About the input format<a class="headerlink" href="#about-the-input-format" title="Permalink to this heading">¶</a></h2>
+<p><strong>Q</strong>: I processed my data using Seurat, and transformed them into .h5ad files.
+But an error occurred when I passed them into CAME’s default pipeline.</p>
+<p><strong>A</strong>: The problem is caused by “the h5ad files converted from seurat-object by
+<code class="docutils literal notranslate"><span class="pre">SeuratDisk</span></code>”.
+CAME process the data from the raw-count matrices.
+So please use scanpy to construct the AnnData object from the raw-count matrices
+(e.g., read from the <code class="docutils literal notranslate"><span class="pre">*.mtx</span></code> and <code class="docutils literal notranslate"><span class="pre">*.txt</span></code> files by <code class="docutils literal notranslate"><span class="pre">scanpy.read()</span></code>)</p>
+<p>You can also use the following R code to export the filtered scRNA-seq data
+into an <code class="docutils literal notranslate"><span class="pre">.h5</span></code> file, which takes less time and space.</p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># R code</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">rhdf5</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">Matrix</span><span class="p">)</span>
+
+<span class="n">save_h5mat</span> <span class="o">=</span> <span class="nf">function</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="n">feature_type</span><span class="p">,</span> <span class="n">genome</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">){</span>
+  <span class="c1"># save sparse.mat (&#39;dgCMatrix&#39; format) into a h5 file</span>
+  <span class="c1"># ======= Test code ======</span>
+  <span class="c1"># tmp = Seurat::Read10X_h5(fp_h5)</span>
+  <span class="c1"># all(tmp@x == mat@x)</span>
+  <span class="c1"># all(tmp@i == mat@i)</span>
+  <span class="c1"># all(tmp@p == mat@p)</span>
+
+  <span class="nf">message</span><span class="p">(</span><span class="n">fp_h5</span><span class="p">)</span>
+
+  <span class="nf">h5createFile</span><span class="p">(</span><span class="n">fp_h5</span><span class="p">)</span>
+  <span class="n">root</span> <span class="o">=</span> <span class="s">&quot;matrix&quot;</span>
+  <span class="nf">h5createGroup</span><span class="p">(</span><span class="n">fp_h5</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+
+  <span class="nf">h5write</span><span class="p">(</span><span class="nf">dim</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s">&quot;shape&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+  <span class="nf">h5write</span><span class="p">(</span><span class="n">mat</span><span class="o">@</span><span class="n">x</span><span class="p">,</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s">&quot;data&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+  <span class="nf">h5write</span><span class="p">(</span><span class="n">mat</span><span class="o">@</span><span class="n">i</span><span class="p">,</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s">&quot;indices&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>  <span class="c1"># mat@i - 1 ?</span>
+  <span class="nf">h5write</span><span class="p">(</span><span class="n">mat</span><span class="o">@</span><span class="n">p</span><span class="p">,</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s">&quot;indptr&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+  <span class="nf">h5write</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s">&quot;barcodes&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+
+
+  <span class="n">feat_root</span> <span class="o">=</span> <span class="nf">paste</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s">&quot;features&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+  <span class="nf">h5createGroup</span><span class="p">(</span><span class="n">fp_h5</span><span class="p">,</span> <span class="n">feat_root</span><span class="p">)</span>
+
+  <span class="nf">h5write</span><span class="p">(</span><span class="nf">rownames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">feat_root</span><span class="p">,</span> <span class="s">&quot;id&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+  <span class="nf">h5write</span><span class="p">(</span><span class="nf">rownames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">feat_root</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+
+  <span class="nf">h5write</span><span class="p">(</span><span class="nf">rep</span><span class="p">(</span><span class="n">feature_type</span><span class="p">,</span> <span class="nf">dim</span><span class="p">(</span><span class="n">mat</span><span class="p">)[</span><span class="m">1</span><span class="p">]),</span>
+          <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">feat_root</span><span class="p">,</span> <span class="s">&quot;feature_type&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+
+  <span class="nf">h5write</span><span class="p">(</span><span class="nf">rep</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="nf">dim</span><span class="p">(</span><span class="n">mat</span><span class="p">)[</span><span class="m">1</span><span class="p">]),</span>
+          <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">feat_root</span><span class="p">,</span> <span class="s">&quot;derivation&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+  <span class="nf">h5write</span><span class="p">(</span><span class="nf">rep</span><span class="p">(</span><span class="n">genome</span><span class="p">,</span> <span class="nf">dim</span><span class="p">(</span><span class="n">mat</span><span class="p">)[</span><span class="m">1</span><span class="p">]),</span>  <span class="c1"># &quot;mm10&quot;</span>
+          <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">feat_root</span><span class="p">,</span> <span class="s">&quot;genome&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+  <span class="nf">h5write</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;genome&quot;</span><span class="p">,</span> <span class="s">&quot;derivation&quot;</span><span class="p">),</span>
+          <span class="n">fp_h5</span><span class="p">,</span> <span class="nf">paste</span><span class="p">(</span><span class="n">feat_root</span><span class="p">,</span> <span class="s">&quot;_all_tag_keys&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+
+  <span class="nf">h5closeAll</span><span class="p">()</span>
+  <span class="nf">message</span><span class="p">(</span><span class="s">&quot;Done!&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># save_h5mat_peak = function(mat, fp_h5, genome=&quot;&quot;){</span>
+<span class="c1">#   save_h5mat(mat, fp_h5, feature_type = &quot;Peaks&quot;, genome = genome)</span>
+<span class="c1"># }</span>
+
+<span class="n">save_h5mat_gex</span> <span class="o">=</span> <span class="nf">function</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="n">genome</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">){</span>
+  <span class="nf">save_h5mat</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">fp_h5</span><span class="p">,</span> <span class="n">feature_type</span> <span class="o">=</span> <span class="s">&quot;Gene Expression&quot;</span><span class="p">,</span> <span class="n">genome</span> <span class="o">=</span> <span class="n">genome</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="c1"># save the raw-counts in a Seurat-object &quot;seurat_obj&quot;</span>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">seurat_obj</span><span class="p">[[</span><span class="s">&quot;RNA&quot;</span><span class="p">]]</span><span class="o">@</span><span class="n">counts</span>
+<span class="nf">save_h5mat_gex</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="s">&quot;matrix.raw.h5&quot;</span><span class="p">,</span> <span class="n">genome</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+
+<span class="c1"># save the meta-data into a csv file:</span>
+<span class="n">meta_data</span> <span class="o">=</span> <span class="n">seurat_obj</span><span class="o">@</span><span class="n">meta.data</span>
+<span class="nf">write.csv</span><span class="p">(</span><span class="n">meta_data</span><span class="p">,</span> <span class="s">&quot;metadata.csv&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And read the h5 file using Scanpy’s build-in function:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># python-code</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+
+<span class="n">fp_mat</span> <span class="o">=</span> <span class="s1">&#39;matrix.raw.h5&#39;</span>
+<span class="n">fp_meta</span> <span class="o">=</span> <span class="s1">&#39;metadata.csv&#39;</span>
+<span class="n">adata_raw</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_10x_h5</span><span class="p">(</span><span class="n">fp_mat</span><span class="p">)</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fp_meta</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1"># add meta-data</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="n">adata_raw</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="citation.html" class="btn btn-neutral float-right" title="Citation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="generated/came.utils.plot.plot_multipartite_graph.html" class="btn btn-neutral float-left" title="came.utils.plot.plot_multipartite_graph" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

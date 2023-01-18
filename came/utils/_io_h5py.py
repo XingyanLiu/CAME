@@ -13,7 +13,7 @@ import numpy as np
 import h5py
 
 
-def save_hidden_states(data_list: list, path: Union[Path, str]):
+def save_hidden_states(data_list: List, path: Union[Path, str]):
     """ Save hidden states into .h5 file
 
     Parameters

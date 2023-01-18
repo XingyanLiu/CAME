@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>came.aligned_datapair_from_adatas &mdash; CAME  documentation</title>
@@ -32,9 +33,8 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -98,7 +98,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="came.make_features.html">came.make_features</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.aligned_datapair_from_adatas</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.aligned_datapair_from_adatas</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#came.aligned_datapair_from_adatas"><code class="docutils literal notranslate"><span class="pre">aligned_datapair_from_adatas()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="came.datapair_from_adatas.html">came.datapair_from_adatas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.AlignedDataPair.html">came.AlignedDataPair</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.DataPair.html">came.DataPair</a></li>
@@ -110,6 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -204,35 +208,35 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="came-aligned-datapair-from-adatas">
-<h1>came.aligned_datapair_from_adatas<a class="headerlink" href="#came-aligned-datapair-from-adatas" title="Permalink to this headline">¶</a></h1>
+<section id="came-aligned-datapair-from-adatas">
+<h1>came.aligned_datapair_from_adatas<a class="headerlink" href="#came-aligned-datapair-from-adatas" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.aligned_datapair_from_adatas">
-<span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">aligned_datapair_from_adatas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_feat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_as_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.aligned_datapair_from_adatas" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">aligned_datapair_from_adatas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adatas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">AnnData</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_feat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars_as_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oo_adjs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">spmatrix</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('reference',</span> <span class="pre">'query')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.datapair.aligned.AlignedDataPair"><span class="pre">AlignedDataPair</span></a></span></span><a class="headerlink" href="#came.aligned_datapair_from_adatas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build <code class="docutils literal notranslate"><span class="pre">AlignedDataPair</span></code> object from a pair of adatas.</p>
 <p>Note that the node features will be extracted from <code class="docutils literal notranslate"><span class="pre">adata.raw</span></code>
 (if not None), so please make sure that these values are normalized.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adatas</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code>]) – a list or tuple of 2 sc.AnnData objects.</p></li>
-<li><p><strong>vars_feat</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – a list of variable-names that will be used as (cell) node features.
+<li><p><strong>adatas</strong> – a list or tuple of 2 sc.AnnData objects.</p></li>
+<li><p><strong>vars_feat</strong> – a list of variable-names that will be used as (cell) node features.
 for example, names of differentail expressed genes (DEGs),
 highly variable features.</p></li>
-<li><p><strong>vars_as_nodes</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – a sequence of variable names, optional.
+<li><p><strong>vars_as_nodes</strong> – a sequence of variable names, optional.
 a name-list of variables that will be taken as nodes in the graph
 for model training.
 if None (not provided), it will be the same as <cite>vars_feat</cite></p></li>
-<li><p><strong>oo_adjs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">spmatrix</span></code>]]) – a sequence of (sparse) adjacent matrices of observations.
+<li><p><strong>oo_adjs</strong> – a sequence of (sparse) adjacent matrices of observations.
 for example, the single-cell network within each dataset.</p></li>
-<li><p><strong>dataset_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list or tuple of 2. names to discriminate data source,
+<li><p><strong>dataset_names</strong> – list or tuple of 2. names to discriminate data source,
 e.g. (‘reference’, ‘query’)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>dpair</strong></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.AlignedDataPair">AlignedDataPair</a></p>
 </dd>
 </dl>
@@ -250,7 +254,7 @@ e.g. (‘reference’, ‘query’)</p></li>
 </div>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -266,7 +270,7 @@ e.g. (‘reference’, ‘query’)</p></li>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

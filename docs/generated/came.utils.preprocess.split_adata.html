@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>came.utils.preprocess.split_adata &mdash; CAME  documentation</title>
@@ -32,9 +33,8 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -110,7 +110,10 @@
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.take_adata_groups.html">came.utils.preprocess.take_adata_groups</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.remove_adata_groups.html">came.utils.preprocess.remove_adata_groups</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.merge_adata_groups.html">came.utils.preprocess.merge_adata_groups</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.preprocess.split_adata</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.preprocess.split_adata</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#came.utils.preprocess.split_adata"><code class="docutils literal notranslate"><span class="pre">split_adata()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a></li>
@@ -120,6 +123,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -214,29 +218,26 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="came-utils-preprocess-split-adata">
-<h1>came.utils.preprocess.split_adata<a class="headerlink" href="#came-utils-preprocess-split-adata" title="Permalink to this headline">¶</a></h1>
+<section id="came-utils-preprocess-split-adata">
+<h1>came.utils.preprocess.split_adata<a class="headerlink" href="#came-utils-preprocess-split-adata" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.preprocess.split_adata">
-<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">split_adata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.split_adata" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">split_adata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">AnnData</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#came.utils.preprocess.split_adata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split an <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object into a dict of multiple objects</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code>) – the AnnData object to be split</p></li>
-<li><p><strong>key</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a column-name of <cite>adata.obs</cite></p></li>
+<li><p><strong>adata</strong> – the AnnData object to be split</p></li>
+<li><p><strong>key</strong> – a column-name of <cite>adata.obs</cite></p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>a dict of AnnData</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>a dict of AnnData</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -252,7 +253,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

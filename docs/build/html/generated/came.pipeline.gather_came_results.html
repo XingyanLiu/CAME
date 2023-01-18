@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>came.pipeline.gather_came_results &mdash; CAME  documentation</title>
@@ -32,9 +33,8 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -99,7 +99,10 @@
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.main_for_unaligned.html">came.pipeline.main_for_unaligned</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.preprocess_aligned.html">came.pipeline.preprocess_aligned</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.pipeline.preprocess_unaligned.html">came.pipeline.preprocess_unaligned</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.pipeline.gather_came_results</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.pipeline.gather_came_results</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#came.pipeline.gather_came_results"><code class="docutils literal notranslate"><span class="pre">gather_came_results()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a></li>
@@ -110,6 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -204,11 +208,11 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="came-pipeline-gather-came-results">
-<h1>came.pipeline.gather_came_results<a class="headerlink" href="#came-pipeline-gather-came-results" title="Permalink to this headline">¶</a></h1>
+<section id="came-pipeline-gather-came-results">
+<h1>came.pipeline.gather_came_results<a class="headerlink" href="#came-pipeline-gather-came-results" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.pipeline.gather_came_results">
-<span class="sig-prename descclassname"><span class="pre">came.pipeline.</span></span><span class="sig-name descname"><span class="pre">gather_came_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dpair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_compare</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_hidden_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpair</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.pipeline.gather_came_results" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.pipeline.</span></span><span class="sig-name descname"><span class="pre">gather_came_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dpair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.datapair.unaligned.DataPair"><span class="pre">DataPair</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.datapair.aligned.AlignedDataPair"><span class="pre">AlignedDataPair</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Trainer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_compare</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_hidden_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.pipeline.gather_came_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Packed function for pipeline as follows:</p>
 <ol class="arabic simple">
 <li><p>load the ‘best’ or the given checkpoint (model)</p></li>
@@ -217,33 +221,33 @@
 <li><p>make a predictor</p></li>
 </ol>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dpair</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="came.DataPair.html#came.DataPair" title="came.datapair.unaligned.DataPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataPair</span></code></a>, <a class="reference internal" href="came.AlignedDataPair.html#came.AlignedDataPair" title="came.datapair.aligned.AlignedDataPair"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlignedDataPair</span></code></a>]) – the <code class="docutils literal notranslate"><span class="pre">DataPair</span></code> or <code class="docutils literal notranslate"><span class="pre">AlignedDataPair</span></code> object. Note that it may be changed
+<li><p><strong>dpair</strong> – the <code class="docutils literal notranslate"><span class="pre">DataPair</span></code> or <code class="docutils literal notranslate"><span class="pre">AlignedDataPair</span></code> object. Note that it may be changed
 after pass through this function.</p></li>
-<li><p><strong>trainer</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Trainer</span></code>) – the model trainer</p></li>
-<li><p><strong>classes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – the class (or cell-type) space</p></li>
-<li><p><strong>keys</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a pair of names like [<cite>key_class1</cite>, <cite>key_class2</cite>], where <cite>key_class1</cite>
+<li><p><strong>trainer</strong> – the model trainer</p></li>
+<li><p><strong>classes</strong> – the class (or cell-type) space</p></li>
+<li><p><strong>keys</strong> – a pair of names like [<cite>key_class1</cite>, <cite>key_class2</cite>], where <cite>key_class1</cite>
 is the column name of the reference cell-type labels, and
 <cite>key_class2</cite> for the query, which can be set as None if there
 are no labels for the query data.
 These labels will be extracted and stored in the column ‘REF’ of
 <code class="docutils literal notranslate"><span class="pre">dpair.obs</span></code>.</p></li>
-<li><p><strong>keys_compare</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – a pair of names like [key_class1, key_class2], just for comparison.
+<li><p><strong>keys_compare</strong> – a pair of names like [key_class1, key_class2], just for comparison.
 These labels will be extracted and stored in the column ‘celltype’
 of <code class="docutils literal notranslate"><span class="pre">dpair.obs</span></code>.</p></li>
-<li><p><strong>resdir</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – the result directory</p></li>
-<li><p><strong>checkpoint</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – specify which checkpoint to adopt.
+<li><p><strong>resdir</strong> – the result directory</p></li>
+<li><p><strong>checkpoint</strong> – specify which checkpoint to adopt.
 candidates are ‘best’, ‘last’, or an integer.</p></li>
-<li><p><strong>batch_size</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – specify it when your GPU memory is limited</p></li>
-<li><p><strong>save_hidden_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to save the hidden states into <cite>{resdir}/hidden_list.h5</cite></p></li>
-<li><p><strong>save_dpair</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to save the dpair elements into <cite>{resdir}/datapair_init.pickle</cite></p></li>
+<li><p><strong>batch_size</strong> – specify it when your GPU memory is limited</p></li>
+<li><p><strong>save_hidden_list</strong> – whether to save the hidden states into <cite>{resdir}/hidden_list.h5</cite></p></li>
+<li><p><strong>save_dpair</strong> – whether to save the dpair elements into <cite>{resdir}/datapair_init.pickle</cite></p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -259,7 +263,7 @@ candidates are ‘best’, ‘last’, or an integer.</p></li>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

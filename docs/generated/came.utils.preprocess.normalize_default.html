@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>came.utils.preprocess.normalize_default &mdash; CAME  documentation</title>
@@ -32,9 +33,8 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -97,7 +97,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.pipeline">Pipeline <code class="docutils literal notranslate"><span class="pre">came.pipeline.*</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-came.utils.preprocess">Preprocessing <code class="docutils literal notranslate"><span class="pre">came.pp.*</span></code></a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.align_adata_vars.html">came.utils.preprocess.align_adata_vars</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.preprocess.normalize_default</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.preprocess.normalize_default</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#came.utils.preprocess.normalize_default"><code class="docutils literal notranslate"><span class="pre">normalize_default()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.quick_preprocess.html">came.utils.preprocess.quick_preprocess</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.quick_pre_vis.html">came.utils.preprocess.quick_pre_vis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.preprocess.group_mean.html">came.utils.preprocess.group_mean</a></li>
@@ -120,6 +123,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -214,35 +218,32 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="came-utils-preprocess-normalize-default">
-<h1>came.utils.preprocess.normalize_default<a class="headerlink" href="#came-utils-preprocess-normalize-default" title="Permalink to this headline">¶</a></h1>
+<section id="came-utils-preprocess-normalize-default">
+<h1>came.utils.preprocess.normalize_default<a class="headerlink" href="#came-utils-preprocess-normalize-default" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.preprocess.normalize_default">
-<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">normalize_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_return</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.normalize_default" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.utils.preprocess.</span></span><span class="sig-name descname"><span class="pre">normalize_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_return</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.preprocess.normalize_default" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalizing datasets with default settings (total-counts normalization
 followed by log(x+1) transform).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code>) – <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object</p></li>
+<li><p><strong>adata</strong> – <code class="docutils literal notranslate"><span class="pre">AnnData</span></code> object</p></li>
 <li><p><strong>target_sum</strong> – scale factor of total-count normalization</p></li>
-<li><p><strong>copy</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to copy the dataset</p></li>
-<li><p><strong>log_only</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to skip the “total-counts normalization” and only perform
+<li><p><strong>copy</strong> – whether to copy the dataset</p></li>
+<li><p><strong>log_only</strong> – whether to skip the “total-counts normalization” and only perform
 log(x+1) transform</p></li>
-<li><p><strong>force_return</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to return the data, even if changes are made for the
+<li><p><strong>force_return</strong> – whether to return the data, even if changes are made for the
 original object</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">AnnData</span></code> or None</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">AnnData</span></code> or None</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -258,7 +259,7 @@ original object</p></li>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>
