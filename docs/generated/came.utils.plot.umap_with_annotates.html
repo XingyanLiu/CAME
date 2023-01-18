@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>came.utils.plot.umap_with_annotates &mdash; CAME  documentation</title>
@@ -32,9 +33,8 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -108,12 +108,16 @@
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.plot_contingency_mat.html">came.utils.plot.plot_contingency_mat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.embed_with_values.html">came.utils.plot.embed_with_values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.adata_embed_with_values.html">came.utils.plot.adata_embed_with_values</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.plot.umap_with_annotates</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.plot.umap_with_annotates</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#came.utils.plot.umap_with_annotates"><code class="docutils literal notranslate"><span class="pre">umap_with_annotates()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.plot_multipartite_graph.html">came.utils.plot.plot_multipartite_graph</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -208,40 +212,37 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="came-utils-plot-umap-with-annotates">
-<h1>came.utils.plot.umap_with_annotates<a class="headerlink" href="#came-utils-plot-umap-with-annotates" title="Permalink to this headline">¶</a></h1>
+<section id="came-utils-plot-umap-with-annotates">
+<h1>came.utils.plot.umap_with_annotates<a class="headerlink" href="#came-utils-plot-umap-with-annotates" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.plot.umap_with_annotates">
-<span class="sig-prename descclassname"><span class="pre">came.utils.plot.</span></span><span class="sig-name descname"><span class="pre">umap_with_annotates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anno_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anno_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plkwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.plot.umap_with_annotates" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.utils.plot.</span></span><span class="sig-name descname"><span class="pre">umap_with_annotates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anno_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anno_fontsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anno_fontfamily</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Arial'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anno_fontstyle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'italic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plkwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.plot.umap_with_annotates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the UMAP embeddings and annotate the names of the given points</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adt</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AnnData</span></code>) – </p></li>
-<li><p><strong>text_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>) – ids of the points to be annotated, corresponding to
+<li><p><strong>adt</strong> – </p></li>
+<li><p><strong>text_ids</strong> – ids of the points to be annotated, corresponding to
 <code class="docutils literal notranslate"><span class="pre">anno_df.index</span></code> or <code class="docutils literal notranslate"><span class="pre">anno_df[index_col]</span></code> (if <code class="docutils literal notranslate"><span class="pre">index_col</span></code> is given)</p></li>
-<li><p><strong>color</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a column name in <code class="docutils literal notranslate"><span class="pre">adt.obs</span></code></p></li>
-<li><p><strong>anno_df</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – use <code class="docutils literal notranslate"><span class="pre">adt.obs</span></code> as the default annotations.</p></li>
-<li><p><strong>text_col</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – used as the annotation texts.
+<li><p><strong>color</strong> – a column name in <code class="docutils literal notranslate"><span class="pre">adt.obs</span></code></p></li>
+<li><p><strong>anno_df</strong> – use <code class="docutils literal notranslate"><span class="pre">adt.obs</span></code> as the default annotations.</p></li>
+<li><p><strong>text_col</strong> – used as the annotation texts.
 if specifies, should be a column name in <code class="docutils literal notranslate"><span class="pre">anno_df</span></code>.</p></li>
-<li><p><strong>index_col</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – used for index the points, corresponding to <code class="docutils literal notranslate"><span class="pre">text_ids</span></code>
+<li><p><strong>index_col</strong> – used for index the points, corresponding to <code class="docutils literal notranslate"><span class="pre">text_ids</span></code>
 if specifies, should be a column name in <code class="docutils literal notranslate"><span class="pre">anno_df</span></code>.</p></li>
-<li><p><strong>anno_fontsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the fontsize of the annotations</p></li>
+<li><p><strong>anno_fontsize</strong> – the fontsize of the annotations</p></li>
 <li><p><strong>ax</strong> – the plot ax</p></li>
 <li><p><strong>fp</strong> – file path for saving the plot.</p></li>
 <li><p><strong>plkwds</strong> – other key-word-args for <code class="docutils literal notranslate"><span class="pre">sc.pl.umap</span></code></p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ax</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ax</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -257,7 +258,7 @@ if specifies, should be a column name in <code class="docutils literal notransla
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

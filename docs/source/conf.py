@@ -43,7 +43,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.githubpages',  # enable github-pages
-    'sphinx_autodoc_typehints',  # needs to be after napoleon
+    # 'sphinx_autodoc_typehints',  # needs to be after napoleon
 ]
 autosummary_generate = True
 autodoc_member_order = 'bysource'

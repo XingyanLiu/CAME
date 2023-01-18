@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>came.utils.plot.wrapper_heatmap_scores &mdash; CAME  documentation</title>
@@ -32,9 +33,8 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -103,7 +103,10 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.plot_stacked_bar.html">came.utils.plot.plot_stacked_bar</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.heatmap_probas.html">came.utils.plot.heatmap_probas</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.plot.wrapper_heatmap_scores</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.plot.wrapper_heatmap_scores</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#came.utils.plot.wrapper_heatmap_scores"><code class="docutils literal notranslate"><span class="pre">wrapper_heatmap_scores()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.plot_confus_mat.html">came.utils.plot.plot_confus_mat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.plot_contingency_mat.html">came.utils.plot.plot_contingency_mat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.plot.embed_with_values.html">came.utils.plot.embed_with_values</a></li>
@@ -114,6 +117,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -208,15 +212,15 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="came-utils-plot-wrapper-heatmap-scores">
-<h1>came.utils.plot.wrapper_heatmap_scores<a class="headerlink" href="#came-utils-plot-wrapper-heatmap-scores" title="Permalink to this headline">¶</a></h1>
+<section id="came-utils-plot-wrapper-heatmap-scores">
+<h1>came.utils.plot.wrapper_heatmap_scores<a class="headerlink" href="#came-utils-plot-wrapper-heatmap-scores" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.plot.wrapper_heatmap_scores">
-<span class="sig-prename descclassname"><span class="pre">came.utils.plot.</span></span><span class="sig-name descname"><span class="pre">wrapper_heatmap_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'celltype'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'predicted'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">3)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_subsample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Cell</span> <span class="pre">type'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_null</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_order_true</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_order_pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.plot.wrapper_heatmap_scores" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.utils.plot.</span></span><span class="sig-name descname"><span class="pre">wrapper_heatmap_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'celltype'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'predicted'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(5,</span> <span class="pre">3)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_subsample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Cell</span> <span class="pre">type'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_null</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_order_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_order_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.plot.wrapper_heatmap_scores" title="Permalink to this definition">¶</a></dt>
 <dd><p>sort columns and rows, plot heatmap of cell-type scores</p>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -232,7 +236,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

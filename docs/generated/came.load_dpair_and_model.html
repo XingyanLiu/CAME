@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>came.load_dpair_and_model &mdash; CAME  documentation</title>
@@ -32,9 +33,8 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -99,7 +99,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-1">DataPair and AlignedDataPair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.load_dpair_and_model</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.load_dpair_and_model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#came.load_dpair_and_model"><code class="docutils literal notranslate"><span class="pre">load_dpair_and_model()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="came.load_hidden_states.html">came.load_hidden_states</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.save_hidden_states.html">came.save_hidden_states</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.save_pickle.html">came.save_pickle</a></li>
@@ -110,6 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -204,21 +208,21 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="came-load-dpair-and-model">
-<h1>came.load_dpair_and_model<a class="headerlink" href="#came-load-dpair-and-model" title="Permalink to this headline">¶</a></h1>
+<section id="came-load-dpair-and-model">
+<h1>came.load_dpair_and_model<a class="headerlink" href="#came-load-dpair-and-model" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.load_dpair_and_model">
-<span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">load_dpair_and_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dirname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subdir_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_models'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ckpt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.load_dpair_and_model" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.</span></span><span class="sig-name descname"><span class="pre">load_dpair_and_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dirname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subdir_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_models'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ckpt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.load_dpair_and_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the output results of CAME.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dirname</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – result directory of CAME</p></li>
-<li><p><strong>subdir_model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – subdirectory where the model checkpoints are saved.</p></li>
-<li><p><strong>ckpt</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – specify which model checkpoint to load.</p></li>
+<li><p><strong>dirname</strong> – result directory of CAME</p></li>
+<li><p><strong>subdir_model</strong> – subdirectory where the model checkpoints are saved.</p></li>
+<li><p><strong>ckpt</strong> – specify which model checkpoint to load.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>dpair</strong> (<em>AlignedDataPair or DataPair</em>) – the datapair object that stores the features and graph</p></li>
 <li><p><strong>model</strong> (<em>CGGCNet or CGCNet</em>) – the graph neural network model</p></li>
@@ -248,7 +252,7 @@
 </div>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -264,7 +268,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

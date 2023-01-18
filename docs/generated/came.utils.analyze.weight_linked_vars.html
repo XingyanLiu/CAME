@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>came.utils.analyze.weight_linked_vars &mdash; CAME  documentation</title>
@@ -32,9 +33,8 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -100,7 +100,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#graph-neural-network-model">Graph Neural Network Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#i-o-functions">I/O Functions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-came.utils.analyze">Analysis <code class="docutils literal notranslate"><span class="pre">came.ana.*</span></code></a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.analyze.weight_linked_vars</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">came.utils.analyze.weight_linked_vars</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#came.utils.analyze.weight_linked_vars"><code class="docutils literal notranslate"><span class="pre">weight_linked_vars()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.analyze.weight_linked_vars_by_expr.html">came.utils.analyze.weight_linked_vars_by_expr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.analyze.make_abstracted_graph.html">came.utils.analyze.make_abstracted_graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="came.utils.analyze.compare_modules.html">came.utils.analyze.compare_modules</a></li>
@@ -110,6 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-came.utils.plot">Plotting Functions <code class="docutils literal notranslate"><span class="pre">came.pl.*</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -204,36 +208,36 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="came-utils-analyze-weight-linked-vars">
-<h1>came.utils.analyze.weight_linked_vars<a class="headerlink" href="#came-utils-analyze-weight-linked-vars" title="Permalink to this headline">¶</a></h1>
+<section id="came-utils-analyze-weight-linked-vars">
+<h1>came.utils.analyze.weight_linked_vars<a class="headerlink" href="#came-utils-analyze-weight-linked-vars" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="came.utils.analyze.weight_linked_vars">
-<span class="sig-prename descclassname"><span class="pre">came.utils.analyze.</span></span><span class="sig-name descname"><span class="pre">weight_linked_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cosine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_dist2weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">ignored</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#came.utils.analyze.weight_linked_vars" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">came.utils.analyze.</span></span><span class="sig-name descname"><span class="pre">weight_linked_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">spmatrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cosine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_dist2weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">ignored</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#came.utils.analyze.weight_linked_vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the similarity of each linked (homologous) pair of variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<em>np.ndarray</em>) – feature matrix of shape (N, M), where N is the number of sample and M is
 the feature dimensionality.</p></li>
-<li><p><strong>adj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">spmatrix</span></code>) – sparse.spmatrix; binary adjacent matrix of shape (N, N). Note that only
+<li><p><strong>adj</strong> – sparse.spmatrix; binary adjacent matrix of shape (N, N). Note that only
 the upper triangle of the matrix will be considered!</p></li>
-<li><p><strong>names</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>]) – a sequence of names for rows of <cite>X</cite>, of shape (N,)</p></li>
-<li><p><strong>metric</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the metric to quantify the similarities of the given vectors (embeddings)</p></li>
-<li><p><strong>sort</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to sort by the resulting weights</p></li>
+<li><p><strong>names</strong> – a sequence of names for rows of <cite>X</cite>, of shape (N,)</p></li>
+<li><p><strong>metric</strong> – the metric to quantify the similarities of the given vectors (embeddings)</p></li>
+<li><p><strong>sort</strong> – whether to sort by the resulting weights</p></li>
 <li><p><strong>index_names</strong> – a pair of names for the multi-index of the resulting DataFrame.
 e.g., a pair of dataset or species names (in cross-species scenario)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>df</strong> – with columns [<code class="docutils literal notranslate"><span class="pre">index_names[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">index_names[1]</span></code>, “distance”, “weight”]</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -249,7 +253,7 @@ e.g., a pair of dataset or species names (in cross-species scenario)</p></li>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>

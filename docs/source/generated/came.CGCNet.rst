@@ -36,6 +36,7 @@ came.CGCNet
       ~CGCNet.get_sampler
       ~CGCNet.get_submodule
       ~CGCNet.half
+      ~CGCNet.ipu
       ~CGCNet.load_state_dict
       ~CGCNet.modules
       ~CGCNet.named_buffers
@@ -48,6 +49,8 @@ came.CGCNet
       ~CGCNet.register_forward_hook
       ~CGCNet.register_forward_pre_hook
       ~CGCNet.register_full_backward_hook
+      ~CGCNet.register_load_state_dict_post_hook
+      ~CGCNet.register_module
       ~CGCNet.register_parameter
       ~CGCNet.requires_grad_
       ~CGCNet.set_extra_state

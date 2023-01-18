@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Getting started (for datasets with unaligned features) &mdash; CAME  documentation</title>
@@ -32,12 +33,11 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -109,6 +109,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faqs.html">FAQs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
 </ul>
 
@@ -289,10 +290,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -389,11 +391,12 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -402,10 +405,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -417,12 +424,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -449,15 +459,14 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Getting-started-(for-datasets-with-unaligned-features)">
-<h1>Getting started (for datasets with unaligned features)<a class="headerlink" href="#Getting-started-(for-datasets-with-unaligned-features)" title="Permalink to this headline">¶</a></h1>
+<section id="Getting-started-(for-datasets-with-unaligned-features)">
+<h1>Getting started (for datasets with unaligned features)<a class="headerlink" href="#Getting-started-(for-datasets-with-unaligned-features)" title="Permalink to this heading">¶</a></h1>
 <p>Import the required packages:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
@@ -484,8 +493,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">came</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">came</span>
 <span class="kn">from</span> <span class="nn">came</span> <span class="kn">import</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">pp</span><span class="p">,</span> <span class="n">pl</span>
 
 <span class="n">ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>  <span class="c1"># set root</span>
@@ -500,16 +508,15 @@ div.rendered_html tbody tr:hover {
 Using backend: pytorch
 </pre></div></div>
 </div>
-<div class="section" id="0-Load-datasets">
-<h2>0 Load datasets<a class="headerlink" href="#0-Load-datasets" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="0.1-Load-the-example-datasets">
-<h3>0.1 Load the example datasets<a class="headerlink" href="#0.1-Load-the-example-datasets" title="Permalink to this headline">¶</a></h3>
+<section id="0-Load-datasets">
+<h2>0 Load datasets<a class="headerlink" href="#0-Load-datasets" title="Permalink to this heading">¶</a></h2>
+<section id="0.1-Load-the-example-datasets">
+<h3>0.1 Load the example datasets<a class="headerlink" href="#0.1-Load-the-example-datasets" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">came</span> <span class="kn">import</span> <span class="n">load_example_data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">came</span> <span class="kn">import</span> <span class="n">load_example_data</span>
 
 <span class="n">example_data_dict</span> <span class="o">=</span> <span class="n">load_example_data</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">example_data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -540,9 +547,9 @@ a new directory made:
         _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="0.2-Load-your-own-datasets">
-<h3>0.2 Load your own datasets<a class="headerlink" href="#0.2-Load-your-own-datasets" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="0.2-Load-your-own-datasets">
+<h3>0.2 Load your own datasets<a class="headerlink" href="#0.2-Load-your-own-datasets" title="Permalink to this heading">¶</a></h3>
 <p>To load your own datasets, see the code example below:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ========= customized paths ==========</span>
 
@@ -586,15 +593,14 @@ a new directory made:
 <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata_raw2</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="0.3-Inspect-the-compositions-of-different-classes">
-<h3>0.3 Inspect the compositions of different classes<a class="headerlink" href="#0.3-Inspect-the-compositions-of-different-classes" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="0.3-Inspect-the-compositions-of-different-classes">
+<h3>0.3 Inspect the compositions of different classes<a class="headerlink" href="#0.3-Inspect-the-compositions-of-different-classes" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Inspect classes</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Inspect classes</span>
 <span class="k">if</span> <span class="n">key_class2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">group_counts_ori</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span>
         <span class="n">pd</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">adata_raw1</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">key_class1</span><span class="p">]),</span>
@@ -714,17 +720,16 @@ a new directory made:
 </table>
 </div></div>
 </div>
-</div>
-</div>
-<div class="section" id="1-The-default-pipeline-of-CAME">
-<h2>1 The default pipeline of CAME<a class="headerlink" href="#1-The-default-pipeline-of-CAME" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="1-The-default-pipeline-of-CAME">
+<h2>1 The default pipeline of CAME<a class="headerlink" href="#1-The-default-pipeline-of-CAME" title="Permalink to this heading">¶</a></h2>
 <p>Parameter settings.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># The numer of training epochs</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The numer of training epochs</span>
 <span class="c1"># (a recommended setting is 200-400 for whole-graph training, and 80-200 for sub-graph training)</span>
 <span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">300</span>
 
@@ -762,8 +767,7 @@ a new directory made:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">came_inputs</span><span class="p">,</span> <span class="p">(</span><span class="n">adata1</span><span class="p">,</span> <span class="n">adata2</span><span class="p">)</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">preprocess_unaligned</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">came_inputs</span><span class="p">,</span> <span class="p">(</span><span class="n">adata1</span><span class="p">,</span> <span class="n">adata2</span><span class="p">)</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">preprocess_unaligned</span><span class="p">(</span>
     <span class="n">adatas</span><span class="p">,</span>
     <span class="n">key_class</span><span class="o">=</span><span class="n">key_class1</span><span class="p">,</span>
     <span class="n">use_scnets</span><span class="o">=</span><span class="n">use_scnets</span><span class="p">,</span>
@@ -797,8 +801,7 @@ a new directory made:
 <span class="n">obs_ids1</span><span class="p">,</span> <span class="n">obs_ids2</span> <span class="o">=</span> <span class="n">dpair</span><span class="o">.</span><span class="n">obs_ids1</span><span class="p">,</span> <span class="n">dpair</span><span class="o">.</span><span class="n">obs_ids2</span>
 <span class="n">obs</span> <span class="o">=</span> <span class="n">dpair</span><span class="o">.</span><span class="n">obs</span>
 <span class="n">classes</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">classes</span>
-
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -985,8 +988,8 @@ figure has been saved into:
         _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\figs\heatmap_probas.pdf
 </pre></div></div>
 </div>
-<div class="section" id="Load-other-checkpoint-(optional)">
-<h3>Load other checkpoint (optional)<a class="headerlink" href="#Load-other-checkpoint-(optional)" title="Permalink to this headline">¶</a></h3>
+<section id="Load-other-checkpoint-(optional)">
+<h3>Load other checkpoint (optional)<a class="headerlink" href="#Load-other-checkpoint-(optional)" title="Permalink to this heading">¶</a></h3>
 <p>You can load other model checkpoint if the default model is not satisfying.</p>
 <p>For example, load the last checkpoint and compute the results of it:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">outputs</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">gather_came_results</span><span class="p">(</span>
@@ -1006,8 +1009,7 @@ figure has been saved into:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">came</span><span class="o">.</span><span class="n">get_checkpoint_list</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;_models&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">came</span><span class="o">.</span><span class="n">get_checkpoint_list</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;_models&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1038,15 +1040,14 @@ figure has been saved into:
  99]
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Plot-the-contingency-matrix-for-query-dataset">
-<h3>Plot the contingency matrix for query dataset<a class="headerlink" href="#Plot-the-contingency-matrix-for-query-dataset" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Plot-the-contingency-matrix-for-query-dataset">
+<h3>Plot the contingency matrix for query dataset<a class="headerlink" href="#Plot-the-contingency-matrix-for-query-dataset" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># contingency matrix for query dataset</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># contingency matrix for query dataset</span>
 <span class="n">y_true</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="s1">&#39;celltype&#39;</span><span class="p">][</span><span class="n">obs_ids2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 <span class="n">y_pred</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">][</span><span class="n">obs_ids2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
@@ -1076,15 +1077,14 @@ figure has been saved into:
 <img alt="../_images/tut_notebooks_getting_started_pipeline_un_17_1.png" src="../_images/tut_notebooks_getting_started_pipeline_un_17_1.png" />
 </div>
 </div>
-</div>
-<div class="section" id="Plot-heatmap-of-predicted-probabilities">
-<h3>Plot heatmap of predicted probabilities<a class="headerlink" href="#Plot-heatmap-of-predicted-probabilities" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Plot-heatmap-of-predicted-probabilities">
+<h3>Plot heatmap of predicted probabilities<a class="headerlink" href="#Plot-heatmap-of-predicted-probabilities" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">name_label</span> <span class="o">=</span> <span class="s1">&#39;celltype&#39;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">name_label</span> <span class="o">=</span> <span class="s1">&#39;celltype&#39;</span>
 <span class="n">cols_anno</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;celltype&#39;</span><span class="p">,</span> <span class="s1">&#39;predicted&#39;</span><span class="p">][:]</span>
 <span class="n">df_probs</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">classes</span><span class="p">)]</span>
 
@@ -1118,10 +1118,10 @@ figure has been saved into:
 <img alt="../_images/tut_notebooks_getting_started_pipeline_un_19_1.png" src="../_images/tut_notebooks_getting_started_pipeline_un_19_1.png" />
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="2-Further-analysis">
-<h2>2 Further analysis<a class="headerlink" href="#2-Further-analysis" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="2-Further-analysis">
+<h2>2 Further analysis<a class="headerlink" href="#2-Further-analysis" title="Permalink to this heading">¶</a></h2>
 <p>By default, CAME will use the <strong>last</strong> layer of hidden states, as the embeddings, to produce cell- and gene-UMAP.</p>
 <blockquote>
 <div><p>You can also load ALL of the model hidden states that have been seved during CAME’s default pipeline:</p>
@@ -1136,8 +1136,7 @@ figure has been saved into:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">adt</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">make_adata</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="s1">&#39;cell&#39;</span><span class="p">],</span> <span class="n">obs</span><span class="o">=</span><span class="n">dpair</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="n">assparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adt</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">make_adata</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="s1">&#39;cell&#39;</span><span class="p">],</span> <span class="n">obs</span><span class="o">=</span><span class="n">dpair</span><span class="o">.</span><span class="n">obs</span><span class="p">,</span> <span class="n">assparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">gadt</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">make_adata</span><span class="p">(</span><span class="n">h_dict</span><span class="p">[</span><span class="s1">&#39;gene&#39;</span><span class="p">],</span> <span class="n">obs</span><span class="o">=</span><span class="n">dpair</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">assparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># adt.write(resdir / &#39;adt_hidden_cell.h5ad&#39;)</span>
@@ -1156,14 +1155,13 @@ adding columns to `adata.obs` (ignore_index=True):
 name, dataset, done!
 </pre></div></div>
 </div>
-<div class="section" id="2.1-UMAP-of-cell-embeddings">
-<h3>2.1 UMAP of cell embeddings<a class="headerlink" href="#2.1-UMAP-of-cell-embeddings" title="Permalink to this headline">¶</a></h3>
+<section id="2.1-UMAP-of-cell-embeddings">
+<h3>2.1 UMAP of cell embeddings<a class="headerlink" href="#2.1-UMAP-of-cell-embeddings" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">dpi_save</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">dpi_save</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 
 <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">adt</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
 <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adt</span><span class="p">)</span>
@@ -1214,8 +1212,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">obs_umap</span> <span class="o">=</span> <span class="n">adt</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_umap&#39;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obs_umap</span> <span class="o">=</span> <span class="n">adt</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_umap&#39;</span><span class="p">]</span>
 <span class="n">obs</span><span class="p">[</span><span class="s1">&#39;UMAP1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
 <span class="n">obs</span><span class="p">[</span><span class="s1">&#39;UMAP2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">obs</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;obs.csv&#39;</span><span class="p">)</span>
@@ -1228,21 +1225,19 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">adata1</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_umap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[</span><span class="n">obs_ids1</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata1</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_umap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[</span><span class="n">obs_ids1</span><span class="p">]</span>
 <span class="n">adata2</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_umap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_umap</span><span class="p">[</span><span class="n">obs_ids2</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="2.2-UMAP-of-genes">
-<h3>2.2 UMAP of genes<a class="headerlink" href="#2.2-UMAP-of-genes" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="2.2-UMAP-of-genes">
+<h3>2.2 UMAP of genes<a class="headerlink" href="#2.2-UMAP-of-genes" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">gadt</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">gadt</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
 
 <span class="c1"># gadt = pp.make_adata(h_dict[&#39;gene&#39;], obs=dpair.var.iloc[:, :2], assparse=False, ignore_index=True)</span>
 <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">gadt</span><span class="p">)</span>
@@ -1270,9 +1265,8 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># joint gene module extraction</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">gadt</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=.</span><span class="mi">8</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s1">&#39;module&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># joint gene module extraction</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">gadt</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">.8</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="s1">&#39;module&#39;</span><span class="p">)</span>
 <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">gadt</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;module&#39;</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;tab20b&#39;</span><span class="p">)</span>
 
 <span class="c1"># backup results is needed</span>
@@ -1292,8 +1286,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># gadt.obs_names = gadt.obs_names.astype(str)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># gadt.obs_names = gadt.obs_names.astype(str)</span>
 <span class="n">gadt1</span><span class="p">,</span> <span class="n">gadt2</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">bisplit_adata</span><span class="p">(</span><span class="n">gadt</span><span class="p">,</span> <span class="s1">&#39;dataset&#39;</span><span class="p">,</span> <span class="n">dsnames</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reset_index_by</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
 
 <span class="n">color_by</span> <span class="o">=</span> <span class="s1">&#39;module&#39;</span>
@@ -1342,8 +1335,7 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">df_var_links</span> <span class="o">=</span> <span class="n">came</span><span class="o">.</span><span class="n">weight_linked_vars</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_var_links</span> <span class="o">=</span> <span class="n">came</span><span class="o">.</span><span class="n">weight_linked_vars</span><span class="p">(</span>
     <span class="n">gadt</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">dpair</span><span class="o">.</span><span class="n">_vv_adj</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">dpair</span><span class="o">.</span><span class="n">get_vnode_names</span><span class="p">(),</span>
     <span class="n">matric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">index_names</span><span class="o">=</span><span class="n">dsnames</span><span class="p">,</span>
 <span class="p">)</span>
@@ -1353,24 +1345,22 @@ WARNING: saving figure to file _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#3
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="2.3-Gene-expression-profiles-(for-each-cell-type)-on-gene-UMAP">
-<h3>2.3 Gene-expression-profiles (for each cell type) on gene UMAP<a class="headerlink" href="#2.3-Gene-expression-profiles-(for-each-cell-type)-on-gene-UMAP" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="2.3-Gene-expression-profiles-(for-each-cell-type)-on-gene-UMAP">
+<h3>2.3 Gene-expression-profiles (for each cell type) on gene UMAP<a class="headerlink" href="#2.3-Gene-expression-profiles-(for-each-cell-type)-on-gene-UMAP" title="Permalink to this heading">¶</a></h3>
 <p>Compute average expressions for each cell type.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># averaged expressions</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># averaged expressions</span>
 <span class="n">avg_expr1</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">group_mean_adata</span><span class="p">(</span>
     <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">groupby</span><span class="o">=</span><span class="n">key_class1</span><span class="p">,</span>
     <span class="n">features</span><span class="o">=</span><span class="n">dpair</span><span class="o">.</span><span class="n">vnode_names1</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">avg_expr2</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">group_mean_adata</span><span class="p">(</span>
     <span class="n">adatas</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">groupby</span><span class="o">=</span><span class="n">key_class2</span> <span class="k">if</span> <span class="n">key_class2</span> <span class="k">else</span> <span class="s1">&#39;predicted&#39;</span><span class="p">,</span>
     <span class="n">features</span><span class="o">=</span><span class="n">dpair</span><span class="o">.</span><span class="n">vnode_names2</span><span class="p">,</span> <span class="n">use_raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1387,8 +1377,7 @@ Computing averages grouped by cell_ontology_class
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plkwds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdYlBu_r&#39;</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">do_zscore</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plkwds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdYlBu_r&#39;</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">do_zscore</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
               <span class="n">axscale</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">with_cbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">fig1</span><span class="p">,</span> <span class="n">axs1</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">adata_embed_with_values</span><span class="p">(</span>
@@ -1417,8 +1406,7 @@ figure has been saved into:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fig1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig1</span>
 </pre></div>
 </div>
 </div>
@@ -1434,8 +1422,7 @@ figure has been saved into:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fig2</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig2</span>
 </pre></div>
 </div>
 </div>
@@ -1447,15 +1434,14 @@ figure has been saved into:
 <img alt="../_images/tut_notebooks_getting_started_pipeline_un_40_0.png" src="../_images/tut_notebooks_getting_started_pipeline_un_40_0.png" />
 </div>
 </div>
-</div>
-<div class="section" id="2.4-Abstracted-graph">
-<h3>2.4 Abstracted graph<a class="headerlink" href="#2.4-Abstracted-graph" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="2.4-Abstracted-graph">
+<h3>2.4 Abstracted graph<a class="headerlink" href="#2.4-Abstracted-graph" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">norm_ov</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;zs&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">norm_ov</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;zs&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">cut_ov</span> <span class="o">=</span> <span class="mf">0.</span>
 
 <span class="n">groupby_var</span> <span class="o">=</span> <span class="s1">&#39;module&#39;</span>
@@ -1474,8 +1460,7 @@ figure has been saved into:
     <span class="n">cut_ov</span><span class="o">=</span><span class="n">cut_ov</span><span class="p">,</span>
     <span class="n">norm_mtd_ov</span><span class="o">=</span><span class="n">norm_ov</span><span class="p">,</span>
 <span class="p">)</span>
-
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1510,8 +1495,7 @@ shape of the one-hot-labels: (3332, 11) (2981, 11)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39; visualization &#39;&#39;&#39;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39; visualization &#39;&#39;&#39;</span>
 <span class="n">fp_abs</span> <span class="o">=</span> <span class="n">figdir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;abstracted_graph-</span><span class="si">{</span><span class="n">groupby_var</span><span class="si">}</span><span class="s1">-cut</span><span class="si">{</span><span class="n">cut_ov</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">norm_ov</span><span class="si">}</span><span class="s1">.pdf&#39;</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">plot_multipartite_graph</span><span class="p">(</span>
     <span class="n">g</span><span class="p">,</span> <span class="n">edge_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
@@ -1543,8 +1527,7 @@ figure has been saved into:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># save abstracted-graph object</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># save abstracted-graph object</span>
 <span class="n">came</span><span class="o">.</span><span class="n">save_pickle</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">resdir</span> <span class="o">/</span> <span class="s1">&#39;abs_graph.pickle&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1558,9 +1541,9 @@ object saved into:
          _temp\(&#39;Baron_human&#39;, &#39;Baron_mouse&#39;)-(12-16 18.36.34)\abs_graph.pickle
 </pre></div></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
@@ -1576,7 +1559,7 @@ object saved into:
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2022, Academy of Mathematics and Systems Science, CAS..
+        &#169; Copyright 2023, Academy of Mathematics and Systems Science, CAS..
 
     </p>
   </div>
