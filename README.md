@@ -31,9 +31,10 @@ conda activate env_came
 Install required packages:
 
 ```shell
+# on CPU
 pip install "scanpy[leiden]"
 pip install torch  # >=1.8 
-pip install dgl  # tested on 0.7.2
+pip install dgl  # tested on 0.7.2, better below 1.0.*
 ```
 
 See [Scanpy](https://scanpy.readthedocs.io/en/stable/), 
@@ -113,8 +114,8 @@ python test_pipeline.py
 
 If you are having issues, please let us know. We have a mailing list located at:
 
-* xingyan@amss.ac.cn
 * 544568643@qq.com
+* xingyan@amss.ac.cn
 
 
 ### Citation
