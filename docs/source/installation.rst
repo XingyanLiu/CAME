@@ -15,7 +15,7 @@ Install required packages:
 
    pip install "scanpy[leiden]"
    pip install torch  # >=1.8
-   pip install dgl
+   pip install dgl  # better below 1.0.*
 
 See scanpy (https://scanpy.readthedocs.io/en/stable/),
 PyTorch (https://pytorch.org/) and DGL(https://www.dgl.ai/)

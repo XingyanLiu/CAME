@@ -32,7 +32,7 @@ conda activate env_came
 ```shell
 pip install "scanpy[leiden]"
 pip install torch  # >=1.8 
-pip install dgl  # tested on 0.7.2
+pip install dgl  # better below 1.0.*
 ```
 
 See [Scanpy](https://scanpy.readthedocs.io/en/stable/), 
@@ -103,8 +103,8 @@ python test_pipeline.py
 
 如果你有其他问题，也可以通过邮箱联系我们:
 
-* xingyan@amss.ac.cn
 * 544568643@qq.com
+* xingyan@amss.ac.cn
 
 
 ### 引用

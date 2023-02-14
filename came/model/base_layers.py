@@ -872,7 +872,7 @@ class GraphConvLayer(nn.Module):
         else:
             weight = self.weight
         if static_weight is None:
-            message_func = fn.copy_src(src='h', out='m')
+            message_func = fn.copy_u('h', out='m')  # fn.copy_src will cause error in DGL-v1
         else:
             g.edata['w_static'] = static_weight
             message_func = fn.u_mul_e('h', 'w_static', 'm')
