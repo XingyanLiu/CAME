@@ -883,13 +883,13 @@ class GraphConvLayer(nn.Module):
             if weight is not None:
                 feat = th.matmul(feat, weight)
             g.srcdata['h'] = feat
-            g.update_all(message_func,  # fn.copy_src(src='h', out='m'),
+            g.update_all(message_func,
                          fn.sum(msg='m', out='h'))
             rst = g.dstdata['h']
         else:
             # aggregate first then mult W
             g.srcdata['h'] = feat
-            g.update_all(message_func,  # fn.copy_src(src='h', out='m'),
+            g.update_all(message_func,
                          fn.sum(msg='m', out='h'))
             rst = g.dstdata['h']
             if weight is not None:

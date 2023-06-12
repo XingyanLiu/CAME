@@ -593,6 +593,13 @@ class DataPair(object):
 
             if varnames_feat is None:
                 varnames_feat = [list(range(self.n_feats)), list(range(self.n_feats))]
+            elif isinstance(varnames_feat, pd.DataFrame):
+                # assumed to be a two-column df
+                logging.info('got `varnames_feat` as a DataFrame, using the first two columns.')
+                varnames_feat = [
+                    varnames_feat.iloc[:, 0],
+                    varnames_feat.iloc[:, 1],
+                ]
             self._varnames_feat = pd.DataFrame({
                 self.dataset_names[0]: varnames_feat[0],
                 self.dataset_names[1]: varnames_feat[1],

@@ -1374,6 +1374,9 @@ def normalize_log_then_total(
 def zscore(X, with_mean=True, scale=True, ):
     """ For each column of X, do centering (z-scoring)
     """
+    # /Applications/anaconda/anaconda3/envs/dgl_cp/lib/python3.8/site-packages/sklearn/utils/validation.py:585:
+    # FutureWarning: np.matrix usage is deprecated in 1.0 and will raise a TypeError in 1.2. Please convert to a numpy array with np.asarray.
+    X = np.asarray(X)
     # code borrowed from `scanpy.pp._simple`
     scaler = StandardScaler(with_mean=with_mean, copy=True).partial_fit(X)
     if scale:
@@ -1529,6 +1532,7 @@ def normalize_col(X, scale_factor=1., by='sum'):
     by: str, {'sum', 'max'}
 
     """
+    _eps = 1e-16
     if by == 'sum':
         norms = X.sum(axis=0).astype(float)
     elif by == 'max':
@@ -1537,14 +1541,14 @@ def normalize_col(X, scale_factor=1., by='sum'):
         raise ValueError(f'`by` should be either "sum" or "max", got {by}')
     if hasattr(norms, 'A'):
         norms = norms.A.flatten()
+    is_zero = -_eps <= norms <= _eps
     if scale_factor is None:
-        is_zero = norms == 0
         scale_factor = np.median(norms[~ is_zero])
     norms /= scale_factor
     # for those rows or columns that summed to 0, just do nothing
-    norms[norms == 0] = 1
+    norms[is_zero] = 1.
 
-    norm_ = 1 / norms
+    norm_ = 1. / norms
 
     if sparse.isspmatrix(X):
         logging.info('sparse normalization')
@@ -1571,6 +1575,7 @@ def normalize_row(X, scale_factor=1, by='sum'):
     by: str, {'sum', 'max'}
 
     """
+    _eps = 1e-16
     if by == 'sum':
         norms = X.sum(axis=1).astype(float)
     elif by == 'max':
@@ -1579,13 +1584,13 @@ def normalize_row(X, scale_factor=1, by='sum'):
         raise ValueError(f'`by` should be either "sum" or "max", got {by}')
     if hasattr(norms, 'A'):
         norms = norms.A.flatten()
+    is_zero = -_eps <= norms <= _eps
     if scale_factor is None:
-        is_zero = norms == 0
         scale_factor = np.median(norms[~ is_zero])
     norms /= scale_factor
     # for those rows or columns that summed to 0, just do nothing
-    norms[norms == 0] = 1
-    norm_ = 1 / norms
+    norms[is_zero] = 1.
+    norm_ = 1. / norms
 
     if sparse.isspmatrix(X):
         logging.info('sparse normalization')
@@ -1677,7 +1682,7 @@ def mean_of_nozeros(mat, axis=0):
     logging.info('making a copy')
     sums = mat.sum(axis=axis)
     # mat.eliminate_zeros()
-    mat[mat > 0] = 1
+    mat[mat > 0] = 1.
     nnz = mat.sum(axis=axis)
     m = sums / nnz
     if hasattr(m, 'A'):
