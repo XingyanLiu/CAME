@@ -32,6 +32,11 @@ from .evaluation import accuracy, get_AMI, get_F1_score, detach2numpy
 from .plot import plot_records_for_trainer
 from ._base_trainer import BaseTrainer, SUBDIR_MODEL
 
+try:
+    from dgl.dataloading import NodeDataLoader
+except ImportError:
+    from dgl.dataloading import DataLoader as NodeDataLoader
+
 
 def seed_everything(seed=123):
     """ not works well """
@@ -52,7 +57,7 @@ def make_class_weights(labels, astensor=True, foo=np.sqrt, n_add=0):
 
     counts = value_counts(labels).sort_index()  # sort for alignment
     n_cls = len(counts) + n_add
-    w = counts.apply(lambda x: 1 / foo(x + 1) if x > 0 else 0)  
+    w = counts.apply(lambda x: 1 / foo(x + 1) if x > 0 else 0)
     w = (w / w.sum() * (1 - n_add / n_cls)).values
     w = np.array(list(w) + [1 / n_cls] * int(n_add))
 
@@ -117,7 +122,7 @@ def prepare4train(
         test_idx = LongTensor(test_idx)
 
     g = dpair.get_whole_net(rebuild=False, )
-    g.nodes[node_cls_type].data[key_label] = labels   # date: 211113
+    g.nodes[node_cls_type].data[key_label] = labels  # date: 211113
 
     ENV_VARs = dict(
         classes=classes,
@@ -134,8 +139,8 @@ def prepare4train(
 
 class Trainer(BaseTrainer):
     """
-    
-    
+
+
     """
 
     def __init__(self,
@@ -309,7 +314,7 @@ class Trainer(BaseTrainer):
                 **params_lossfunc
             )
 
-            # prediction 
+            # prediction
             _, y_pred = torch.max(logits, dim=1)
 
             # ========== evaluation (Acc.) ==========
@@ -367,22 +372,24 @@ class Trainer(BaseTrainer):
         if sampler is None:
             sampler = model.get_sampler(g.canonical_etypes, 50)
 
-        train_dataloader = dgl.dataloading.NodeDataLoader(
+        train_dataloader = NodeDataLoader(
             # The following arguments are specific to NodeDataLoader.
-            g, {'cell': train_idx},  # The node IDs to iterate over in minibatches
-            sampler, device=device,  # Put the sampled MFGs on CPU or GPU
+            g, {'cell': train_idx},
+            # The node IDs to iterate over in minibatches
+            sampler, device='cpu',  # Put the sampled MFGs on CPU or GPU
             # The following arguments are inherited from PyTorch DataLoader.
             batch_size=batch_size, shuffle=True, drop_last=False, num_workers=0
         )
-        test_dataloader = dgl.dataloading.NodeDataLoader(
-            g, {'cell': test_idx}, sampler, device=device, batch_size=batch_size,
+        test_dataloader = NodeDataLoader(
+            g, {'cell': test_idx}, sampler, device='cpu', batch_size=batch_size,
             shuffle=False, drop_last=False, num_workers=0
         )
         print(f" start training (device='{device}') ".center(60, '='))
+        rcd = {}
         for epoch in range(n_epochs):
             model.train()
             self._cur_epoch += 1
-            
+
             t0 = time.time()
             all_train_preds = []
             train_labels = []
@@ -443,6 +450,7 @@ class Trainer(BaseTrainer):
                 **rcd, print_info=self._cur_epoch % info_stride == 0 or backup)
         self.log_info(**rcd, print_info=True)
         self._cur_epoch_adopted = self._cur_epoch
+        self.save_checkpoint_record()
 
     def get_current_outputs(self,
                             feat_dict=None,
@@ -526,7 +534,8 @@ class Trainer(BaseTrainer):
         )
         return metrics
 
-    def log_info(self, train_acc, test_acc, ami=None, print_info=True, # dur=0.,
+    def log_info(self, train_acc, test_acc, ami=None, print_info=True,
+                 # dur=0.,
                  **kwargs):
         dur_avg = np.average(self.dur)
         ami = kwargs.get('AMI', 'NaN') if ami is None else ami
@@ -575,7 +584,7 @@ def infer_for_nodes(
     if reorder:
         return order_by_ids(all_test_preds, orig_ids)
     return all_test_preds
-        
+
 
 def order_by_ids(x, ids):
     """reorder by the original ids"""

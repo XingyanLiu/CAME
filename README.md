@@ -86,6 +86,11 @@ second contains the corresponding query homologous genes.
 > for code testing. The resulting annotation accuracy may not be as good as 
 > using the full dataset as the reference.
 
+**Suggestions**
+> 
+> If you have sufficient GPU memory, setting the hidden-size `h_dim=512` 
+in "came/PARAMETERS.py" may result in a more accurate cell-type transfer. 
+
 ### Test CAME's pipeline (optional)
 
 To test the package, run the python file `test_pipeline.py`:
@@ -120,7 +125,7 @@ If you are having issues, please let us know. We have a mailing list located at:
 
 ### Citation
 
-If CAME is useful for your research, consider citing our preprint:
+If CAME is useful for your research, consider citing our work:
 
 > Liu X, Shen Q, Zhang S. Cross-species cell-type assignment of single-cell RNA-seq by a heterogeneous graph neural network[J]. Genome Research, 2022: gr. 276868.122.
 
