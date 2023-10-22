@@ -75,7 +75,7 @@ python setup.py install
 
 ### **建议**
 
-如果你有足够的显存，我们建议在PARAMETERS.py中设置`h_dim=512` 来获得更好的结果。
+如果你有足够的GPU显存，我们建议在``came/PARAMETERS.py``中设置`h_dim=512` 来获得更好的结果。
 
 ### 测试 CAME 的分析流程 (非必要)
 
