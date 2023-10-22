@@ -86,6 +86,10 @@ second contains the corresponding query homologous genes.
 > for code testing. The resulting annotation accuracy may not be as good as 
 > using the full dataset as the reference.
 
+> **Suggestions**
+> 
+> If you have enough GPU memory, setting `h_dim=512`  in "PARAMETERS.py" may result in a more accurate cell-type transfer. 
+
 ### Test CAME's pipeline (optional)
 
 To test the package, run the python file `test_pipeline.py`:
