@@ -73,6 +73,10 @@ python setup.py install
 > 数据文件 “raw-Baron_human.h5ad” 仅用于代码测试，是原始数据的子样本 （20%），
 > 因此结果的注释精度可能不如使用完整数据集作为参考。
 
+### **建议**
+
+如果你有足够的显存，我们建议在PARAMETERS.py中设置`h_dim=512` 来获得更好的结果。
+
 ### 测试 CAME 的分析流程 (非必要)
 
 可以直接运行 `test_pipeline.py` 来测试 CAME 的分析流程：
