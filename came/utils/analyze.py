@@ -1661,7 +1661,7 @@ def wrapper_contingency_mat(y_true, y_pred,
     # Currently, coo_matrix is faster than histogram2d for simple cases
     mat = sparse.coo_matrix(
         (np.ones(class_idx.shape[0]), (class_idx, cluster_idx)),
-        shape=(n_classes, n_clusters), dtype=np.int
+        shape=(n_classes, n_clusters), dtype=np.int64
     )
     if assparse:
         mat = mat.tocsr()
