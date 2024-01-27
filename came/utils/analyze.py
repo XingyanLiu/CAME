@@ -1369,7 +1369,7 @@ def weight_normalize_by_size(adj, sizes1, sizes2,
 
 
 def abstract_ov_edges(
-        avg_expr,
+        avg_expr: pd.DataFrame,
         var_labels,
         norm_method=None,
         norm_axis=1,
@@ -1389,7 +1389,10 @@ def abstract_ov_edges(
     norm_method:
         one of {None, 'zs', 'maxmin', 'max'}
     """
-    df = avg_expr.copy()
+    if isinstance(avg_expr, pd.DataFrame):
+        df = avg_expr.copy()
+    else:
+        raise TypeError(f'``avg_expr`` should be a DataFrame')
     if norm_method is not None and norm_first:
         df = pp.wrapper_normalize(df, method=norm_method, axis=norm_axis)
 
