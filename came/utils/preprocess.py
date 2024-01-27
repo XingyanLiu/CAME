@@ -1376,6 +1376,7 @@ def zscore(X, with_mean=True, scale=True, ):
     """
     # /Applications/anaconda/anaconda3/envs/dgl_cp/lib/python3.8/site-packages/sklearn/utils/validation.py:585:
     # FutureWarning: np.matrix usage is deprecated in 1.0 and will raise a TypeError in 1.2. Please convert to a numpy array with np.asarray.
+    X_bak = X
     X = np.asarray(X)
     # code borrowed from `scanpy.pp._simple`
     scaler = StandardScaler(with_mean=with_mean, copy=True).partial_fit(X)
@@ -1386,8 +1387,8 @@ def zscore(X, with_mean=True, scale=True, ):
     else:
         scaler.scale_ = np.array([1] * X.shape[1])
     X_new = scaler.transform(X)
-    if isinstance(X, pd.DataFrame):
-        X_new = pd.DataFrame(X_new, index=X.index, columns=X.columns)
+    if isinstance(X_bak, pd.DataFrame):
+        X_new = pd.DataFrame(X_new, index=X_bak.index, columns=X_bak.columns)
     return X_new
 
 
